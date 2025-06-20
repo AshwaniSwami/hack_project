@@ -115,11 +115,19 @@ The application uses a relational database with the following core entities:
 - Port configuration for Replit deployment (5000 → 80)
 - Session management with PostgreSQL session store
 
+## Recent Changes
+
+- December 19, 2024: Successfully migrated project from Replit Agent to Replit environment
+- December 19, 2024: Configured PostgreSQL database and applied migrations
+- December 19, 2024: Modified project detail view to focus on Episodes and Scripts organization
+- December 19, 2024: Removed upload functionality from project details view per user preference
+
 ## Changelog
 
 ```
 Changelog:
 - June 20, 2025. Initial setup
+- December 19, 2024. Migration to Replit environment completed
 ```
 
 ## User Preferences

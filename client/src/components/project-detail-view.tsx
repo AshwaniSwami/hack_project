@@ -4,14 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ProjectFileUpload } from "@/components/project-file-upload";
 import { FileList } from "@/components/file-list";
 import { 
   Plus, 
   FileText, 
   Users, 
   Calendar,
-  Upload,
   FolderOpen
 } from "lucide-react";
 import type { Project, Episode, Script } from "@shared/schema";
@@ -53,21 +51,11 @@ export function ProjectDetailView({ project, onAddEpisode }: ProjectDetailViewPr
         </CardHeader>
       </Card>
 
-      <Tabs defaultValue="files" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="files">Project Files</TabsTrigger>
+      <Tabs defaultValue="episodes" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="episodes">Episodes</TabsTrigger>
           <TabsTrigger value="scripts">Scripts</TabsTrigger>
-          <TabsTrigger value="upload">Upload Files</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="files" className="space-y-4">
-          <FileList 
-            entityType="projects" 
-            entityId={project.id}
-            title="Project Files"
-          />
-        </TabsContent>
 
         <TabsContent value="episodes" className="space-y-4">
           <div className="flex justify-between items-center">
@@ -166,15 +154,7 @@ export function ProjectDetailView({ project, onAddEpisode }: ProjectDetailViewPr
           </div>
         </TabsContent>
 
-        <TabsContent value="upload" className="space-y-4">
-          <ProjectFileUpload
-            projectId={project.id}
-            title="Upload Project Files"
-            onUploadSuccess={() => {
-              queryClient.invalidateQueries({ queryKey: ['/api/files'] });
-            }}
-          />
-        </TabsContent>
+
       </Tabs>
     </div>
   );
