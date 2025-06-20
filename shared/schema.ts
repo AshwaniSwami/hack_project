@@ -97,6 +97,20 @@ export const freeProjectAccess = pgTable("free_project_access", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Files table for storing uploaded files
+export const files = pgTable("files", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  filename: varchar("filename", { length: 255 }).notNull(),
+  originalName: varchar("original_name", { length: 255 }).notNull(),
+  mimeType: varchar("mime_type", { length: 100 }).notNull(),
+  fileSize: integer("file_size").notNull(),
+  fileData: text("file_data").notNull(), // Base64 encoded file data
+  entityType: varchar("entity_type", { length: 50 }).notNull(), // users, projects, episodes, scripts, radio-stations
+  entityId: uuid("entity_id"), // Optional: link to specific entity
+  uploadedBy: uuid("uploaded_by"), // Optional: user who uploaded
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   scripts: many(scripts),
@@ -208,6 +222,11 @@ export const insertFreeProjectAccessSchema = createInsertSchema(freeProjectAcces
   createdAt: true,
 });
 
+export const insertFileSchema = createInsertSchema(files).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof insertUserSchema._type;
@@ -229,3 +248,6 @@ export type InsertRadioStation = typeof insertRadioStationSchema._type;
 
 export type FreeProjectAccess = typeof freeProjectAccess.$inferSelect;
 export type InsertFreeProjectAccess = typeof insertFreeProjectAccessSchema._type;
+
+export type File = typeof files.$inferSelect;
+export type InsertFile = typeof insertFileSchema._type;

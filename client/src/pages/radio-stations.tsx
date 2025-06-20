@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +35,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/api";
 import { Plus, Edit, Trash2, Radio, Phone, Mail, MapPin } from "lucide-react";
 import { FileUpload } from "@/components/file-upload";
+import { FileList } from "@/components/file-list";
 import type { RadioStation } from "@shared/schema";
 
 const radioStationFormSchema = z.object({
@@ -54,7 +55,7 @@ export default function RadioStations() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: stations = [], isLoading } = useQuery<RadioStation[]>({
+  const { data: stations = [], isLoading, refetch } = useQuery<RadioStation[]>({
     queryKey: ["/api/radio-stations"],
   });
 
@@ -138,9 +139,9 @@ export default function RadioStations() {
   const onSubmit = (data: RadioStationFormData) => {
     const payload = {
       ...data,
-      contactPerson: data.contactPerson || null,
-      phone: data.phone || null,
-      address: data.address || null,
+      contactPerson: data.contactPerson || undefined,
+      phone: data.phone || undefined,  
+      address: data.address || undefined,
     };
     
     if (editingStation) {
@@ -407,6 +408,29 @@ export default function RadioStations() {
           </CardContent>
         </Card>
       )}
+
+      {/* File Upload Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>File Management</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <FileUpload 
+              endpoint="/api/radio-stations/upload" 
+              onUploadSuccess={() => {
+                refetch();
+                queryClient.invalidateQueries({ queryKey: ['/api/files'] });
+              }}
+              title="Upload Radio Station Files"
+            />
+            <FileList 
+              entityType="radio-stations" 
+              title="Uploaded Files"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Edit Dialog */}
       <Dialog open={!!editingStation} onOpenChange={() => setEditingStation(null)}>

@@ -10,13 +10,18 @@ import {
   insertTopicSchema,
   insertRadioStationSchema,
   insertFreeProjectAccessSchema,
+  insertFileSchema,
 } from "@shared/schema";
 
 // Configure multer for file uploads
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
+    fileSize: 50 * 1024 * 1024, // 50MB limit for various file types
+  },
+  fileFilter: (req, file, cb) => {
+    // Accept all file types
+    cb(null, true);
   },
 });
 
@@ -63,31 +68,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const fileContent = req.file.buffer.toString("utf-8");
-      const users = JSON.parse(fileContent);
-      
-      if (!Array.isArray(users)) {
-        return res.status(400).json({ message: "File must contain an array of users" });
-      }
+      // Store the file in the database
+      const fileData = {
+        filename: `users_${Date.now()}_${req.file.originalname}`,
+        originalName: req.file.originalname,
+        mimeType: req.file.mimetype,
+        fileSize: req.file.size,
+        fileData: req.file.buffer.toString('base64'),
+        entityType: 'users',
+        entityId: null,
+        uploadedBy: null,
+      };
 
-      const createdUsers = [];
-      for (const userData of users) {
+      const storedFile = await storage.createFile(fileData);
+
+      // Try to parse and import data if it's a JSON file
+      let importedCount = 0;
+      if (req.file.mimetype === 'application/json' || req.file.originalname.endsWith('.json')) {
         try {
-          const validatedData = insertUserSchema.parse(userData);
-          const user = await storage.createUser(validatedData);
-          createdUsers.push(user);
-        } catch (error) {
-          console.error("Error creating user from file:", error);
+          const fileContent = req.file.buffer.toString("utf-8");
+          const users = JSON.parse(fileContent);
+          
+          if (Array.isArray(users)) {
+            for (const userData of users) {
+              try {
+                const validatedData = insertUserSchema.parse(userData);
+                await storage.createUser(validatedData);
+                importedCount++;
+              } catch (error) {
+                console.error("Error creating user from file:", error);
+              }
+            }
+          }
+        } catch (parseError) {
+          console.log("File is not JSON or couldn't be parsed for import");
         }
       }
 
       res.status(201).json({ 
-        message: `Successfully imported ${createdUsers.length} users`, 
-        users: createdUsers 
+        message: `File uploaded successfully${importedCount > 0 ? ` and imported ${importedCount} users` : ''}`,
+        file: storedFile,
+        importedCount
       });
     } catch (error) {
-      console.error("Error uploading users:", error);
-      res.status(500).json({ message: "Failed to upload users" });
+      console.error("Error uploading file:", error);
+      res.status(500).json({ message: "Failed to upload file" });
     }
   });
 
@@ -517,6 +542,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating free project access:", error);
       res.status(400).json({ message: "Failed to create free project access" });
+    }
+  });
+
+  // Files API
+  app.get("/api/files", async (req, res) => {
+    try {
+      const { entityType, entityId } = req.query;
+      let files;
+      
+      if (entityType) {
+        files = await storage.getFilesByEntity(entityType as string, entityId as string);
+      } else {
+        files = await storage.getAllFiles();
+      }
+      
+      // Don't send file data in list view for performance
+      const filesWithoutData = files.map(file => ({
+        ...file,
+        fileData: undefined
+      }));
+      
+      res.json(filesWithoutData);
+    } catch (error) {
+      console.error("Error fetching files:", error);
+      res.status(500).json({ message: "Failed to fetch files" });
+    }
+  });
+
+  app.get("/api/files/:id", async (req, res) => {
+    try {
+      const file = await storage.getFile(req.params.id);
+      if (!file) {
+        return res.status(404).json({ message: "File not found" });
+      }
+      res.json(file);
+    } catch (error) {
+      console.error("Error fetching file:", error);
+      res.status(500).json({ message: "Failed to fetch file" });
+    }
+  });
+
+  app.get("/api/files/:id/download", async (req, res) => {
+    try {
+      const file = await storage.getFile(req.params.id);
+      if (!file) {
+        return res.status(404).json({ message: "File not found" });
+      }
+
+      const buffer = Buffer.from(file.fileData, 'base64');
+      
+      res.setHeader('Content-Disposition', `attachment; filename="${file.originalName}"`);
+      res.setHeader('Content-Type', file.mimeType);
+      res.setHeader('Content-Length', buffer.length);
+      
+      res.send(buffer);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      res.status(500).json({ message: "Failed to download file" });
+    }
+  });
+
+  app.get("/api/files/:id/view", async (req, res) => {
+    try {
+      const file = await storage.getFile(req.params.id);
+      if (!file) {
+        return res.status(404).json({ message: "File not found" });
+      }
+
+      const buffer = Buffer.from(file.fileData, 'base64');
+      
+      res.setHeader('Content-Type', file.mimeType);
+      res.setHeader('Content-Length', buffer.length);
+      
+      res.send(buffer);
+    } catch (error) {
+      console.error("Error viewing file:", error);
+      res.status(500).json({ message: "Failed to view file" });
+    }
+  });
+
+  app.delete("/api/files/:id", async (req, res) => {
+    try {
+      await storage.deleteFile(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      res.status(500).json({ message: "Failed to delete file" });
     }
   });
 

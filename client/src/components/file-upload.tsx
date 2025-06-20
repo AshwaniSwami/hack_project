@@ -12,7 +12,7 @@ interface FileUploadProps {
   title: string;
 }
 
-export function FileUpload({ endpoint, onUploadSuccess, acceptedTypes = ".json,.txt,.csv", title }: FileUploadProps) {
+export function FileUpload({ endpoint, onUploadSuccess, acceptedTypes = "*", title }: FileUploadProps) {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
@@ -87,7 +87,7 @@ export function FileUpload({ endpoint, onUploadSuccess, acceptedTypes = ".json,.
           className="cursor-pointer"
         />
         <p className="text-sm text-muted-foreground">
-          Supported formats: {acceptedTypes.replace(/\./g, '').toUpperCase()}
+          All file formats supported (PDF, DOC, Audio, Images, etc.)
         </p>
       </div>
 

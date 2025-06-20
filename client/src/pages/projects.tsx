@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/api";
 import { Plus, Edit, Trash2, Search, FolderOpen } from "lucide-react";
 import { FileUpload } from "@/components/file-upload";
+import { FileList } from "@/components/file-list";
 import type { Project } from "@shared/schema";
 
 const projectFormSchema = z.object({

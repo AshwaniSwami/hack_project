@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -32,8 +32,10 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/api";
+import { queryClient } from "@/lib/queryClient";
 import { Plus, Edit, Trash2, User, Search, Mail } from "lucide-react";
 import { FileUpload } from "@/components/file-upload";
+import { FileList } from "@/components/file-list";
 import type { User as UserType } from "@shared/schema";
 
 const userFormSchema = z.object({
@@ -50,7 +52,7 @@ export default function Users() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: users = [], isLoading } = useQuery<UserType[]>({
+  const { data: users = [], isLoading, refetch } = useQuery<UserType[]>({
     queryKey: ["/api/users"],
   });
 
@@ -346,6 +348,29 @@ export default function Users() {
           </CardContent>
         </Card>
       )}
+
+      {/* File Upload Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>File Management</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <FileUpload 
+              endpoint="/api/users/upload" 
+              onUploadSuccess={() => {
+                refetch();
+                queryClient.invalidateQueries({ queryKey: ['/api/files'] });
+              }}
+              title="Upload User Files"
+            />
+            <FileList 
+              entityType="users" 
+              title="Uploaded Files"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Edit Dialog */}
       <Dialog open={!!editingUser} onOpenChange={() => setEditingUser(null)}>
