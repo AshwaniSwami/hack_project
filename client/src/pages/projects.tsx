@@ -25,8 +25,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/api";
-import { Plus, Edit, Trash2, Search, FolderOpen, Upload } from "lucide-react";
-import { FileList } from "@/components/file-list";
+import { Plus, Edit, Trash2, Search, FolderOpen } from "lucide-react";
 import type { Project } from "@shared/schema";
 
 const projectFormSchema = z.object({
@@ -142,43 +141,7 @@ export default function Projects() {
     }
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, projectId: string) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("projectId", projectId);
-
-    try {
-      const response = await fetch("/api/projects/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Upload failed");
-      }
-
-      const result = await response.json();
-      toast({
-        title: "Upload successful",
-        description: result.message,
-      });
-
-      queryClient.invalidateQueries({ queryKey: ['/api/files'] });
-      
-      // Reset the file input
-      event.target.value = '';
-    } catch (error) {
-      console.error("Upload error:", error);
-      toast({
-        title: "Upload failed",
-        description: "There was an error uploading your file. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const filteredProjects = projects.filter((project) =>
     project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -263,50 +226,7 @@ export default function Projects() {
           </Dialog>
         </div>
 
-        {/* Enhanced File Management Section */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>File Management</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {projects.map((project) => (
-                <div key={project.id} className="border rounded-lg p-4">
-                  <h4 className="font-medium mb-4">{project.name}</h4>
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <h5 className="text-sm font-medium mb-2">Upload Files</h5>
-                      <div className="space-y-4 p-4 border rounded-lg bg-card">
-                        <input
-                          type="file"
-                          id={`file-${project.id}`}
-                          className="hidden"
-                          onChange={(e) => handleFileUpload(e, project.id)}
-                        />
-                        <label
-                          htmlFor={`file-${project.id}`}
-                          className="flex items-center justify-center w-full p-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400"
-                        >
-                          <div className="text-center">
-                            <span className="text-sm text-gray-600">Click to upload files</span>
-                          </div>
-                        </label>
-                      </div>
-                    </div>
-                    <div>
-                      <h5 className="text-sm font-medium mb-2">Project Files</h5>
-                      <FileList 
-                        entityType="projects" 
-                        entityId={project.id}
-                        title=""
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+
       </div>
 
       {/* Projects Grid */}

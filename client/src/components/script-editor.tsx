@@ -31,10 +31,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/api";
-import type { Script, Episode, User } from "@shared/schema";
+import type { Script, Episode, User, Project } from "@shared/schema";
 
 const scriptFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
+  projectId: z.string().min(1, "Project is required"),
   episodeId: z.string().min(1, "Episode is required"),
   content: z.string().min(1, "Content is required"),
   status: z.string().default("Draft"),
@@ -66,6 +67,12 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
   const queryClient = useQueryClient();
   const [content, setContent] = useState("");
 
+  const [selectedProject, setSelectedProject] = useState<string>("");
+
+  const { data: projects = [] } = useQuery<Project[]>({
+    queryKey: ["/api/projects"],
+  });
+
   const { data: episodes = [] } = useQuery<Episode[]>({
     queryKey: ["/api/episodes"],
   });
@@ -74,7 +81,7 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
     queryKey: ["/api/users"],
   });
 
-  const { data: projects = [] } = useQuery<any[]>({
+  const { data: projectsData = [] } = useQuery<Project[]>({
     queryKey: ["/api/projects"],
   });
 
@@ -82,6 +89,7 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
     resolver: zodResolver(scriptFormSchema),
     defaultValues: {
       title: "",
+      projectId: "",
       episodeId: "",
       content: "",
       status: "Draft",
@@ -108,8 +116,10 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
 
   useEffect(() => {
     if (script) {
+      const episode = episodes.find(e => e.id === script.episodeId);
       form.reset({
         title: script.title,
+        projectId: episode?.projectId || "",
         episodeId: script.episodeId,
         content: script.content,
         status: script.status,
@@ -118,9 +128,11 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
         audioFilePath: script.audioFilePath || "",
       });
       setContent(script.content);
+      setSelectedProject(episode?.projectId || "");
     } else {
       form.reset({
         title: "",
+        projectId: "",
         episodeId: "",
         content: "",
         status: "Draft",
@@ -129,6 +141,7 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
         audioFilePath: "",
       });
       setContent("");
+      setSelectedProject("");
     }
   }, [script, form]);
 
@@ -172,9 +185,14 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
   };
 
   const getProjectName = (projectId: string) => {
-    const project = projects.find((p: any) => p.id === projectId);
+    const project = projectsData.find((p: Project) => p.id === projectId);
     return project?.name || "";
   };
+
+  // Filter episodes based on selected project
+  const filteredEpisodes = selectedProject 
+    ? episodes.filter(episode => episode.projectId === selectedProject)
+    : episodes;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -239,12 +257,9 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {episodes.map((episode) => (
+                          {filteredEpisodes.map((episode) => (
                             <SelectItem key={episode.id} value={episode.id}>
-                              <div className="flex flex-col">
-                                <span className="font-medium">{episode.title} (#{episode.episodeNumber})</span>
-                                <span className="text-xs text-gray-500">Project: {getProjectName(episode.projectId)}</span>
-                              </div>
+                              Episode {episode.episodeNumber}: {episode.title}
                             </SelectItem>
                           ))}
                         </SelectContent>
