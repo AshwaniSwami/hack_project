@@ -92,6 +92,12 @@ export function ProjectFileUpload({
       setFile(null);
       onUploadSuccess();
       
+      // Force refresh of file lists
+      const queryClient = document.querySelector('[data-query-client]');
+      if (queryClient) {
+        window.location.reload();
+      }
+      
       // Reset the file input
       const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
       if (fileInput) fileInput.value = '';

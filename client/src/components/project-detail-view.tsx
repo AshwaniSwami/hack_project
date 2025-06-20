@@ -31,6 +31,17 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
     select: (data) => data.filter(script => script.projectId === project.id)
   });
 
+
+  const { data: projectFiles = [] } = useQuery({
+    queryKey: ['/api/files', 'project', project.id],
+    queryFn: async () => {
+      const response = await fetch(`/api/files`);
+      if (!response.ok) throw new Error('Failed to fetch files');
+      return response.json();
+    },
+    refetchInterval: 2000,
+  });
+
   return (
     <div className="space-y-6">
       <Card>
@@ -100,7 +111,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                   <FileList 
                     entityType="episodes" 
                     entityId={project.id}
-                    title="Episode Files"
+                    title=""
                   />
                 </div>
               </CardContent>
@@ -157,7 +168,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                   <FileList 
                     entityType="scripts" 
                     entityId={project.id}
-                    title="Script Files"
+                    title=""
                   />
                 </div>
               </CardContent>

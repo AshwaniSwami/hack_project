@@ -121,6 +121,8 @@ The application uses a relational database with the following core entities:
 - December 19, 2024: Configured PostgreSQL database and applied migrations
 - December 19, 2024: Modified project detail view to focus on Episodes and Scripts organization
 - December 19, 2024: Removed upload functionality from project details view per user preference
+- December 19, 2024: Fixed file upload routing - audio/video files go to Episodes, documents go to Scripts
+- December 19, 2024: Files now display correctly in project detail view under Episodes and Scripts tabs
 
 ## Changelog
 

@@ -54,13 +54,16 @@ export function FileList({ entityType, entityId, title = "Files" }: FileListProp
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: files = [], isLoading } = useQuery<FileData[]>({
+  const { data: files = [], isLoading, refetch } = useQuery<FileData[]>({
     queryKey: ['/api/files', entityType, entityId],
     queryFn: async () => {
-      const response = await fetch(`/api/files?entityType=${entityType}${entityId ? `&entityId=${entityId}` : ''}`);
+      const url = `/api/files?entityType=${entityType}${entityId ? `&entityId=${entityId}` : ''}`;
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch files');
       return response.json() as Promise<FileData[]>;
-    }
+    },
+    staleTime: 0,
+    cacheTime: 0,
   });
 
   const deleteMutation = useMutation({
@@ -71,6 +74,7 @@ export function FileList({ entityType, entityId, title = "Files" }: FileListProp
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/files'] });
+      queryClient.refetchQueries({ queryKey: ['/api/files'] });
       toast({
         title: "Success",
         description: "File deleted successfully",
