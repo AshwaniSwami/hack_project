@@ -18,7 +18,7 @@ import type { Project, Episode } from "@shared/schema";
 export function EpisodeFileUpload() {
   const [file, setFile] = useState<File | null>(null);
   const [selectedProject, setSelectedProject] = useState<string>("");
-  const [selectedEpisode, setSelectedEpisode] = useState<string>("");
+  const [selectedEpisode, setSelectedEpisode] = useState<string>("none");
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -62,13 +62,13 @@ export function EpisodeFileUpload() {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("projectId", selectedProject);
-    if (selectedEpisode) {
+    if (selectedEpisode && selectedEpisode !== "none") {
       formData.append("episodeId", selectedEpisode);
     }
 
     try {
       let endpoint = "/api/projects/upload";
-      if (selectedEpisode) {
+      if (selectedEpisode && selectedEpisode !== "none") {
         endpoint = `/api/episodes/${selectedEpisode}/upload`;
       }
 
@@ -89,7 +89,7 @@ export function EpisodeFileUpload() {
 
       setFile(null);
       setSelectedProject("");
-      setSelectedEpisode("");
+      setSelectedEpisode("none");
       queryClient.invalidateQueries({ queryKey: ['/api/files'] });
       
       // Reset the file input
@@ -121,7 +121,7 @@ export function EpisodeFileUpload() {
             <Label htmlFor="project-select">Project *</Label>
             <Select value={selectedProject} onValueChange={(value) => {
               setSelectedProject(value);
-              setSelectedEpisode(""); // Reset episode when project changes
+              setSelectedEpisode("none"); // Reset episode when project changes
             }}>
               <SelectTrigger>
                 <SelectValue placeholder="Select project" />
@@ -147,7 +147,7 @@ export function EpisodeFileUpload() {
                 <SelectValue placeholder="Select episode" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">General project files</SelectItem>
+                <SelectItem value="none">General project files</SelectItem>
                 {episodes.map((episode) => (
                   <SelectItem key={episode.id} value={episode.id}>
                     Episode {episode.episodeNumber}: {episode.title}
