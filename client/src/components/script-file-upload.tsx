@@ -18,6 +18,7 @@ import type { Project, Episode } from "@shared/schema";
 export function ScriptFileUpload() {
   const [file, setFile] = useState<File | null>(null);
   const [selectedProject, setSelectedProject] = useState<string>("");
+  const [selectedEpisode, setSelectedEpisode] = useState<string>("none");
 
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
@@ -62,9 +63,15 @@ export function ScriptFileUpload() {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("projectId", selectedProject);
+    if (selectedEpisode && selectedEpisode !== "none") {
+      formData.append("episodeId", selectedEpisode);
+    }
 
     try {
-      const endpoint = `/api/projects/${selectedProject}/upload`;
+      let endpoint = `/api/projects/${selectedProject}/upload`;
+      if (selectedEpisode && selectedEpisode !== "none") {
+        endpoint = `/api/episodes/${selectedEpisode}/upload`;
+      }
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -83,6 +90,7 @@ export function ScriptFileUpload() {
 
       setFile(null);
       setSelectedProject("");
+      setSelectedEpisode("none");
       queryClient.invalidateQueries({ queryKey: ['/api/files'] });
       
       // Reset the file input
@@ -109,20 +117,46 @@ export function ScriptFileUpload() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="project-select">Project *</Label>
-          <Select value={selectedProject} onValueChange={setSelectedProject}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select project" />
-            </SelectTrigger>
-            <SelectContent>
-              {projects.map((project) => (
-                <SelectItem key={project.id} value={project.id}>
-                  {project.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="project-select">Project *</Label>
+            <Select value={selectedProject} onValueChange={(value) => {
+              setSelectedProject(value);
+              setSelectedEpisode("none");
+            }}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select project" />
+              </SelectTrigger>
+              <SelectContent>
+                {projects.map((project) => (
+                  <SelectItem key={project.id} value={project.id}>
+                    {project.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="episode-select">Episode (Optional)</Label>
+            <Select 
+              value={selectedEpisode} 
+              onValueChange={setSelectedEpisode}
+              disabled={!selectedProject}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select episode" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No specific episode</SelectItem>
+                {episodes.map((episode) => (
+                  <SelectItem key={episode.id} value={episode.id}>
+                    Episode {episode.episodeNumber}: {episode.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="space-y-2">

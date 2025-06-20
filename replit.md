@@ -123,6 +123,8 @@ The application uses a relational database with the following core entities:
 - December 19, 2024: Removed upload functionality from project details view per user preference
 - December 19, 2024: Fixed file upload routing - audio/video files go to Episodes, documents go to Scripts
 - December 19, 2024: Files now display correctly in project detail view under Episodes and Scripts tabs
+- December 19, 2024: Restored episode selection dropdowns for targeted file uploads
+- December 19, 2024: Updated project badge to show accurate episode, script, and file counts
 
 ## Changelog
 

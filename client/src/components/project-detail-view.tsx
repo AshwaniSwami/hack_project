@@ -71,7 +71,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
               {project.name}
             </div>
             <Badge variant="secondary">
-              {episodes.length + projectEpisodeFiles.length} episodes • {scripts.length + projectScriptFiles.length} scripts
+              {episodes.length} episodes • {scripts.length} scripts • {projectEpisodeFiles.length + projectScriptFiles.length} files
             </Badge>
           </CardTitle>
           {project.description && (
@@ -136,7 +136,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
               </CardContent>
             </Card>
             
-            {episodes.length === 0 && (
+            {episodes.length === 0 && projectEpisodeFiles.length === 0 && (
               <Card>
                 <CardContent className="p-8 text-center">
                   <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -193,7 +193,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
               </CardContent>
             </Card>
             
-            {scripts.length === 0 && (
+            {scripts.length === 0 && projectScriptFiles.length === 0 && (
               <Card>
                 <CardContent className="p-8 text-center">
                   <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
