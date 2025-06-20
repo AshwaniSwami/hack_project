@@ -56,6 +56,16 @@ export default function Projects() {
     queryKey: ["/api/scripts"],
   });
 
+  // Get all files to count script files per project
+  const { data: allFiles = [] } = useQuery({
+    queryKey: ["/api/files"],
+    queryFn: async () => {
+      const response = await fetch('/api/files');
+      if (!response.ok) return [];
+      return response.json();
+    }
+  });
+
   const form = useForm<ProjectFormData>({
     resolver: zodResolver(projectFormSchema),
     defaultValues: {
@@ -309,7 +319,8 @@ export default function Projects() {
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-gray-600">Scripts:</span>
                     <Badge className="bg-purple-100 text-purple-800">
-                      {scripts.filter(script => script.projectId === project.id).length}
+                      {scripts.filter(script => script.projectId === project.id).length + 
+                       allFiles.filter(file => file.entityType === 'scripts' && file.entityId === project.id).length}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
