@@ -125,8 +125,10 @@ The application uses a relational database with the following core entities:
 - December 19, 2024: Files now display correctly in project detail view under Episodes and Scripts tabs
 - December 19, 2024: Resolved script upload 404 errors by correcting endpoint routing
 - December 19, 2024: Project badges now show accurate counts including both records and uploaded files
-- December 19, 2024: Added comprehensive debugging to script editor to resolve save issues
-- December 19, 2024: Enhanced script editor with better form validation and content handling
+- December 19, 2024: Fixed script editor save functionality and removed debug logging
+- December 19, 2024: Enhanced script display with proper HTML formatting and removed irrelevant author data
+- December 19, 2024: Added ScriptFileManager component for individual script file uploads
+- December 19, 2024: Improved script interface with better layout and file management capabilities
 
 ## Changelog
 

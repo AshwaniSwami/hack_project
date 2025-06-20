@@ -131,17 +131,13 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
 
   const mutation = useMutation({
     mutationFn: async (data: ScriptFormData) => {
-      console.log("Mutation function called with:", data);
       // Combine form data with content from ReactQuill
       const submitData = { ...data, content: content.trim() };
-      console.log("API request data:", submitData);
       
       if (script) {
-        console.log("Updating existing script:", script.id);
         const response = await apiRequest("PUT", `/api/scripts/${script.id}`, submitData);
         return response.json();
       } else {
-        console.log("Creating new script");
         const response = await apiRequest("POST", "/api/scripts", submitData);
         return response.json();
       }
@@ -158,10 +154,9 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
       form.reset();
     },
     onError: (error) => {
-      console.error("Script save error:", error);
       toast({
         title: "Error",
-        description: `Failed to ${script ? "update" : "create"} script: ${error.message}`,
+        description: `Failed to ${script ? "update" : "create"} script`,
         variant: "destructive",
       });
     },
@@ -290,10 +285,7 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
                   <ReactQuill
                     theme="snow"
                     value={content}
-                    onChange={(value) => {
-                      console.log("ReactQuill content changed:", value);
-                      setContent(value);
-                    }}
+                    onChange={setContent}
                     modules={quillModules}
                     placeholder="Write your script content here..."
                     className="bg-white dark:bg-gray-800"
@@ -331,9 +323,7 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
                   type="button"
                   disabled={mutation.isPending || !content.trim() || content === '<p></p>' || content === '<p><br></p>'}
                   onClick={() => {
-                    console.log("Save button clicked, content:", content);
                     const formData = form.getValues();
-                    console.log("Form values:", formData);
                     onSubmit(formData);
                   }}
                 >

@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ScriptFileUpload } from "@/components/script-file-upload";
+import { ScriptFileManager } from "@/components/script-file-manager";
 import { FileList } from "@/components/file-list";
 import type { Script, User, Project } from "@shared/schema";
 
@@ -243,57 +244,65 @@ export default function Scripts() {
           {filteredScripts.map((script) => (
             <Card key={script.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <h3 className="text-lg font-medium text-gray-900">
-                        {script.title}
-                      </h3>
-                      <Badge className={getStatusColor(script.status)}>
-                        {script.status}
-                      </Badge>
-                    </div>
-                    
-                    <div className="space-y-1 text-sm text-gray-600 mb-3">
-                      <p>Episode: {getEpisodeTitle(script.episodeId)}</p>
-                      <p>Author: {getAuthorName(script.authorId)}</p>
-                    </div>
-                    
-                    <p className="text-sm text-gray-500 mb-3 line-clamp-2">
-                      {script.content.substring(0, 200)}...
-                    </p>
-                    
-                    {script.reviewComments && (
-                      <div className="bg-gray-50 p-3 rounded-lg mb-3">
-                        <p className="text-xs font-medium text-gray-700 mb-1">Review Comments:</p>
-                        <p className="text-sm text-gray-600">{script.reviewComments}</p>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <h3 className="text-lg font-medium text-gray-900">
+                          {script.title}
+                        </h3>
+                        <Badge className={getStatusColor(script.status)}>
+                          {script.status}
+                        </Badge>
                       </div>
-                    )}
+                      
+                      <div className="space-y-1 text-sm text-gray-600 mb-3">
+                        <p>Project: {getProjectName(script.projectId)}</p>
+                      </div>
+                      
+                      <div className="text-sm text-gray-700 mb-3 prose prose-sm max-w-none">
+                        <div dangerouslySetInnerHTML={{ 
+                          __html: script.content.length > 150 
+                            ? script.content.substring(0, 150) + '...' 
+                            : script.content 
+                        }} />
+                      </div>
+                      
+                      {script.reviewComments && (
+                        <div className="bg-gray-50 p-3 rounded-lg mb-3">
+                          <p className="text-xs font-medium text-gray-700 mb-1">Review Comments:</p>
+                          <p className="text-sm text-gray-600">{script.reviewComments}</p>
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center space-x-4 text-xs text-gray-500">
+                        <span>Created: {new Date(script.createdAt!).toLocaleDateString()}</span>
+                        <span>Updated: {new Date(script.updatedAt!).toLocaleDateString()}</span>
+                      </div>
+                    </div>
                     
-
-                    
-                    <div className="flex items-center space-x-4 text-xs text-gray-500">
-                      <span>Created: {new Date(script.createdAt!).toLocaleDateString()}</span>
-                      <span>Updated: {new Date(script.updatedAt!).toLocaleDateString()}</span>
+                    <div className="flex space-x-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleEdit(script)}
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleDelete(script.id)}
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Delete
+                      </Button>
                     </div>
                   </div>
                   
-                  <div className="flex space-x-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => handleEdit(script)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => handleDelete(script.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  {/* Script File Manager */}
+                  <ScriptFileManager script={script} />
                 </div>
               </CardContent>
             </Card>
