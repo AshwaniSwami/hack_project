@@ -179,31 +179,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const fileContent = req.file.buffer.toString("utf-8");
-      const projects = JSON.parse(fileContent);
-      
-      if (!Array.isArray(projects)) {
-        return res.status(400).json({ message: "File must contain an array of projects" });
-      }
+      // Store the file in the database
+      const fileData = {
+        filename: `projects_${Date.now()}_${req.file.originalname}`,
+        originalName: req.file.originalname,
+        mimeType: req.file.mimetype,
+        fileSize: req.file.size,
+        fileData: req.file.buffer.toString('base64'),
+        entityType: 'projects',
+        entityId: null,
+        uploadedBy: null,
+      };
 
-      const createdProjects = [];
-      for (const projectData of projects) {
+      const storedFile = await storage.createFile(fileData);
+
+      // Try to parse and import data if it's a JSON file
+      let importedCount = 0;
+      if (req.file.mimetype === 'application/json' || req.file.originalname.endsWith('.json')) {
         try {
-          const validatedData = insertProjectSchema.parse(projectData);
-          const project = await storage.createProject(validatedData);
-          createdProjects.push(project);
-        } catch (error) {
-          console.error("Error creating project from file:", error);
+          const fileContent = req.file.buffer.toString("utf-8");
+          const projects = JSON.parse(fileContent);
+          
+          if (Array.isArray(projects)) {
+            for (const projectData of projects) {
+              try {
+                const validatedData = insertProjectSchema.parse(projectData);
+                await storage.createProject(validatedData);
+                importedCount++;
+              } catch (error) {
+                console.error("Error creating project from file:", error);
+              }
+            }
+          }
+        } catch (parseError) {
+          console.log("File is not JSON or couldn't be parsed for import");
         }
       }
 
       res.status(201).json({ 
-        message: `Successfully imported ${createdProjects.length} projects`, 
-        projects: createdProjects 
+        message: `File uploaded successfully${importedCount > 0 ? ` and imported ${importedCount} projects` : ''}`,
+        file: storedFile,
+        importedCount
       });
     } catch (error) {
-      console.error("Error uploading projects:", error);
-      res.status(500).json({ message: "Failed to upload projects" });
+      console.error("Error uploading file:", error);
+      res.status(500).json({ message: "Failed to upload file" });
     }
   });
 
@@ -270,31 +290,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const fileContent = req.file.buffer.toString("utf-8");
-      const episodes = JSON.parse(fileContent);
-      
-      if (!Array.isArray(episodes)) {
-        return res.status(400).json({ message: "File must contain an array of episodes" });
-      }
+      // Store the file in the database
+      const fileData = {
+        filename: `episodes_${Date.now()}_${req.file.originalname}`,
+        originalName: req.file.originalname,
+        mimeType: req.file.mimetype,
+        fileSize: req.file.size,
+        fileData: req.file.buffer.toString('base64'),
+        entityType: 'episodes',
+        entityId: null,
+        uploadedBy: null,
+      };
 
-      const createdEpisodes = [];
-      for (const episodeData of episodes) {
+      const storedFile = await storage.createFile(fileData);
+
+      // Try to parse and import data if it's a JSON file
+      let importedCount = 0;
+      if (req.file.mimetype === 'application/json' || req.file.originalname.endsWith('.json')) {
         try {
-          const validatedData = insertEpisodeSchema.parse(episodeData);
-          const episode = await storage.createEpisode(validatedData);
-          createdEpisodes.push(episode);
-        } catch (error) {
-          console.error("Error creating episode from file:", error);
+          const fileContent = req.file.buffer.toString("utf-8");
+          const episodes = JSON.parse(fileContent);
+          
+          if (Array.isArray(episodes)) {
+            for (const episodeData of episodes) {
+              try {
+                const validatedData = insertEpisodeSchema.parse(episodeData);
+                await storage.createEpisode(validatedData);
+                importedCount++;
+              } catch (error) {
+                console.error("Error creating episode from file:", error);
+              }
+            }
+          }
+        } catch (parseError) {
+          console.log("File is not JSON or couldn't be parsed for import");
         }
       }
 
       res.status(201).json({ 
-        message: `Successfully imported ${createdEpisodes.length} episodes`, 
-        episodes: createdEpisodes 
+        message: `File uploaded successfully${importedCount > 0 ? ` and imported ${importedCount} episodes` : ''}`,
+        file: storedFile,
+        importedCount
       });
     } catch (error) {
-      console.error("Error uploading episodes:", error);
-      res.status(500).json({ message: "Failed to upload episodes" });
+      console.error("Error uploading file:", error);
+      res.status(500).json({ message: "Failed to upload file" });
     }
   });
 
@@ -361,31 +401,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const fileContent = req.file.buffer.toString("utf-8");
-      const scripts = JSON.parse(fileContent);
-      
-      if (!Array.isArray(scripts)) {
-        return res.status(400).json({ message: "File must contain an array of scripts" });
-      }
+      // Store the file in the database
+      const fileData = {
+        filename: `scripts_${Date.now()}_${req.file.originalname}`,
+        originalName: req.file.originalname,
+        mimeType: req.file.mimetype,
+        fileSize: req.file.size,
+        fileData: req.file.buffer.toString('base64'),
+        entityType: 'scripts',
+        entityId: null,
+        uploadedBy: null,
+      };
 
-      const createdScripts = [];
-      for (const scriptData of scripts) {
+      const storedFile = await storage.createFile(fileData);
+
+      // Try to parse and import data if it's a JSON file
+      let importedCount = 0;
+      if (req.file.mimetype === 'application/json' || req.file.originalname.endsWith('.json')) {
         try {
-          const validatedData = insertScriptSchema.parse(scriptData);
-          const script = await storage.createScript(validatedData);
-          createdScripts.push(script);
-        } catch (error) {
-          console.error("Error creating script from file:", error);
+          const fileContent = req.file.buffer.toString("utf-8");
+          const scripts = JSON.parse(fileContent);
+          
+          if (Array.isArray(scripts)) {
+            for (const scriptData of scripts) {
+              try {
+                const validatedData = insertScriptSchema.parse(scriptData);
+                await storage.createScript(validatedData);
+                importedCount++;
+              } catch (error) {
+                console.error("Error creating script from file:", error);
+              }
+            }
+          }
+        } catch (parseError) {
+          console.log("File is not JSON or couldn't be parsed for import");
         }
       }
 
       res.status(201).json({ 
-        message: `Successfully imported ${createdScripts.length} scripts`, 
-        scripts: createdScripts 
+        message: `File uploaded successfully${importedCount > 0 ? ` and imported ${importedCount} scripts` : ''}`,
+        file: storedFile,
+        importedCount
       });
     } catch (error) {
-      console.error("Error uploading scripts:", error);
-      res.status(500).json({ message: "Failed to upload scripts" });
+      console.error("Error uploading file:", error);
+      res.status(500).json({ message: "Failed to upload file" });
     }
   });
 
@@ -474,31 +534,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const fileContent = req.file.buffer.toString("utf-8");
-      const stations = JSON.parse(fileContent);
-      
-      if (!Array.isArray(stations)) {
-        return res.status(400).json({ message: "File must contain an array of radio stations" });
-      }
+      // Store the file in the database
+      const fileData = {
+        filename: `radio-stations_${Date.now()}_${req.file.originalname}`,
+        originalName: req.file.originalname,
+        mimeType: req.file.mimetype,
+        fileSize: req.file.size,
+        fileData: req.file.buffer.toString('base64'),
+        entityType: 'radio-stations',
+        entityId: null,
+        uploadedBy: null,
+      };
 
-      const createdStations = [];
-      for (const stationData of stations) {
+      const storedFile = await storage.createFile(fileData);
+
+      // Try to parse and import data if it's a JSON file
+      let importedCount = 0;
+      if (req.file.mimetype === 'application/json' || req.file.originalname.endsWith('.json')) {
         try {
-          const validatedData = insertRadioStationSchema.parse(stationData);
-          const station = await storage.createRadioStation(validatedData);
-          createdStations.push(station);
-        } catch (error) {
-          console.error("Error creating radio station from file:", error);
+          const fileContent = req.file.buffer.toString("utf-8");
+          const stations = JSON.parse(fileContent);
+          
+          if (Array.isArray(stations)) {
+            for (const stationData of stations) {
+              try {
+                const validatedData = insertRadioStationSchema.parse(stationData);
+                await storage.createRadioStation(validatedData);
+                importedCount++;
+              } catch (error) {
+                console.error("Error creating radio station from file:", error);
+              }
+            }
+          }
+        } catch (parseError) {
+          console.log("File is not JSON or couldn't be parsed for import");
         }
       }
 
       res.status(201).json({ 
-        message: `Successfully imported ${createdStations.length} radio stations`, 
-        stations: createdStations 
+        message: `File uploaded successfully${importedCount > 0 ? ` and imported ${importedCount} radio stations` : ''}`,
+        file: storedFile,
+        importedCount
       });
     } catch (error) {
-      console.error("Error uploading radio stations:", error);
-      res.status(500).json({ message: "Failed to upload radio stations" });
+      console.error("Error uploading file:", error);
+      res.status(500).json({ message: "Failed to upload file" });
     }
   });
 
