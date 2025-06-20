@@ -13,11 +13,60 @@ const upload = multer({
 });
 
 export function registerProjectFileRoutes(app: Express) {
-  // Project file uploads are disabled - files should be uploaded to episodes or scripts instead
+  // Auto-route project uploads to scripts based on file type
   app.post("/api/projects/:projectId/upload", upload.single("file"), async (req, res) => {
-    res.status(400).json({ 
-      message: "Direct project file uploads are not allowed. Please upload files to specific episodes or scripts instead." 
-    });
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const projectId = req.params.projectId;
+      
+      // Verify project exists
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+
+      // Determine entity type based on file type
+      const mimeType = req.file.mimetype.toLowerCase();
+      const filename = req.file.originalname.toLowerCase();
+      
+      let entityType = 'scripts'; // Default to scripts
+      let filePrefix = 'script';
+      
+      // Check if it's likely an episode file (audio/video)
+      if (mimeType.includes('audio') || mimeType.includes('video') || 
+          filename.includes('.mp3') || filename.includes('.mp4') || 
+          filename.includes('.wav') || filename.includes('.m4a')) {
+        entityType = 'episodes';
+        filePrefix = 'episode';
+      }
+
+      const fileData = {
+        filename: `${filePrefix}_${projectId}_${Date.now()}_${req.file.originalname}`,
+        originalName: req.file.originalname,
+        mimeType: req.file.mimetype,
+        fileSize: req.file.size,
+        fileData: req.file.buffer.toString('base64'),
+        entityType: entityType,
+        entityId: projectId, // Use projectId as entityId for project-level organization
+        uploadedBy: null,
+      };
+
+      console.log(`Upload request - projectId: ${projectId} file: ${req.file.originalname} -> routing to ${entityType}`);
+
+      const storedFile = await storage.createFile(fileData);
+
+      res.status(201).json({ 
+        message: `File uploaded successfully to ${entityType}`,
+        file: storedFile,
+        routedTo: entityType
+      });
+    } catch (error) {
+      console.error("Error uploading project file:", error);
+      res.status(500).json({ message: "Failed to upload file" });
+    }
   });
 
   // Get files for specific project
