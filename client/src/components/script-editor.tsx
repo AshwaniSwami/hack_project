@@ -168,13 +168,14 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
   });
 
   const onSubmit = (data: ScriptFormData) => {
-    console.log("Form submitted with data:", data);
-    console.log("ReactQuill content:", content);
+    console.log("✅ onSubmit called with data:", data);
+    console.log("✅ ReactQuill content:", content);
     
     // Clean up ReactQuill content - remove empty tags
     const cleanContent = content.replace(/<p><br><\/p>/g, '').trim();
     
     if (!cleanContent || cleanContent === '<p></p>') {
+      console.log("❌ Content validation failed");
       toast({
         title: "Error",
         description: "Script content is required",
@@ -185,7 +186,7 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
     
     // Ensure content is included in the submitted data
     const submitData = { ...data, content: cleanContent };
-    console.log("Submitting data:", submitData);
+    console.log("✅ Final submit data:", submitData);
     mutation.mutate(submitData);
   };
 
@@ -208,7 +209,7 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
         
         <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-1">
+            <div className="space-y-6 p-1">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
@@ -327,14 +328,19 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
                   Cancel
                 </Button>
                 <Button 
-                  type="submit" 
+                  type="button"
                   disabled={mutation.isPending || !content.trim() || content === '<p></p>' || content === '<p><br></p>'}
-                  onClick={() => console.log("Save button clicked, content:", content)}
+                  onClick={() => {
+                    console.log("Save button clicked, content:", content);
+                    const formData = form.getValues();
+                    console.log("Form values:", formData);
+                    onSubmit(formData);
+                  }}
                 >
                   {mutation.isPending ? "Saving..." : "Save Script"}
                 </Button>
               </div>
-            </form>
+            </div>
           </Form>
         </div>
       </DialogContent>
