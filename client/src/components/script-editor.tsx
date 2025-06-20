@@ -134,7 +134,8 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
 
   const mutation = useMutation({
     mutationFn: async (data: ScriptFormData) => {
-      const submitData = { ...data, content };
+      // Combine form data with content from ReactQuill
+      const submitData = { ...data, content: content.trim() };
       if (script) {
         return apiRequest("PUT", `/api/scripts/${script.id}`, submitData);
       } else {
@@ -143,12 +144,14 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/scripts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/files"] });
       toast({
-        title: "Success",
+        title: "Success", 
         description: `Script ${script ? "updated" : "created"} successfully`,
       });
       onClose();
       setContent("");
+      form.reset();
     },
     onError: (error) => {
       toast({
@@ -168,7 +171,9 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
       });
       return;
     }
-    mutation.mutate(data);
+    // Ensure content is included in the submitted data
+    const submitData = { ...data, content: content.trim() };
+    mutation.mutate(submitData);
   };
 
   const getProjectName = (projectId: string) => {
@@ -261,19 +266,7 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
 
               </div>
 
-              <FormField
-                control={form.control}
-                name="audioLink"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Audio Link</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://example.com/audio.mp3" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+
 
               <div className="space-y-2">
                 <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
