@@ -96,14 +96,11 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
   const quillModules = {
     toolbar: [
       [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
+      ['bold', 'italic', 'underline'],
       [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'script': 'sub'}, { 'script': 'super' }],
       [{ 'indent': '-1'}, { 'indent': '+1' }],
-      [{ 'direction': 'rtl' }],
-      [{ 'color': [] }, { 'background': [] }],
       [{ 'align': [] }],
-      ['link', 'blockquote', 'code-block'],
+      ['blockquote'],
       ['clean']
     ],
   };
@@ -134,12 +131,19 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
 
   const mutation = useMutation({
     mutationFn: async (data: ScriptFormData) => {
+      console.log("Mutation function called with:", data);
       // Combine form data with content from ReactQuill
       const submitData = { ...data, content: content.trim() };
+      console.log("API request data:", submitData);
+      
       if (script) {
-        return apiRequest("PUT", `/api/scripts/${script.id}`, submitData);
+        console.log("Updating existing script:", script.id);
+        const response = await apiRequest("PUT", `/api/scripts/${script.id}`, submitData);
+        return response.json();
       } else {
-        return apiRequest("POST", "/api/scripts", submitData);
+        console.log("Creating new script");
+        const response = await apiRequest("POST", "/api/scripts", submitData);
+        return response.json();
       }
     },
     onSuccess: () => {
@@ -154,16 +158,23 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
       form.reset();
     },
     onError: (error) => {
+      console.error("Script save error:", error);
       toast({
         title: "Error",
-        description: `Failed to ${script ? "update" : "create"} script`,
+        description: `Failed to ${script ? "update" : "create"} script: ${error.message}`,
         variant: "destructive",
       });
     },
   });
 
   const onSubmit = (data: ScriptFormData) => {
-    if (!content.trim()) {
+    console.log("Form submitted with data:", data);
+    console.log("ReactQuill content:", content);
+    
+    // Clean up ReactQuill content - remove empty tags
+    const cleanContent = content.replace(/<p><br><\/p>/g, '').trim();
+    
+    if (!cleanContent || cleanContent === '<p></p>') {
       toast({
         title: "Error",
         description: "Script content is required",
@@ -171,8 +182,10 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
       });
       return;
     }
+    
     // Ensure content is included in the submitted data
-    const submitData = { ...data, content: content.trim() };
+    const submitData = { ...data, content: cleanContent };
+    console.log("Submitting data:", submitData);
     mutation.mutate(submitData);
   };
 
@@ -276,13 +289,17 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
                   <ReactQuill
                     theme="snow"
                     value={content}
-                    onChange={setContent}
+                    onChange={(value) => {
+                      console.log("ReactQuill content changed:", value);
+                      setContent(value);
+                    }}
                     modules={quillModules}
                     placeholder="Write your script content here..."
                     className="bg-white dark:bg-gray-800"
+                    style={{ minHeight: "200px" }}
                   />
                 </div>
-                {!content.trim() && (
+                {(!content.trim() || content === '<p></p>' || content === '<p><br></p>') && (
                   <p className="text-sm text-red-500">Script content is required</p>
                 )}
               </div>
@@ -309,7 +326,11 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={mutation.isPending}>
+                <Button 
+                  type="submit" 
+                  disabled={mutation.isPending || !content.trim() || content === '<p></p>' || content === '<p><br></p>'}
+                  onClick={() => console.log("Save button clicked, content:", content)}
+                >
                   {mutation.isPending ? "Saving..." : "Save Script"}
                 </Button>
               </div>
