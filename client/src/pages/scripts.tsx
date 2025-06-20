@@ -42,6 +42,14 @@ export default function Scripts() {
     queryKey: ["/api/users"],
   });
 
+  const { data: projects = [] } = useQuery<Project[]>({
+    queryKey: ["/api/projects"],
+  });
+
+  const { data: episodes = [] } = useQuery<Episode[]>({
+    queryKey: ["/api/episodes"],
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       return apiRequest("DELETE", `/api/scripts/${id}`);
@@ -105,6 +113,11 @@ export default function Scripts() {
   const getAuthorName = (authorId: string) => {
     const author = users.find(u => u.id === authorId);
     return author?.username || "Unknown Author";
+  };
+
+  const getEpisodeTitle = (episodeId: string) => {
+    const episode = episodes.find(e => e.id === episodeId);
+    return episode ? episode.title : "Unknown Episode";
   };
 
   const filteredScripts = scripts.filter((script) => {
