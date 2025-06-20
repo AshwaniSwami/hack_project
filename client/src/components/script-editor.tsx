@@ -143,7 +143,7 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
       setContent("");
       setSelectedProject("");
     }
-  }, [script, form]);
+  }, [script, form, episodes]);
 
   const mutation = useMutation({
     mutationFn: async (data: ScriptFormData) => {

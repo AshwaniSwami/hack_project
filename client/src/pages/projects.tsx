@@ -25,8 +25,9 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/api";
-import { Plus, Edit, Trash2, Search, FolderOpen } from "lucide-react";
-import type { Project } from "@shared/schema";
+import { Plus, Edit, Trash2, Search, FolderOpen, Eye } from "lucide-react";
+import { ProjectDetailView } from "@/components/project-detail-view";
+import type { Project, Episode, Script } from "@shared/schema";
 
 const projectFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -38,12 +39,21 @@ type ProjectFormData = z.infer<typeof projectFormSchema>;
 export default function Projects() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [viewingProject, setViewingProject] = useState<Project | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: projects = [], isLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects"],
+  });
+
+  const { data: episodes = [] } = useQuery<Episode[]>({
+    queryKey: ["/api/episodes"],
+  });
+
+  const { data: scripts = [] } = useQuery<Script[]>({
+    queryKey: ["/api/scripts"],
   });
 
   const form = useForm<ProjectFormData>({
@@ -290,20 +300,48 @@ export default function Projects() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Created:</span>
-                    <span className="font-medium">
-                      {new Date(project.createdAt!).toLocaleDateString()}
-                    </span>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-gray-600">Episodes:</span>
+                    <Badge className="bg-blue-100 text-blue-800">
+                      {episodes.filter(ep => ep.projectId === project.id).length}
+                    </Badge>
                   </div>
-                  <div className="flex justify-between text-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-gray-600">Scripts:</span>
+                    <Badge className="bg-purple-100 text-purple-800">
+                      {scripts.filter(script => {
+                        const episode = episodes.find(ep => ep.id === script.episodeId);
+                        return episode?.projectId === project.id;
+                      }).length}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
                     <span className="text-gray-600">Status:</span>
                     <Badge className="bg-green-100 text-green-800">Active</Badge>
                   </div>
                 </div>
-                <div className="mt-4 pt-3 border-t border-gray-200">
-                  <Button variant="outline" className="w-full">
+                <div className="mt-4 pt-3 border-t border-gray-200 flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={() => setViewingProject(project)}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
                     View Details
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEdit(project)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDelete(project.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </CardContent>
@@ -365,6 +403,25 @@ export default function Projects() {
               </div>
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Project Details Dialog */}
+      <Dialog open={!!viewingProject} onOpenChange={() => setViewingProject(null)}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>Project Details: {viewingProject?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
+            {viewingProject && (
+              <ProjectDetailView 
+                project={viewingProject} 
+                onAddEpisode={() => {
+                  setViewingProject(null);
+                }} 
+              />
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
