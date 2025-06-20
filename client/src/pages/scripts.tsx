@@ -22,8 +22,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FileUpload } from "@/components/file-upload";
-import type { Script, Episode, User } from "@shared/schema";
+import { ScriptFileUpload } from "@/components/script-file-upload";
+import { FileList } from "@/components/file-list";
+import type { Script, Episode, User, Project } from "@shared/schema";
 
 export default function Scripts() {
   const [isScriptEditorOpen, setIsScriptEditorOpen] = useState(false);
@@ -43,6 +44,10 @@ export default function Scripts() {
 
   const { data: users = [] } = useQuery<User[]>({
     queryKey: ["/api/users"],
+  });
+
+  const { data: projects = [] } = useQuery<Project[]>({
+    queryKey: ["/api/projects"],
   });
 
   const deleteMutation = useMutation({
@@ -167,7 +172,49 @@ export default function Scripts() {
         </div>
 
         {/* File Upload Section */}
-        {/* Script-based file upload will be added per script */}
+        {/* Enhanced Script File Upload */}
+        <ScriptFileUpload />
+        
+        {/* Project-Organized File Lists */}
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Script Files by Project</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {projects.map((project) => {
+                const projectEpisodes = episodes.filter(ep => ep.projectId === project.id);
+                return (
+                  <div key={project.id} className="border rounded-lg p-4">
+                    <h4 className="font-medium mb-4">{project.name}</h4>
+                    <div className="space-y-4">
+                      <div>
+                        <h5 className="text-sm font-medium mb-2">General Project Files</h5>
+                        <FileList 
+                          entityType="projects" 
+                          entityId={project.id}
+                          title=""
+                        />
+                      </div>
+                      {projectEpisodes.map((episode) => (
+                        <div key={episode.id}>
+                          <h5 className="text-sm font-medium mb-2">
+                            Episode {episode.episodeNumber}: {episode.title}
+                          </h5>
+                          <FileList 
+                            entityType="episodes" 
+                            entityId={episode.id}
+                            title=""
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Scripts List */}

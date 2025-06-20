@@ -33,7 +33,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/api";
 import { Plus, Edit, Trash2, Mic } from "lucide-react";
-import { FileUpload } from "@/components/file-upload";
+import { EpisodeFileUpload } from "@/components/episode-file-upload";
+import { FileList } from "@/components/file-list";
 import type { Episode, Project } from "@shared/schema";
 
 const episodeFormSchema = z.object({
@@ -306,7 +307,49 @@ export default function Episodes() {
         </div>
 
         {/* File Upload Section */}
-        {/* Project-based file upload will be added per episode */}
+        {/* Enhanced Episode File Upload */}
+        <EpisodeFileUpload />
+        
+        {/* Project-Organized File Lists */}
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Episode Files by Project</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {projects.map((project) => {
+                const projectEpisodes = episodes.filter(ep => ep.projectId === project.id);
+                return (
+                  <div key={project.id} className="border rounded-lg p-4">
+                    <h4 className="font-medium mb-4">{project.name}</h4>
+                    <div className="space-y-4">
+                      <div>
+                        <h5 className="text-sm font-medium mb-2">General Project Files</h5>
+                        <FileList 
+                          entityType="projects" 
+                          entityId={project.id}
+                          title=""
+                        />
+                      </div>
+                      {projectEpisodes.map((episode) => (
+                        <div key={episode.id}>
+                          <h5 className="text-sm font-medium mb-2">
+                            Episode {episode.episodeNumber}: {episode.title}
+                          </h5>
+                          <FileList 
+                            entityType="episodes" 
+                            entityId={episode.id}
+                            title=""
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Episodes List */}
