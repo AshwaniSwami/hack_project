@@ -28,28 +28,13 @@ export function registerEpisodeFileRoutes(app: Express) {
         return res.status(404).json({ message: "Episode not found" });
       }
 
-      // Determine entity type based on file type - scripts go to scripts even when uploaded via episode
-      const mimeType = req.file.mimetype.toLowerCase();
-      const filename = req.file.originalname.toLowerCase();
-      
-      let entityType = 'episodes'; // Default to episodes
-      let filePrefix = 'episode';
-      
-      // Check if it's a document file (should go to scripts)
-      if (mimeType.includes('document') || mimeType.includes('pdf') || 
-          filename.includes('.doc') || filename.includes('.pdf') || 
-          filename.includes('.txt') || filename.includes('.rtf')) {
-        entityType = 'scripts';
-        filePrefix = 'script';
-      }
-
       const fileData = {
-        filename: `${filePrefix}_${episodeId}_${Date.now()}_${req.file.originalname}`,
+        filename: `episode_${episodeId}_${Date.now()}_${req.file.originalname}`,
         originalName: req.file.originalname,
         mimeType: req.file.mimetype,
         fileSize: req.file.size,
         fileData: req.file.buffer.toString('base64'),
-        entityType: entityType,
+        entityType: 'episodes',
         entityId: episodeId,
         uploadedBy: null,
       };

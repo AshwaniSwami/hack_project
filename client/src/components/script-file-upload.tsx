@@ -70,7 +70,7 @@ export function ScriptFileUpload() {
     try {
       let endpoint = `/api/projects/${selectedProject}/upload`;
       if (selectedEpisode && selectedEpisode !== "none") {
-        endpoint = `/api/episodes/${selectedEpisode}/upload`;
+        endpoint = `/api/scripts/${selectedEpisode}/upload`;
       }
 
       const response = await fetch(endpoint, {
