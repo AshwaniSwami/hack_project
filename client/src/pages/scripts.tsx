@@ -192,12 +192,8 @@ export default function Scripts() {
                   <h4 className="font-medium mb-4">{project.name}</h4>
                   <div className="space-y-4">
                     <div>
-                      <h5 className="text-sm font-medium mb-2">Project Files</h5>
-                      <FileList 
-                        entityType="projects" 
-                        entityId={project.id}
-                        title=""
-                      />
+                      <h5 className="text-sm font-medium mb-2">No script files uploaded yet</h5>
+                      <p className="text-sm text-muted-foreground">Script files will appear here when uploaded via episodes or directly to scripts.</p>
                     </div>
                   </div>
                 </div>

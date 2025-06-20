@@ -13,42 +13,11 @@ const upload = multer({
 });
 
 export function registerProjectFileRoutes(app: Express) {
-  // Upload files for specific projects
+  // Project file uploads are disabled - files should be uploaded to episodes or scripts instead
   app.post("/api/projects/:projectId/upload", upload.single("file"), async (req, res) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({ message: "No file uploaded" });
-      }
-
-      const projectId = req.params.projectId;
-      
-      // Verify project exists
-      const project = await storage.getProject(projectId);
-      if (!project) {
-        return res.status(404).json({ message: "Project not found" });
-      }
-
-      const fileData = {
-        filename: `project_${projectId}_${Date.now()}_${req.file.originalname}`,
-        originalName: req.file.originalname,
-        mimeType: req.file.mimetype,
-        fileSize: req.file.size,
-        fileData: req.file.buffer.toString('base64'),
-        entityType: 'projects',
-        entityId: projectId,
-        uploadedBy: null,
-      };
-
-      const storedFile = await storage.createFile(fileData);
-
-      res.status(201).json({ 
-        message: "File uploaded successfully",
-        file: storedFile
-      });
-    } catch (error) {
-      console.error("Error uploading project file:", error);
-      res.status(500).json({ message: "Failed to upload file" });
-    }
+    res.status(400).json({ 
+      message: "Direct project file uploads are not allowed. Please upload files to specific episodes or scripts instead." 
+    });
   });
 
   // Get files for specific project

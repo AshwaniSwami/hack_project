@@ -50,20 +50,11 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
         </CardHeader>
       </Card>
 
-      <Tabs defaultValue="files" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="files">Project Files</TabsTrigger>
+      <Tabs defaultValue="episodes" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="episodes">Episodes</TabsTrigger>
           <TabsTrigger value="scripts">Scripts</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="files" className="space-y-4">
-          <FileList 
-            entityType="projects" 
-            entityId={project.id}
-            title="Project Files"
-          />
-        </TabsContent>
 
         <TabsContent value="episodes" className="space-y-4">
           <h3 className="text-lg font-semibold">Episodes</h3>

@@ -323,14 +323,6 @@ export default function Episodes() {
                   <div key={project.id} className="border rounded-lg p-4">
                     <h4 className="font-medium mb-4">{project.name}</h4>
                     <div className="space-y-4">
-                      <div>
-                        <h5 className="text-sm font-medium mb-2">General Project Files</h5>
-                        <FileList 
-                          entityType="projects" 
-                          entityId={project.id}
-                          title=""
-                        />
-                      </div>
                       {projectEpisodes.map((episode) => (
                         <div key={episode.id}>
                           <h5 className="text-sm font-medium mb-2">
