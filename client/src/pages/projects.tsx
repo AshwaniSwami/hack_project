@@ -26,6 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/api";
 import { Plus, Edit, Trash2, Search, FolderOpen } from "lucide-react";
+import { FileUpload } from "@/components/file-upload";
 import type { Project } from "@shared/schema";
 
 const projectFormSchema = z.object({
@@ -222,6 +223,15 @@ export default function Projects() {
               </Form>
             </DialogContent>
           </Dialog>
+        </div>
+
+        {/* File Upload Section */}
+        <div className="mb-8">
+          <FileUpload
+            endpoint="projects"
+            onUploadSuccess={() => queryClient.invalidateQueries({ queryKey: ['/api/projects'] })}
+            title="Import Projects from File"
+          />
         </div>
       </div>
 

@@ -33,6 +33,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/api";
 import { Plus, Edit, Trash2, Mic } from "lucide-react";
+import { FileUpload } from "@/components/file-upload";
 import type { Episode, Project } from "@shared/schema";
 
 const episodeFormSchema = z.object({
@@ -302,6 +303,15 @@ export default function Episodes() {
               </Form>
             </DialogContent>
           </Dialog>
+        </div>
+
+        {/* File Upload Section */}
+        <div className="mb-8">
+          <FileUpload
+            endpoint="episodes"
+            onUploadSuccess={() => queryClient.invalidateQueries({ queryKey: ['/api/episodes'] })}
+            title="Import Episodes from File"
+          />
         </div>
       </div>
 

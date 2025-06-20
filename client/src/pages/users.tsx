@@ -33,6 +33,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/api";
 import { Plus, Edit, Trash2, User, Search, Mail } from "lucide-react";
+import { FileUpload } from "@/components/file-upload";
 import type { User as UserType } from "@shared/schema";
 
 const userFormSchema = z.object({
@@ -236,6 +237,15 @@ export default function Users() {
             className="pl-10"
           />
         </div>
+      </div>
+
+      {/* File Upload Section */}
+      <div className="mb-8">
+        <FileUpload
+          endpoint="users"
+          onUploadSuccess={() => queryClient.invalidateQueries({ queryKey: ['/api/users'] })}
+          title="Import Users from File"
+        />
       </div>
 
       {/* Users Table */}

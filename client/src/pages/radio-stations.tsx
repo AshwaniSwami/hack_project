@@ -34,6 +34,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/api";
 import { Plus, Edit, Trash2, Radio, Phone, Mail, MapPin } from "lucide-react";
+import { FileUpload } from "@/components/file-upload";
 import type { RadioStation } from "@shared/schema";
 
 const radioStationFormSchema = z.object({
@@ -275,6 +276,15 @@ export default function RadioStations() {
               </Form>
             </DialogContent>
           </Dialog>
+        </div>
+
+        {/* File Upload Section */}
+        <div className="mb-8">
+          <FileUpload
+            endpoint="radio-stations"
+            onUploadSuccess={() => queryClient.invalidateQueries({ queryKey: ['/api/radio-stations'] })}
+            title="Import Radio Stations from File"
+          />
         </div>
       </div>
 

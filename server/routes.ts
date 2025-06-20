@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import multer from "multer";
 import { storage } from "./storage";
 import {
   insertUserSchema,
@@ -10,6 +11,14 @@ import {
   insertRadioStationSchema,
   insertFreeProjectAccessSchema,
 } from "@shared/schema";
+
+// Configure multer for file uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Users API
@@ -44,6 +53,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating user:", error);
       res.status(400).json({ message: "Failed to create user" });
+    }
+  });
+
+  // File upload endpoint for users
+  app.post("/api/users/upload", upload.single("file"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const fileContent = req.file.buffer.toString("utf-8");
+      const users = JSON.parse(fileContent);
+      
+      if (!Array.isArray(users)) {
+        return res.status(400).json({ message: "File must contain an array of users" });
+      }
+
+      const createdUsers = [];
+      for (const userData of users) {
+        try {
+          const validatedData = insertUserSchema.parse(userData);
+          const user = await storage.createUser(validatedData);
+          createdUsers.push(user);
+        } catch (error) {
+          console.error("Error creating user from file:", error);
+        }
+      }
+
+      res.status(201).json({ 
+        message: `Successfully imported ${createdUsers.length} users`, 
+        users: createdUsers 
+      });
+    } catch (error) {
+      console.error("Error uploading users:", error);
+      res.status(500).json({ message: "Failed to upload users" });
     }
   });
 
@@ -103,6 +147,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // File upload endpoint for projects
+  app.post("/api/projects/upload", upload.single("file"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const fileContent = req.file.buffer.toString("utf-8");
+      const projects = JSON.parse(fileContent);
+      
+      if (!Array.isArray(projects)) {
+        return res.status(400).json({ message: "File must contain an array of projects" });
+      }
+
+      const createdProjects = [];
+      for (const projectData of projects) {
+        try {
+          const validatedData = insertProjectSchema.parse(projectData);
+          const project = await storage.createProject(validatedData);
+          createdProjects.push(project);
+        } catch (error) {
+          console.error("Error creating project from file:", error);
+        }
+      }
+
+      res.status(201).json({ 
+        message: `Successfully imported ${createdProjects.length} projects`, 
+        projects: createdProjects 
+      });
+    } catch (error) {
+      console.error("Error uploading projects:", error);
+      res.status(500).json({ message: "Failed to upload projects" });
+    }
+  });
+
   app.put("/api/projects/:id", async (req, res) => {
     try {
       const projectData = insertProjectSchema.partial().parse(req.body);
@@ -159,6 +238,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // File upload endpoint for episodes
+  app.post("/api/episodes/upload", upload.single("file"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const fileContent = req.file.buffer.toString("utf-8");
+      const episodes = JSON.parse(fileContent);
+      
+      if (!Array.isArray(episodes)) {
+        return res.status(400).json({ message: "File must contain an array of episodes" });
+      }
+
+      const createdEpisodes = [];
+      for (const episodeData of episodes) {
+        try {
+          const validatedData = insertEpisodeSchema.parse(episodeData);
+          const episode = await storage.createEpisode(validatedData);
+          createdEpisodes.push(episode);
+        } catch (error) {
+          console.error("Error creating episode from file:", error);
+        }
+      }
+
+      res.status(201).json({ 
+        message: `Successfully imported ${createdEpisodes.length} episodes`, 
+        episodes: createdEpisodes 
+      });
+    } catch (error) {
+      console.error("Error uploading episodes:", error);
+      res.status(500).json({ message: "Failed to upload episodes" });
+    }
+  });
+
   app.put("/api/episodes/:id", async (req, res) => {
     try {
       const episodeData = insertEpisodeSchema.partial().parse(req.body);
@@ -212,6 +326,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating script:", error);
       res.status(400).json({ message: "Failed to create script" });
+    }
+  });
+
+  // File upload endpoint for scripts
+  app.post("/api/scripts/upload", upload.single("file"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const fileContent = req.file.buffer.toString("utf-8");
+      const scripts = JSON.parse(fileContent);
+      
+      if (!Array.isArray(scripts)) {
+        return res.status(400).json({ message: "File must contain an array of scripts" });
+      }
+
+      const createdScripts = [];
+      for (const scriptData of scripts) {
+        try {
+          const validatedData = insertScriptSchema.parse(scriptData);
+          const script = await storage.createScript(validatedData);
+          createdScripts.push(script);
+        } catch (error) {
+          console.error("Error creating script from file:", error);
+        }
+      }
+
+      res.status(201).json({ 
+        message: `Successfully imported ${createdScripts.length} scripts`, 
+        scripts: createdScripts 
+      });
+    } catch (error) {
+      console.error("Error uploading scripts:", error);
+      res.status(500).json({ message: "Failed to upload scripts" });
     }
   });
 
@@ -290,6 +439,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating radio station:", error);
       res.status(400).json({ message: "Failed to create radio station" });
+    }
+  });
+
+  // File upload endpoint for radio stations
+  app.post("/api/radio-stations/upload", upload.single("file"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const fileContent = req.file.buffer.toString("utf-8");
+      const stations = JSON.parse(fileContent);
+      
+      if (!Array.isArray(stations)) {
+        return res.status(400).json({ message: "File must contain an array of radio stations" });
+      }
+
+      const createdStations = [];
+      for (const stationData of stations) {
+        try {
+          const validatedData = insertRadioStationSchema.parse(stationData);
+          const station = await storage.createRadioStation(validatedData);
+          createdStations.push(station);
+        } catch (error) {
+          console.error("Error creating radio station from file:", error);
+        }
+      }
+
+      res.status(201).json({ 
+        message: `Successfully imported ${createdStations.length} radio stations`, 
+        stations: createdStations 
+      });
+    } catch (error) {
+      console.error("Error uploading radio stations:", error);
+      res.status(500).json({ message: "Failed to upload radio stations" });
     }
   });
 

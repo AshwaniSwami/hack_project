@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { FileUpload } from "@/components/file-upload";
 import type { Script, Episode, User } from "@shared/schema";
 
 export default function Scripts() {
@@ -163,6 +164,15 @@ export default function Scripts() {
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        {/* File Upload Section */}
+        <div className="mb-8">
+          <FileUpload
+            endpoint="scripts"
+            onUploadSuccess={() => queryClient.invalidateQueries({ queryKey: ['/api/scripts'] })}
+            title="Import Scripts from File"
+          />
         </div>
       </div>
 
