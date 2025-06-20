@@ -31,6 +31,25 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
     select: (data) => data.filter(script => script.projectId === project.id)
   });
 
+  // Get project-level files to count episodes and scripts
+  const { data: projectEpisodeFiles = [] } = useQuery({
+    queryKey: ['/api/files', 'episodes', project.id],
+    queryFn: async () => {
+      const response = await fetch(`/api/files?entityType=episodes&entityId=${project.id}`);
+      if (!response.ok) return [];
+      return response.json();
+    }
+  });
+
+  const { data: projectScriptFiles = [] } = useQuery({
+    queryKey: ['/api/files', 'scripts', project.id],
+    queryFn: async () => {
+      const response = await fetch(`/api/files?entityType=scripts&entityId=${project.id}`);
+      if (!response.ok) return [];
+      return response.json();
+    }
+  });
+
 
   const { data: projectFiles = [] } = useQuery({
     queryKey: ['/api/files', 'project', project.id],
@@ -52,7 +71,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
               {project.name}
             </div>
             <Badge variant="secondary">
-              {episodes.length} episodes • {scripts.length} scripts
+              {episodes.length + projectEpisodeFiles.length} episodes • {scripts.length + projectScriptFiles.length} scripts
             </Badge>
           </CardTitle>
           {project.description && (
