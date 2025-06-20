@@ -413,9 +413,6 @@ export default function Projects() {
             {viewingProject && (
               <ProjectDetailView 
                 project={viewingProject} 
-                onAddEpisode={() => {
-                  setViewingProject(null);
-                }} 
               />
             )}
           </div>

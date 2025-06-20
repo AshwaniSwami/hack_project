@@ -16,10 +16,9 @@ import type { Project, Episode, Script } from "@shared/schema";
 
 interface ProjectDetailViewProps {
   project: Project;
-  onAddEpisode: () => void;
 }
 
-export function ProjectDetailView({ project, onAddEpisode }: ProjectDetailViewProps) {
+export function ProjectDetailView({ project }: ProjectDetailViewProps) {
   const queryClient = useQueryClient();
 
   const { data: episodes = [] } = useQuery<Episode[]>({
@@ -51,20 +50,23 @@ export function ProjectDetailView({ project, onAddEpisode }: ProjectDetailViewPr
         </CardHeader>
       </Card>
 
-      <Tabs defaultValue="episodes" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+      <Tabs defaultValue="files" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="files">Project Files</TabsTrigger>
           <TabsTrigger value="episodes">Episodes</TabsTrigger>
           <TabsTrigger value="scripts">Scripts</TabsTrigger>
         </TabsList>
 
+        <TabsContent value="files" className="space-y-4">
+          <FileList 
+            entityType="projects" 
+            entityId={project.id}
+            title="Project Files"
+          />
+        </TabsContent>
+
         <TabsContent value="episodes" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Episodes</h3>
-            <Button onClick={onAddEpisode}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Episode
-            </Button>
-          </div>
+          <h3 className="text-lg font-semibold">Episodes</h3>
           
           <div className="grid gap-4">
             {episodes.map((episode) => (
@@ -103,9 +105,7 @@ export function ProjectDetailView({ project, onAddEpisode }: ProjectDetailViewPr
                 <CardContent className="p-8 text-center">
                   <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                   <p className="text-muted-foreground">No episodes yet</p>
-                  <Button onClick={onAddEpisode} className="mt-4">
-                    Create First Episode
-                  </Button>
+                  <p className="text-sm text-muted-foreground mt-2">Episodes can be created from the Episodes page</p>
                 </CardContent>
               </Card>
             )}
