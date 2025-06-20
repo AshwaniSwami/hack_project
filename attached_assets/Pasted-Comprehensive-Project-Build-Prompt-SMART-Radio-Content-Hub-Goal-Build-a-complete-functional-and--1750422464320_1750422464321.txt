@@ -1,0 +1,186 @@
+Comprehensive Project Build Prompt: SMART Radio Content Hub
+Goal: Build a complete, functional, and attractive "SMART Radio Content Hub" full-stack web application.
+
+Technology Stack:
+
+Backend: Express.js (Node.js) for RESTful APIs.
+Database: PostgreSQL (Replit's integrated service) with Sequelize ORM.
+Frontend: React.js with Material-UI (MUI) for a clean and responsive user interface.
+Deployment Environment: Replit.
+Core Application Requirements:
+
+The application will allow radio station staff (scriptwriters, producers, administrators) to manage content, including:
+
+Projects: High-level containers (e.g., specific shows, campaigns).
+Episodes: Individual broadcast segments within a Project.
+Scripts: Written content for Episodes, with rich text editing.
+Topics: Categories for scripts (many-to-many relationship with Scripts).
+Users: System users (authors, administrators).
+Radio Stations: Management of external radio station entities.
+Free Project Access: Granting specific Projects to Radio Stations.
+User Experience & Design Principles:
+
+Clean and Modern UI: All frontend components must use Material-UI for consistency and aesthetics.
+Intuitive Navigation: Clear AppBar navigation.
+Responsive Design: Layouts should adapt well to different screen sizes.
+Loading & Error States: Clear feedback to the user during API calls or failures.
+Rich Text Editing: Integrated react-quill for script content.
+Detailed Prompt for Agentic AI:
+
+Please construct the full-stack "SMART Radio Content Hub" application within a Node.js Repl, ensuring all components are functional and integrated as described.
+
+**Project Structure:**
+
+The application will consist of two main directories at the root level:
+* `backend/`: Contains the Express.js server and Sequelize models.
+* `frontend/smart_radio_frontend/`: Contains the React.js application.
+
+---
+
+**Phase 1: Backend Setup (Express.js, PostgreSQL, Sequelize)**
+
+**1. Initialize Backend Project & Install Dependencies:**
+    * Create a `backend/` directory.
+    * Inside `backend/`, initialize a Node.js project (`npm init -y`).
+    * Install the following npm packages: `express`, `cors`, `pg`, `sequelize`.
+
+**2. Database Configuration (`backend/config/database.js`):**
+    * Create `backend/config/` directory.
+    * Create `backend/config/database.js`.
+    * Configure `Sequelize` to connect to Replit's PostgreSQL using `process.env.PGDATABASE`, `PGUSER`, `PGPASSWORD`, `PGHOST`, `PGPORT`. Set `dialect: 'postgres'`. Include `ssl: { require: true, rejectUnauthorized: false }` in `dialectOptions` for Replit.
+    * Export the `sequelize` instance and an async `testDbConnection` function.
+
+**3. Define All Sequelize Models (`backend/models/*.js` and `backend/models/index.js`):**
+    * Create `backend/models/` directory.
+    * Each model file (`User.js`, `Project.js`, `Episode.js`, `Script.js`, `Topic.js`, `ScriptTopic.js`, `RadioStation.js`, `FreeProjectAccess.js`) should export a function that takes `sequelizeInstance` and `DataTypes` as arguments.
+    * **User.js:** `id` (UUID, PK, default UUIDV4), `username` (STRING, not null, unique), `email` (STRING, not null, unique, isEmail validation).
+    * **Project.js:** `id` (UUID, PK, default UUIDV4), `name` (STRING, not null, unique), `description` (TEXT).
+    * **Episode.js:** `id` (UUID, PK, default UUIDV4), `project_id` (UUID), `title` (STRING, not null), `episode_number` (INTEGER), `description` (TEXT), `broadcast_date` (DATEONLY), `is_premium` (BOOLEAN, default false). Add unique constraint for `['project_id', 'episode_number']`.
+    * **Script.js:** `id` (UUID, PK, default UUIDV4), `episode_id` (UUID), `author_id` (UUID), `title` (STRING, not null), `content` (TEXT, not null), `status` (STRING, not null, enum-like: 'Draft', 'Submitted', 'Under Review', 'Approved', 'Needs Revision', 'Recorded', 'Archived'), `review_comments` (TEXT), `audio_file_path` (STRING), `audio_link` (STRING), `is_archived` (BOOLEAN, default false).
+    * **Topic.js:** `id` (UUID, PK, default UUIDV4), `name` (STRING, not null, unique).
+    * **ScriptTopic.js:** `id` (UUID, PK, default UUIDV4), `script_id` (UUID), `topic_id` (UUID). (Junction table).
+    * **RadioStation.js:** `id` (UUID, PK, default UUIDV4), `user_id` (UUID, nullable), `name` (STRING, not null, unique), `contact_person` (STRING), `email` (STRING, not null, unique, isEmail validation), `phone` (STRING), `address` (TEXT), `is_active` (BOOLEAN, default true).
+    * **FreeProjectAccess.js:** `id` (UUID, PK, default UUIDV4), `radio_station_id` (UUID), `project_id` (UUID), `granted_by_user_id` (UUID, nullable), `is_active` (BOOLEAN, default true). Add unique constraint for `['radio_station_id', 'project_id']`.
+    * **`backend/models/index.js`:**
+        * Import all defined models.
+        * Initialize each model with the `sequelize` instance.
+        * Define all associations:
+            * `Project.hasMany(Episode, { foreignKey: 'project_id' })`
+            * `Episode.belongsTo(Project, { foreignKey: 'project_id' })`
+            * `Episode.hasMany(Script, { foreignKey: 'episode_id' })`
+            * `Script.belongsTo(Episode, { foreignKey: 'episode_id' })`
+            * `Script.belongsTo(User, { foreignKey: 'author_id', as: 'author' })`
+            * `Script.belongsToMany(Topic, { through: 'ScriptTopic', foreignKey: 'script_id', otherKey: 'topic_id' })`
+            * `Topic.belongsToMany(Script, { through: 'ScriptTopic', foreignKey: 'topic_id', otherKey: 'script_id' })`
+            * `RadioStation.belongsTo(User, { foreignKey: 'user_id', as: 'associatedUser' })`
+            * `RadioStation.hasMany(FreeProjectAccess, { foreignKey: 'radio_station_id' })`
+            * `FreeProjectAccess.belongsTo(RadioStation, { foreignKey: 'radio_station_id' })`
+            * `Project.hasMany(FreeProjectAccess, { foreignKey: 'project_id' })`
+            * `FreeProjectAccess.belongsTo(Project, { foreignKey: 'project_id' })`
+            * `FreeProjectAccess.belongsTo(User, { foreignKey: 'granted_by_user_id', as: 'grantedBy' })`
+        * Export all initialized models.
+
+**4. Express.js Server (`backend/server.js`):**
+    * Import `express`, `cors`, and all models from `backend/models/index.js`.
+    * Import `sequelize` and `testDbConnection` from `backend/config/database.js`.
+    * Initialize `app = express()`.
+    * Set up middleware: `app.use(cors())`, `app.use(express.json())`, `app.use(express.urlencoded({ extended: true }))`.
+    * Define an `async function startServer()`:
+        * Call `await testDbConnection()`.
+        * Call `await sequelize.sync({ force: false })` (ensure existing data is not lost on restart).
+        * Start `app.listen(process.env.PORT || 8000, ...)`.
+        * Include `console.log` messages for connection and server start.
+        * Add error handling (`try...catch`) for database connection and server start.
+    * Call `startServer()`.
+    * **Implement RESTful API Endpoints (CRUD) for ALL Models:**
+        * For `User`, `Project`, `Episode`, `Script`, `Topic`, `RadioStation`, `FreeProjectAccess`:
+            * **GET `/api/<plural-model-name>`:** Fetch all items, including associated data (e.g., for Episodes, include Project; for Scripts, include Episode and Author; for FreeProjectAccess, include RadioStation, Project, and GrantedBy).
+            * **GET `/api/<plural-model-name>/:id`:** Fetch a single item by ID, with associations.
+            * **POST `/api/<plural-model-name>`:** Create a new item. Validate required fields.
+            * **PUT `/api/<plural-model-name>/:id`:** Update an existing item by ID. Validate required fields.
+            * **DELETE `/api/<plural-model-name>/:id`:** Delete an item by ID.
+        * Ensure robust error handling for all API routes (e.g., 400 Bad Request, 404 Not Found, 409 Conflict for unique constraints, 500 Internal Server Error).
+        * For `ScriptTopic` (junction table), implement basic POST/DELETE endpoints to manage associations if needed (e.g., `/api/script-topics`).
+
+---
+
+**Phase 2: Frontend Setup (React.js, Material-UI, React Router, React-Quill)**
+
+**1. Initialize Frontend Project & Install Dependencies:**
+    * Create a `frontend/` directory.
+    * Inside `frontend/`, create a React app: `npx create-react-app smart_radio_frontend --template cra-template-pwa --use-npm`.
+    * After `create-react-app` finishes, delete the default `src` content: `App.css`, `App.test.js`, `logo.svg`, `reportWebVitals.js`, `setupTests.js`, `index.css` inside `frontend/smart_radio_frontend/src/`.
+    * Inside `frontend/smart_radio_frontend/`, install: `@mui/material`, `@emotion/react`, `@emotion/styled`, `@fontsource/inter`, `react-router-dom`, `react-quill`.
+
+**2. React App Structure (`frontend/smart_radio_frontend/src/`):**
+    * **`index.js`:** Configure `ReactDOM.createRoot` to render `App` component wrapped in `BrowserRouter`. Import `@fontsource/inter`.
+    * **`App.js`:**
+        * Import `AppBar`, `Toolbar`, `Typography`, `Box` from `@mui/material`.
+        * Import `Routes`, `Route`, `Link` from `react-router-dom`.
+        * Include a Material-UI `AppBar` with `Link` components for navigation to:
+            * `/` (Home)
+            * `/users`
+            * `/projects`
+            * `/episodes`
+            * `/scripts`
+            * `/radio-stations`
+        * Set up `Routes` for each of these paths, mapping to appropriate components.
+
+**3. Create Core Frontend Components (`frontend/smart_radio_frontend/src/components/`):**
+    * Create a `components/` directory inside `frontend/smart_radio_frontend/src/`.
+    * **`HomePage.js`:** A simple welcome component with links to other sections.
+    * **`UserList.js`:**
+        * React functional component.
+        * Fetches users from `/api/users`.
+        * Displays them in a Material-UI `List` or `Table`.
+        * Shows loading state (`CircularProgress`) and error messages (`Alert`).
+    * **`ProjectList.js`:**
+        * React functional component.
+        * Fetches projects from `/api/projects`.
+        * Displays them in a Material-UI `List` or `Table`.
+        * Includes "Edit" and "Delete" actions (placeholders for now, will link to forms/delete API).
+        * Button to "Add New Project" (navigates to `/projects/new`).
+    * **`EpisodeList.js`:**
+        * React functional component.
+        * Fetches episodes from `/api/episodes`, ensuring `Project` details are included.
+        * Displays episodes with their associated project name.
+        * Includes "Edit" and "Delete" actions.
+        * Button to "Add New Episode" (navigates to `/episodes/new`).
+    * **`ScriptList.js`:**
+        * React functional component.
+        * Fetches scripts from `/api/scripts`, ensuring `Episode` (with nested `Project`) and `Author` (User) data is included.
+        * Displays scripts with title, episode, author, and status.
+        * Includes "Edit" and "Delete" actions.
+        * Button to "Add New Script" (navigates to `/scripts/new`).
+    * **`ScriptForm.js`:**
+        * React functional component for creating/editing scripts.
+        * Uses Material-UI `TextField`, `Select`, `Button`.
+        * **`Title`**, **`Review Comments`**, **`Audio Link`** as `TextField`.
+        * **`Episode`** dropdown: Fetches from `/api/episodes`, displays `title` and `project.name`, submits `episode_id`.
+        * **`Author`** dropdown: Fetches from `/api/users`, displays `username`, submits `author_id`.
+        * **`Content` (Rich Text Editor):** Integrate `ReactQuill`. Manage its HTML content in state.
+        * **`Status`** dropdown: Hardcode choices ('Draft', 'Submitted', 'Approved', etc.).
+        * **`Audio File Path` (Placeholder for Upload):** A `TextField` for now, acknowledging actual file upload will be a later feature.
+        * Handles form submission (POST for new, PUT for edit) to `/api/scripts`. Pre-fills form for edits.
+        * Includes loading (`CircularProgress`) and error (`Alert`) states during submission.
+    * **`RadioStationList.js`:**
+        * React functional component.
+        * Fetches radio stations from `/api/radio-stations`.
+        * Displays stations.
+        * Includes "Edit" and "Delete" actions.
+        * Button to "Add New Radio Station".
+
+**4. Frontend Environment Variable:**
+    * In `frontend/smart_radio_frontend/`, create a `.env` file.
+    * Add `REACT_APP_API_BASE_URL=http://localhost:8000/api/` (this base URL will be used for all backend API calls).
+
+---
+
+**Phase 3: Replit Deployment Configuration**
+
+**1. Root `Procfile`:**
+    * At the root of the Repl, create/update `Procfile`.
+    * This `Procfile` must successfully run **both** the Express.js backend and the React development server concurrently.
+    * The Express.js server runs from `backend/server.js`.
+    * The React server runs `npm start` from `frontend/smart_radio_frontend/`.
+
