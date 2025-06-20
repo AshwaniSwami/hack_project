@@ -46,14 +46,12 @@ export const episodes = pgTable("episodes", {
 // Scripts table
 export const scripts = pgTable("scripts", {
   id: uuid("id").primaryKey().defaultRandom(),
-  episodeId: uuid("episode_id").notNull(),
+  projectId: uuid("project_id").notNull(),
   authorId: uuid("author_id").notNull(),
   title: varchar("title", { length: 255 }).notNull(),
   content: text("content").notNull(),
   status: varchar("status", { length: 50 }).notNull().default("Draft"),
   reviewComments: text("review_comments"),
-  audioFilePath: varchar("audio_file_path", { length: 500 }),
-  audioLink: varchar("audio_link", { length: 500 }),
   isArchived: boolean("is_archived").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -120,21 +118,21 @@ export const usersRelations = relations(users, ({ many }) => ({
 
 export const projectsRelations = relations(projects, ({ many }) => ({
   episodes: many(episodes),
+  scripts: many(scripts),
   freeAccess: many(freeProjectAccess),
 }));
 
-export const episodesRelations = relations(episodes, ({ one, many }) => ({
+export const episodesRelations = relations(episodes, ({ one }) => ({
   project: one(projects, {
     fields: [episodes.projectId],
     references: [projects.id],
   }),
-  scripts: many(scripts),
 }));
 
 export const scriptsRelations = relations(scripts, ({ one, many }) => ({
-  episode: one(episodes, {
-    fields: [scripts.episodeId],
-    references: [episodes.id],
+  project: one(projects, {
+    fields: [scripts.projectId],
+    references: [projects.id],
   }),
   author: one(users, {
     fields: [scripts.authorId],

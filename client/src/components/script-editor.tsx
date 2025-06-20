@@ -36,12 +36,9 @@ import type { Script, Episode, User, Project } from "@shared/schema";
 const scriptFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   projectId: z.string().min(1, "Project is required"),
-  episodeId: z.string().min(1, "Episode is required"),
   content: z.string().min(1, "Content is required"),
   status: z.string().default("Draft"),
   reviewComments: z.string().optional(),
-  audioLink: z.string().url().optional().or(z.literal("")),
-  audioFilePath: z.string().optional(),
 });
 
 type ScriptFormData = z.infer<typeof scriptFormSchema>;
@@ -90,12 +87,9 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
     defaultValues: {
       title: "",
       projectId: "",
-      episodeId: "",
       content: "",
       status: "Draft",
       reviewComments: "",
-      audioLink: "",
-      audioFilePath: "",
     },
   });
 
@@ -116,34 +110,27 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
 
   useEffect(() => {
     if (script) {
-      const episode = episodes.find(e => e.id === script.episodeId);
       form.reset({
         title: script.title,
-        projectId: episode?.projectId || "",
-        episodeId: script.episodeId,
+        projectId: script.projectId || "",
         content: script.content,
         status: script.status,
         reviewComments: script.reviewComments || "",
-        audioLink: script.audioLink || "",
-        audioFilePath: script.audioFilePath || "",
       });
       setContent(script.content);
-      setSelectedProject(episode?.projectId || "");
+      setSelectedProject(script.projectId || "");
     } else {
       form.reset({
         title: "",
         projectId: "",
-        episodeId: "",
         content: "",
         status: "Draft",
         reviewComments: "",
-        audioLink: "",
-        audioFilePath: "",
       });
       setContent("");
       setSelectedProject("");
     }
-  }, [script, form, episodes]);
+  }, [script, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: ScriptFormData) => {
@@ -246,20 +233,23 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
 
                 <FormField
                   control={form.control}
-                  name="episodeId"
+                  name="projectId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Episode</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormLabel>Project</FormLabel>
+                      <Select onValueChange={(value) => {
+                        field.onChange(value);
+                        setSelectedProject(value);
+                      }} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select episode" />
+                            <SelectValue placeholder="Select project" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {filteredEpisodes.map((episode) => (
-                            <SelectItem key={episode.id} value={episode.id}>
-                              Episode {episode.episodeNumber}: {episode.title}
+                          {projectsData.map((project) => (
+                            <SelectItem key={project.id} value={project.id}>
+                              {project.name}
                             </SelectItem>
                           ))}
                         </SelectContent>

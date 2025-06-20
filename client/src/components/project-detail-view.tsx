@@ -31,10 +31,7 @@ export function ProjectDetailView({ project, onAddEpisode }: ProjectDetailViewPr
 
   const { data: scripts = [] } = useQuery<Script[]>({
     queryKey: ["/api/scripts"],
-    select: (data) => data.filter(script => {
-      const scriptEpisode = episodes.find(ep => ep.id === script.episodeId);
-      return scriptEpisode?.projectId === project.id;
-    })
+    select: (data) => data.filter(script => script.projectId === project.id)
   });
 
   return (

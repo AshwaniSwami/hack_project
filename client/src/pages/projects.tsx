@@ -309,10 +309,7 @@ export default function Projects() {
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-gray-600">Scripts:</span>
                     <Badge className="bg-purple-100 text-purple-800">
-                      {scripts.filter(script => {
-                        const episode = episodes.find(ep => ep.id === script.episodeId);
-                        return episode?.projectId === project.id;
-                      }).length}
+                      {scripts.filter(script => script.projectId === project.id).length}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">

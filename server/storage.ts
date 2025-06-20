@@ -58,7 +58,7 @@ export interface IStorage {
   updateScript(id: string, script: Partial<InsertScript>): Promise<Script>;
   deleteScript(id: string): Promise<void>;
   getAllScripts(): Promise<Script[]>;
-  getScriptsByEpisode(episodeId: string): Promise<Script[]>;
+  getScriptsByProject(projectId: string): Promise<Script[]>;
 
   // Topics
   getTopic(id: string): Promise<Topic | undefined>;
@@ -216,11 +216,11 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(scripts).orderBy(desc(scripts.createdAt));
   }
 
-  async getScriptsByEpisode(episodeId: string): Promise<Script[]> {
+  async getScriptsByProject(projectId: string): Promise<Script[]> {
     return await db
       .select()
       .from(scripts)
-      .where(eq(scripts.episodeId, episodeId))
+      .where(eq(scripts.projectId, projectId))
       .orderBy(desc(scripts.createdAt));
   }
 

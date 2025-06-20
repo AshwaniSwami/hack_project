@@ -398,7 +398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const scriptData = insertScriptSchema.parse(req.body);
       // Set a default author if not provided (for now, use first user or create a system user)
       const users = await storage.getAllUsers();
-      const authorId = users.length > 0 ? users[0].id : 'system-user';
+      const authorId = users.length > 0 ? users[0].id : '00000000-0000-0000-0000-000000000000';
       
       const script = await storage.createScript({
         ...scriptData,
@@ -443,7 +443,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             for (const scriptData of scripts) {
               try {
                 const validatedData = insertScriptSchema.parse(scriptData);
-                await storage.createScript(validatedData);
+                const users = await storage.getAllUsers();
+                const authorId = users.length > 0 ? users[0].id : '00000000-0000-0000-0000-000000000000';
+                await storage.createScript({
+                  ...validatedData,
+                  authorId
+                });
                 importedCount++;
               } catch (error) {
                 console.error("Error creating script from file:", error);
