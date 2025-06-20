@@ -2,6 +2,9 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import multer from "multer";
 import { storage } from "./storage";
+import { registerProjectFileRoutes } from "./routes-projects-files";
+import { registerEpisodeFileRoutes } from "./routes-episodes-files";
+import { registerScriptFileRoutes } from "./routes-scripts-files";
 import {
   insertUserSchema,
   insertProjectSchema,
@@ -26,6 +29,10 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Register file upload routes for organized content management
+  registerProjectFileRoutes(app);
+  registerEpisodeFileRoutes(app);
+  registerScriptFileRoutes(app);
   // Users API
   app.get("/api/users", async (req, res) => {
     try {
@@ -386,7 +393,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/scripts", async (req, res) => {
     try {
       const scriptData = insertScriptSchema.parse(req.body);
-      const script = await storage.createScript(scriptData);
+      // Set a default author if not provided (for now, use first user or create a system user)
+      const users = await storage.getAllUsers();
+      const authorId = users.length > 0 ? users[0].id : 'system-user';
+      
+      const script = await storage.createScript({
+        ...scriptData,
+        authorId
+      });
       res.status(201).json(script);
     } catch (error) {
       console.error("Error creating script:", error);

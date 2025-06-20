@@ -306,13 +306,7 @@ export default function Episodes() {
         </div>
 
         {/* File Upload Section */}
-        <div className="mb-8">
-          <FileUpload
-            endpoint="episodes"
-            onUploadSuccess={() => queryClient.invalidateQueries({ queryKey: ['/api/episodes'] })}
-            title="Import Episodes from File"
-          />
-        </div>
+        {/* Project-based file upload will be added per episode */}
       </div>
 
       {/* Episodes List */}

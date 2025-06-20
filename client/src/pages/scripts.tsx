@@ -167,13 +167,7 @@ export default function Scripts() {
         </div>
 
         {/* File Upload Section */}
-        <div className="mb-8">
-          <FileUpload
-            endpoint="scripts"
-            onUploadSuccess={() => queryClient.invalidateQueries({ queryKey: ['/api/scripts'] })}
-            title="Import Scripts from File"
-          />
-        </div>
+        {/* Script-based file upload will be added per script */}
       </div>
 
       {/* Scripts List */}

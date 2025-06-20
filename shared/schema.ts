@@ -204,6 +204,7 @@ export const insertScriptSchema = createInsertSchema(scripts).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+  authorId: true, // Remove author from form input - will be set server-side
 });
 
 export const insertTopicSchema = createInsertSchema(topics).omit({

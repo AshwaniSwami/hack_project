@@ -36,7 +36,6 @@ import type { Script, Episode, User } from "@shared/schema";
 const scriptFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   episodeId: z.string().min(1, "Episode is required"),
-  authorId: z.string().min(1, "Author is required"),
   content: z.string().min(1, "Content is required"),
   status: z.string().default("Draft"),
   reviewComments: z.string().optional(),
@@ -84,7 +83,6 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
     defaultValues: {
       title: "",
       episodeId: "",
-      authorId: "",
       content: "",
       status: "Draft",
       reviewComments: "",
@@ -113,7 +111,6 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
       form.reset({
         title: script.title,
         episodeId: script.episodeId,
-        authorId: script.authorId,
         content: script.content,
         status: script.status,
         reviewComments: script.reviewComments || "",
@@ -125,7 +122,6 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
       form.reset({
         title: "",
         episodeId: "",
-        authorId: "",
         content: "",
         status: "Draft",
         reviewComments: "",
@@ -258,30 +254,6 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="authorId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Author</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select author" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {users.map((user) => (
-                            <SelectItem key={user.id} value={user.id}>
-                              {user.username}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
 
               <FormField
