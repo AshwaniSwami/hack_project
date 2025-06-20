@@ -28,13 +28,28 @@ export function registerScriptFileRoutes(app: Express) {
         return res.status(404).json({ message: "Script not found" });
       }
 
+      // Determine entity type based on file type - audio/video should go to episodes
+      const mimeType = req.file.mimetype.toLowerCase();
+      const filename = req.file.originalname.toLowerCase();
+      
+      let entityType = 'scripts'; // Default to scripts
+      let filePrefix = 'script';
+      
+      // Check if it's an audio/video file (should go to episodes)
+      if (mimeType.includes('audio') || mimeType.includes('video') || 
+          filename.includes('.mp3') || filename.includes('.mp4') || 
+          filename.includes('.wav') || filename.includes('.m4a')) {
+        entityType = 'episodes';
+        filePrefix = 'episode';
+      }
+
       const fileData = {
-        filename: `script_${scriptId}_${Date.now()}_${req.file.originalname}`,
+        filename: `${filePrefix}_${scriptId}_${Date.now()}_${req.file.originalname}`,
         originalName: req.file.originalname,
         mimeType: req.file.mimetype,
         fileSize: req.file.size,
         fileData: req.file.buffer.toString('base64'),
-        entityType: 'scripts',
+        entityType: entityType,
         entityId: scriptId,
         uploadedBy: null,
       };

@@ -121,20 +121,22 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
               </Card>
             ))}
             
-            {/* Show project-level episode files */}
-            <Card>
-              <CardContent className="p-4">
-                <div className="space-y-2">
-                  <h4 className="font-medium">Project Episode Files</h4>
-                  <p className="text-sm text-muted-foreground">Audio/video files uploaded to this project</p>
-                  <FileList 
-                    entityType="episodes" 
-                    entityId={project.id}
-                    title=""
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            {/* Show project-level episode files only if there are any */}
+            {projectEpisodeFiles.length > 0 && (
+              <Card>
+                <CardContent className="p-4">
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Project Episode Files</h4>
+                    <p className="text-sm text-muted-foreground">Audio/video files uploaded to this project</p>
+                    <FileList 
+                      entityType="episodes" 
+                      entityId={project.id}
+                      title=""
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             
             {episodes.length === 0 && projectEpisodeFiles.length === 0 && (
               <Card>
@@ -178,20 +180,22 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
               );
             })}
             
-            {/* Show project-level script files */}
-            <Card>
-              <CardContent className="p-4">
-                <div className="space-y-2">
-                  <h4 className="font-medium">Project Script Files</h4>
-                  <p className="text-sm text-muted-foreground">Document files uploaded to this project</p>
-                  <FileList 
-                    entityType="scripts" 
-                    entityId={project.id}
-                    title=""
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            {/* Show project-level script files only if there are any */}
+            {projectScriptFiles.length > 0 && (
+              <Card>
+                <CardContent className="p-4">
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Project Script Files</h4>
+                    <p className="text-sm text-muted-foreground">Document files uploaded to this project</p>
+                    <FileList 
+                      entityType="scripts" 
+                      entityId={project.id}
+                      title=""
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             
             {scripts.length === 0 && projectScriptFiles.length === 0 && (
               <Card>

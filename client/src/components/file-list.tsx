@@ -62,8 +62,8 @@ export function FileList({ entityType, entityId, title = "Files" }: FileListProp
       if (!response.ok) throw new Error('Failed to fetch files');
       return response.json() as Promise<FileData[]>;
     },
-    staleTime: 1000,
-    refetchInterval: 3000,
+    staleTime: 0,
+    refetchInterval: 2000,
   });
 
   const deleteMutation = useMutation({
