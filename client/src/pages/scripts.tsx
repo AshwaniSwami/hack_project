@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select";
 import { ScriptFileUpload } from "@/components/script-file-upload";
 import { FileList } from "@/components/file-list";
-import type { Script, Episode, User, Project } from "@shared/schema";
+import type { Script, User, Project } from "@shared/schema";
 
 export default function Scripts() {
   const [isScriptEditorOpen, setIsScriptEditorOpen] = useState(false);
@@ -38,16 +38,8 @@ export default function Scripts() {
     queryKey: ["/api/scripts"],
   });
 
-  const { data: episodes = [] } = useQuery<Episode[]>({
-    queryKey: ["/api/episodes"],
-  });
-
   const { data: users = [] } = useQuery<User[]>({
     queryKey: ["/api/users"],
-  });
-
-  const { data: projects = [] } = useQuery<Project[]>({
-    queryKey: ["/api/projects"],
   });
 
   const deleteMutation = useMutation({
@@ -105,9 +97,9 @@ export default function Scripts() {
     }
   };
 
-  const getEpisodeTitle = (episodeId: string) => {
-    const episode = episodes.find(e => e.id === episodeId);
-    return episode ? `${episode.title} (#${episode.episodeNumber})` : "Unknown Episode";
+  const getProjectName = (projectId: string) => {
+    const project = projects.find(p => p.id === projectId);
+    return project ? project.name : "Unknown Project";
   };
 
   const getAuthorName = (authorId: string) => {
@@ -182,36 +174,21 @@ export default function Scripts() {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {projects.map((project) => {
-                const projectEpisodes = episodes.filter(ep => ep.projectId === project.id);
-                return (
-                  <div key={project.id} className="border rounded-lg p-4">
-                    <h4 className="font-medium mb-4">{project.name}</h4>
-                    <div className="space-y-4">
-                      <div>
-                        <h5 className="text-sm font-medium mb-2">General Project Files</h5>
-                        <FileList 
-                          entityType="projects" 
-                          entityId={project.id}
-                          title=""
-                        />
-                      </div>
-                      {projectEpisodes.map((episode) => (
-                        <div key={episode.id}>
-                          <h5 className="text-sm font-medium mb-2">
-                            Episode {episode.episodeNumber}: {episode.title}
-                          </h5>
-                          <FileList 
-                            entityType="episodes" 
-                            entityId={episode.id}
-                            title=""
-                          />
-                        </div>
-                      ))}
+              {projects.map((project) => (
+                <div key={project.id} className="border rounded-lg p-4">
+                  <h4 className="font-medium mb-4">{project.name}</h4>
+                  <div className="space-y-4">
+                    <div>
+                      <h5 className="text-sm font-medium mb-2">Project Files</h5>
+                      <FileList 
+                        entityType="projects" 
+                        entityId={project.id}
+                        title=""
+                      />
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -280,18 +257,7 @@ export default function Scripts() {
                       </div>
                     )}
                     
-                    {script.audioLink && (
-                      <div className="mb-3">
-                        <a 
-                          href={script.audioLink} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-sm text-blue-600 hover:text-blue-800"
-                        >
-                          🎵 Audio Link
-                        </a>
-                      </div>
-                    )}
+
                     
                     <div className="flex items-center space-x-4 text-xs text-gray-500">
                       <span>Created: {new Date(script.createdAt!).toLocaleDateString()}</span>
