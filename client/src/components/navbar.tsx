@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Bell, ChevronDown, Radio, Menu, X } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useState } from "react";
 
 const navItems = [
@@ -25,7 +26,7 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <header className="bg-gradient-to-r from-blue-700 to-blue-800 text-white shadow-lg sticky top-0 z-50">
+    <header className="bg-gradient-to-r from-blue-700 to-blue-800 dark:from-slate-800 dark:to-slate-900 text-white shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-4">
@@ -59,6 +60,8 @@ export function Navbar() {
           </div>
           
           <div className="flex items-center space-x-4">
+            <ThemeToggle />
+            
             <Button
               variant="ghost"
               size="sm"
