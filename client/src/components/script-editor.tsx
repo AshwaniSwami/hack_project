@@ -3,6 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import {
   Dialog,
   DialogContent,
@@ -63,6 +65,7 @@ const statusOptions = [
 export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [content, setContent] = useState("");
 
   const { data: episodes = [] } = useQuery<Episode[]>({
     queryKey: ["/api/episodes"],
@@ -70,6 +73,10 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
 
   const { data: users = [] } = useQuery<User[]>({
     queryKey: ["/api/users"],
+  });
+
+  const { data: projects = [] } = useQuery<any[]>({
+    queryKey: ["/api/projects"],
   });
 
   const form = useForm<ScriptFormData>({
@@ -86,6 +93,21 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
     },
   });
 
+  const quillModules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'script': 'sub'}, { 'script': 'super' }],
+      [{ 'indent': '-1'}, { 'indent': '+1' }],
+      [{ 'direction': 'rtl' }],
+      [{ 'color': [] }, { 'background': [] }],
+      [{ 'align': [] }],
+      ['link', 'blockquote', 'code-block'],
+      ['clean']
+    ],
+  };
+
   useEffect(() => {
     if (script) {
       form.reset({
@@ -98,6 +120,7 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
         audioLink: script.audioLink || "",
         audioFilePath: script.audioFilePath || "",
       });
+      setContent(script.content);
     } else {
       form.reset({
         title: "",
@@ -109,15 +132,17 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
         audioLink: "",
         audioFilePath: "",
       });
+      setContent("");
     }
   }, [script, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: ScriptFormData) => {
+      const submitData = { ...data, content };
       if (script) {
-        return apiRequest("PUT", `/api/scripts/${script.id}`, data);
+        return apiRequest("PUT", `/api/scripts/${script.id}`, submitData);
       } else {
-        return apiRequest("POST", "/api/scripts", data);
+        return apiRequest("POST", "/api/scripts", submitData);
       }
     },
     onSuccess: () => {
@@ -127,6 +152,7 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
         description: `Script ${script ? "updated" : "created"} successfully`,
       });
       onClose();
+      setContent("");
     },
     onError: (error) => {
       toast({
@@ -138,7 +164,20 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
   });
 
   const onSubmit = (data: ScriptFormData) => {
+    if (!content.trim()) {
+      toast({
+        title: "Error",
+        description: "Script content is required",
+        variant: "destructive",
+      });
+      return;
+    }
     mutation.mutate(data);
+  };
+
+  const getProjectName = (projectId: string) => {
+    const project = projects.find((p: any) => p.id === projectId);
+    return project?.name || "";
   };
 
   return (
@@ -206,7 +245,10 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
                         <SelectContent>
                           {episodes.map((episode) => (
                             <SelectItem key={episode.id} value={episode.id}>
-                              {episode.title} (#{episode.episodeNumber})
+                              <div className="flex flex-col">
+                                <span className="font-medium">{episode.title} (#{episode.episodeNumber})</span>
+                                <span className="text-xs text-gray-500">Project: {getProjectName(episode.projectId)}</span>
+                              </div>
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -256,23 +298,24 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="content"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Script Content</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Enter script content..."
-                        className="min-h-[300px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Script Content *
+                </label>
+                <div className="rounded-md overflow-hidden">
+                  <ReactQuill
+                    theme="snow"
+                    value={content}
+                    onChange={setContent}
+                    modules={quillModules}
+                    placeholder="Write your script content here..."
+                    className="bg-white dark:bg-gray-800"
+                  />
+                </div>
+                {!content.trim() && (
+                  <p className="text-sm text-red-500">Script content is required</p>
                 )}
-              />
+              </div>
 
               <FormField
                 control={form.control}

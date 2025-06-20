@@ -2,6 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ReactQuill Editor Styling */
+.ql-editor {
+  min-height: 250px;
+  font-family: inherit;
+}
+
+.ql-toolbar {
+  border-top: 1px solid #e5e7eb;
+  border-left: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+}
+
+.ql-container {
+  border-bottom: 1px solid #e5e7eb;
+  border-left: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+}
+
+.ql-editor.ql-blank::before {
+  color: #9ca3af;
+  font-style: normal;
+}
+
+/* Dark mode support for ReactQuill */
+.dark .ql-toolbar {
+  border-color: #374151;
+  background-color: #1f2937;
+}
+
+.dark .ql-container {
+  border-color: #374151;
+  background-color: #1f2937;
+}
+
+.dark .ql-editor {
+  color: #f9fafb;
+}
+
+.dark .ql-editor.ql-blank::before {
+  color: #6b7280;
+}
+
 :root {
   --background: hsl(0, 0%, 100%);
   --foreground: hsl(20, 14.3%, 4.1%);

@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { FolderOpen, Mic, FileText, Radio } from "lucide-react";
+import { FolderOpen, Mic, FileText, Radio, TrendingUp, Clock } from "lucide-react";
 
 interface StatsCardsProps {
   stats: {
@@ -16,45 +16,68 @@ export function StatsCards({ stats }: StatsCardsProps) {
       title: "Active Projects",
       value: stats.activeProjects,
       icon: FolderOpen,
-      bgColor: "bg-blue-50",
+      bgColor: "bg-gradient-to-br from-blue-50 to-blue-100",
       iconColor: "text-blue-600",
+      borderColor: "border-l-blue-500",
+      change: "+12%",
+      trend: "up"
     },
     {
       title: "Episodes This Month",
       value: stats.episodesThisMonth,
       icon: Mic,
-      bgColor: "bg-green-50",
+      bgColor: "bg-gradient-to-br from-green-50 to-green-100",
       iconColor: "text-green-600",
+      borderColor: "border-l-green-500",
+      change: "+8%",
+      trend: "up"
     },
     {
       title: "Scripts Pending",
       value: stats.scriptsPending,
       icon: FileText,
-      bgColor: "bg-orange-50",
+      bgColor: "bg-gradient-to-br from-orange-50 to-orange-100",
       iconColor: "text-orange-600",
+      borderColor: "border-l-orange-500",
+      change: "-5%",
+      trend: "down"
     },
     {
       title: "Radio Stations",
       value: stats.radioStations,
       icon: Radio,
-      bgColor: "bg-purple-50",
+      bgColor: "bg-gradient-to-br from-purple-50 to-purple-100",
       iconColor: "text-purple-600",
+      borderColor: "border-l-purple-500",
+      change: "+3%",
+      trend: "up"
     },
   ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       {cards.map((card, index) => (
-        <Card key={index} className="shadow-sm">
+        <Card key={index} className={`shadow-lg border-l-4 ${card.borderColor} hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-white/80 backdrop-blur-sm`}>
           <CardContent className="p-6">
-            <div className="flex items-center">
-              <div className={`p-3 rounded-lg ${card.bgColor}`}>
-                <card.icon className={`${card.iconColor} h-6 w-6`} />
+            <div className="flex items-center justify-between mb-4">
+              <div className={`p-3 rounded-xl ${card.bgColor} shadow-lg`}>
+                <card.icon className={`${card.iconColor} h-7 w-7`} />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">{card.title}</p>
-                <p className="text-2xl font-semibold text-gray-900">{card.value}</p>
+              <div className="flex items-center space-x-1">
+                {card.trend === "up" ? (
+                  <TrendingUp className="h-4 w-4 text-green-500" />
+                ) : (
+                  <Clock className="h-4 w-4 text-orange-500" />
+                )}
+                <span className={`text-xs font-medium ${card.trend === "up" ? "text-green-600" : "text-orange-600"}`}>
+                  {card.change}
+                </span>
               </div>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600 mb-1">{card.title}</p>
+              <p className="text-3xl font-bold text-gray-900">{card.value}</p>
+              <p className="text-xs text-gray-500 mt-1">vs last month</p>
             </div>
           </CardContent>
         </Card>
