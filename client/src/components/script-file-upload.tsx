@@ -68,10 +68,8 @@ export function ScriptFileUpload() {
     }
 
     try {
-      let endpoint = `/api/projects/${selectedProject}/upload`;
-      if (selectedEpisode && selectedEpisode !== "none") {
-        endpoint = `/api/scripts/${selectedEpisode}/upload`;
-      }
+      // Always upload to the project endpoint for script files
+      const endpoint = `/api/projects/${selectedProject}/upload`;
 
       const response = await fetch(endpoint, {
         method: "POST",

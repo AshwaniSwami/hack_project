@@ -71,7 +71,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
               {project.name}
             </div>
             <Badge variant="secondary">
-              {episodes.length} episodes • {scripts.length + projectScriptFiles.length} scripts
+              {episodes.length + projectEpisodeFiles.length} episodes • {scripts.length + projectScriptFiles.length} scripts
             </Badge>
           </CardTitle>
           {project.description && (

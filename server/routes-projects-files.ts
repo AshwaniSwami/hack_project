@@ -50,7 +50,7 @@ export function registerProjectFileRoutes(app: Express) {
         fileSize: req.file.size,
         fileData: req.file.buffer.toString('base64'),
         entityType: entityType,
-        entityId: projectId, // Use projectId as entityId for project-level organization
+        entityId: projectId,
         uploadedBy: null,
       };
 
