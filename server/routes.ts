@@ -186,15 +186,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
+      const { projectId } = req.body; // Get projectId from form data
+      console.log("Upload request - projectId:", projectId, "file:", req.file.originalname);
+
       // Store the file in the database
       const fileData = {
-        filename: `projects_${Date.now()}_${req.file.originalname}`,
+        filename: `project_${projectId || 'general'}_${Date.now()}_${req.file.originalname}`,
         originalName: req.file.originalname,
         mimeType: req.file.mimetype,
         fileSize: req.file.size,
         fileData: req.file.buffer.toString('base64'),
         entityType: 'projects',
-        entityId: null,
+        entityId: projectId || null,
         uploadedBy: null,
       };
 

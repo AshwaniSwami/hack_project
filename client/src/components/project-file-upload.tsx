@@ -67,6 +67,11 @@ export function ProjectFileUpload({
     setIsUploading(true);
     const formData = new FormData();
     formData.append("file", file);
+    
+    // Add entity IDs to form data for proper organization
+    if (projectId) formData.append("projectId", projectId);
+    if (episodeId) formData.append("episodeId", episodeId);
+    if (scriptId) formData.append("scriptId", scriptId);
 
     try {
       const response = await fetch(getUploadEndpoint(), {
