@@ -25,7 +25,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/api";
-import { Plus, Edit, Trash2, Search, FolderOpen, Eye } from "lucide-react";
+import { Plus, Edit, Trash2, Search, FolderOpen, Eye, Calendar, Users, FileText, Zap, Star, TrendingUp, Rocket, Sparkles } from "lucide-react";
 import { ProjectDetailView } from "@/components/project-detail-view";
 import type { Project, Episode, Script } from "@shared/schema";
 
@@ -169,28 +169,54 @@ export default function Projects() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-6">Projects Management</h2>
-        
-        <div className="flex justify-between items-center mb-6">
-          <div className="relative max-w-md w-full">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search projects..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Hero Section */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 p-8 mb-8 shadow-2xl">
+          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
+          <div className="absolute bottom-0 left-0 w-72 h-72 bg-white/10 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
           
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                New Project
-              </Button>
-            </DialogTrigger>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+                    <Rocket className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-4xl font-bold text-white mb-2">Project Hub</h1>
+                    <p className="text-blue-100 text-lg">Manage your creative radio content projects</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-6 text-white/90">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="text-sm font-medium">{projects.length} Active Projects</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <TrendingUp className="h-4 w-4" />
+                    <span className="text-sm font-medium">{episodes.length} Episodes Created</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <FileText className="h-4 w-4" />
+                    <span className="text-sm font-medium">{scripts.length} Scripts Written</span>
+                  </div>
+                </div>
+              </div>
+              
+              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button 
+                    size="lg" 
+                    className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm transition-all duration-300 hover:scale-105 shadow-lg"
+                  >
+                    <Plus className="h-5 w-5 mr-2" />
+                    Create New Project
+                    <Sparkles className="h-4 w-4 ml-2" />
+                  </Button>
+                </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Create New Project</DialogTitle>
@@ -245,116 +271,209 @@ export default function Projects() {
             </DialogContent>
           </Dialog>
         </div>
+      </div>
 
-
+      {/* Search and Filter Section */}
+      <div className="mb-8">
+        <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/20">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Input
+                placeholder="Search your amazing projects..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-12 h-12 border-0 bg-white/80 dark:bg-slate-700/80 backdrop-blur-sm rounded-xl text-base shadow-lg focus:shadow-xl transition-all duration-300"
+              />
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <div className="text-sm text-gray-600 dark:text-gray-300 bg-white/60 dark:bg-slate-700/60 px-4 py-2 rounded-xl backdrop-blur-sm">
+                {filteredProjects.length} {filteredProjects.length === 1 ? 'project' : 'projects'} found
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Projects Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {[...Array(6)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardContent className="p-6">
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2 mb-4"></div>
-                <div className="h-8 bg-gray-200 rounded w-full"></div>
+            <Card key={i} className="animate-pulse bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border-0 shadow-xl">
+              <CardContent className="p-8">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="h-12 w-12 bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl"></div>
+                  <div className="flex-1">
+                    <div className="h-5 bg-gray-200 rounded-lg w-3/4 mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="h-4 bg-gray-200 rounded w-full"></div>
+                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                </div>
+                <div className="mt-6 h-10 bg-gray-200 rounded-xl"></div>
               </CardContent>
             </Card>
           ))}
         </div>
       ) : filteredProjects.length === 0 ? (
-        <div className="text-center py-12">
-          <FolderOpen className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            {searchTerm ? "No projects found" : "No projects yet"}
-          </h3>
-          <p className="text-gray-500 mb-4">
-            {searchTerm ? "Try adjusting your search terms" : "Get started by creating your first project"}
-          </p>
-          {!searchTerm && (
-            <Button onClick={() => setIsCreateDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Project
-            </Button>
-          )}
+        <div className="text-center py-20">
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full blur-3xl"></div>
+            <div className="relative bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-3xl p-12 shadow-2xl border border-white/20 max-w-md mx-auto">
+              <div className="mb-6">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur-xl opacity-20"></div>
+                  <div className="relative bg-gradient-to-r from-purple-500 to-pink-500 p-4 rounded-2xl w-fit mx-auto">
+                    <FolderOpen className="h-12 w-12 text-white" />
+                  </div>
+                </div>
+              </div>
+              
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                {searchTerm ? "No projects found" : "Your creative journey starts here"}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-6 text-lg">
+                {searchTerm ? "Try adjusting your search terms" : "Create your first project and bring your radio content ideas to life"}
+              </p>
+              
+              {!searchTerm && (
+                <Button 
+                  onClick={() => setIsCreateDialogOpen(true)}
+                  size="lg"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  Create Your First Project
+                  <Rocket className="h-5 w-5 ml-2" />
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProjects.map((project) => (
-            <Card key={project.id} className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">{project.name}</CardTitle>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {project.description || "No description"}
-                    </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+          {filteredProjects.map((project, index) => {
+            const projectEpisodes = episodes.filter(ep => ep.projectId === project.id).length;
+            const projectScripts = scripts.filter(script => script.projectId === project.id).length + 
+                                   allFiles.filter(file => file.entityType === 'scripts' && file.entityId === project.id).length;
+            
+            return (
+              <Card 
+                key={project.id} 
+                className="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border-0 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2 overflow-hidden"
+                style={{
+                  animationDelay: `${index * 100}ms`
+                }}
+              >
+                {/* Gradient Header */}
+                <div className="h-2 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500"></div>
+                
+                <CardHeader className="pb-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center space-x-4 flex-1">
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl blur-lg opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
+                        <div className="relative bg-gradient-to-br from-purple-500 to-pink-500 p-3 rounded-2xl">
+                          <Zap className="h-6 w-6 text-white" />
+                        </div>
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300 truncate">
+                          {project.name}
+                        </CardTitle>
+                        <p className="text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">
+                          {project.description || "No description provided"}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleEdit(project)}
+                        className="h-8 w-8 p-0 hover:bg-purple-100 dark:hover:bg-purple-900/20"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleDelete(project.id)}
+                        className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex space-x-1">
+                </CardHeader>
+                
+                <CardContent className="pt-0">
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-3 gap-4 mb-6">
+                    <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                      <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{projectEpisodes}</div>
+                      <div className="text-xs text-blue-700 dark:text-blue-300 font-medium">Episodes</div>
+                    </div>
+                    <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
+                      <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{projectScripts}</div>
+                      <div className="text-xs text-purple-700 dark:text-purple-300 font-medium">Scripts</div>
+                    </div>
+                    <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-xl">
+                      <div className="flex items-center justify-center">
+                        <Star className="h-4 w-4 text-green-600 dark:text-green-400 mr-1" />
+                        <span className="text-sm font-bold text-green-600 dark:text-green-400">Active</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Created Date */}
+                  <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-6">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Created {new Date(project.createdAt!).toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric', 
+                      year: 'numeric' 
+                    })}
+                  </div>
+                  
+                  {/* Action Buttons */}
+                  <div className="space-y-3">
                     <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => handleEdit(project)}
+                      onClick={() => setViewingProject(project)}
+                      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-105"
                     >
-                      <Edit className="h-4 w-4" />
+                      <Eye className="h-4 w-4 mr-2" />
+                      View Project Details
+                      <Sparkles className="h-4 w-4 ml-2" />
                     </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => handleDelete(project.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => handleEdit(project)}
+                        className="flex-1 border-purple-200 hover:bg-purple-50 dark:border-purple-800 dark:hover:bg-purple-900/20 transition-all duration-300"
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => handleDelete(project.id)}
+                        className="border-red-200 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-900/20 text-red-600 transition-all duration-300"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-600">Episodes:</span>
-                    <Badge className="bg-blue-100 text-blue-800">
-                      {episodes.filter(ep => ep.projectId === project.id).length}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-600">Scripts:</span>
-                    <Badge className="bg-purple-100 text-purple-800">
-                      {scripts.filter(script => script.projectId === project.id).length + 
-                       allFiles.filter(file => file.entityType === 'scripts' && file.entityId === project.id).length}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Status:</span>
-                    <Badge className="bg-green-100 text-green-800">Active</Badge>
-                  </div>
-                </div>
-                <div className="mt-4 pt-3 border-t border-gray-200 flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    className="flex-1"
-                    onClick={() => setViewingProject(project)}
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    View Details
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(project)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDelete(project.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
 
