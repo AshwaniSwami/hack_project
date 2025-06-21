@@ -777,12 +777,14 @@ export default function Scripts() {
               {viewingScript?.title}
             </DialogTitle>
           </DialogHeader>
-          <div className="overflow-y-auto max-h-[80vh]">
+          <div className="overflow-y-auto max-h-[80vh] p-6">
             {viewingScript && (
               <ScriptEditor 
+                isOpen={false}
+                onClose={() => {}}
                 script={viewingScript} 
-                onSave={() => setViewingScript(null)}
                 readOnly={true}
+                onSave={() => setViewingScript(null)}
               />
             )}
           </div>

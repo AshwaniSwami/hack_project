@@ -29,16 +29,19 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/api";
-import type { Script, Episode, User, Project } from "@shared/schema";
+import { FileText, Sparkles, CheckCircle, AlertCircle, PlayCircle, Edit as EditIcon } from "lucide-react";
+import type { Script, Episode, Project } from "@shared/schema";
 
 const scriptFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
   projectId: z.string().min(1, "Project is required"),
+  episodeId: z.string().optional(),
   content: z.string().min(1, "Content is required"),
-  status: z.string().default("Draft"),
-  reviewComments: z.string().optional(),
+  status: z.enum(["draft", "review", "approved", "published"]).default("draft"),
 });
 
 type ScriptFormData = z.infer<typeof scriptFormSchema>;
@@ -47,23 +50,28 @@ interface ScriptEditorProps {
   isOpen: boolean;
   onClose: () => void;
   script?: Script;
+  readOnly?: boolean;
+  onSave?: () => void;
 }
 
-const statusOptions = [
-  "Draft",
-  "Submitted",
-  "Under Review",
-  "Approved",
-  "Needs Revision",
-  "Recorded",
-  "Archived",
-];
+const statusColors = {
+  draft: "bg-gray-100 text-gray-700 border-gray-200",
+  review: "bg-yellow-100 text-yellow-700 border-yellow-200",
+  approved: "bg-green-100 text-green-700 border-green-200", 
+  published: "bg-blue-100 text-blue-700 border-blue-200"
+};
 
-export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
+const statusIcons = {
+  draft: EditIcon,
+  review: AlertCircle,
+  approved: CheckCircle,
+  published: PlayCircle
+};
+
+export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave }: ScriptEditorProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [content, setContent] = useState("");
-
   const [selectedProject, setSelectedProject] = useState<string>("");
 
   const { data: projects = [] } = useQuery<Project[]>({
@@ -74,56 +82,54 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
     queryKey: ["/api/episodes"],
   });
 
-  const { data: users = [] } = useQuery<User[]>({
-    queryKey: ["/api/users"],
-  });
-
-  const { data: projectsData = [] } = useQuery<Project[]>({
-    queryKey: ["/api/projects"],
-  });
-
   const form = useForm<ScriptFormData>({
     resolver: zodResolver(scriptFormSchema),
     defaultValues: {
       title: "",
+      description: "",
       projectId: "",
+      episodeId: "",
       content: "",
-      status: "Draft",
-      reviewComments: "",
+      status: "draft",
     },
   });
 
   const quillModules = {
-    toolbar: [
+    toolbar: readOnly ? false : [
       [{ 'header': [1, 2, 3, false] }],
       ['bold', 'italic', 'underline'],
       [{ 'list': 'ordered'}, { 'list': 'bullet' }],
       [{ 'indent': '-1'}, { 'indent': '+1' }],
       [{ 'align': [] }],
-      ['blockquote'],
+      ['blockquote', 'code-block'],
+      ['link'],
       ['clean']
     ],
   };
 
   useEffect(() => {
     if (script) {
-      form.reset({
+      const scriptData = {
         title: script.title,
+        description: script.description || "",
         projectId: script.projectId || "",
-        content: script.content,
-        status: script.status,
-        reviewComments: script.reviewComments || "",
-      });
-      setContent(script.content);
+        episodeId: script.episodeId || "",
+        content: script.content || "",
+        status: script.status as "draft" | "review" | "approved" | "published",
+      };
+      form.reset(scriptData);
+      setContent(script.content || "");
       setSelectedProject(script.projectId || "");
     } else {
-      form.reset({
+      const defaultData = {
         title: "",
+        description: "",
         projectId: "",
+        episodeId: "",
         content: "",
-        status: "Draft",
-        reviewComments: "",
-      });
+        status: "draft" as const,
+      };
+      form.reset(defaultData);
       setContent("");
       setSelectedProject("");
     }
@@ -131,29 +137,37 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
 
   const mutation = useMutation({
     mutationFn: async (data: ScriptFormData) => {
-      // Combine form data with content from ReactQuill
-      const submitData = { ...data, content: content.trim() };
+      const submitData = { 
+        ...data, 
+        content: content.trim(),
+        episodeId: data.episodeId || undefined,
+        description: data.description || undefined
+      };
       
       if (script) {
-        const response = await apiRequest("PUT", `/api/scripts/${script.id}`, submitData);
-        return response.json();
+        return apiRequest("PUT", `/api/scripts/${script.id}`, submitData);
       } else {
-        const response = await apiRequest("POST", "/api/scripts", submitData);
-        return response.json();
+        return apiRequest("POST", "/api/scripts", submitData);
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/scripts"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/files"] });
       toast({
         title: "Success", 
         description: `Script ${script ? "updated" : "created"} successfully`,
       });
-      onClose();
-      setContent("");
-      form.reset();
+      if (onSave) {
+        onSave();
+      } else {
+        onClose();
+      }
+      if (!script) {
+        setContent("");
+        form.reset();
+      }
     },
     onError: (error) => {
+      console.error("Script save error:", error);
       toast({
         title: "Error",
         description: `Failed to ${script ? "update" : "create"} script`,
@@ -163,14 +177,9 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
   });
 
   const onSubmit = (data: ScriptFormData) => {
-    console.log("✅ onSubmit called with data:", data);
-    console.log("✅ ReactQuill content:", content);
-    
-    // Clean up ReactQuill content - remove empty tags
     const cleanContent = content.replace(/<p><br><\/p>/g, '').trim();
     
     if (!cleanContent || cleanContent === '<p></p>') {
-      console.log("❌ Content validation failed");
       toast({
         title: "Error",
         description: "Script content is required",
@@ -179,15 +188,8 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
       return;
     }
     
-    // Ensure content is included in the submitted data
     const submitData = { ...data, content: cleanContent };
-    console.log("✅ Final submit data:", submitData);
     mutation.mutate(submitData);
-  };
-
-  const getProjectName = (projectId: string) => {
-    const project = projectsData.find((p: Project) => p.id === projectId);
-    return project?.name || "";
   };
 
   // Filter episodes based on selected project
@@ -195,16 +197,79 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
     ? episodes.filter(episode => episode.projectId === selectedProject)
     : episodes;
 
+  const selectedProjectData = projects.find(p => p.id === selectedProject);
+  const selectedEpisodeData = episodes.find(e => e.id === form.watch("episodeId"));
+  const StatusIcon = script ? statusIcons[script.status as keyof typeof statusIcons] : EditIcon;
+
+  if (readOnly && script) {
+    return (
+      <div className="space-y-6">
+        {/* Script Info Header */}
+        <div className="bg-gradient-to-r from-blue-50 to-emerald-50 rounded-lg p-6 border border-blue-100">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
+                <FileText className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold text-gray-800">{script.title}</h3>
+                {script.description && (
+                  <p className="text-gray-600 mt-1">{script.description}</p>
+                )}
+              </div>
+            </div>
+            <Badge className={`text-sm px-3 py-1 ${statusColors[script.status as keyof typeof statusColors]}`}>
+              <StatusIcon className="h-3 w-3 mr-1" />
+              {script.status.charAt(0).toUpperCase() + script.status.slice(1)}
+            </Badge>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {selectedProjectData && (
+              <div className="flex items-center space-x-3 p-3 bg-white/60 rounded-lg">
+                <div className="font-semibold text-gray-700">Project:</div>
+                <div className="text-gray-600">{selectedProjectData.name}</div>
+              </div>
+            )}
+            {selectedEpisodeData && (
+              <div className="flex items-center space-x-3 p-3 bg-white/60 rounded-lg">
+                <div className="font-semibold text-gray-700">Episode:</div>
+                <div className="text-gray-600">{selectedEpisodeData.title}</div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Script Content */}
+        <div className="space-y-3">
+          <h4 className="text-lg font-semibold text-gray-800">Script Content</h4>
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div 
+              className="prose prose-sm max-w-none text-gray-700 leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: script.content || "" }}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
-          <DialogTitle>{script ? "Edit Script" : "Create New Script"}</DialogTitle>
+          <DialogTitle className="flex items-center gap-3 text-xl">
+            <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
+              <Sparkles className="h-5 w-5 text-white" />
+            </div>
+            {script ? "Edit Script" : "Create New Script"}
+          </DialogTitle>
         </DialogHeader>
         
         <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
           <Form {...form}>
-            <div className="space-y-6 p-1">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-1">
+              {/* Title and Status */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
@@ -233,18 +298,20 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {statusOptions.map((status) => (
-                            <SelectItem key={status} value={status}>
-                              {status}
-                            </SelectItem>
-                          ))}
+                          <SelectItem value="draft">Draft</SelectItem>
+                          <SelectItem value="review">Review</SelectItem>
+                          <SelectItem value="approved">Approved</SelectItem>
+                          <SelectItem value="published">Published</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+              </div>
 
+              {/* Project and Episode */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
                   name="projectId"
@@ -254,6 +321,8 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
                       <Select onValueChange={(value) => {
                         field.onChange(value);
                         setSelectedProject(value);
+                        // Clear episode selection when project changes
+                        form.setValue("episodeId", "");
                       }} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -261,7 +330,7 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {projectsData.map((project) => (
+                          {projects.map((project) => (
                             <SelectItem key={project.id} value={project.id}>
                               {project.name}
                             </SelectItem>
@@ -273,40 +342,44 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
                   )}
                 />
 
+                <FormField
+                  control={form.control}
+                  name="episodeId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Episode (Optional)</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select episode (optional)" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="">No episode</SelectItem>
+                          {filteredEpisodes.map((episode) => (
+                            <SelectItem key={episode.id} value={episode.id}>
+                              {episode.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
-
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Script Content *
-                </label>
-                <div className="rounded-md overflow-hidden">
-                  <ReactQuill
-                    theme="snow"
-                    value={content}
-                    onChange={setContent}
-                    modules={quillModules}
-                    placeholder="Write your script content here..."
-                    className="bg-white dark:bg-gray-800"
-                    style={{ minHeight: "200px" }}
-                  />
-                </div>
-                {(!content.trim() || content === '<p></p>' || content === '<p><br></p>') && (
-                  <p className="text-sm text-red-500">Script content is required</p>
-                )}
-              </div>
-
+              {/* Description */}
               <FormField
                 control={form.control}
-                name="reviewComments"
+                name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Review Comments</FormLabel>
+                    <FormLabel>Description (Optional)</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Add review comments or notes..."
-                        rows={3}
+                        placeholder="Brief description of the script..."
+                        rows={2}
                         {...field}
                       />
                     </FormControl>
@@ -315,22 +388,41 @@ export function ScriptEditor({ isOpen, onClose, script }: ScriptEditorProps) {
                 )}
               />
 
+              {/* Script Content */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none">
+                  Script Content *
+                </label>
+                <div className="rounded-md overflow-hidden border border-gray-200">
+                  <ReactQuill
+                    theme="snow"
+                    value={content}
+                    onChange={setContent}
+                    modules={quillModules}
+                    placeholder="Write your script content here... Use formatting tools to structure your script with headers, lists, and emphasis."
+                    className="bg-white"
+                    style={{ minHeight: "300px" }}
+                  />
+                </div>
+                {(!content.trim() || content === '<p></p>' || content === '<p><br></p>') && (
+                  <p className="text-sm text-red-500">Script content is required</p>
+                )}
+              </div>
+
+              {/* Action Buttons */}
               <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancel
                 </Button>
                 <Button 
-                  type="button"
+                  type="submit"
                   disabled={mutation.isPending || !content.trim() || content === '<p></p>' || content === '<p><br></p>'}
-                  onClick={() => {
-                    const formData = form.getValues();
-                    onSubmit(formData);
-                  }}
+                  className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-lg"
                 >
-                  {mutation.isPending ? "Saving..." : "Save Script"}
+                  {mutation.isPending ? "Saving..." : (script ? "Update Script" : "Create Script")}
                 </Button>
               </div>
-            </div>
+            </form>
           </Form>
         </div>
       </DialogContent>

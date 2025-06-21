@@ -118,6 +118,9 @@ The application uses a relational database with the following core entities:
 ## Recent Changes
 
 - January 21, 2025: Redesigned all main pages (Episodes, Projects, Scripts, Users, Radio Stations) with consistent blue-emerald color scheme and compact headers
+- January 21, 2025: Fixed script editor functionality with consistent ReactQuill implementation across dashboard and scripts page
+- January 21, 2025: Added episode selection support to scripts (optional relationship)
+- January 21, 2025: Enhanced script viewer with proper read-only mode and improved formatting
 - January 21, 2025: Reduced header heights across all pages for better space utilization and enhanced visual consistency
 - January 21, 2025: Transformed Users and Radio Stations pages with modern card layouts, enhanced search, and professional styling
 - January 21, 2025: Transformed Scripts page with status filtering, enhanced search, and modern workflow management
