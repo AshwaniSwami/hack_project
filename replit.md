@@ -117,7 +117,9 @@ The application uses a relational database with the following core entities:
 
 ## Recent Changes
 
-- January 21, 2025: Redesigned Episodes, Projects, and Scripts pages with consistent blue-emerald color scheme and enhanced visual hierarchy
+- January 21, 2025: Redesigned all main pages (Episodes, Projects, Scripts, Users, Radio Stations) with consistent blue-emerald color scheme and compact headers
+- January 21, 2025: Reduced header heights across all pages for better space utilization and enhanced visual consistency
+- January 21, 2025: Transformed Users and Radio Stations pages with modern card layouts, enhanced search, and professional styling
 - January 21, 2025: Transformed Scripts page with status filtering, enhanced search, and modern workflow management
 - January 21, 2025: Transformed Projects page with modern card design, statistical indicators, and enhanced search functionality
 - January 21, 2025: Optimized both episode and project cards with improved spacing, better contrast, and refined interactions
