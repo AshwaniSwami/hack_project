@@ -43,7 +43,15 @@ import {
   Podcast,
   Megaphone,
   Volume2,
-  Rss
+  Rss,
+  Star,
+  Award,
+  TrendingDown,
+  CheckCircle,
+  AlertCircle,
+  Timer,
+  Globe,
+  Bookmark
 } from "lucide-react";
 import type { Script, Project, Episode, RadioStation } from "@shared/schema";
 
@@ -66,7 +74,7 @@ export default function Dashboard() {
       if (!response.ok) {
         throw new Error("Failed to delete script");
       }
-      return response.json();
+      return response.status === 204 ? {} : response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/scripts"] });
@@ -141,11 +149,29 @@ export default function Dashboard() {
     setSelectedScript(undefined);
   };
 
-  const handleDeleteScript = (scriptId: string) => {
-    deleteScriptMutation.mutate(scriptId);
+  const handleDeleteScript = (scriptId: string, scriptTitle: string) => {
+    if (window.confirm(`Are you sure you want to delete "${scriptTitle}"? This action cannot be undone.`)) {
+      deleteScriptMutation.mutate(scriptId);
+    }
   };
 
   const recentScripts = scripts.slice(0, 5);
+  
+  // Enhanced statistics with more detailed metrics
+  const enhancedStats = {
+    ...stats,
+    completedScripts: scripts.filter(script => script.status === "Approved").length,
+    draftScripts: scripts.filter(script => script.status === "Draft").length,
+    reviewScripts: scripts.filter(script => script.status === "Under Review").length,
+    totalWords: scripts.reduce((total, script) => total + (script.content?.length || 0), 0),
+    averageWordsPerScript: scripts.length > 0 ? Math.round(scripts.reduce((total, script) => total + (script.content?.length || 0), 0) / scripts.length) : 0,
+    productivity: scripts.filter(script => {
+      const createdDate = new Date(script.createdAt || '');
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      return createdDate >= weekAgo;
+    }).length
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-stone-50 to-gray-100">
@@ -381,11 +407,15 @@ export default function Dashboard() {
                               <Button 
                                 variant="ghost" 
                                 size="sm" 
-                                className="h-9 w-9 p-0 hover:bg-red-100 dark:hover:bg-red-900/50 hover:scale-110 transition-all duration-200"
-                                onClick={() => handleDeleteScript(script.id)}
+                                className="h-9 w-9 p-0 hover:bg-red-100 hover:scale-110 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                onClick={() => handleDeleteScript(script.id, script.title)}
                                 disabled={deleteScriptMutation.isPending}
                               >
-                                <Trash2 className="h-4 w-4 text-red-600" />
+                                {deleteScriptMutation.isPending ? (
+                                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
+                                ) : (
+                                  <Trash2 className="h-4 w-4 text-red-600 hover:text-red-700" />
+                                )}
                               </Button>
                             </div>
                           </div>
