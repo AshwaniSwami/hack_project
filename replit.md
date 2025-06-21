@@ -117,7 +117,11 @@ The application uses a relational database with the following core entities:
 
 ## Recent Changes
 
-- June 21, 2025: Successfully completed migration from Replit Agent to Replit environment
+- January 21, 2025: Completely redesigned Episodes page with modern gradient design, tabbed interface, and enhanced user experience
+- January 21, 2025: Added glassmorphism effects, backdrop blur, and hover animations to episode cards
+- January 21, 2025: Implemented comprehensive episode management with create, edit, delete functionality
+- January 21, 2025: Enhanced episode file upload and organization system with project-based structure
+- December 19, 2024: Successfully completed migration from Replit Agent to Replit environment
 - June 21, 2025: Enhanced navbar with modern gradient design, improved icons, and smooth animations
 - June 21, 2025: Completely redesigned dashboard with fresh modern look featuring hero section, enhanced stats cards with progress indicators, and improved visual hierarchy
 - June 21, 2025: Added glassmorphism effects, backdrop blur, and hover animations throughout dashboard interface
