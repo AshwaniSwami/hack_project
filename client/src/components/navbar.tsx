@@ -43,7 +43,7 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <header className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 text-white shadow-2xl sticky top-0 z-50 backdrop-blur-md border-b border-white/10">
+    <header className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 text-white shadow-2xl sticky top-0 z-50 backdrop-blur-md border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <div className="flex items-center space-x-6">
@@ -54,10 +54,10 @@ export function Navbar() {
                   <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
                 <div className="group-hover:scale-105 transition-transform duration-200">
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+                  <h1 className="text-xl font-bold bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
                     SMART Radio
                   </h1>
-                  <p className="text-sm text-white/80 font-medium tracking-wide">Content Hub</p>
+                  <p className="text-xs text-white/80 font-medium tracking-wide">Content Hub</p>
                 </div>
               </div>
             </Link>

@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ScriptEditor } from "@/components/script-editor";
 import { cn } from "@/lib/utils";
 import { 
@@ -37,6 +44,7 @@ import type { Script, Project, Episode, RadioStation } from "@shared/schema";
 export default function Dashboard() {
   const [isScriptEditorOpen, setIsScriptEditorOpen] = useState(false);
   const [selectedScript, setSelectedScript] = useState<Script | undefined>(undefined);
+  const [showGoals, setShowGoals] = useState(false);
   
   const { data: scripts = [], isLoading: scriptsLoading } = useQuery<Script[]>({
     queryKey: ["/api/scripts"],
@@ -54,20 +62,25 @@ export default function Dashboard() {
     queryKey: ["/api/radio-stations"],
   });
 
-  // Calculate stats
+  // Calculate stats with proper filtering
   const stats = {
     activeProjects: projects.length,
     episodesThisMonth: episodes.filter(episode => {
-      const episodeDate = new Date(episode.createdAt!);
+      if (!episode.createdAt) return false;
+      const episodeDate = new Date(episode.createdAt);
       const now = new Date();
       return episodeDate.getMonth() === now.getMonth() && 
              episodeDate.getFullYear() === now.getFullYear();
     }).length,
     scriptsPending: scripts.filter(script => 
-      script.status === "Under Review" || script.status === "Submitted"
+      script.status === "Under Review" || script.status === "Submitted" || script.status === "Draft"
     ).length,
     radioStations: radioStations.length,
   };
+
+  // Calculate progress towards monthly goal (assuming 10 episodes per month as target)
+  const monthlyEpisodeGoal = 10;
+  const episodeProgress = Math.min((stats.episodesThisMonth / monthlyEpisodeGoal) * 100, 100);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -97,9 +110,9 @@ export default function Dashboard() {
   const recentScripts = scripts.slice(0, 5);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-slate-800 dark:via-indigo-900 dark:to-purple-900">
+      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 dark:from-slate-800 dark:via-slate-700 dark:to-slate-900">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex items-center justify-between">
@@ -150,6 +163,7 @@ export default function Dashboard() {
                 size="lg"
                 variant="outline"
                 className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm transition-all duration-300"
+                onClick={() => setShowGoals(true)}
               >
                 <Target className="h-5 w-5 mr-2" />
                 View Goals
@@ -188,8 +202,8 @@ export default function Dashboard() {
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Episodes This Month</p>
                   <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.episodesThisMonth}</p>
                   <div className="flex items-center mt-2">
-                    <Progress value={75} className="w-16 h-2 mr-2" />
-                    <span className="text-sm text-gray-500 dark:text-gray-400">75% of goal</span>
+                    <Progress value={episodeProgress} className="w-16 h-2 mr-2" />
+                    <span className="text-sm text-gray-500 dark:text-gray-400">{Math.round(episodeProgress)}% of goal</span>
                   </div>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg">
@@ -240,18 +254,18 @@ export default function Dashboard() {
           {/* Recent Scripts */}
           <div className="lg:col-span-2">
             <Card className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl shadow-2xl border-0 hover:shadow-3xl transition-all duration-300">
-              <CardHeader className="bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 dark:from-slate-700 dark:via-indigo-900 dark:to-purple-900 border-b border-gray-200/20">
+              <CardHeader className="bg-gradient-to-r from-blue-50 via-slate-50 to-gray-50 dark:from-slate-700 dark:via-slate-800 dark:to-slate-900 border-b border-gray-200/20">
                 <div className="flex justify-between items-center">
                   <div>
                     <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
-                      <FileText className="h-6 w-6 mr-3 text-indigo-600" />
+                      <FileText className="h-6 w-6 mr-3 text-blue-600" />
                       Recent Scripts
                     </CardTitle>
                     <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">Your latest script submissions and drafts</p>
                   </div>
                   <Button 
                     onClick={() => setIsScriptEditorOpen(true)}
-                    className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     New Script
@@ -278,7 +292,7 @@ export default function Dashboard() {
                     <p className="text-gray-600 dark:text-gray-300 mb-8 max-w-md mx-auto">Get started by creating your first script. Share your ideas with the world through compelling radio content.</p>
                     <Button 
                       size="lg"
-                      className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105" 
+                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105" 
                       onClick={() => setIsScriptEditorOpen(true)}
                     >
                       <Sparkles className="h-5 w-5 mr-2" />
@@ -289,14 +303,14 @@ export default function Dashboard() {
                   <div className="space-y-6">
                     {recentScripts.map((script, index) => (
                       <div key={script.id} className="group relative bg-gradient-to-r from-white to-gray-50 dark:from-slate-800 dark:to-slate-700 border border-gray-200/50 dark:border-slate-600/50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
-                        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-slate-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         <div className="relative flex justify-between items-start">
                           <div className="flex-1">
                             <div className="flex items-center space-x-3 mb-3">
-                              <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg text-white text-sm font-bold">
+                              <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg text-white text-sm font-bold">
                                 {index + 1}
                               </div>
-                              <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">{script.title}</h3>
+                              <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">{script.title}</h3>
                             </div>
                             <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400 mb-3">
                               <div className="flex items-center space-x-1">
@@ -319,10 +333,10 @@ export default function Dashboard() {
                               <Button 
                                 variant="ghost" 
                                 size="sm" 
-                                className="h-9 w-9 p-0 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 hover:scale-110 transition-all duration-200"
+                                className="h-9 w-9 p-0 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:scale-110 transition-all duration-200"
                                 onClick={() => handleEditScript(script)}
                               >
-                                <Edit className="h-4 w-4 text-indigo-600" />
+                                <Edit className="h-4 w-4 text-blue-600" />
                               </Button>
                               <Button 
                                 variant="ghost" 
@@ -483,6 +497,106 @@ export default function Dashboard() {
           onClose={handleCloseScriptEditor}
           script={selectedScript}
         />
+
+        {/* Goals Dialog */}
+        <Dialog open={showGoals} onOpenChange={setShowGoals}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+                <Target className="h-6 w-6 mr-3 text-blue-600" />
+                Content Goals & Targets
+              </DialogTitle>
+              <DialogDescription className="text-gray-600 dark:text-gray-300 mt-2">
+                Track your progress towards monthly content creation goals
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-6 mt-6">
+              {/* Monthly Episode Goal */}
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-6 rounded-xl border border-green-200/50 dark:border-green-700/50">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-green-500 rounded-lg">
+                      <PlayCircle className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">Monthly Episodes</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">Target: {monthlyEpisodeGoal} episodes</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.episodesThisMonth}/{monthlyEpisodeGoal}</p>
+                    <p className="text-sm text-green-600 dark:text-green-400">{Math.round(episodeProgress)}% complete</p>
+                  </div>
+                </div>
+                <Progress value={episodeProgress} className="h-3" />
+              </div>
+
+              {/* Script Completion Goal */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-6 rounded-xl border border-blue-200/50 dark:border-blue-700/50">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-blue-500 rounded-lg">
+                      <FileText className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">Script Pipeline</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">Pending review & completion</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.scriptsPending}</p>
+                    <p className="text-sm text-blue-600 dark:text-blue-400">Scripts in progress</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Project & Station Goals */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-4 rounded-xl border border-purple-200/50 dark:border-purple-700/50">
+                  <div className="flex items-center space-x-3 mb-2">
+                    <div className="p-2 bg-purple-500 rounded-lg">
+                      <FolderOpen className="h-4 w-4 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900 dark:text-white">Active Projects</h4>
+                      <p className="text-xl font-bold text-purple-600 dark:text-purple-400">{stats.activeProjects}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 p-4 rounded-xl border border-orange-200/50 dark:border-orange-700/50">
+                  <div className="flex items-center space-x-3 mb-2">
+                    <div className="p-2 bg-orange-500 rounded-lg">
+                      <Radio className="h-4 w-4 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900 dark:text-white">Radio Stations</h4>
+                      <p className="text-xl font-bold text-orange-600 dark:text-orange-400">{stats.radioStations}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowGoals(false)}>
+                  Close
+                </Button>
+                <Button 
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={() => {
+                    setShowGoals(false);
+                    setIsScriptEditorOpen(true);
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Content
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
