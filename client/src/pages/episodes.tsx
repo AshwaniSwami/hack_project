@@ -190,34 +190,41 @@ export default function Episodes() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
       {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="relative px-6 py-16">
+      <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 via-gray-900 to-zinc-900">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-emerald-600/10"></div>
+        <div className="relative px-6 py-20">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
-                  <Radio className="h-8 w-8 text-white" />
+              <div className="flex items-center space-x-6">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-2xl blur opacity-75"></div>
+                  <div className="relative p-4 bg-white rounded-2xl">
+                    <Radio className="h-8 w-8 text-slate-700" />
+                  </div>
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold text-white mb-2">Episodes</h1>
-                  <p className="text-white/80 text-lg">Manage your radio episodes and audio content</p>
+                  <h1 className="text-5xl font-bold text-white mb-3 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                    Episodes
+                  </h1>
+                  <p className="text-gray-300 text-xl font-medium">Manage your radio episodes and audio content</p>
                 </div>
               </div>
               
               <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button size="lg" className="bg-white/10 backdrop-blur-sm hover:bg-white/20 border border-white/20 text-white shadow-lg transition-all duration-200 hover:scale-105">
-                    <Plus className="h-5 w-5 mr-2" />
+                  <Button size="lg" className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-blue-500/25 border-0">
+                    <Plus className="h-5 w-5 mr-3" />
                     New Episode
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                      <Sparkles className="h-5 w-5 text-purple-600" />
+                    <DialogTitle className="flex items-center gap-3 text-xl">
+                      <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
+                        <Sparkles className="h-5 w-5 text-white" />
+                      </div>
                       Create New Episode
                     </DialogTitle>
                   </DialogHeader>
@@ -325,7 +332,7 @@ export default function Episodes() {
                         <Button 
                           type="submit" 
                           disabled={createMutation.isPending}
-                          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                          className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-lg"
                         >
                           {createMutation.isPending ? "Creating..." : "Create Episode"}
                         </Button>
@@ -342,16 +349,16 @@ export default function Episodes() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         <Tabs defaultValue="episodes" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-3 lg:w-[400px] bg-white/60 backdrop-blur-sm">
-            <TabsTrigger value="episodes" className="flex items-center gap-2">
+          <TabsList className="grid w-full grid-cols-3 lg:w-[450px] bg-white/80 backdrop-blur-md shadow-xl border border-gray-200/50 p-1">
+            <TabsTrigger value="episodes" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white transition-all duration-300">
               <Play className="h-4 w-4" />
               Episodes
             </TabsTrigger>
-            <TabsTrigger value="upload" className="flex items-center gap-2">
+            <TabsTrigger value="upload" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white transition-all duration-300">
               <Upload className="h-4 w-4" />
               Upload
             </TabsTrigger>
-            <TabsTrigger value="files" className="flex items-center gap-2">
+            <TabsTrigger value="files" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white transition-all duration-300">
               <FolderOpen className="h-4 w-4" />
               Files
             </TabsTrigger>
@@ -371,19 +378,22 @@ export default function Episodes() {
                 ))}
               </div>
             ) : episodes.length === 0 ? (
-              <Card className="bg-white/60 backdrop-blur-sm border-0 shadow-lg">
-                <CardContent className="text-center py-16">
-                  <div className="p-4 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
-                    <Mic className="h-12 w-12 text-purple-600" />
+              <Card className="bg-white/80 backdrop-blur-md border-0 shadow-2xl">
+                <CardContent className="text-center py-20">
+                  <div className="relative mb-8">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full blur-lg opacity-25 w-32 h-32 mx-auto"></div>
+                    <div className="relative p-6 bg-gradient-to-br from-blue-50 to-emerald-50 rounded-full w-32 h-32 mx-auto flex items-center justify-center border border-blue-100">
+                      <Mic className="h-16 w-16 text-blue-600" />
+                    </div>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">No episodes yet</h3>
-                  <p className="text-gray-600 mb-6 text-lg">Start creating engaging radio content</p>
+                  <h3 className="text-3xl font-bold text-gray-800 mb-3">No episodes yet</h3>
+                  <p className="text-gray-600 mb-8 text-xl max-w-md mx-auto">Start creating engaging radio content for your audience</p>
                   <Button 
                     onClick={() => setIsCreateDialogOpen(true)}
                     size="lg"
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+                    className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 hover:scale-105 px-8 py-3"
                   >
-                    <Plus className="h-5 w-5 mr-2" />
+                    <Plus className="h-6 w-6 mr-3" />
                     Create Your First Episode
                   </Button>
                 </CardContent>
@@ -393,75 +403,78 @@ export default function Episodes() {
                 {episodes.map((episode) => {
                   const project = projects.find(p => p.id === episode.projectId);
                   return (
-                    <Card key={episode.id} className="group hover:shadow-2xl transition-all duration-300 bg-white/60 backdrop-blur-sm border-0 shadow-lg hover:scale-105">
-                      <CardContent className="p-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center space-x-3">
-                            <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
-                              <Hash className="h-4 w-4 text-white" />
+                    <Card key={episode.id} className="group hover:shadow-2xl transition-all duration-500 bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-xl hover:scale-[1.02] hover:shadow-blue-500/10">
+                      <CardContent className="p-8">
+                        <div className="flex items-start justify-between mb-6">
+                          <div className="flex items-center space-x-4">
+                            <div className="relative">
+                              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-xl blur opacity-50"></div>
+                              <div className="relative p-3 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-xl">
+                                <Hash className="h-5 w-5 text-white" />
+                              </div>
                             </div>
                             <div>
-                              <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
+                              <Badge variant="secondary" className="text-sm bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1">
                                 Episode {episode.episodeNumber}
                               </Badge>
                             </div>
                           </div>
-                          <div className="flex space-x-1">
+                          <div className="flex space-x-2">
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleEdit(episode)}
-                              className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-blue-50"
+                              className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-blue-50 hover:scale-110"
                             >
-                              <Edit className="h-4 w-4 text-blue-600" />
+                              <Edit className="h-5 w-5 text-blue-600" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleDelete(episode.id)}
-                              className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50"
+                              className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-50 hover:scale-110"
                             >
-                              <Trash2 className="h-4 w-4 text-red-600" />
+                              <Trash2 className="h-5 w-5 text-red-500" />
                             </Button>
                           </div>
                         </div>
 
-                        <div className="space-y-3">
-                          <h3 className="font-bold text-lg text-gray-900 line-clamp-2 group-hover:text-purple-700 transition-colors">
+                        <div className="space-y-4">
+                          <h3 className="font-bold text-xl text-gray-800 line-clamp-2 group-hover:text-blue-700 transition-colors duration-300">
                             {episode.title}
                           </h3>
                           
                           {project && (
-                            <div className="flex items-center space-x-2">
-                              <FolderOpen className="h-4 w-4 text-gray-500" />
-                              <span className="text-sm text-gray-600 font-medium">{project.name}</span>
+                            <div className="flex items-center space-x-3 p-3 bg-gray-50/80 rounded-lg">
+                              <FolderOpen className="h-5 w-5 text-blue-600" />
+                              <span className="text-sm text-gray-700 font-semibold">{project.name}</span>
                             </div>
                           )}
 
                           {episode.description && (
-                            <p className="text-sm text-gray-600 line-clamp-3">
+                            <p className="text-gray-600 line-clamp-3 leading-relaxed">
                               {episode.description}
                             </p>
                           )}
 
                           {episode.broadcastDate && (
-                            <div className="flex items-center space-x-2">
-                              <Calendar className="h-4 w-4 text-gray-500" />
-                              <span className="text-sm text-gray-600">
+                            <div className="flex items-center space-x-3 p-2 bg-emerald-50/80 rounded-lg">
+                              <Calendar className="h-5 w-5 text-emerald-600" />
+                              <span className="text-sm text-emerald-700 font-medium">
                                 {new Date(episode.broadcastDate).toLocaleDateString()}
                               </span>
                             </div>
                           )}
 
-                          <div className="flex items-center justify-between pt-3">
+                          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                             <div className="flex items-center space-x-2">
                               <Clock className="h-4 w-4 text-gray-400" />
-                              <span className="text-xs text-gray-500">
+                              <span className="text-sm text-gray-500">
                                 {new Date(episode.createdAt).toLocaleDateString()}
                               </span>
                             </div>
                             {episode.isPremium && (
-                              <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white border-0">
+                              <Badge className="bg-gradient-to-r from-amber-400 to-orange-500 text-white border-0 px-3 py-1 shadow-lg">
                                 Premium
                               </Badge>
                             )}
@@ -476,10 +489,12 @@ export default function Episodes() {
           </TabsContent>
 
           <TabsContent value="upload">
-            <Card className="bg-white/60 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileAudio className="h-5 w-5 text-purple-600" />
+            <Card className="bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-2xl">
+              <CardHeader className="pb-6">
+                <CardTitle className="flex items-center gap-3 text-xl">
+                  <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
+                    <FileAudio className="h-6 w-6 text-white" />
+                  </div>
                   Upload Episode Files
                 </CardTitle>
               </CardHeader>
@@ -490,10 +505,12 @@ export default function Episodes() {
           </TabsContent>
 
           <TabsContent value="files">
-            <Card className="bg-white/60 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FolderOpen className="h-5 w-5 text-purple-600" />
+            <Card className="bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-2xl">
+              <CardHeader className="pb-6">
+                <CardTitle className="flex items-center gap-3 text-xl">
+                  <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
+                    <FolderOpen className="h-6 w-6 text-white" />
+                  </div>
                   Episode Files by Project
                 </CardTitle>
               </CardHeader>
@@ -502,17 +519,19 @@ export default function Episodes() {
                   {projects.map((project) => {
                     const projectEpisodes = episodes.filter(ep => ep.projectId === project.id);
                     return (
-                      <Card key={project.id} className="bg-gradient-to-r from-slate-50 to-blue-50 border border-slate-200">
-                        <CardHeader>
-                          <CardTitle className="text-lg flex items-center gap-2">
-                            <FolderOpen className="h-5 w-5 text-blue-600" />
+                      <Card key={project.id} className="bg-gradient-to-br from-gray-50 to-blue-50/50 border border-gray-200 shadow-lg">
+                        <CardHeader className="pb-4">
+                          <CardTitle className="text-lg flex items-center gap-3">
+                            <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
+                              <FolderOpen className="h-5 w-5 text-white" />
+                            </div>
                             {project.name}
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                           <div>
-                            <h5 className="text-sm font-semibold mb-2 text-gray-700 flex items-center gap-2">
-                              <FileAudio className="h-4 w-4" />
+                            <h5 className="text-sm font-semibold mb-3 text-gray-700 flex items-center gap-3 p-2 bg-blue-50/80 rounded-lg">
+                              <FileAudio className="h-5 w-5 text-blue-600" />
                               Project Episode Files
                             </h5>
                             <FileList 
@@ -523,9 +542,9 @@ export default function Episodes() {
                           </div>
                           
                           {projectEpisodes.map((episode) => (
-                            <div key={episode.id} className="pl-4 border-l-2 border-purple-200">
-                              <h5 className="text-sm font-semibold mb-2 text-gray-700 flex items-center gap-2">
-                                <Hash className="h-4 w-4 text-purple-600" />
+                            <div key={episode.id} className="pl-6 border-l-2 border-emerald-200 bg-emerald-50/30 rounded-r-lg">
+                              <h5 className="text-sm font-semibold mb-3 text-gray-700 flex items-center gap-3 p-2">
+                                <Hash className="h-5 w-5 text-emerald-600" />
                                 Episode {episode.episodeNumber}: {episode.title}
                               </h5>
                               <FileList 
@@ -550,8 +569,10 @@ export default function Episodes() {
       <Dialog open={!!editingEpisode} onOpenChange={() => setEditingEpisode(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Edit className="h-5 w-5 text-blue-600" />
+            <DialogTitle className="flex items-center gap-3 text-xl">
+              <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
+                <Edit className="h-5 w-5 text-white" />
+              </div>
               Edit Episode
             </DialogTitle>
           </DialogHeader>
@@ -659,7 +680,7 @@ export default function Episodes() {
                 <Button 
                   type="submit" 
                   disabled={updateMutation.isPending}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-lg"
                 >
                   {updateMutation.isPending ? "Updating..." : "Update Episode"}
                 </Button>
