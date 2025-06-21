@@ -53,6 +53,7 @@ import {
 } from "lucide-react";
 import { ScriptEditor } from "@/components/script-editor";
 import { ScriptFileUpload } from "@/components/script-file-upload";
+import { ScriptFileManager } from "@/components/script-file-manager";
 import { FileList } from "@/components/file-list";
 import type { Script, Project } from "@shared/schema";
 
