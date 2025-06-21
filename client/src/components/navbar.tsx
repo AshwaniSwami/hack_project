@@ -43,7 +43,7 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <header className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white shadow-2xl sticky top-0 z-50 backdrop-blur-md border-b border-white/10">
+    <header className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-900 text-white shadow-2xl sticky top-0 z-50 backdrop-blur-md border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <div className="flex items-center space-x-6">

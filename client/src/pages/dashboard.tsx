@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/dialog";
 import { ScriptEditor } from "@/components/script-editor";
 import { cn } from "@/lib/utils";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Plus, 
   FolderPlus, 
@@ -49,9 +51,37 @@ export default function Dashboard() {
   const [isScriptEditorOpen, setIsScriptEditorOpen] = useState(false);
   const [selectedScript, setSelectedScript] = useState<Script | undefined>(undefined);
   const [showGoals, setShowGoals] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   const { data: scripts = [], isLoading: scriptsLoading } = useQuery<Script[]>({
     queryKey: ["/api/scripts"],
+  });
+
+  const deleteScriptMutation = useMutation({
+    mutationFn: async (scriptId: string) => {
+      const response = await fetch(`/api/scripts/${scriptId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete script");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/scripts"] });
+      toast({
+        title: "Script deleted",
+        description: "The script has been successfully removed.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete script. Please try again.",
+        variant: "destructive",
+      });
+    },
   });
 
   const { data: projects = [] } = useQuery<Project[]>({
@@ -111,12 +141,16 @@ export default function Dashboard() {
     setSelectedScript(undefined);
   };
 
+  const handleDeleteScript = (scriptId: string) => {
+    deleteScriptMutation.mutate(scriptId);
+  };
+
   const recentScripts = scripts.slice(0, 5);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-emerald-50 to-teal-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-stone-50 to-gray-100">
       {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600">
+      <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-slate-700 to-slate-900">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex items-center justify-between">
@@ -165,7 +199,7 @@ export default function Dashboard() {
               </Button>
               <Button 
                 size="lg"
-                className="bg-white text-emerald-600 hover:bg-white/90 border-2 border-white transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 font-semibold"
+                className="bg-amber-500 text-white hover:bg-amber-600 border-2 border-amber-400 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 font-semibold"
                 onClick={() => setShowGoals(true)}
               >
                 <Target className="h-5 w-5 mr-2" />
@@ -179,73 +213,77 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Enhanced Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 -mt-16 relative z-10">
-          <Card className="bg-white/95 backdrop-blur-xl shadow-xl border border-gray-200/50 hover:shadow-2xl transition-all duration-300 hover:scale-105">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+          <Card className="bg-white shadow-xl border-0 hover:shadow-2xl transition-all duration-300 hover:scale-105 overflow-hidden">
+            <CardContent className="p-6 relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-full -mr-16 -mt-16 opacity-50"></div>
+              <div className="flex items-center justify-between relative z-10">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">Active Projects</p>
-                  <p className="text-3xl font-bold text-gray-900">{stats.activeProjects}</p>
-                  <div className="flex items-center mt-2 text-sm">
-                    <TrendingUp className="h-4 w-4 text-emerald-500 mr-1" />
-                    <span className="text-emerald-600 font-medium">Growing</span>
+                  <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Active Projects</p>
+                  <p className="text-4xl font-bold text-slate-800">{stats.activeProjects}</p>
+                  <div className="flex items-center mt-3 text-sm">
+                    <TrendingUp className="h-4 w-4 text-blue-600 mr-2" />
+                    <span className="text-blue-700 font-semibold">Growing</span>
                   </div>
                 </div>
-                <div className="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl shadow-lg">
-                  <FolderOpen className="h-8 w-8 text-white" />
+                <div className="p-4 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl shadow-xl">
+                  <FolderOpen className="h-10 w-10 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/95 backdrop-blur-xl shadow-xl border border-gray-200/50 hover:shadow-2xl transition-all duration-300 hover:scale-105">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+          <Card className="bg-white shadow-xl border-0 hover:shadow-2xl transition-all duration-300 hover:scale-105 overflow-hidden">
+            <CardContent className="p-6 relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-50 to-orange-100 rounded-full -mr-16 -mt-16 opacity-50"></div>
+              <div className="flex items-center justify-between relative z-10">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">Episodes This Month</p>
-                  <p className="text-3xl font-bold text-gray-900">{stats.episodesThisMonth}</p>
-                  <div className="flex items-center mt-2">
-                    <Progress value={episodeProgress} className="w-20 h-2 mr-2" />
-                    <span className="text-sm text-teal-600 font-medium">{Math.round(episodeProgress)}% complete</span>
+                  <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Episodes This Month</p>
+                  <p className="text-4xl font-bold text-slate-800">{stats.episodesThisMonth}</p>
+                  <div className="flex items-center mt-3">
+                    <Progress value={episodeProgress} className="w-24 h-2 mr-3" />
+                    <span className="text-sm text-amber-700 font-semibold">{Math.round(episodeProgress)}% complete</span>
                   </div>
                 </div>
-                <div className="p-3 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl shadow-lg">
-                  <Podcast className="h-8 w-8 text-white" />
+                <div className="p-4 bg-gradient-to-br from-amber-600 to-orange-700 rounded-3xl shadow-xl">
+                  <Podcast className="h-10 w-10 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/95 backdrop-blur-xl shadow-xl border border-gray-200/50 hover:shadow-2xl transition-all duration-300 hover:scale-105">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+          <Card className="bg-white shadow-xl border-0 hover:shadow-2xl transition-all duration-300 hover:scale-105 overflow-hidden">
+            <CardContent className="p-6 relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-50 to-green-100 rounded-full -mr-16 -mt-16 opacity-50"></div>
+              <div className="flex items-center justify-between relative z-10">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">Scripts Pending</p>
-                  <p className="text-3xl font-bold text-gray-900">{stats.scriptsPending}</p>
-                  <div className="flex items-center mt-2 text-sm">
-                    <Clock className="h-4 w-4 text-amber-500 mr-1" />
-                    <span className="text-amber-600 font-medium">In Review</span>
+                  <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Scripts Pending</p>
+                  <p className="text-4xl font-bold text-slate-800">{stats.scriptsPending}</p>
+                  <div className="flex items-center mt-3 text-sm">
+                    <Clock className="h-4 w-4 text-emerald-600 mr-2" />
+                    <span className="text-emerald-700 font-semibold">In Review</span>
                   </div>
                 </div>
-                <div className="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl shadow-lg">
-                  <FileText className="h-8 w-8 text-white" />
+                <div className="p-4 bg-gradient-to-br from-emerald-600 to-green-700 rounded-3xl shadow-xl">
+                  <FileText className="h-10 w-10 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/95 backdrop-blur-xl shadow-xl border border-gray-200/50 hover:shadow-2xl transition-all duration-300 hover:scale-105">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+          <Card className="bg-white shadow-xl border-0 hover:shadow-2xl transition-all duration-300 hover:scale-105 overflow-hidden">
+            <CardContent className="p-6 relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-50 to-violet-100 rounded-full -mr-16 -mt-16 opacity-50"></div>
+              <div className="flex items-center justify-between relative z-10">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">Radio Stations</p>
-                  <p className="text-3xl font-bold text-gray-900">{stats.radioStations}</p>
-                  <div className="flex items-center mt-2 text-sm">
-                    <Volume2 className="h-4 w-4 text-cyan-500 mr-1" />
-                    <span className="text-cyan-600 font-medium">Connected</span>
+                  <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">Radio Stations</p>
+                  <p className="text-4xl font-bold text-slate-800">{stats.radioStations}</p>
+                  <div className="flex items-center mt-3 text-sm">
+                    <Volume2 className="h-4 w-4 text-purple-600 mr-2" />
+                    <span className="text-purple-700 font-semibold">Connected</span>
                   </div>
                 </div>
-                <div className="p-3 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl shadow-lg">
-                  <Radio className="h-8 w-8 text-white" />
+                <div className="p-4 bg-gradient-to-br from-purple-600 to-violet-700 rounded-3xl shadow-xl">
+                  <Radio className="h-10 w-10 text-white" />
                 </div>
               </div>
             </CardContent>
@@ -255,19 +293,19 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Recent Scripts */}
           <div className="lg:col-span-2">
-            <Card className="bg-white/95 backdrop-blur-xl shadow-xl border border-gray-200/50 hover:shadow-2xl transition-all duration-300">
-              <CardHeader className="bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 border-b border-gray-200/20">
+            <Card className="bg-white shadow-xl border-0 hover:shadow-2xl transition-all duration-300">
+              <CardHeader className="bg-gradient-to-r from-slate-50 to-gray-100 border-b border-gray-200">
                 <div className="flex justify-between items-center">
                   <div>
-                    <CardTitle className="text-2xl font-bold text-gray-900 flex items-center">
-                      <FileText className="h-6 w-6 mr-3 text-emerald-600" />
+                    <CardTitle className="text-2xl font-bold text-slate-800 flex items-center">
+                      <FileText className="h-7 w-7 mr-3 text-slate-600" />
                       Recent Scripts
                     </CardTitle>
                     <p className="text-sm text-gray-600 mt-2">Your latest script submissions and drafts</p>
                   </div>
                   <Button 
                     onClick={() => setIsScriptEditorOpen(true)}
-                    className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                    className="bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-800 hover:to-slate-900 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     New Script
@@ -294,7 +332,7 @@ export default function Dashboard() {
                     <p className="text-gray-600 dark:text-gray-300 mb-8 max-w-md mx-auto">Get started by creating your first script. Share your ideas with the world through compelling radio content.</p>
                     <Button 
                       size="lg"
-                      className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105" 
+                      className="bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-800 hover:to-slate-900 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105" 
                       onClick={() => setIsScriptEditorOpen(true)}
                     >
                       <Sparkles className="h-5 w-5 mr-2" />
@@ -309,10 +347,10 @@ export default function Dashboard() {
                         <div className="relative flex justify-between items-start">
                           <div className="flex-1">
                             <div className="flex items-center space-x-3 mb-3">
-                              <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg text-white text-sm font-bold">
+                              <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-slate-600 to-slate-700 rounded-lg text-white text-sm font-bold">
                                 {index + 1}
                               </div>
-                              <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">{script.title}</h3>
+                              <h3 className="text-xl font-bold text-slate-800 group-hover:text-slate-600 transition-colors duration-200">{script.title}</h3>
                             </div>
                             <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400 mb-3">
                               <div className="flex items-center space-x-1">
@@ -335,15 +373,17 @@ export default function Dashboard() {
                               <Button 
                                 variant="ghost" 
                                 size="sm" 
-                                className="h-9 w-9 p-0 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:scale-110 transition-all duration-200"
+                                className="h-9 w-9 p-0 hover:bg-slate-100 hover:scale-110 transition-all duration-200"
                                 onClick={() => handleEditScript(script)}
                               >
-                                <Edit className="h-4 w-4 text-blue-600" />
+                                <Edit className="h-4 w-4 text-slate-600" />
                               </Button>
                               <Button 
                                 variant="ghost" 
                                 size="sm" 
                                 className="h-9 w-9 p-0 hover:bg-red-100 dark:hover:bg-red-900/50 hover:scale-110 transition-all duration-200"
+                                onClick={() => handleDeleteScript(script.id)}
+                                disabled={deleteScriptMutation.isPending}
                               >
                                 <Trash2 className="h-4 w-4 text-red-600" />
                               </Button>
