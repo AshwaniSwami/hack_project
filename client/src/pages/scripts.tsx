@@ -605,7 +605,7 @@ export default function Scripts() {
                               Project Script Files
                             </h5>
                             <FileList 
-                              entityType="scripts" 
+                              entityType="projects" 
                               entityId={project.id}
                               title=""
                             />
