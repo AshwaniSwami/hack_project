@@ -37,7 +37,11 @@ import {
   PlayCircle,
   PenTool,
   Headphones,
-  Waves
+  Waves,
+  Podcast,
+  Megaphone,
+  Volume2,
+  Rss
 } from "lucide-react";
 import type { Script, Project, Episode, RadioStation } from "@shared/schema";
 
@@ -110,9 +114,9 @@ export default function Dashboard() {
   const recentScripts = scripts.slice(0, 5);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-emerald-50 to-teal-50">
       {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 dark:from-slate-800 dark:via-slate-700 dark:to-slate-900">
+      <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex items-center justify-between">
@@ -153,7 +157,7 @@ export default function Dashboard() {
             <div className="hidden lg:flex space-x-4">
               <Button 
                 size="lg"
-                className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+                className="bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
                 onClick={() => setIsScriptEditorOpen(true)}
               >
                 <Zap className="h-5 w-5 mr-2" />
@@ -161,8 +165,7 @@ export default function Dashboard() {
               </Button>
               <Button 
                 size="lg"
-                variant="outline"
-                className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm transition-all duration-300"
+                className="bg-white text-emerald-600 hover:bg-white/90 border-2 border-white transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 font-semibold"
                 onClick={() => setShowGoals(true)}
               >
                 <Target className="h-5 w-5 mr-2" />
@@ -176,74 +179,73 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Enhanced Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 -mt-16 relative z-10">
-          <Card className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl shadow-2xl border-0 hover:shadow-3xl transition-all duration-300 hover:scale-105">
+          <Card className="bg-white/95 backdrop-blur-xl shadow-xl border border-gray-200/50 hover:shadow-2xl transition-all duration-300 hover:scale-105">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Active Projects</p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.activeProjects}</p>
+                  <p className="text-sm font-medium text-gray-600 mb-1">Active Projects</p>
+                  <p className="text-3xl font-bold text-gray-900">{stats.activeProjects}</p>
                   <div className="flex items-center mt-2 text-sm">
-                    <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                    <span className="text-green-600 dark:text-green-400 font-medium">+12%</span>
-                    <span className="text-gray-500 dark:text-gray-400 ml-1">vs last month</span>
+                    <TrendingUp className="h-4 w-4 text-emerald-500 mr-1" />
+                    <span className="text-emerald-600 font-medium">Growing</span>
                   </div>
                 </div>
-                <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg">
+                <div className="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl shadow-lg">
                   <FolderOpen className="h-8 w-8 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl shadow-2xl border-0 hover:shadow-3xl transition-all duration-300 hover:scale-105">
+          <Card className="bg-white/95 backdrop-blur-xl shadow-xl border border-gray-200/50 hover:shadow-2xl transition-all duration-300 hover:scale-105">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Episodes This Month</p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.episodesThisMonth}</p>
+                  <p className="text-sm font-medium text-gray-600 mb-1">Episodes This Month</p>
+                  <p className="text-3xl font-bold text-gray-900">{stats.episodesThisMonth}</p>
                   <div className="flex items-center mt-2">
-                    <Progress value={episodeProgress} className="w-16 h-2 mr-2" />
-                    <span className="text-sm text-gray-500 dark:text-gray-400">{Math.round(episodeProgress)}% of goal</span>
+                    <Progress value={episodeProgress} className="w-20 h-2 mr-2" />
+                    <span className="text-sm text-teal-600 font-medium">{Math.round(episodeProgress)}% complete</span>
                   </div>
                 </div>
-                <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg">
-                  <PlayCircle className="h-8 w-8 text-white" />
+                <div className="p-3 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl shadow-lg">
+                  <Podcast className="h-8 w-8 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl shadow-2xl border-0 hover:shadow-3xl transition-all duration-300 hover:scale-105">
+          <Card className="bg-white/95 backdrop-blur-xl shadow-xl border border-gray-200/50 hover:shadow-2xl transition-all duration-300 hover:scale-105">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Scripts Pending</p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.scriptsPending}</p>
+                  <p className="text-sm font-medium text-gray-600 mb-1">Scripts Pending</p>
+                  <p className="text-3xl font-bold text-gray-900">{stats.scriptsPending}</p>
                   <div className="flex items-center mt-2 text-sm">
-                    <Clock className="h-4 w-4 text-orange-500 mr-1" />
-                    <span className="text-orange-600 dark:text-orange-400 font-medium">Needs attention</span>
+                    <Clock className="h-4 w-4 text-amber-500 mr-1" />
+                    <span className="text-amber-600 font-medium">In Review</span>
                   </div>
                 </div>
-                <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl shadow-lg">
-                  <PenTool className="h-8 w-8 text-white" />
+                <div className="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl shadow-lg">
+                  <FileText className="h-8 w-8 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl shadow-2xl border-0 hover:shadow-3xl transition-all duration-300 hover:scale-105">
+          <Card className="bg-white/95 backdrop-blur-xl shadow-xl border border-gray-200/50 hover:shadow-2xl transition-all duration-300 hover:scale-105">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Radio Stations</p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.radioStations}</p>
+                  <p className="text-sm font-medium text-gray-600 mb-1">Radio Stations</p>
+                  <p className="text-3xl font-bold text-gray-900">{stats.radioStations}</p>
                   <div className="flex items-center mt-2 text-sm">
-                    <Waves className="h-4 w-4 text-purple-500 mr-1" />
-                    <span className="text-purple-600 dark:text-purple-400 font-medium">Broadcasting</span>
+                    <Volume2 className="h-4 w-4 text-cyan-500 mr-1" />
+                    <span className="text-cyan-600 font-medium">Connected</span>
                   </div>
                 </div>
-                <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl shadow-lg">
-                  <Headphones className="h-8 w-8 text-white" />
+                <div className="p-3 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl shadow-lg">
+                  <Radio className="h-8 w-8 text-white" />
                 </div>
               </div>
             </CardContent>
@@ -253,19 +255,19 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Recent Scripts */}
           <div className="lg:col-span-2">
-            <Card className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl shadow-2xl border-0 hover:shadow-3xl transition-all duration-300">
-              <CardHeader className="bg-gradient-to-r from-blue-50 via-slate-50 to-gray-50 dark:from-slate-700 dark:via-slate-800 dark:to-slate-900 border-b border-gray-200/20">
+            <Card className="bg-white/95 backdrop-blur-xl shadow-xl border border-gray-200/50 hover:shadow-2xl transition-all duration-300">
+              <CardHeader className="bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 border-b border-gray-200/20">
                 <div className="flex justify-between items-center">
                   <div>
-                    <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
-                      <FileText className="h-6 w-6 mr-3 text-blue-600" />
+                    <CardTitle className="text-2xl font-bold text-gray-900 flex items-center">
+                      <FileText className="h-6 w-6 mr-3 text-emerald-600" />
                       Recent Scripts
                     </CardTitle>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">Your latest script submissions and drafts</p>
+                    <p className="text-sm text-gray-600 mt-2">Your latest script submissions and drafts</p>
                   </div>
                   <Button 
                     onClick={() => setIsScriptEditorOpen(true)}
-                    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                    className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     New Script
@@ -292,7 +294,7 @@ export default function Dashboard() {
                     <p className="text-gray-600 dark:text-gray-300 mb-8 max-w-md mx-auto">Get started by creating your first script. Share your ideas with the world through compelling radio content.</p>
                     <Button 
                       size="lg"
-                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105" 
+                      className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105" 
                       onClick={() => setIsScriptEditorOpen(true)}
                     >
                       <Sparkles className="h-5 w-5 mr-2" />
@@ -359,75 +361,75 @@ export default function Dashboard() {
           {/* Quick Actions & Projects */}
           <div className="space-y-8">
             {/* Quick Actions */}
-            <Card className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl shadow-2xl border-0 hover:shadow-3xl transition-all duration-300">
-              <CardHeader className="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-green-900/20 dark:via-emerald-900/20 dark:to-teal-900/20 border-b border-gray-200/20">
-                <CardTitle className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
+            <Card className="bg-white/95 backdrop-blur-xl shadow-xl border border-gray-200/50 hover:shadow-2xl transition-all duration-300">
+              <CardHeader className="bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 border-b border-gray-200/20">
+                <CardTitle className="text-xl font-bold text-gray-900 flex items-center">
                   <Zap className="h-5 w-5 mr-3 text-emerald-600" />
                   Quick Actions
                 </CardTitle>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Create new content quickly</p>
+                <p className="text-sm text-gray-600 mt-1">Create new content quickly</p>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="space-y-4">
                   <Link href="/projects">
-                    <Button variant="ghost" className="w-full justify-between h-14 text-left hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 border border-blue-200/50 dark:border-blue-700/50 rounded-xl group transition-all duration-300 hover:scale-105 hover:shadow-lg">
+                    <Button variant="ghost" className="w-full justify-between h-14 text-left hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 border border-emerald-200/50 rounded-xl group transition-all duration-300 hover:scale-105 hover:shadow-lg">
                       <div className="flex items-center space-x-4">
-                        <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg group-hover:scale-110 transition-transform duration-200">
-                          <FolderPlus className="h-5 w-5 text-white" />
+                        <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg group-hover:scale-110 transition-transform duration-200">
+                          <Megaphone className="h-5 w-5 text-white" />
                         </div>
                         <div>
-                          <p className="font-semibold text-gray-900 dark:text-white">Create New Project</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">Start a new radio project</p>
+                          <p className="font-semibold text-gray-900">Create New Project</p>
+                          <p className="text-xs text-gray-500">Start a new radio project</p>
                         </div>
                       </div>
-                      <ArrowUpRight className="h-4 w-4 text-gray-400 group-hover:text-blue-600 transition-colors duration-200" />
+                      <ArrowUpRight className="h-4 w-4 text-gray-400 group-hover:text-emerald-600 transition-colors duration-200" />
                     </Button>
                   </Link>
                   
                   <Link href="/episodes">
-                    <Button variant="ghost" className="w-full justify-between h-14 text-left hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 dark:hover:from-green-900/20 dark:hover:to-emerald-900/20 border border-green-200/50 dark:border-green-700/50 rounded-xl group transition-all duration-300 hover:scale-105 hover:shadow-lg">
+                    <Button variant="ghost" className="w-full justify-between h-14 text-left hover:bg-gradient-to-r hover:from-teal-50 hover:to-cyan-50 border border-teal-200/50 rounded-xl group transition-all duration-300 hover:scale-105 hover:shadow-lg">
                       <div className="flex items-center space-x-4">
-                        <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg group-hover:scale-110 transition-transform duration-200">
-                          <Mic className="h-5 w-5 text-white" />
+                        <div className="p-2 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-lg group-hover:scale-110 transition-transform duration-200">
+                          <Podcast className="h-5 w-5 text-white" />
                         </div>
                         <div>
-                          <p className="font-semibold text-gray-900 dark:text-white">Add Episode</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">Record a new episode</p>
+                          <p className="font-semibold text-gray-900">Add Episode</p>
+                          <p className="text-xs text-gray-500">Record a new episode</p>
                         </div>
                       </div>
-                      <ArrowUpRight className="h-4 w-4 text-gray-400 group-hover:text-green-600 transition-colors duration-200" />
+                      <ArrowUpRight className="h-4 w-4 text-gray-400 group-hover:text-teal-600 transition-colors duration-200" />
                     </Button>
                   </Link>
                   
                   <Button 
                     variant="ghost" 
-                    className="w-full justify-between h-14 text-left hover:bg-gradient-to-r hover:from-orange-50 hover:to-amber-50 dark:hover:from-orange-900/20 dark:hover:to-amber-900/20 border border-orange-200/50 dark:border-orange-700/50 rounded-xl group transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                    className="w-full justify-between h-14 text-left hover:bg-gradient-to-r hover:from-cyan-50 hover:to-blue-50 border border-cyan-200/50 rounded-xl group transition-all duration-300 hover:scale-105 hover:shadow-lg"
                     onClick={() => setIsScriptEditorOpen(true)}
                   >
                     <div className="flex items-center space-x-4">
-                      <div className="p-2 bg-gradient-to-br from-orange-500 to-amber-500 rounded-lg group-hover:scale-110 transition-transform duration-200">
+                      <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg group-hover:scale-110 transition-transform duration-200">
                         <FileText className="h-5 w-5 text-white" />
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-900 dark:text-white">Write Script</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Create compelling content</p>
+                        <p className="font-semibold text-gray-900">Write Script</p>
+                        <p className="text-xs text-gray-500">Create compelling content</p>
                       </div>
                     </div>
-                    <ArrowUpRight className="h-4 w-4 text-gray-400 group-hover:text-orange-600 transition-colors duration-200" />
+                    <ArrowUpRight className="h-4 w-4 text-gray-400 group-hover:text-cyan-600 transition-colors duration-200" />
                   </Button>
                   
                   <Link href="/radio-stations">
-                    <Button variant="ghost" className="w-full justify-between h-14 text-left hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 border border-purple-200/50 dark:border-purple-700/50 rounded-xl group transition-all duration-300 hover:scale-105 hover:shadow-lg">
+                    <Button variant="ghost" className="w-full justify-between h-14 text-left hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 border border-blue-200/50 rounded-xl group transition-all duration-300 hover:scale-105 hover:shadow-lg">
                       <div className="flex items-center space-x-4">
-                        <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg group-hover:scale-110 transition-transform duration-200">
+                        <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg group-hover:scale-110 transition-transform duration-200">
                           <Radio className="h-5 w-5 text-white" />
                         </div>
                         <div>
-                          <p className="font-semibold text-gray-900 dark:text-white">Add Radio Station</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">Connect with stations</p>
+                          <p className="font-semibold text-gray-900">Add Radio Station</p>
+                          <p className="text-xs text-gray-500">Connect with stations</p>
                         </div>
                       </div>
-                      <ArrowUpRight className="h-4 w-4 text-gray-400 group-hover:text-purple-600 transition-colors duration-200" />
+                      <ArrowUpRight className="h-4 w-4 text-gray-400 group-hover:text-blue-600 transition-colors duration-200" />
                     </Button>
                   </Link>
                 </div>
