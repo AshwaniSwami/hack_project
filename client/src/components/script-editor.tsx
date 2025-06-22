@@ -220,9 +220,6 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
               </div>
               <div>
                 <h3 className="text-2xl font-bold text-gray-800">{script.title}</h3>
-                {script.description && (
-                  <p className="text-gray-600 mt-1">{script.description}</p>
-                )}
               </div>
             </div>
             <Badge className={`text-sm px-3 py-1 ${statusColors[script.status as keyof typeof statusColors]}`}>
@@ -379,24 +376,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
                 />
               </div>
 
-              {/* Description */}
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description (Optional)</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Brief description of the script..."
-                        rows={2}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              
 
               {/* Script Content */}
               <div className="space-y-2">
