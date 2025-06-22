@@ -13,12 +13,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Project, Episode } from "@shared/schema";
+import type { Project, Episode, Script } from "@shared/schema";
 
 export function ScriptFileUpload() {
   const [file, setFile] = useState<File | null>(null);
   const [selectedProject, setSelectedProject] = useState<string>("");
   const [selectedEpisode, setSelectedEpisode] = useState<string>("none");
+  const [selectedScript, setSelectedScript] = useState<string>("none");
 
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
@@ -32,6 +33,13 @@ export function ScriptFileUpload() {
     queryKey: ["/api/episodes"],
     select: (data) => selectedProject 
       ? data.filter(episode => episode.projectId === selectedProject)
+      : data
+  });
+
+  const { data: scripts = [] } = useQuery<Script[]>({
+    queryKey: ["/api/scripts"],
+    select: (data) => selectedProject 
+      ? data.filter(script => script.projectId === selectedProject)
       : data
   });
 
@@ -66,10 +74,16 @@ export function ScriptFileUpload() {
     if (selectedEpisode && selectedEpisode !== "none") {
       formData.append("episodeId", selectedEpisode);
     }
+    if (selectedScript && selectedScript !== "none") {
+      formData.append("scriptId", selectedScript);
+    }
 
     try {
-      // Always upload to the project endpoint for script files
-      const endpoint = `/api/projects/${selectedProject}/upload`;
+      // Choose endpoint based on what's selected
+      let endpoint = `/api/projects/${selectedProject}/upload`;
+      if (selectedScript && selectedScript !== "none") {
+        endpoint = `/api/scripts/${selectedScript}/upload`;
+      }
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -89,6 +103,7 @@ export function ScriptFileUpload() {
       setFile(null);
       setSelectedProject("");
       setSelectedEpisode("none");
+      setSelectedScript("none");
       queryClient.invalidateQueries({ queryKey: ['/api/files'] });
       
       // Reset the file input
@@ -115,12 +130,13 @@ export function ScriptFileUpload() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="project-select">Project *</Label>
             <Select value={selectedProject} onValueChange={(value) => {
               setSelectedProject(value);
               setSelectedEpisode("none");
+              setSelectedScript("none");
             }}>
               <SelectTrigger>
                 <SelectValue placeholder="Select project" />
@@ -150,6 +166,27 @@ export function ScriptFileUpload() {
                 {episodes.map((episode) => (
                   <SelectItem key={episode.id} value={episode.id}>
                     Episode {episode.episodeNumber}: {episode.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="script-select">Script (Optional)</Label>
+            <Select 
+              value={selectedScript} 
+              onValueChange={setSelectedScript}
+              disabled={!selectedProject}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select script" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No specific script</SelectItem>
+                {scripts.map((script) => (
+                  <SelectItem key={script.id} value={script.id}>
+                    {script.title}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -188,6 +225,12 @@ export function ScriptFileUpload() {
         >
           {isUploading ? "Uploading..." : "Upload Script File"}
         </Button>
+        
+        {selectedScript !== "none" && (
+          <p className="text-sm text-blue-600 bg-blue-50 p-2 rounded">
+            File will be associated with the selected script: <strong>{scripts.find(s => s.id === selectedScript)?.title}</strong>
+          </p>
+        )}
       </CardContent>
     </Card>
   );
