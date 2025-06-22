@@ -88,7 +88,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
       title: "",
       description: "",
       projectId: "",
-      episodeId: "",
+      episodeId: "none",
       content: "",
       status: "Draft",
     },
@@ -113,7 +113,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
         title: script.title,
         description: script.description || "",
         projectId: script.projectId || "",
-        episodeId: script.episodeId || "",
+        episodeId: script.episodeId || "none",
         content: script.content || "",
         status: script.status as "Draft" | "Under Review" | "Approved" | "Published",
       };
@@ -125,7 +125,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
         title: "",
         description: "",
         projectId: "",
-        episodeId: "",
+        episodeId: "none",
         content: "",
         status: "Draft" as const,
       };
@@ -140,7 +140,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
       const submitData = { 
         ...data, 
         content: content.trim(),
-        episodeId: data.episodeId || undefined,
+        episodeId: data.episodeId === "none" ? undefined : data.episodeId || undefined,
         description: data.description || undefined
       };
       
@@ -322,7 +322,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
                         field.onChange(value);
                         setSelectedProject(value);
                         // Clear episode selection when project changes
-                        form.setValue("episodeId", "");
+                        form.setValue("episodeId", "none");
                       }} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -355,7 +355,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">No episode</SelectItem>
+                          <SelectItem value="none">No episode</SelectItem>
                           {filteredEpisodes.map((episode) => (
                             <SelectItem key={episode.id} value={episode.id}>
                               {episode.title}
