@@ -164,6 +164,16 @@ export default function Users() {
     });
   };
 
+  const handleCreateNew = () => {
+    setEditingUser(null);
+    setIsCreateDialogOpen(true);
+    form.reset({
+      username: "",
+      email: "",
+      role: "member" as const,
+    });
+  };
+
   const handleDelete = (id: string) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       deleteMutation.mutate(id);
@@ -198,13 +208,16 @@ export default function Users() {
                 </div>
               </div>
               
+              <Button 
+                onClick={handleCreateNew}
+                size="lg" 
+                className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-blue-500/25 border-0"
+              >
+                <Plus className="h-5 w-5 mr-3" />
+                New User
+              </Button>
+              
               <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button size="lg" className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-blue-500/25 border-0">
-                    <Plus className="h-5 w-5 mr-3" />
-                    New User
-                  </Button>
-                </DialogTrigger>
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-3 text-xl">
@@ -488,67 +501,7 @@ export default function Users() {
         )}
       </div>
 
-      {/* Edit Dialog */}
-      <Dialog open={!!editingUser} onOpenChange={() => setEditingUser(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-3 text-xl">
-              <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
-                <Edit className="h-5 w-5 text-white" />
-              </div>
-              Edit User
-            </DialogTitle>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter username" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter email address" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <div className="flex justify-end space-x-3 pt-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setEditingUser(null)}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit" 
-                  disabled={updateMutation.isPending}
-                  className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-lg"
-                >
-                  {updateMutation.isPending ? "Updating..." : "Update User"}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+
     </div>
   );
 }
