@@ -32,34 +32,28 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
   });
 
   // Get project-level files to count episodes and scripts
-  const { data: projectEpisodeFiles = [] } = useQuery({
+  const { data: projectEpisodeFilesResponse = { files: [] } } = useQuery({
     queryKey: ['/api/files', 'episodes', project.id],
     queryFn: async () => {
       const response = await fetch(`/api/files?entityType=episodes&entityId=${project.id}`);
-      if (!response.ok) return [];
-      return response.json();
+      if (!response.ok) return { files: [] };
+      const data = await response.json();
+      return data.files ? data : { files: data };
     }
   });
 
-  const { data: projectScriptFiles = [] } = useQuery({
+  const { data: projectScriptFilesResponse = { files: [] } } = useQuery({
     queryKey: ['/api/files', 'scripts', project.id],
     queryFn: async () => {
       const response = await fetch(`/api/files?entityType=scripts&entityId=${project.id}`);
-      if (!response.ok) return [];
-      return response.json();
+      if (!response.ok) return { files: [] };
+      const data = await response.json();
+      return data.files ? data : { files: data };
     }
   });
 
-
-  const { data: projectFiles = [] } = useQuery({
-    queryKey: ['/api/files', 'project', project.id],
-    queryFn: async () => {
-      const response = await fetch(`/api/files`);
-      if (!response.ok) throw new Error('Failed to fetch files');
-      return response.json();
-    },
-    refetchInterval: 2000,
-  });
+  const projectEpisodeFiles = projectEpisodeFilesResponse?.files || [];
+  const projectScriptFiles = projectScriptFilesResponse?.files || [];
 
   return (
     <div className="space-y-6">

@@ -38,8 +38,8 @@ import {
   FileText,
   Mic
 } from "lucide-react";
-import { ProjectDetailView } from "@/components/project-detail-view";
 import type { Project, Episode, Script } from "@shared/schema";
+import { ProjectDetailView } from "@/components/project-detail-view";
 
 const projectFormSchema = z.object({
   name: z.string().min(1, "Name is required"),

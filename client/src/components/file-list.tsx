@@ -54,13 +54,14 @@ export function FileList({ entityType, entityId, title = "Files" }: FileListProp
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: files = [], isLoading, refetch } = useQuery<FileData[]>({
+  const { data: filesResponse = { files: [] }, isLoading, refetch } = useQuery({
     queryKey: ['/api/files', entityType, entityId],
     queryFn: async () => {
       const url = `/api/files?entityType=${entityType}${entityId ? `&entityId=${entityId}` : ''}`;
       const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch files');
-      return response.json() as Promise<FileData[]>;
+      const data = await response.json();
+      return data.files ? data : { files: Array.isArray(data) ? data : [] };
     },
     staleTime: 0,
     refetchInterval: 2000,
@@ -108,6 +109,8 @@ export function FileList({ entityType, entityId, title = "Files" }: FileListProp
     }
   };
 
+  const files = filesResponse.files || [];
+
   if (isLoading) {
     return (
       <Card>
@@ -121,7 +124,7 @@ export function FileList({ entityType, entityId, title = "Files" }: FileListProp
     );
   }
 
-  if (files.length === 0) {
+  if (!files || files.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -144,7 +147,7 @@ export function FileList({ entityType, entityId, title = "Files" }: FileListProp
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {files.map((file: FileData) => (
+          {files && files.map((file: FileData) => (
             <div key={file.id} className="flex items-center justify-between p-3 border rounded-lg">
               <div className="flex items-center space-x-3">
                 {getFileIcon(file.mimeType)}
