@@ -219,7 +219,10 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
               </div>
             </div>
             <Badge className={`text-sm px-3 py-1 ${statusColors[script.status as keyof typeof statusColors]}`}>
-              <StatusIcon className="h-3 w-3 mr-1" />
+              {(() => {
+                const StatusIcon = statusIcons[script.status as keyof typeof statusIcons] || Edit;
+                return <StatusIcon className="h-3 w-3 mr-1" />;
+              })()}
               {script.status.charAt(0).toUpperCase() + script.status.slice(1)}
             </Badge>
           </div>

@@ -227,7 +227,7 @@ export default function Scripts() {
                   <p className="text-gray-300 text-sm">Create and manage your radio scripts and content</p>
                 </div>
               </div>
-              
+
               <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                 <DialogTrigger asChild>
                   <Button size="lg" className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-blue-500/25 border-0">
@@ -271,7 +271,7 @@ export default function Scripts() {
                             </FormItem>
                           )}
                         />
-                        
+
                         <FormField
                           control={form.control}
                           name="status"
@@ -296,7 +296,7 @@ export default function Scripts() {
                           )}
                         />
                       </div>
-                      
+
                       <FormField
                         control={form.control}
                         name="title"
@@ -310,7 +310,7 @@ export default function Scripts() {
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={form.control}
                         name="description"
@@ -327,7 +327,7 @@ export default function Scripts() {
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={form.control}
                         name="content"
@@ -345,7 +345,7 @@ export default function Scripts() {
                           </FormItem>
                         )}
                       />
-                      
+
                       <div className="flex justify-end space-x-3 pt-4">
                         <Button 
                           type="button" 
@@ -467,7 +467,7 @@ export default function Scripts() {
                 {filteredScripts.map((script) => {
                   const project = projects.find(p => p.id === script.projectId);
                   const StatusIcon = statusIcons[script.status as keyof typeof statusIcons] || Edit;
-                  
+
                   return (
                     <Card key={script.id} className="group hover:shadow-2xl transition-all duration-500 bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-xl hover:scale-[1.02] hover:shadow-blue-500/10">
                       <CardContent className="p-8">
@@ -513,12 +513,12 @@ export default function Scripts() {
                             </Button>
                           </div>
                         </div>
-                        
+
                         <div className="space-y-4">
                           <h3 className="text-2xl font-bold text-gray-800 line-clamp-2 group-hover:text-blue-700 transition-colors duration-300">
                             {script.title}
                           </h3>
-                          
+
                           {project && (
                             <div className="flex items-center space-x-3 p-3 bg-gray-50/80 rounded-lg">
                               <FolderOpen className="h-5 w-5 text-blue-600" />
@@ -531,7 +531,7 @@ export default function Scripts() {
                               {script.description}
                             </p>
                           )}
-                          
+
                           <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                             <div className="flex items-center space-x-2">
                               <Clock className="h-4 w-4 text-gray-400" />
@@ -609,7 +609,7 @@ export default function Scripts() {
                               title=""
                             />
                           </div>
-                          
+
                           {projectScripts.map((script) => (
                             <div key={script.id} className="pl-6 border-l-2 border-emerald-200 bg-emerald-50/30 rounded-r-lg">
                               <h5 className="text-sm font-semibold mb-3 text-gray-700 flex items-center gap-3 p-2">
@@ -672,7 +672,7 @@ export default function Scripts() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="status"
@@ -697,7 +697,7 @@ export default function Scripts() {
                   )}
                 />
               </div>
-              
+
               <FormField
                 control={form.control}
                 name="title"
@@ -711,7 +711,7 @@ export default function Scripts() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="description"
@@ -728,7 +728,7 @@ export default function Scripts() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="content"
@@ -746,7 +746,7 @@ export default function Scripts() {
                   </FormItem>
                 )}
               />
-              
+
               <div className="flex justify-end space-x-3 pt-4">
                 <Button 
                   type="button" 
