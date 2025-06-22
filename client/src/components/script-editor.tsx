@@ -41,7 +41,7 @@ const scriptFormSchema = z.object({
   projectId: z.string().min(1, "Project is required"),
   episodeId: z.string().optional(),
   content: z.string().min(1, "Content is required"),
-  status: z.enum(["draft", "review", "approved", "published"]).default("draft"),
+  status: z.enum(["Draft", "Under Review", "Approved", "Published"]).default("Draft"),
 });
 
 type ScriptFormData = z.infer<typeof scriptFormSchema>;
@@ -55,17 +55,17 @@ interface ScriptEditorProps {
 }
 
 const statusColors = {
-  draft: "bg-gray-100 text-gray-700 border-gray-200",
-  review: "bg-yellow-100 text-yellow-700 border-yellow-200",
-  approved: "bg-green-100 text-green-700 border-green-200", 
-  published: "bg-blue-100 text-blue-700 border-blue-200"
+  "Draft": "bg-gray-100 text-gray-700 border-gray-200",
+  "Under Review": "bg-yellow-100 text-yellow-700 border-yellow-200",
+  "Approved": "bg-green-100 text-green-700 border-green-200", 
+  "Published": "bg-blue-100 text-blue-700 border-blue-200"
 };
 
 const statusIcons = {
-  draft: EditIcon,
-  review: AlertCircle,
-  approved: CheckCircle,
-  published: PlayCircle
+  "Draft": EditIcon,
+  "Under Review": AlertCircle,
+  "Approved": CheckCircle,
+  "Published": PlayCircle
 };
 
 export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave }: ScriptEditorProps) {
@@ -90,7 +90,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
       projectId: "",
       episodeId: "",
       content: "",
-      status: "draft",
+      status: "Draft",
     },
   });
 
@@ -115,7 +115,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
         projectId: script.projectId || "",
         episodeId: script.episodeId || "",
         content: script.content || "",
-        status: script.status as "draft" | "review" | "approved" | "published",
+        status: script.status as "Draft" | "Under Review" | "Approved" | "Published",
       };
       form.reset(scriptData);
       setContent(script.content || "");
@@ -127,7 +127,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
         projectId: "",
         episodeId: "",
         content: "",
-        status: "draft" as const,
+        status: "Draft" as const,
       };
       form.reset(defaultData);
       setContent("");
@@ -298,10 +298,10 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="draft">Draft</SelectItem>
-                          <SelectItem value="review">Review</SelectItem>
-                          <SelectItem value="approved">Approved</SelectItem>
-                          <SelectItem value="published">Published</SelectItem>
+                          <SelectItem value="Draft">Draft</SelectItem>
+                          <SelectItem value="Under Review">Under Review</SelectItem>
+                          <SelectItem value="Approved">Approved</SelectItem>
+                          <SelectItem value="Published">Published</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
