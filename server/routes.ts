@@ -36,7 +36,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Users API
   app.get("/api/users", async (req, res) => {
     try {
-      const users = await storage.getAllUsers();
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+      const offset = req.query.offset ? parseInt(req.query.offset as string) : undefined;
+      const users = await storage.getAllUsers(limit, offset);
       res.json(users);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -517,7 +519,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Radio Stations API
   app.get("/api/radio-stations", async (req, res) => {
     try {
-      const stations = await storage.getAllRadioStations();
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+      const offset = req.query.offset ? parseInt(req.query.offset as string) : undefined;
+      const stations = await storage.getAllRadioStations(limit, offset);
       res.json(stations);
     } catch (error) {
       console.error("Error fetching radio stations:", error);
@@ -651,12 +655,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/files", async (req, res) => {
     try {
       const { entityType, entityId } = req.query;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+      const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
+      
       let files;
+      let totalCount;
       
       if (entityType) {
         files = await storage.getFilesByEntity(entityType as string, entityId as string);
+        totalCount = files.length;
       } else {
-        files = await storage.getAllFiles();
+        files = await storage.getAllFiles(limit, offset);
+        totalCount = await storage.getFileCount();
       }
       
       // Don't send file data in list view for performance
@@ -665,7 +675,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         fileData: undefined
       }));
       
-      res.json(filesWithoutData);
+      res.json({
+        files: filesWithoutData,
+        totalCount,
+        hasMore: offset + limit < totalCount
+      });
     } catch (error) {
       console.error("Error fetching files:", error);
       res.status(500).json({ message: "Failed to fetch files" });

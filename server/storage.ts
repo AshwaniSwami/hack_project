@@ -26,7 +26,7 @@ import {
   type InsertFile,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, sql } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -120,8 +120,15 @@ export class DatabaseStorage implements IStorage {
     await db.delete(users).where(eq(users.id, id));
   }
 
-  async getAllUsers(): Promise<User[]> {
-    return await db.select().from(users).orderBy(desc(users.createdAt));
+  async getAllUsers(limit?: number, offset?: number): Promise<User[]> {
+    let query = db.select().from(users).orderBy(desc(users.createdAt));
+    if (limit) {
+      query = query.limit(limit);
+    }
+    if (offset) {
+      query = query.offset(offset);
+    }
+    return await query;
   }
 
   // Projects
@@ -276,8 +283,15 @@ export class DatabaseStorage implements IStorage {
     await db.delete(radioStations).where(eq(radioStations.id, id));
   }
 
-  async getAllRadioStations(): Promise<RadioStation[]> {
-    return await db.select().from(radioStations).orderBy(desc(radioStations.createdAt));
+  async getAllRadioStations(limit?: number, offset?: number): Promise<RadioStation[]> {
+    let query = db.select().from(radioStations).orderBy(desc(radioStations.createdAt));
+    if (limit) {
+      query = query.limit(limit);
+    }
+    if (offset) {
+      query = query.offset(offset);
+    }
+    return await query;
   }
 
   // Free Project Access
@@ -331,8 +345,27 @@ export class DatabaseStorage implements IStorage {
     await db.delete(files).where(eq(files.id, id));
   }
 
-  async getAllFiles(): Promise<File[]> {
-    return await db.select().from(files).orderBy(desc(files.createdAt));
+  async getAllFiles(limit?: number, offset?: number, entityType?: string): Promise<File[]> {
+    let query = db.select().from(files).orderBy(desc(files.createdAt));
+    if (entityType) {
+      query = query.where(eq(files.entityType, entityType));
+    }
+    if (limit) {
+      query = query.limit(limit);
+    }
+    if (offset) {
+      query = query.offset(offset);
+    }
+    return await query;
+  }
+
+  async getFileCount(entityType?: string): Promise<number> {
+    let query = db.select({ count: sql`count(*)` }).from(files);
+    if (entityType) {
+      query = query.where(eq(files.entityType, entityType));
+    }
+    const result = await query;
+    return Number(result[0]?.count || 0);
   }
 
   async getFilesByEntity(entityType: string, entityId?: string): Promise<File[]> {

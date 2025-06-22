@@ -15,8 +15,8 @@ import { createInsertSchema } from "drizzle-zod";
 // Users table
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
-  username: varchar("username", { length: 255 }).notNull().unique(),
-  email: varchar("email", { length: 255 }).notNull().unique(),
+  username: varchar("username", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -24,7 +24,7 @@ export const users = pgTable("users", {
 // Projects table
 export const projects = pgTable("projects", {
   id: uuid("id").primaryKey().defaultRandom(),
-  name: varchar("name", { length: 255 }).notNull().unique(),
+  name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -75,9 +75,9 @@ export const scriptTopics = pgTable("script_topics", {
 export const radioStations = pgTable("radio_stations", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id"),
-  name: varchar("name", { length: 255 }).notNull().unique(),
+  name: varchar("name", { length: 255 }).notNull(),
   contactPerson: varchar("contact_person", { length: 255 }),
-  email: varchar("email", { length: 255 }).notNull().unique(),
+  email: varchar("email", { length: 255 }).notNull(),
   phone: varchar("phone", { length: 50 }),
   address: text("address"),
   isActive: boolean("is_active").default(true),

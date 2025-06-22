@@ -47,6 +47,9 @@ export default function RadioStations() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
+
   const { data: radioStations = [], isLoading } = useQuery<RadioStation[]>({
     queryKey: ["/api/radio-stations"],
   });
@@ -140,6 +143,17 @@ export default function RadioStations() {
     },
   });
 
+  const filteredStations = radioStations.filter(station =>
+    station.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    station.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (station.contactPerson && station.contactPerson.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  // Pagination
+  const totalPages = Math.ceil(filteredStations.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedStations = filteredStations.slice(startIndex, startIndex + itemsPerPage);
+
   const onSubmit = (data: RadioStationFormData) => {
     if (editingStation) {
       updateMutation.mutate(data);
@@ -165,12 +179,6 @@ export default function RadioStations() {
       deleteMutation.mutate(id);
     }
   };
-
-  const filteredStations = radioStations.filter((station) =>
-    station.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    station.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (station.contactPerson && station.contactPerson.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
@@ -405,8 +413,9 @@ export default function RadioStations() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredStations.map((station) => (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {paginatedStations.map((station) => (
               <Card key={station.id} className="group hover:shadow-2xl transition-all duration-500 bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-xl hover:scale-[1.02] hover:shadow-blue-500/10">
                 <CardContent className="p-8">
                   <div className="flex items-start justify-between mb-6">
@@ -499,8 +508,46 @@ export default function RadioStations() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
+              ))}
+            </div>
+            
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center space-x-2 mt-8">
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
+                
+                <div className="flex space-x-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    const pageNum = i + 1;
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={currentPage === pageNum ? "default" : "outline"}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className="w-10"
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                </div>
+                
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
 
