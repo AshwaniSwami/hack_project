@@ -84,10 +84,17 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
 
   const form = useForm<ScriptFormData>({
     resolver: zodResolver(scriptFormSchema),
-    defaultValues: {
+    defaultValues: script ? {
+      projectId: script.projectId,
+      title: script.title,
+      description: script.description || "",
+      episodeId: script.episodeId || "none",
+      content: script.content || "",
+      status: script.status as "Draft" | "Under Review" | "Approved" | "Published",
+    } : {
+      projectId: "",
       title: "",
       description: "",
-      projectId: "",
       episodeId: "none",
       content: "",
       status: "Draft",
@@ -143,7 +150,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
         episodeId: data.episodeId === "none" ? undefined : data.episodeId || undefined,
         description: data.description || undefined
       };
-      
+
       if (script) {
         return apiRequest("PUT", `/api/scripts/${script.id}`, submitData);
       } else {
@@ -178,7 +185,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
 
   const onSubmit = (data: ScriptFormData) => {
     const cleanContent = content.replace(/<p><br><\/p>/g, '').trim();
-    
+
     if (!cleanContent || cleanContent === '<p></p>') {
       toast({
         title: "Error",
@@ -187,7 +194,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
       });
       return;
     }
-    
+
     const submitData = { ...data, content: cleanContent };
     mutation.mutate(submitData);
   };
@@ -226,7 +233,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
               {script.status.charAt(0).toUpperCase() + script.status.slice(1)}
             </Badge>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {selectedProjectData && (
               <div className="flex items-center space-x-3 p-3 bg-white/60 rounded-lg">
@@ -268,7 +275,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
             {script ? "Edit Script" : "Create New Script"}
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-1">

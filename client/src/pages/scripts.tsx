@@ -78,7 +78,7 @@ const statusIcons = {
   "Under Review": AlertCircle,
   "Approved": CheckCircle,
   "Published": PlayCircle
-};
+} as const;
 
 export default function Scripts() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -466,7 +466,7 @@ export default function Scripts() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredScripts.map((script) => {
                   const project = projects.find(p => p.id === script.projectId);
-                  const StatusIcon = statusIcons[script.status as keyof typeof statusIcons] || Edit;
+                  const StatusIcon = statusIcons[script.status as keyof typeof statusIcons] || FileText;
 
                   return (
                     <Card key={script.id} className="group hover:shadow-2xl transition-all duration-500 bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-xl hover:scale-[1.02] hover:shadow-blue-500/10">
@@ -482,7 +482,7 @@ export default function Scripts() {
                             <div>
                               <Badge className={`text-sm px-3 py-1 ${statusColors[script.status as keyof typeof statusColors]}`}>
                                 <StatusIcon className="h-3 w-3 mr-1" />
-                                {script.status.charAt(0).toUpperCase() + script.status.slice(1)}
+                                {script.status}
                               </Badge>
                             </div>
                           </div>
