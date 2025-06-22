@@ -110,7 +110,12 @@ export default function Users() {
         description: "User updated successfully",
       });
       setEditingUser(null);
-      form.reset();
+      setIsCreateDialogOpen(false);
+      form.reset({
+        username: "",
+        email: "",
+        role: "member" as const,
+      });
     },
     onError: () => {
       toast({
@@ -151,6 +156,7 @@ export default function Users() {
 
   const handleEdit = (user: UserType) => {
     setEditingUser(user);
+    setIsCreateDialogOpen(true);
     form.reset({
       username: user.username,
       email: user.email,
@@ -293,7 +299,10 @@ export default function Users() {
                           disabled={createMutation.isPending || updateMutation.isPending}
                           className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-lg"
                         >
-                          {createMutation.isPending || updateMutation.isPending ? "Saving..." : "Save User"}
+                          {editingUser 
+                            ? (updateMutation.isPending ? "Updating..." : "Update User")
+                            : (createMutation.isPending ? "Creating..." : "Create User")
+                          }
                         </Button>
                       </div>
                     </form>
