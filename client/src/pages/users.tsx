@@ -22,9 +22,23 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/api";
-import { Plus, Edit, Trash2, User, Search, Mail, Users as UsersIcon, Sparkles, Shield, Crown, Clock } from "lucide-react";
+import { Plus, Edit, Trash2, User, Search, Mail, Users as UsersIcon, Sparkles, Shield, Crown, Clock, Eye, MoreHorizontal, Filter } from "lucide-react";
 import type { User as UserType } from "@shared/schema";
 
 const userFormSchema = z.object({
@@ -245,36 +259,44 @@ export default function Users() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Search Bar */}
+        {/* Search and Filter Bar */}
         <div className="mb-8">
           <Card className="bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-xl">
             <CardContent className="p-6">
-              <div className="relative max-w-xl mx-auto">
-                <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400" />
-                <Input
-                  placeholder="Search users by name or email..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-12 h-12 text-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
-                />
+              <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-4 top-3 h-5 w-5 text-gray-400" />
+                  <Input
+                    placeholder="Search users by name or email..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-12 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                  />
+                </div>
+                <Badge variant="outline" className="bg-gray-50">
+                  {filteredUsers.length} users
+                </Badge>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Users Content */}
+        {/* Users Table */}
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} className="animate-pulse bg-white/60 backdrop-blur-sm">
-                <CardContent className="p-8">
-                  <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <Card className="bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-xl">
+            <CardContent className="p-8">
+              <div className="animate-pulse space-y-4">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="flex space-x-4">
+                    <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/6"></div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         ) : filteredUsers.length === 0 ? (
           <Card className="bg-white/80 backdrop-blur-md border-0 shadow-2xl">
             <CardContent className="text-center py-20">
@@ -306,68 +328,86 @@ export default function Users() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredUsers.map((user) => (
-              <Card key={user.id} className="group hover:shadow-2xl transition-all duration-500 bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-xl hover:scale-[1.02] hover:shadow-blue-500/10">
-                <CardContent className="p-8">
-                  <div className="flex items-start justify-between mb-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-xl blur opacity-50"></div>
-                        <div className="relative p-3 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-xl">
-                          <User className="h-6 w-6 text-white" />
+          <Card className="bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
+                    <TableHead className="font-semibold text-gray-700">User</TableHead>
+                    <TableHead className="font-semibold text-gray-700">Email</TableHead>
+                    <TableHead className="font-semibold text-gray-700">Role</TableHead>
+                    <TableHead className="font-semibold text-gray-700">Created</TableHead>
+                    <TableHead className="font-semibold text-gray-700 text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredUsers.map((user) => (
+                    <TableRow 
+                      key={user.id} 
+                      className="hover:bg-blue-50/50 transition-colors duration-200 border-b border-gray-100"
+                    >
+                      <TableCell className="font-medium">
+                        <div className="flex items-center space-x-3">
+                          <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg blur opacity-50"></div>
+                            <div className="relative p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
+                              <User className="h-4 w-4 text-white" />
+                            </div>
+                          </div>
+                          <div>
+                            <div className="font-semibold text-gray-900">{user.username}</div>
+                            <div className="text-sm text-gray-500">ID: {user.id.substring(0, 8)}...</div>
+                          </div>
                         </div>
-                      </div>
-                      <div>
-                        <Badge className="text-sm bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1">
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Mail className="h-4 w-4 text-emerald-600" />
+                          <span className="text-gray-700">{user.email}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className="bg-blue-50 text-blue-700 border border-blue-200">
                           <Crown className="h-3 w-3 mr-1" />
                           Member
                         </Badge>
-                      </div>
-                    </div>
-                    <div className="flex space-x-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => handleEdit(user)}
-                        className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-blue-50 hover:scale-110"
-                      >
-                        <Edit className="h-5 w-5 text-blue-600" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => handleDelete(user.id)}
-                        className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-50 hover:scale-110"
-                      >
-                        <Trash2 className="h-5 w-5 text-red-500" />
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <h3 className="text-2xl font-bold text-gray-800 group-hover:text-blue-700 transition-colors duration-300">
-                      {user.username}
-                    </h3>
-                    
-                    <div className="flex items-center space-x-3 p-3 bg-gray-50/80 rounded-lg">
-                      <Mail className="h-5 w-5 text-emerald-600" />
-                      <span className="text-sm text-gray-700 font-medium">{user.email}</span>
-                    </div>
-                    
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                      <div className="flex items-center space-x-2">
-                        <Clock className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-500">
-                          {new Date(user.createdAt!).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Clock className="h-3 w-3 text-gray-400" />
+                          <span className="text-sm text-gray-500">
+                            {new Date(user.createdAt!).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem onClick={() => handleEdit(user)}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit User
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => handleDelete(user.id)}
+                              className="text-red-600 focus:text-red-600"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete User
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
         )}
       </div>
 
