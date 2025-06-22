@@ -61,23 +61,23 @@ const scriptFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
   content: z.string().optional(),
-  status: z.enum(["draft", "review", "approved", "published"]).default("draft"),
+  status: z.enum(["Draft", "Under Review", "Approved", "Published"]).default("Draft"),
 });
 
 type ScriptFormData = z.infer<typeof scriptFormSchema>;
 
 const statusColors = {
-  draft: "bg-gray-100 text-gray-700 border-gray-200",
-  review: "bg-yellow-100 text-yellow-700 border-yellow-200",
-  approved: "bg-green-100 text-green-700 border-green-200", 
-  published: "bg-blue-100 text-blue-700 border-blue-200"
+  "Draft": "bg-gray-100 text-gray-700 border-gray-200",
+  "Under Review": "bg-yellow-100 text-yellow-700 border-yellow-200",
+  "Approved": "bg-green-100 text-green-700 border-green-200", 
+  "Published": "bg-blue-100 text-blue-700 border-blue-200"
 };
 
 const statusIcons = {
-  draft: Edit,
-  review: AlertCircle,
-  approved: CheckCircle,
-  published: PlayCircle
+  "Draft": Edit,
+  "Under Review": AlertCircle,
+  "Approved": CheckCircle,
+  "Published": PlayCircle
 };
 
 export default function Scripts() {
@@ -104,7 +104,7 @@ export default function Scripts() {
       title: "",
       description: "",
       content: "",
-      status: "draft",
+      status: "Draft",
     },
   });
 
@@ -188,7 +188,7 @@ export default function Scripts() {
       title: script.title,
       description: script.description || "",
       content: script.content || "",
-      status: script.status,
+      status: script.status as "Draft" | "Under Review" | "Approved" | "Published",
     });
   };
 
@@ -285,10 +285,10 @@ export default function Scripts() {
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="draft">Draft</SelectItem>
-                                  <SelectItem value="review">Review</SelectItem>
-                                  <SelectItem value="approved">Approved</SelectItem>
-                                  <SelectItem value="published">Published</SelectItem>
+                                  <SelectItem value="Draft">Draft</SelectItem>
+                                  <SelectItem value="Under Review">Under Review</SelectItem>
+                                  <SelectItem value="Approved">Approved</SelectItem>
+                                  <SelectItem value="Published">Published</SelectItem>
                                 </SelectContent>
                               </Select>
                               <FormMessage />
@@ -409,10 +409,10 @@ export default function Scripts() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="review">Review</SelectItem>
-                      <SelectItem value="approved">Approved</SelectItem>
-                      <SelectItem value="published">Published</SelectItem>
+                      <SelectItem value="Draft">Draft</SelectItem>
+                      <SelectItem value="Under Review">Under Review</SelectItem>
+                      <SelectItem value="Approved">Approved</SelectItem>
+                      <SelectItem value="Published">Published</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -466,7 +466,7 @@ export default function Scripts() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredScripts.map((script) => {
                   const project = projects.find(p => p.id === script.projectId);
-                  const StatusIcon = statusIcons[script.status];
+                  const StatusIcon = statusIcons[script.status as keyof typeof statusIcons] || Edit;
                   
                   return (
                     <Card key={script.id} className="group hover:shadow-2xl transition-all duration-500 bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-xl hover:scale-[1.02] hover:shadow-blue-500/10">
@@ -480,7 +480,7 @@ export default function Scripts() {
                               </div>
                             </div>
                             <div>
-                              <Badge className={`text-sm px-3 py-1 ${statusColors[script.status]}`}>
+                              <Badge className={`text-sm px-3 py-1 ${statusColors[script.status as keyof typeof statusColors]}`}>
                                 <StatusIcon className="h-3 w-3 mr-1" />
                                 {script.status.charAt(0).toUpperCase() + script.status.slice(1)}
                               </Badge>
@@ -686,10 +686,10 @@ export default function Scripts() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="draft">Draft</SelectItem>
-                          <SelectItem value="review">Review</SelectItem>
-                          <SelectItem value="approved">Approved</SelectItem>
-                          <SelectItem value="published">Published</SelectItem>
+                          <SelectItem value="Draft">Draft</SelectItem>
+                          <SelectItem value="Under Review">Under Review</SelectItem>
+                          <SelectItem value="Approved">Approved</SelectItem>
+                          <SelectItem value="Published">Published</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
