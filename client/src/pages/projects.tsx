@@ -68,11 +68,11 @@ export default function Projects() {
     queryKey: ["/api/scripts"],
   });
 
-  const { data: allFiles = [] } = useQuery({
+  const { data: allFiles = { files: [] } } = useQuery({
     queryKey: ["/api/files"],
     queryFn: async () => {
       const response = await fetch('/api/files');
-      if (!response.ok) return [];
+      if (!response.ok) return { files: [] };
       return response.json();
     }
   });
@@ -176,6 +176,8 @@ export default function Projects() {
     project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (project.description && project.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  const projectFiles = allFiles?.files || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
@@ -341,7 +343,7 @@ export default function Projects() {
             {filteredProjects.map((project) => {
               const projectEpisodes = episodes.filter(ep => ep.projectId === project.id);
               const projectScripts = scripts.filter(script => script.projectId === project.id);
-              const projectScriptFiles = allFiles.filter(file => 
+              const projectScriptFiles = projectFiles.filter(file => 
                 file.entityType === 'scripts' && 
                 (file.entityId === project.id || projectScripts.some(script => script.id === file.entityId))
               );

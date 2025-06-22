@@ -36,14 +36,22 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/api";
-import { Plus, Edit, Trash2, User, Search, Mail, Users as UsersIcon, Sparkles, Shield, Crown, Clock, Eye, MoreHorizontal, Filter } from "lucide-react";
+import { Plus, Edit, Trash2, User, Search, Mail, Users as UsersIcon, Sparkles, Shield, Crown, Clock, Eye, MoreHorizontal, Filter, Settings } from "lucide-react";
 import type { User as UserType } from "@shared/schema";
 
 const userFormSchema = z.object({
   username: z.string().min(1, "Username is required").min(3, "Username must be at least 3 characters"),
   email: z.string().email("Invalid email address"),
+  role: z.enum(["admin", "editor", "member"]).default("member"),
 });
 
 type UserFormData = z.infer<typeof userFormSchema>;
@@ -64,6 +72,7 @@ export default function Users() {
     defaultValues: {
       username: "",
       email: "",
+      role: "member" as const,
     },
   });
 
@@ -145,6 +154,7 @@ export default function Users() {
     form.reset({
       username: user.username,
       email: user.email,
+      role: (user.role || "member") as "admin" | "editor" | "member",
     });
   };
 
@@ -223,6 +233,44 @@ export default function Users() {
                             <FormControl>
                               <Input placeholder="Enter email address" {...field} />
                             </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="role"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Role</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select user role" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="member">
+                                  <div className="flex items-center gap-2">
+                                    <User className="h-4 w-4" />
+                                    Member
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="editor">
+                                  <div className="flex items-center gap-2">
+                                    <Edit className="h-4 w-4" />
+                                    Editor
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="admin">
+                                  <div className="flex items-center gap-2">
+                                    <Shield className="h-4 w-4" />
+                                    Administrator
+                                  </div>
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -367,9 +415,29 @@ export default function Users() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge className="bg-blue-50 text-blue-700 border border-blue-200">
-                          <Crown className="h-3 w-3 mr-1" />
-                          Member
+                        <Badge className={`${
+                          user.role === 'admin' 
+                            ? "bg-red-50 text-red-700 border border-red-200" 
+                            : user.role === 'editor'
+                            ? "bg-orange-50 text-orange-700 border border-orange-200"
+                            : "bg-blue-50 text-blue-700 border border-blue-200"
+                        }`}>
+                          {user.role === 'admin' ? (
+                            <>
+                              <Shield className="h-3 w-3 mr-1" />
+                              Administrator
+                            </>
+                          ) : user.role === 'editor' ? (
+                            <>
+                              <Edit className="h-3 w-3 mr-1" />
+                              Editor
+                            </>
+                          ) : (
+                            <>
+                              <User className="h-3 w-3 mr-1" />
+                              Member
+                            </>
+                          )}
                         </Badge>
                       </TableCell>
                       <TableCell>
