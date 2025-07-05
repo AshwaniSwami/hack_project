@@ -68,6 +68,8 @@ async function upsertUser(
     }
   }
   
+  console.log(`Setting user role to: ${role} for user: ${claims["email"]}`);
+  
   await storage.upsertUser({
     id: claims["sub"],
     email: claims["email"],
@@ -180,11 +182,18 @@ export const isAdmin: RequestHandler = async (req, res, next) => {
 
   try {
     const dbUser = await storage.getUser(user.claims.sub);
+    console.log(`Admin check for user ${user.claims.sub}: role = ${dbUser?.role}`);
+    
     if (!dbUser || dbUser.role !== "admin") {
-      return res.status(403).json({ message: "Forbidden - Admin access required" });
+      return res.status(403).json({ 
+        message: "Forbidden - Admin access required",
+        userRole: dbUser?.role,
+        userId: user.claims.sub
+      });
     }
     return next();
   } catch (error) {
+    console.error("Admin check error:", error);
     res.status(500).json({ message: "Server error" });
     return;
   }

@@ -33,7 +33,10 @@ import { useState } from "react";
 export function Navbar() {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, isAdmin } = useAuth();
+  const { user, isLoading, isAuthenticated, isAdmin } = useAuth();
+
+  // Debug admin status
+  console.log("Admin status:", { isAdmin, userRole: user?.role, user });
 
   const navItems = [
     { href: "/", label: "Dashboard", icon: Home },
@@ -88,7 +91,7 @@ export function Navbar() {
                 </div>
               </div>
             </Link>
-            
+
             <nav className="hidden lg:flex space-x-2 ml-8">
               {navItems.map((item) => {
                 const Icon = item.icon;
@@ -117,7 +120,7 @@ export function Navbar() {
               })}
             </nav>
           </div>
-          
+
           <div className="flex items-center space-x-3">
             <Button
               variant="ghost"
@@ -129,7 +132,7 @@ export function Navbar() {
                 3
               </Badge>
             </Button>
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -174,7 +177,7 @@ export function Navbar() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            
+
             <Button
               variant="ghost"
               size="sm"
@@ -188,7 +191,7 @@ export function Navbar() {
             </Button>
           </div>
         </div>
-        
+
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="lg:hidden border-t border-white/10 py-6 backdrop-blur-md">
