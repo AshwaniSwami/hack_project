@@ -51,6 +51,9 @@ import type { User as UserType } from "@shared/schema";
 const userFormSchema = z.object({
   username: z.string().min(1, "Username is required").min(3, "Username must be at least 3 characters"),
   email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters").optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
   role: z.enum(["admin", "editor", "member"]).default("member"),
 });
 
@@ -72,6 +75,9 @@ export default function Users() {
     defaultValues: {
       username: "",
       email: "",
+      password: "",
+      firstName: "",
+      lastName: "",
       role: "member" as const,
     },
   });
@@ -181,8 +187,10 @@ export default function Users() {
   };
 
   const filteredUsers = users.filter((user) =>
-    user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    (user.username?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+    (user.email?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+    (user.firstName?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+    (user.lastName?.toLowerCase() || "").includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -256,6 +264,50 @@ export default function Users() {
                           </FormItem>
                         )}
                       />
+
+                      <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Password</FormLabel>
+                            <FormControl>
+                              <Input type="password" placeholder="Enter password (min 6 characters)" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="firstName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>First Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter first name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="lastName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Last Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter last name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
 
                       <FormField
                         control={form.control}
@@ -425,8 +477,14 @@ export default function Users() {
                             </div>
                           </div>
                           <div>
-                            <div className="font-semibold text-gray-900">{user.username}</div>
-                            <div className="text-sm text-gray-500">ID: {user.id.substring(0, 8)}...</div>
+                            <div className="font-semibold text-gray-900">
+                              {user.firstName && user.lastName 
+                                ? `${user.firstName} ${user.lastName}` 
+                                : user.username || user.email?.split("@")[0] || "User"}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {user.username && `@${user.username}`} • ID: {user.id.substring(0, 8)}...
+                            </div>
                           </div>
                         </div>
                       </TableCell>

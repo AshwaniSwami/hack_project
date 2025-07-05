@@ -30,19 +30,19 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 
-const navItems = [
-  { href: "/", label: "Dashboard", icon: Home },
-  { href: "/projects", label: "Projects", icon: FolderOpen },
-  { href: "/episodes", label: "Episodes", icon: Play },
-  { href: "/scripts", label: "Scripts", icon: FileText },
-  { href: "/radio-stations", label: "Stations", icon: RadioTower },
-  { href: "/users", label: "Users", icon: Users },
-];
-
 export function Navbar() {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
+
+  const navItems = [
+    { href: "/", label: "Dashboard", icon: Home },
+    { href: "/projects", label: "Projects", icon: FolderOpen },
+    { href: "/episodes", label: "Episodes", icon: Play },
+    { href: "/scripts", label: "Scripts", icon: FileText },
+    { href: "/radio-stations", label: "Stations", icon: RadioTower },
+    ...(isAdmin ? [{ href: "/users", label: "Users", icon: Users }] : []),
+  ];
 
   const handleLogout = () => {
     window.location.href = "/api/logout";

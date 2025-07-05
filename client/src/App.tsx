@@ -15,7 +15,7 @@ import Landing from "@/pages/landing";
 import NotFound from "@/pages/not-found";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, isAdmin } = useAuth();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -31,7 +31,7 @@ function Router() {
               <Route path="/episodes" component={Episodes} />
               <Route path="/scripts" component={Scripts} />
               <Route path="/radio-stations" component={RadioStations} />
-              <Route path="/users" component={Users} />
+              {isAdmin && <Route path="/users" component={Users} />}
             </>
           )}
           <Route component={NotFound} />

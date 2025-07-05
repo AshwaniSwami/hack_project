@@ -5,7 +5,8 @@ import { storage } from "./storage";
 import { registerProjectFileRoutes } from "./routes-projects-files";
 import { registerEpisodeFileRoutes } from "./routes-episodes-files";
 import { registerScriptFileRoutes } from "./routes-scripts-files";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated, isAdmin } from "./replitAuth";
+import bcrypt from "bcryptjs";
 import {
   insertUserSchema,
   insertProjectSchema,
@@ -50,8 +51,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Users API
-  app.get("/api/users", async (req, res) => {
+  // Users API - Admin only
+  app.get("/api/users", isAuthenticated, isAdmin, async (req, res) => {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
       const offset = req.query.offset ? parseInt(req.query.offset as string) : undefined;
@@ -63,7 +64,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/users/:id", async (req, res) => {
+  app.get("/api/users/:id", isAuthenticated, isAdmin, async (req, res) => {
     try {
       const user = await storage.getUser(req.params.id);
       if (!user) {
@@ -76,11 +77,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/users", async (req, res) => {
+  app.post("/api/users", isAuthenticated, isAdmin, async (req, res) => {
     try {
       const userData = insertUserSchema.parse(req.body);
+      
+      // Hash password if provided (for custom users)
+      if (userData.password) {
+        userData.password = await bcrypt.hash(userData.password, 10);
+      }
+      
+      // Generate a unique ID for custom users
+      if (!userData.id) {
+        userData.id = `custom_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      }
+      
       const user = await storage.createUser(userData);
-      res.status(201).json(user);
+      
+      // Don't return password in response
+      const { password, ...userResponse } = user;
+      res.status(201).json(userResponse);
     } catch (error) {
       console.error("Error creating user:", error);
       res.status(400).json({ message: "Failed to create user" });

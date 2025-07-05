@@ -34,6 +34,12 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  username: varchar("username").unique(),
+  password: varchar("password"), // For custom users (not Replit users)
+  role: varchar("role").default("member"), // admin, editor, member
+  isActive: boolean("is_active").default(true),
+  loginCount: integer("login_count").default(0),
+  lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

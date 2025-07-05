@@ -57,12 +57,27 @@ function updateUserSession(
 async function upsertUser(
   claims: any,
 ) {
+  const existingUser = await storage.getUser(claims["sub"]);
+  
+  // Check if this is the first user in the system - make them admin
+  let role = existingUser?.role || "member";
+  if (!existingUser) {
+    const allUsers = await storage.getAllUsers();
+    if (allUsers.length === 0) {
+      role = "admin"; // First user becomes admin
+    }
+  }
+  
   await storage.upsertUser({
     id: claims["sub"],
     email: claims["email"],
     firstName: claims["first_name"],
     lastName: claims["last_name"],
     profileImageUrl: claims["profile_image_url"],
+    username: claims["email"]?.split("@")[0] || claims["sub"],
+    role: role,
+    loginCount: (existingUser?.loginCount || 0) + 1,
+    lastLoginAt: new Date(),
   });
 }
 
@@ -152,6 +167,25 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return next();
   } catch (error) {
     res.status(401).json({ message: "Unauthorized" });
+    return;
+  }
+};
+
+export const isAdmin: RequestHandler = async (req, res, next) => {
+  const user = req.user as any;
+  
+  if (!req.isAuthenticated() || !user.claims?.sub) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  try {
+    const dbUser = await storage.getUser(user.claims.sub);
+    if (!dbUser || dbUser.role !== "admin") {
+      return res.status(403).json({ message: "Forbidden - Admin access required" });
+    }
+    return next();
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
     return;
   }
 };
