@@ -51,6 +51,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Emergency admin promotion for first user
+  app.post('/api/auth/promote-first-admin', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const allUsers = await storage.getAllUsers();
+      
+      // Only allow if there are no admins in the system
+      const adminUsers = allUsers.filter(u => u.role === 'admin');
+      if (adminUsers.length === 0) {
+        await storage.updateUser(userId, { role: 'admin' });
+        const updatedUser = await storage.getUser(userId);
+        res.json({ message: 'Successfully promoted to admin', user: updatedUser });
+      } else {
+        res.status(403).json({ message: 'Admin already exists in system' });
+      }
+    } catch (error) {
+      console.error("Error promoting user:", error);
+      res.status(500).json({ message: "Failed to promote user" });
+    }
+  });
+
   // Users API - Admin only
   app.get("/api/users", isAuthenticated, isAdmin, async (req, res) => {
     try {

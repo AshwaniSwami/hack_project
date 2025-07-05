@@ -63,8 +63,10 @@ async function upsertUser(
   let role = existingUser?.role || "member";
   if (!existingUser) {
     const allUsers = await storage.getAllUsers();
+    console.log(`Total users in system: ${allUsers.length}`);
     if (allUsers.length === 0) {
       role = "admin"; // First user becomes admin
+      console.log(`Making first user admin: ${claims["email"]}`);
     }
   }
   
