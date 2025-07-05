@@ -10,6 +10,7 @@ import {
   files,
   type User,
   type InsertUser,
+  type UpsertUser,
   type Project,
   type InsertProject,
   type Episode,
@@ -30,7 +31,9 @@ import { eq, desc, and, sql } from "drizzle-orm";
 
 export interface IStorage {
   // Users
+  // (IMPORTANT) these user operations are mandatory for Replit Auth.
   getUser(id: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, user: Partial<InsertUser>): Promise<User>;
@@ -98,8 +101,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
+    // Note: New schema doesn't have username field, this method may not be needed
+    return undefined;
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {

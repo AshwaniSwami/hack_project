@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { 
   Bell, 
@@ -27,6 +27,7 @@ import {
   User
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 
 const navItems = [
@@ -41,6 +42,32 @@ const navItems = [
 export function Navbar() {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user } = useAuth();
+
+  const handleLogout = () => {
+    window.location.href = "/api/logout";
+  };
+
+  // Get user initials
+  const getUserInitials = () => {
+    if (user?.firstName && user?.lastName) {
+      return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
+    }
+    if (user?.email) {
+      return user.email.substring(0, 2).toUpperCase();
+    }
+    return "U";
+  };
+
+  const getUserDisplayName = () => {
+    if (user?.firstName && user?.lastName) {
+      return `${user.firstName} ${user.lastName}`;
+    }
+    if (user?.email) {
+      return user.email;
+    }
+    return "User";
+  };
 
   return (
     <header className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-900 text-white shadow-2xl sticky top-0 z-50 backdrop-blur-md border-b border-white/10">
@@ -110,13 +137,20 @@ export function Navbar() {
                   className="flex items-center space-x-3 text-white/90 hover:text-white hover:bg-white/15 transition-all duration-300 rounded-xl px-3 py-2 group"
                 >
                   <Avatar className="h-9 w-9 border-2 border-white/30 shadow-lg">
+                    {user?.profileImageUrl && (
+                      <AvatarImage 
+                        src={user.profileImageUrl} 
+                        alt={getUserDisplayName()}
+                        className="object-cover"
+                      />
+                    )}
                     <AvatarFallback className="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 text-white text-sm font-bold">
-                      AD
+                      {getUserInitials()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="hidden sm:block text-left">
-                    <p className="text-sm font-semibold">Admin User</p>
-                    <p className="text-xs text-white/70">Administrator</p>
+                    <p className="text-sm font-semibold">{getUserDisplayName()}</p>
+                    <p className="text-xs text-white/70">{user?.email || "User"}</p>
                   </div>
                   <ChevronDown className="h-4 w-4 group-hover:rotate-180 transition-transform duration-300" />
                 </Button>
@@ -131,7 +165,10 @@ export function Navbar() {
                   <span>Settings</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer text-red-600 group">
+                <DropdownMenuItem 
+                  className="cursor-pointer text-red-600 group"
+                  onClick={handleLogout}
+                >
                   <LogOut className="h-4 w-4 mr-3 group-hover:scale-110 transition-transform duration-200" />
                   <span>Logout</span>
                 </DropdownMenuItem>

@@ -8,16 +8,32 @@ import {
   boolean,
   date,
   primaryKey,
+  jsonb,
+  index,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 
-// Users table
+// Session storage table.
+// (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// User storage table.
+// (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
 export const users = pgTable("users", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  username: varchar("username", { length: 255 }).notNull(),
-  email: varchar("email", { length: 255 }).notNull(),
-  role: varchar("role", { length: 50 }).notNull().default("member"),
+  id: varchar("id").primaryKey().notNull(),
+  email: varchar("email").unique(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  profileImageUrl: varchar("profile_image_url"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -182,7 +198,11 @@ export const freeProjectAccessRelations = relations(freeProjectAccess, ({ one })
 
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
-  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const upsertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
   updatedAt: true,
 });
@@ -230,6 +250,7 @@ export const insertFileSchema = createInsertSchema(files).omit({
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof insertUserSchema._type;
+export type UpsertUser = typeof upsertUserSchema._type;
 
 export type Project = typeof projects.$inferSelect;
 export type InsertProject = typeof insertProjectSchema._type;

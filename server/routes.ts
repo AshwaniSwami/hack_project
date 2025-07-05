@@ -5,6 +5,7 @@ import { storage } from "./storage";
 import { registerProjectFileRoutes } from "./routes-projects-files";
 import { registerEpisodeFileRoutes } from "./routes-episodes-files";
 import { registerScriptFileRoutes } from "./routes-scripts-files";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 import {
   insertUserSchema,
   insertProjectSchema,
@@ -29,10 +30,26 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Auth middleware
+  await setupAuth(app);
+
   // Register file upload routes for organized content management
   registerProjectFileRoutes(app);
   registerEpisodeFileRoutes(app);
   registerScriptFileRoutes(app);
+
+  // Auth routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
   // Users API
   app.get("/api/users", async (req, res) => {
     try {
