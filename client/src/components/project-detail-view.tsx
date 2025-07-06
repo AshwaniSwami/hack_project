@@ -85,74 +85,101 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
           <TabsTrigger value="scripts">Scripts</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Project Summary</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Episodes</span>
-                  <Badge variant="secondary">{episodes.length}</Badge>
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid gap-6 lg:grid-cols-2">
+            {/* Episodes Section */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Episodes ({episodes.length})
+                </h3>
+              </div>
+              
+              {episodes.length === 0 ? (
+                <Card>
+                  <CardContent className="p-6 text-center text-muted-foreground">
+                    No episodes created yet
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-3">
+                  {episodes.slice(0, 5).map((episode) => (
+                    <Card key={episode.id}>
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h4 className="font-medium">{episode.title}</h4>
+                            <p className="text-sm text-muted-foreground">Episode #{episode.episodeNumber}</p>
+                            {episode.description && (
+                              <p className="text-sm mt-1 line-clamp-2">{episode.description}</p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 ml-4">
+                            {episode.isPremium && (
+                              <Badge variant="secondary">Premium</Badge>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  {episodes.length > 5 && (
+                    <p className="text-sm text-muted-foreground text-center">
+                      ... and {episodes.length - 5} more episodes
+                    </p>
+                  )}
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Scripts</span>
-                  <Badge variant="secondary">{scripts.length}</Badge>
+              )}
+            </div>
+
+            {/* Scripts Section */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Scripts ({scripts.length})
+                </h3>
+              </div>
+              
+              {scripts.length === 0 ? (
+                <Card>
+                  <CardContent className="p-6 text-center text-muted-foreground">
+                    No scripts created yet
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-3">
+                  {scripts.slice(0, 5).map((script) => (
+                    <Card key={script.id}>
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h4 className="font-medium">{script.title}</h4>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant="outline" className="text-xs">
+                                {script.status}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(script.updatedAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  {scripts.length > 5 && (
+                    <p className="text-sm text-muted-foreground text-center">
+                      ... and {scripts.length - 5} more scripts
+                    </p>
+                  )}
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Episode Files</span>
-                  <Badge variant="secondary">{projectEpisodeFiles.length}</Badge>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Script Files</span>
-                  <Badge variant="secondary">{projectScriptFiles.length}</Badge>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Created</span>
-                  <span className="text-sm">{new Date(project.createdAt).toLocaleDateString()}</span>
-                </div>
-                {project.updatedAt !== project.createdAt && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Last Updated</span>
-                    <span className="text-sm">{new Date(project.updatedAt).toLocaleDateString()}</span>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {episodes.slice(0, 3).map((episode) => (
-                  <div key={episode.id} className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">Episode {episode.episodeNumber}</p>
-                      <p className="text-xs text-muted-foreground truncate">{episode.title}</p>
-                    </div>
-                    <Badge variant="outline">Episode</Badge>
-                  </div>
-                ))}
-                {scripts.slice(0, 3).map((script) => (
-                  <div key={script.id} className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{script.title}</p>
-                      <p className="text-xs text-muted-foreground">{script.status}</p>
-                    </div>
-                    <Badge variant="outline">Script</Badge>
-                  </div>
-                ))}
-                {episodes.length === 0 && scripts.length === 0 && (
-                  <p className="text-sm text-muted-foreground text-center py-4">
-                    No recent activity
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+              )}
+            </div>
           </div>
           
+          {/* Project Files Section */}
           <EnhancedFileManager 
             entityType="projects" 
             entityId={project.id} 
