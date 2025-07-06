@@ -5,12 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileList } from "@/components/file-list";
+import { EnhancedFileManager } from "@/components/enhanced-file-manager";
+import { SubprojectManager } from "@/components/subproject-manager";
 import { 
   Plus, 
   FileText, 
   Users, 
   Calendar,
-  FolderOpen
+  FolderOpen,
+  FolderTree
 } from "lucide-react";
 import type { Project, Episode, Script } from "@shared/schema";
 
@@ -74,11 +77,37 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
         </CardHeader>
       </Card>
 
-      <Tabs defaultValue="episodes" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="overview" className="flex items-center gap-2">
+            <FolderOpen className="h-4 w-4" />
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="subprojects" className="flex items-center gap-2">
+            <FolderTree className="h-4 w-4" />
+            Subprojects
+          </TabsTrigger>
           <TabsTrigger value="episodes">Episodes</TabsTrigger>
           <TabsTrigger value="scripts">Scripts</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="overview" className="space-y-4">
+          <EnhancedFileManager 
+            entityType="projects" 
+            entityId={project.id} 
+            title="Project Files"
+          />
+        </TabsContent>
+
+        <TabsContent value="subprojects" className="space-y-4">
+          <SubprojectManager 
+            parentProjectId={project.id}
+            onSubprojectSelect={(subproject) => {
+              // Handle subproject selection - could navigate or expand
+              console.log('Selected subproject:', subproject);
+            }}
+          />
+        </TabsContent>
 
         <TabsContent value="episodes" className="space-y-4">
           <h3 className="text-lg font-semibold">Episodes</h3>

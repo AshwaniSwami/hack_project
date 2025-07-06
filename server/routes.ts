@@ -362,6 +362,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Subprojects API - must come before generic :id route
+  app.get("/api/projects/subprojects", isAuthenticated, async (req: any, res) => {
+    try {
+      const { parentProjectId } = req.query;
+      const projects = await storage.getProjectsByParent(parentProjectId as string || undefined);
+      res.json(projects);
+    } catch (error) {
+      console.error("Error fetching subprojects:", error);
+      res.status(500).json({ message: "Failed to fetch subprojects" });
+    }
+  });
+
   app.get("/api/projects/:id", async (req, res) => {
     try {
       const project = await storage.getProject(req.params.id);
@@ -1120,17 +1132,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Subprojects API
-  app.get("/api/projects/subprojects", isAuthenticated, async (req: any, res) => {
-    try {
-      const { parentProjectId } = req.query;
-      const projects = await storage.getProjectsByParent(parentProjectId as string || undefined);
-      res.json(projects);
-    } catch (error) {
-      console.error("Error fetching subprojects:", error);
-      res.status(500).json({ message: "Failed to fetch subprojects" });
-    }
-  });
+
 
   app.get("/api/projects/:id/hierarchy", isAuthenticated, async (req: any, res) => {
     try {
