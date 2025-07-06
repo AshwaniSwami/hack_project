@@ -5,11 +5,33 @@ import * as schema from "@shared/schema";
 
 neonConfig.webSocketConstructor = ws;
 
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+let db: any = null;
+let pool: Pool | null = null;
+
+// Check if database is available
+if (process.env.DATABASE_URL) {
+  try {
+    pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    db = drizzle({ client: pool, schema });
+    console.log("✅ Database connected successfully");
+  } catch (error) {
+    console.error("❌ Database connection failed:", error);
+    db = null;
+  }
+} else {
+  console.warn("⚠️  DATABASE_URL not found. The application will start but database features will be unavailable.");
+  console.warn("   To enable full functionality, please provision a PostgreSQL database in your Replit project.");
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle({ client: pool, schema });
+export { pool, db };
+
+// Helper function to check if database is available
+export const isDatabaseAvailable = () => !!db;
+
+// Helper function to require database connection
+export const requireDatabase = () => {
+  if (!db) {
+    throw new Error("Database is not available. Please provision a PostgreSQL database to use this feature.");
+  }
+  return db;
+};

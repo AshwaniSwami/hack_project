@@ -26,7 +26,7 @@ import {
   type File,
   type InsertFile,
 } from "@shared/schema";
-import { db } from "./db";
+import { db, isDatabaseAvailable, requireDatabase } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
 
 export interface IStorage {
@@ -96,7 +96,8 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   // Users
   async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
+    const dbInstance = requireDatabase();
+    const [user] = await dbInstance.select().from(users).where(eq(users.id, id));
     return user || undefined;
   }
 
@@ -401,4 +402,73 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+// Fallback storage class for when database is not available
+export class FallbackStorage implements IStorage {
+  private throwDatabaseError() {
+    throw new Error("Database is not available. Please provision a PostgreSQL database to use this feature.");
+  }
+
+  // Users
+  async getUser(id: string): Promise<User | undefined> { this.throwDatabaseError(); }
+  async upsertUser(user: UpsertUser): Promise<User> { this.throwDatabaseError(); }
+  async getUserByUsername(username: string): Promise<User | undefined> { this.throwDatabaseError(); }
+  async createUser(user: InsertUser): Promise<User> { this.throwDatabaseError(); }
+  async updateUser(id: string, user: Partial<InsertUser>): Promise<User> { this.throwDatabaseError(); }
+  async deleteUser(id: string): Promise<void> { this.throwDatabaseError(); }
+  async getAllUsers(): Promise<User[]> { this.throwDatabaseError(); }
+
+  // Projects
+  async getProject(id: string): Promise<Project | undefined> { this.throwDatabaseError(); }
+  async createProject(project: InsertProject): Promise<Project> { this.throwDatabaseError(); }
+  async updateProject(id: string, project: Partial<InsertProject>): Promise<Project> { this.throwDatabaseError(); }
+  async deleteProject(id: string): Promise<void> { this.throwDatabaseError(); }
+  async getAllProjects(): Promise<Project[]> { this.throwDatabaseError(); }
+
+  // Episodes
+  async getEpisode(id: string): Promise<Episode | undefined> { this.throwDatabaseError(); }
+  async createEpisode(episode: InsertEpisode): Promise<Episode> { this.throwDatabaseError(); }
+  async updateEpisode(id: string, episode: Partial<InsertEpisode>): Promise<Episode> { this.throwDatabaseError(); }
+  async deleteEpisode(id: string): Promise<void> { this.throwDatabaseError(); }
+  async getAllEpisodes(): Promise<Episode[]> { this.throwDatabaseError(); }
+  async getEpisodesByProject(projectId: string): Promise<Episode[]> { this.throwDatabaseError(); }
+
+  // Scripts
+  async getScript(id: string): Promise<Script | undefined> { this.throwDatabaseError(); }
+  async createScript(script: InsertScript): Promise<Script> { this.throwDatabaseError(); }
+  async updateScript(id: string, script: Partial<InsertScript>): Promise<Script> { this.throwDatabaseError(); }
+  async deleteScript(id: string): Promise<void> { this.throwDatabaseError(); }
+  async getAllScripts(): Promise<Script[]> { this.throwDatabaseError(); }
+  async getScriptsByProject(projectId: string): Promise<Script[]> { this.throwDatabaseError(); }
+
+  // Topics
+  async getTopic(id: string): Promise<Topic | undefined> { this.throwDatabaseError(); }
+  async createTopic(topic: InsertTopic): Promise<Topic> { this.throwDatabaseError(); }
+  async updateTopic(id: string, topic: Partial<InsertTopic>): Promise<Topic> { this.throwDatabaseError(); }
+  async deleteTopic(id: string): Promise<void> { this.throwDatabaseError(); }
+  async getAllTopics(): Promise<Topic[]> { this.throwDatabaseError(); }
+
+  // Radio Stations
+  async getRadioStation(id: string): Promise<RadioStation | undefined> { this.throwDatabaseError(); }
+  async createRadioStation(station: InsertRadioStation): Promise<RadioStation> { this.throwDatabaseError(); }
+  async updateRadioStation(id: string, station: Partial<InsertRadioStation>): Promise<RadioStation> { this.throwDatabaseError(); }
+  async deleteRadioStation(id: string): Promise<void> { this.throwDatabaseError(); }
+  async getAllRadioStations(): Promise<RadioStation[]> { this.throwDatabaseError(); }
+
+  // Free Project Access
+  async getFreeProjectAccess(id: string): Promise<FreeProjectAccess | undefined> { this.throwDatabaseError(); }
+  async createFreeProjectAccess(access: InsertFreeProjectAccess): Promise<FreeProjectAccess> { this.throwDatabaseError(); }
+  async updateFreeProjectAccess(id: string, access: Partial<InsertFreeProjectAccess>): Promise<FreeProjectAccess> { this.throwDatabaseError(); }
+  async deleteFreeProjectAccess(id: string): Promise<void> { this.throwDatabaseError(); }
+  async getAllFreeProjectAccess(): Promise<FreeProjectAccess[]> { this.throwDatabaseError(); }
+
+  // Files
+  async getFile(id: string): Promise<File | undefined> { this.throwDatabaseError(); }
+  async createFile(file: InsertFile): Promise<File> { this.throwDatabaseError(); }
+  async updateFile(id: string, file: Partial<InsertFile>): Promise<File> { this.throwDatabaseError(); }
+  async deleteFile(id: string): Promise<void> { this.throwDatabaseError(); }
+  async getAllFiles(): Promise<File[]> { this.throwDatabaseError(); }
+  async getFilesByEntity(entityType: string, entityId?: string): Promise<File[]> { this.throwDatabaseError(); }
+}
+
+// Use appropriate storage based on database availability
+export const storage = isDatabaseAvailable() ? new DatabaseStorage() : new FallbackStorage();
