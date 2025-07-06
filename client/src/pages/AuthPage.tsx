@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +19,7 @@ interface AuthFormData {
 export default function AuthPage() {
   const [, setLocation] = useLocation();
   const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
   const [error, setError] = useState("");
   const [loginData, setLoginData] = useState<AuthFormData>({
     email: "",
@@ -45,7 +47,12 @@ export default function AuthPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setLocation("/dashboard");
+        // Invalidate and refetch auth data
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+        // Small delay to ensure query updates
+        setTimeout(() => {
+          setLocation("/dashboard");
+        }, 100);
       } else {
         setError(data.message || "Login failed");
       }
@@ -71,7 +78,12 @@ export default function AuthPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setLocation("/dashboard");
+        // Invalidate and refetch auth data
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+        // Small delay to ensure query updates
+        setTimeout(() => {
+          setLocation("/dashboard");
+        }, 100);
       } else {
         setError(data.message || "Registration failed");
       }

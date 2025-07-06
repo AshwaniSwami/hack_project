@@ -77,6 +77,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Users API - Admin only
   app.get("/api/users", isAuthenticated, isAdmin, async (req, res) => {
     try {
+      if (!isDatabaseAvailable()) {
+        const { tempUsers } = await import("./tempData");
+        return res.json(tempUsers);
+      }
       const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
       const offset = req.query.offset ? parseInt(req.query.offset as string) : undefined;
       const users = await storage.getAllUsers(limit, offset);
@@ -204,6 +208,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Projects API
   app.get("/api/projects", async (req, res) => {
     try {
+      if (!isDatabaseAvailable()) {
+        const { tempProjects } = await import("./tempData");
+        return res.json(tempProjects);
+      }
       const projects = await storage.getAllProjects();
       res.json(projects);
     } catch (error) {
@@ -318,6 +326,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Episodes API
   app.get("/api/episodes", async (req, res) => {
     try {
+      if (!isDatabaseAvailable()) {
+        const { tempEpisodes } = await import("./tempData");
+        return res.json(tempEpisodes);
+      }
       const episodes = await storage.getAllEpisodes();
       res.json(episodes);
     } catch (error) {
@@ -429,6 +441,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Scripts API
   app.get("/api/scripts", async (req, res) => {
     try {
+      if (!isDatabaseAvailable()) {
+        const { tempScripts } = await import("./tempData");
+        return res.json(tempScripts);
+      }
       const scripts = await storage.getAllScripts();
       res.json(scripts);
     } catch (error) {
@@ -574,6 +590,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Radio Stations API
   app.get("/api/radio-stations", async (req, res) => {
     try {
+      if (!isDatabaseAvailable()) {
+        const { tempRadioStations } = await import("./tempData");
+        return res.json(tempRadioStations);
+      }
       const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
       const offset = req.query.offset ? parseInt(req.query.offset as string) : undefined;
       const stations = await storage.getAllRadioStations(limit, offset);
