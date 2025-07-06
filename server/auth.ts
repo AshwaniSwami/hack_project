@@ -14,29 +14,52 @@ export interface AuthenticatedRequest extends Request {
 }
 
 // Middleware to check if user is authenticated
-export const isAuthenticated = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const isAuthenticated = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   if (req.session && (req.session as any).userId) {
-    next();
+    try {
+      const user = await storage.getUser((req.session as any).userId);
+      if (user) {
+        req.user = {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        };
+        next();
+      } else {
+        res.status(401).json({ message: "User not found" });
+      }
+    } catch (error) {
+      console.error("Authentication error:", error);
+      res.status(500).json({ message: "Authentication failed" });
+    }
   } else {
     res.status(401).json({ message: "Unauthorized" });
   }
 };
 
 // Middleware to check if user is admin
-export const isAdmin = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const isAdmin = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   if (req.session && (req.session as any).userId) {
-    // Get user from storage to check role
-    storage.getUser((req.session as any).userId)
-      .then(user => {
-        if (user && user.role === 'admin') {
-          next();
-        } else {
-          res.status(403).json({ message: "Admin access required" });
-        }
-      })
-      .catch(() => {
-        res.status(500).json({ message: "Error checking user permissions" });
-      });
+    try {
+      const user = await storage.getUser((req.session as any).userId);
+      if (user && user.role === 'admin') {
+        req.user = {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        };
+        next();
+      } else {
+        res.status(403).json({ message: "Admin access required" });
+      }
+    } catch (error) {
+      console.error("Admin check error:", error);
+      res.status(500).json({ message: "Error checking user permissions" });
+    }
   } else {
     res.status(401).json({ message: "Unauthorized" });
   }
