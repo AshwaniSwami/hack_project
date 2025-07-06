@@ -9,6 +9,7 @@ import {
   radioStations,
   freeProjectAccess,
   files,
+  fileFolders,
   type User,
   type InsertUser,
   type UpsertUser,
@@ -28,6 +29,8 @@ import {
   type InsertFreeProjectAccess,
   type File,
   type InsertFile,
+  type FileFolder,
+  type InsertFileFolder,
 } from "@shared/schema";
 import { db, isDatabaseAvailable, requireDatabase } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
@@ -58,6 +61,8 @@ export interface IStorage {
   updateProject(id: string, project: Partial<InsertProject>): Promise<Project>;
   deleteProject(id: string): Promise<void>;
   getAllProjects(): Promise<Project[]>;
+  getProjectsByParent(parentProjectId?: string): Promise<Project[]>;
+  getProjectHierarchy(projectId: string): Promise<Project[]>;
   getProjectsByTheme(themeId: string): Promise<Project[]>;
 
   // Episodes
@@ -104,8 +109,17 @@ export interface IStorage {
   deleteFile(id: string): Promise<void>;
   getAllFiles(): Promise<File[]>;
   getFilesByEntity(entityType: string, entityId?: string): Promise<File[]>;
+  getFilesByFolder(folderId: string): Promise<File[]>;
   reorderFiles(entityType: string, entityId: string | null, fileIds: string[]): Promise<void>;
-  getFilesByParent(parentFileId: string): Promise<File[]>;
+  searchFiles(query: string, entityType?: string, entityId?: string): Promise<File[]>;
+
+  // File Folders
+  getFileFolder(id: string): Promise<FileFolder | undefined>;
+  createFileFolder(folder: InsertFileFolder): Promise<FileFolder>;
+  updateFileFolder(id: string, folder: Partial<InsertFileFolder>): Promise<FileFolder>;
+  deleteFileFolder(id: string): Promise<void>;
+  getFoldersByEntity(entityType: string, entityId: string): Promise<FileFolder[]>;
+  getFoldersByParent(parentFolderId?: string): Promise<FileFolder[]>;
 
   // Admin User Management
   verifyUser(userId: string): Promise<User>;
@@ -228,7 +242,51 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllProjects(): Promise<Project[]> {
-    return await db.select().from(projects).orderBy(desc(projects.createdAt));
+    return await db
+      .select()
+      .from(projects)
+      .where(eq(projects.isActive, true))
+      .orderBy(desc(projects.createdAt));
+  }
+
+  async getProjectsByParent(parentProjectId?: string): Promise<Project[]> {
+    if (parentProjectId) {
+      return await db
+        .select()
+        .from(projects)
+        .where(and(
+          eq(projects.parentProjectId, parentProjectId),
+          eq(projects.isActive, true)
+        ))
+        .orderBy(asc(projects.sortOrder), asc(projects.name));
+    } else {
+      return await db
+        .select()
+        .from(projects)
+        .where(and(
+          sql`parent_project_id IS NULL`,
+          eq(projects.isActive, true)
+        ))
+        .orderBy(asc(projects.sortOrder), asc(projects.name));
+    }
+  }
+
+  async getProjectHierarchy(projectId: string): Promise<Project[]> {
+    // Get the project and all its parent projects
+    const hierarchy: Project[] = [];
+    let currentProjectId: string | null = projectId;
+
+    while (currentProjectId) {
+      const project = await this.getProject(currentProjectId);
+      if (project) {
+        hierarchy.unshift(project); // Add to beginning to maintain order
+        currentProjectId = project.parentProjectId;
+      } else {
+        break;
+      }
+    }
+
+    return hierarchy;
   }
 
   async getProjectsByTheme(themeId: string): Promise<Project[]> {
@@ -495,15 +553,101 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getFilesByParent(parentFileId: string): Promise<File[]> {
+  async getFilesByFolder(folderId: string): Promise<File[]> {
     return await db
       .select()
       .from(files)
-      .where(and(
-        eq(files.parentFileId, parentFileId),
-        eq(files.isActive, true)
-      ))
+      .where(and(eq(files.folderId, folderId), eq(files.isActive, true)))
       .orderBy(asc(files.sortOrder), asc(files.createdAt));
+  }
+
+  async searchFiles(query: string, entityType?: string, entityId?: string): Promise<File[]> {
+    let baseQuery = db
+      .select()
+      .from(files)
+      .where(and(
+        eq(files.isActive, true),
+        sql`(
+          ${files.originalName} ILIKE ${`%${query}%`} OR 
+          ${files.description} ILIKE ${`%${query}%`} OR 
+          ${sql`array_to_string(${files.tags}, ' ')`} ILIKE ${`%${query}%`}
+        )`
+      ));
+
+    if (entityType) {
+      baseQuery = baseQuery.where(and(eq(files.entityType, entityType)));
+    }
+    if (entityId) {
+      baseQuery = baseQuery.where(and(eq(files.entityId, entityId)));
+    }
+
+    return await baseQuery.orderBy(asc(files.createdAt));
+  }
+
+  // File Folders
+  async getFileFolder(id: string): Promise<FileFolder | undefined> {
+    const [folder] = await db.select().from(fileFolders).where(eq(fileFolders.id, id));
+    return folder || undefined;
+  }
+
+  async createFileFolder(insertFolder: InsertFileFolder): Promise<FileFolder> {
+    // Generate folder path
+    let folderPath = insertFolder.name;
+    if (insertFolder.parentFolderId) {
+      const parentFolder = await this.getFileFolder(insertFolder.parentFolderId);
+      if (parentFolder) {
+        folderPath = `${parentFolder.folderPath}/${insertFolder.name}`;
+      }
+    }
+
+    const [folder] = await db.insert(fileFolders).values({
+      ...insertFolder,
+      folderPath
+    }).returning();
+    return folder;
+  }
+
+  async updateFileFolder(id: string, updateData: Partial<InsertFileFolder>): Promise<FileFolder> {
+    const [folder] = await db.update(fileFolders)
+      .set({ ...updateData, updatedAt: new Date() })
+      .where(eq(fileFolders.id, id))
+      .returning();
+    return folder;
+  }
+
+  async deleteFileFolder(id: string): Promise<void> {
+    // Soft delete by setting isActive to false
+    await db.update(fileFolders)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(fileFolders.id, id));
+  }
+
+  async getFoldersByEntity(entityType: string, entityId: string): Promise<FileFolder[]> {
+    return await db
+      .select()
+      .from(fileFolders)
+      .where(and(
+        eq(fileFolders.entityType, entityType),
+        eq(fileFolders.entityId, entityId),
+        eq(fileFolders.isActive, true)
+      ))
+      .orderBy(asc(fileFolders.sortOrder), asc(fileFolders.name));
+  }
+
+  async getFoldersByParent(parentFolderId?: string): Promise<FileFolder[]> {
+    if (parentFolderId) {
+      return await db
+        .select()
+        .from(fileFolders)
+        .where(and(eq(fileFolders.parentFolderId, parentFolderId), eq(fileFolders.isActive, true)))
+        .orderBy(asc(fileFolders.sortOrder), asc(fileFolders.name));
+    } else {
+      return await db
+        .select()
+        .from(fileFolders)
+        .where(and(sql`parent_folder_id IS NULL`, eq(fileFolders.isActive, true)))
+        .orderBy(asc(fileFolders.sortOrder), asc(fileFolders.name));
+    }
   }
 
   // Admin User Management Methods

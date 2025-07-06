@@ -73,9 +73,18 @@ export const projects = pgTable("projects", {
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
   themeId: uuid("theme_id"), // Reference to theme
+  parentProjectId: uuid("parent_project_id"), // For subprojects hierarchy
+  projectType: varchar("project_type", { length: 50 }).default("main"), // main, subproject, template
+  isTemplate: boolean("is_template").default(false),
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_projects_parent").on(table.parentProjectId),
+  index("idx_projects_type").on(table.projectType),
+  index("idx_projects_sort").on(table.parentProjectId, table.sortOrder),
+]);
 
 // Episodes table
 export const episodes = pgTable("episodes", {
@@ -142,7 +151,26 @@ export const freeProjectAccess = pgTable("free_project_access", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Files table for storing uploaded files
+// File Folders table for better organization
+export const fileFolders = pgTable("file_folders", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  parentFolderId: uuid("parent_folder_id"), // For nested folders
+  entityType: varchar("entity_type", { length: 50 }).notNull(), // projects, episodes, scripts
+  entityId: uuid("entity_id").notNull(),
+  folderPath: text("folder_path"), // Full path for optimization
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_folders_entity").on(table.entityType, table.entityId),
+  index("idx_folders_parent").on(table.parentFolderId),
+  index("idx_folders_path").on(table.folderPath),
+]);
+
+// Enhanced Files table for storing uploaded files
 export const files = pgTable("files", {
   id: uuid("id").primaryKey().defaultRandom(),
   filename: varchar("filename", { length: 255 }).notNull(),
@@ -150,22 +178,31 @@ export const files = pgTable("files", {
   mimeType: varchar("mime_type", { length: 100 }).notNull(),
   fileSize: integer("file_size").notNull(),
   fileData: text("file_data").notNull(), // Base64 encoded file data
-  entityType: varchar("entity_type", { length: 50 }).notNull(), // users, projects, episodes, scripts, radio-stations
-  entityId: uuid("entity_id"), // Optional: link to specific entity
-  uploadedBy: uuid("uploaded_by"), // Optional: user who uploaded
+  entityType: varchar("entity_type", { length: 50 }).notNull(), // projects, episodes, scripts, radio-stations
+  entityId: uuid("entity_id"), // Link to specific entity
+  folderId: uuid("folder_id"), // Optional: organize in folders
+  uploadedBy: varchar("uploaded_by"), // User who uploaded (non-UUID user ID)
   sortOrder: integer("sort_order").default(0), // For manual reordering
-  parentFileId: uuid("parent_file_id"), // For subproject/nested file support
   tags: text("tags").array(), // For better categorization and search
   description: text("description"), // Optional file description
   version: integer("version").default(1), // For file versioning
+  isArchived: boolean("is_archived").default(false), // For archiving old versions
   isActive: boolean("is_active").default(true), // For soft delete
+  filePath: text("file_path"), // Virtual file path for organization
+  checksum: varchar("checksum", { length: 64 }), // For duplicate detection
+  accessLevel: varchar("access_level", { length: 20 }).default("project"), // project, public, private
+  downloadCount: integer("download_count").default(0),
+  lastAccessedAt: timestamp("last_accessed_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
   index("idx_files_entity").on(table.entityType, table.entityId),
+  index("idx_files_folder").on(table.folderId),
   index("idx_files_sort_order").on(table.entityType, table.entityId, table.sortOrder),
   index("idx_files_created_at").on(table.createdAt),
-  index("idx_files_parent").on(table.parentFileId),
+  index("idx_files_checksum").on(table.checksum),
+  index("idx_files_path").on(table.filePath),
+  index("idx_files_tags").on(table.tags),
 ]);
 
 // Relations
@@ -192,9 +229,15 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
     fields: [projects.themeId],
     references: [themes.id],
   }),
+  parentProject: one(projects, {
+    fields: [projects.parentProjectId],
+    references: [projects.id],
+  }),
+  subprojects: many(projects),
   episodes: many(episodes),
   scripts: many(scripts),
   freeAccess: many(freeProjectAccess),
+  folders: many(fileFolders),
 }));
 
 export const episodesRelations = relations(episodes, ({ one }) => ({
@@ -254,16 +297,26 @@ export const freeProjectAccessRelations = relations(freeProjectAccess, ({ one })
   }),
 }));
 
-export const filesRelations = relations(files, ({ one, many }) => ({
-  uploadedByUser: one(users, {
+// File Folders Relations
+export const fileFoldersRelations = relations(fileFolders, ({ one, many }) => ({
+  parentFolder: one(fileFolders, {
+    fields: [fileFolders.parentFolderId],
+    references: [fileFolders.id],
+  }),
+  subfolders: many(fileFolders),
+  files: many(files),
+}));
+
+// Files Relations
+export const filesRelations = relations(files, ({ one }) => ({
+  folder: one(fileFolders, {
+    fields: [files.folderId],
+    references: [fileFolders.id],
+  }),
+  uploader: one(users, {
     fields: [files.uploadedBy],
     references: [users.id],
   }),
-  parentFile: one(files, {
-    fields: [files.parentFileId],
-    references: [files.id],
-  }),
-  childFiles: many(files),
 }));
 
 // Insert schemas
@@ -324,6 +377,12 @@ export const insertFileSchema = createInsertSchema(files).omit({
   updatedAt: true,
 });
 
+export const insertFileFolderSchema = createInsertSchema(fileFolders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertOtpVerificationSchema = createInsertSchema(otpVerifications).omit({
   createdAt: true,
 });
@@ -356,6 +415,9 @@ export type InsertFreeProjectAccess = typeof insertFreeProjectAccessSchema._type
 
 export type File = typeof files.$inferSelect;
 export type InsertFile = typeof insertFileSchema._type;
+
+export type FileFolder = typeof fileFolders.$inferSelect;
+export type InsertFileFolder = typeof insertFileFolderSchema._type;
 
 export type OtpVerification = typeof otpVerifications.$inferSelect;
 export type InsertOtpVerification = typeof insertOtpVerificationSchema._type;

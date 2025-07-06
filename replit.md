@@ -35,21 +35,26 @@ SMART Radio Content Hub is a comprehensive content management system designed fo
 
 ### Database Schema
 The application uses a relational database with the following core entities:
-- **Users**: User authentication and profile management
-- **Projects**: Top-level content organization units
-- **Episodes**: Individual radio episodes linked to projects
-- **Scripts**: Content scripts with rich text support and workflow status
-- **Radio Stations**: External radio station entities with contact information
-- **Topics**: Tagging system for content categorization
-- **Files**: Centralized file storage with entity relationships
-- **Free Project Access**: Access control for radio stations to specific projects
+- **Users**: User authentication and profile management with role-based access control
+- **Projects**: Hierarchical project organization with subproject support and theme categorization
+- **Episodes**: Individual radio episodes linked to projects with premium content support
+- **Scripts**: Content scripts with rich text support, workflow status, and topic associations
+- **Radio Stations**: External radio station entities with contact information and project access
+- **Topics**: Tagging system for content categorization and script classification
+- **Files**: Enhanced file storage with folder organization, versioning, and metadata
+- **File Folders**: Hierarchical folder structure for organizing files within entities
+- **Free Project Access**: Access control system for radio stations to specific projects
+- **Themes**: Visual theme system for project categorization and organization
 
 ### File Management System
-- Supports multiple file types (audio, video, documents, images)
-- Entity-based file organization (project-level, episode-level, script-level)
-- Base64 encoding for file storage in database
-- File size limit of 50MB per upload
-- Automatic filename generation with timestamps
+- **Enhanced File Organization**: Hierarchical folder structure with nested folders support
+- **Multiple File Types**: Supports audio, video, documents, images with proper MIME type detection  
+- **Entity-based Organization**: Files organized by projects, episodes, scripts, and radio stations
+- **Folder Management**: Create, organize, and manage file folders within entities
+- **Advanced Features**: File versioning, tagging, access levels, and checksum validation
+- **Search Capabilities**: Full-text search across filenames, descriptions, and tags
+- **Storage**: Base64 encoding for file storage in database with 50MB per upload limit
+- **Performance Optimizations**: File metadata separation, download tracking, and archive support
 
 ### User Interface
 - Responsive design with mobile-first approach
@@ -120,6 +125,12 @@ The application uses a relational database with the following core entities:
 
 ## Recent Changes
 
+- January 6, 2025: Implemented advanced file storage system with folder organization, search, and enhanced metadata
+- January 6, 2025: Added subproject support allowing hierarchical project organization with parent-child relationships
+- January 6, 2025: Enhanced file management with versioning, tagging, access levels, and checksum validation
+- January 6, 2025: Fixed UUID validation error in script creation by using authenticated user ID
+- January 6, 2025: Added comprehensive API endpoints for folder management and file search functionality
+- January 6, 2025: Optimized database schema with proper indexing for improved performance
 - January 6, 2025: Removed Replit authentication and implemented custom authentication system
 - January 6, 2025: Created custom login/register page with role-based access control
 - January 6, 2025: Updated navigation to hide Users tab for non-admin users

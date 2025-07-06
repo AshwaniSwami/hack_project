@@ -26,6 +26,7 @@ import {
   insertRadioStationSchema,
   insertFreeProjectAccessSchema,
   insertFileSchema,
+  insertFileFolderSchema,
 } from "@shared/schema";
 
 // Configure multer for file uploads
@@ -609,14 +610,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/scripts", async (req, res) => {
     try {
+      const user = req.session?.user;
+      if (!user) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
       const scriptData = insertScriptSchema.parse(req.body);
-      // Set a default author if not provided (for now, use first user or create a system user)
-      const users = await storage.getAllUsers();
-      const authorId = users.length > 0 ? users[0].id : '00000000-0000-0000-0000-000000000000';
       
       const script = await storage.createScript({
         ...scriptData,
-        authorId
+        authorId: user.id
       });
       res.status(201).json(script);
     } catch (error) {
@@ -1008,6 +1011,134 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error reordering files:", error);
       res.status(500).json({ message: "Failed to reorder files" });
+    }
+  });
+
+  // File search endpoint
+  app.get("/api/files/search", isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      if (!requireFilePermission('canView', user)) {
+        return res.status(403).json({ message: "Insufficient permissions to search files" });
+      }
+
+      const { q: query, entityType, entityId } = req.query;
+      
+      if (!query) {
+        return res.status(400).json({ message: "Search query is required" });
+      }
+
+      const files = await storage.searchFiles(
+        query as string, 
+        entityType as string, 
+        entityId as string
+      );
+      
+      // Don't send file data in search results for performance
+      const filesWithoutData = files.map(file => ({
+        ...file,
+        fileData: undefined
+      }));
+
+      res.json(filesWithoutData);
+    } catch (error) {
+      console.error("Error searching files:", error);
+      res.status(500).json({ message: "Failed to search files" });
+    }
+  });
+
+  // File Folders API
+  app.get("/api/folders", isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      if (!requireFilePermission('canView', user)) {
+        return res.status(403).json({ message: "Insufficient permissions to view folders" });
+      }
+
+      const { entityType, entityId, parentFolderId } = req.query;
+      
+      let folders;
+      if (entityType && entityId) {
+        folders = await storage.getFoldersByEntity(entityType as string, entityId as string);
+      } else if (parentFolderId !== undefined) {
+        folders = await storage.getFoldersByParent(parentFolderId as string || undefined);
+      } else {
+        return res.status(400).json({ message: "Either entityType/entityId or parentFolderId is required" });
+      }
+      
+      res.json(folders);
+    } catch (error) {
+      console.error("Error fetching folders:", error);
+      res.status(500).json({ message: "Failed to fetch folders" });
+    }
+  });
+
+  app.post("/api/folders", isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      if (!requireFilePermission('canCreate', user)) {
+        return res.status(403).json({ message: "Insufficient permissions to create folders" });
+      }
+
+      const folderData = insertFileFolderSchema.parse(req.body);
+      const folder = await storage.createFileFolder(folderData);
+      res.status(201).json(folder);
+    } catch (error) {
+      console.error("Error creating folder:", error);
+      res.status(400).json({ message: "Failed to create folder" });
+    }
+  });
+
+  app.put("/api/folders/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      if (!requireFilePermission('canEdit', user)) {
+        return res.status(403).json({ message: "Insufficient permissions to edit folders" });
+      }
+
+      const folderData = insertFileFolderSchema.partial().parse(req.body);
+      const folder = await storage.updateFileFolder(req.params.id, folderData);
+      res.json(folder);
+    } catch (error) {
+      console.error("Error updating folder:", error);
+      res.status(400).json({ message: "Failed to update folder" });
+    }
+  });
+
+  app.delete("/api/folders/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      if (!requireFilePermission('canDelete', user)) {
+        return res.status(403).json({ message: "Insufficient permissions to delete folders" });
+      }
+
+      await storage.deleteFileFolder(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting folder:", error);
+      res.status(500).json({ message: "Failed to delete folder" });
+    }
+  });
+
+  // Subprojects API
+  app.get("/api/projects/subprojects", isAuthenticated, async (req: any, res) => {
+    try {
+      const { parentProjectId } = req.query;
+      const projects = await storage.getProjectsByParent(parentProjectId as string || undefined);
+      res.json(projects);
+    } catch (error) {
+      console.error("Error fetching subprojects:", error);
+      res.status(500).json({ message: "Failed to fetch subprojects" });
+    }
+  });
+
+  app.get("/api/projects/:id/hierarchy", isAuthenticated, async (req: any, res) => {
+    try {
+      const hierarchy = await storage.getProjectHierarchy(req.params.id);
+      res.json(hierarchy);
+    } catch (error) {
+      console.error("Error fetching project hierarchy:", error);
+      res.status(500).json({ message: "Failed to fetch project hierarchy" });
     }
   });
 
