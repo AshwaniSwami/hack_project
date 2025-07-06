@@ -7,6 +7,7 @@ import { Trash2, Download, Eye, FileText, Image, Music, Video, File as FileIcon 
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useFilePermissions } from "@/hooks/useFilePermissions";
+import { decodeFileName } from "@/utils/textUtils";
 
 interface FileListProps {
   entityType: string;
@@ -157,13 +158,7 @@ export function FileList({ entityType, entityId, title = "Files" }: FileListProp
                 {getFileIcon(file.mimeType)}
                 <div>
                   <p className="font-medium text-sm" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-                    {(() => {
-                      try {
-                        return decodeURIComponent(file.originalName);
-                      } catch {
-                        return file.originalName;
-                      }
-                    })()}
+                    {decodeFileName(file.originalName)}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {formatFileSize(file.fileSize)} • {new Date(file.createdAt).toLocaleDateString()}

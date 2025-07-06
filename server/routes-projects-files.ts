@@ -43,9 +43,12 @@ export function registerProjectFileRoutes(app: Express) {
         filePrefix = 'episode';
       }
 
+      // Properly handle UTF-8 encoding for filenames
+      const originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
+      
       const fileData = {
-        filename: `${filePrefix}_${projectId}_${Date.now()}_${Buffer.from(req.file.originalname, 'utf8').toString('utf8')}`,
-        originalName: Buffer.from(req.file.originalname, 'utf8').toString('utf8'),
+        filename: `${filePrefix}_${projectId}_${Date.now()}_${originalName}`,
+        originalName: originalName,
         mimeType: req.file.mimetype,
         fileSize: req.file.size,
         fileData: req.file.buffer.toString('base64'),

@@ -28,9 +28,12 @@ export function registerEpisodeFileRoutes(app: Express) {
         return res.status(404).json({ message: "Episode not found" });
       }
 
+      // Properly handle UTF-8 encoding for filenames
+      const originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
+      
       const fileData = {
-        filename: `episode_${episodeId}_${Date.now()}_${Buffer.from(req.file.originalname, 'utf8').toString('utf8')}`,
-        originalName: Buffer.from(req.file.originalname, 'utf8').toString('utf8'),
+        filename: `episode_${episodeId}_${Date.now()}_${originalName}`,
+        originalName: originalName,
         mimeType: req.file.mimetype,
         fileSize: req.file.size,
         fileData: req.file.buffer.toString('base64'),
