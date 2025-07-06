@@ -101,7 +101,7 @@ export const episodes = pgTable("episodes", {
 export const scripts = pgTable("scripts", {
   id: uuid("id").primaryKey().defaultRandom(),
   projectId: uuid("project_id").notNull(),
-  authorId: uuid("author_id").notNull(),
+  authorId: varchar("author_id").notNull(), // Changed from uuid to varchar to match users table
   title: varchar("title", { length: 255 }).notNull(),
   content: text("content").notNull(),
   status: varchar("status", { length: 50 }).notNull().default("Draft"),
