@@ -1,5 +1,6 @@
 import {
   users,
+  themes,
   projects,
   episodes,
   scripts,
@@ -11,6 +12,8 @@ import {
   type User,
   type InsertUser,
   type UpsertUser,
+  type Theme,
+  type InsertTheme,
   type Project,
   type InsertProject,
   type Episode,
@@ -40,12 +43,21 @@ export interface IStorage {
   deleteUser(id: string): Promise<void>;
   getAllUsers(): Promise<User[]>;
 
+  // Themes
+  getTheme(id: string): Promise<Theme | undefined>;
+  createTheme(theme: InsertTheme): Promise<Theme>;
+  updateTheme(id: string, theme: Partial<InsertTheme>): Promise<Theme>;
+  deleteTheme(id: string): Promise<void>;
+  getAllThemes(): Promise<Theme[]>;
+  getActiveThemes(): Promise<Theme[]>;
+
   // Projects
   getProject(id: string): Promise<Project | undefined>;
   createProject(project: InsertProject): Promise<Project>;
   updateProject(id: string, project: Partial<InsertProject>): Promise<Project>;
   deleteProject(id: string): Promise<void>;
   getAllProjects(): Promise<Project[]>;
+  getProjectsByTheme(themeId: string): Promise<Project[]>;
 
   // Episodes
   getEpisode(id: string): Promise<Episode | undefined>;
@@ -156,6 +168,38 @@ export class DatabaseStorage implements IStorage {
     return await query;
   }
 
+  // Themes
+  async getTheme(id: string): Promise<Theme | undefined> {
+    const [theme] = await db.select().from(themes).where(eq(themes.id, id));
+    return theme || undefined;
+  }
+
+  async createTheme(insertTheme: InsertTheme): Promise<Theme> {
+    const [theme] = await db.insert(themes).values(insertTheme).returning();
+    return theme;
+  }
+
+  async updateTheme(id: string, updateData: Partial<InsertTheme>): Promise<Theme> {
+    const [theme] = await db
+      .update(themes)
+      .set({ ...updateData, updatedAt: new Date() })
+      .where(eq(themes.id, id))
+      .returning();
+    return theme;
+  }
+
+  async deleteTheme(id: string): Promise<void> {
+    await db.delete(themes).where(eq(themes.id, id));
+  }
+
+  async getAllThemes(): Promise<Theme[]> {
+    return await db.select().from(themes).orderBy(desc(themes.createdAt));
+  }
+
+  async getActiveThemes(): Promise<Theme[]> {
+    return await db.select().from(themes).where(eq(themes.isActive, true)).orderBy(desc(themes.createdAt));
+  }
+
   // Projects
   async getProject(id: string): Promise<Project | undefined> {
     const [project] = await db.select().from(projects).where(eq(projects.id, id));
@@ -182,6 +226,10 @@ export class DatabaseStorage implements IStorage {
 
   async getAllProjects(): Promise<Project[]> {
     return await db.select().from(projects).orderBy(desc(projects.createdAt));
+  }
+
+  async getProjectsByTheme(themeId: string): Promise<Project[]> {
+    return await db.select().from(projects).where(eq(projects.themeId, themeId)).orderBy(desc(projects.createdAt));
   }
 
   // Episodes

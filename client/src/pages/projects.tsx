@@ -44,20 +44,45 @@ import { ProjectDetailView } from "@/components/project-detail-view";
 const projectFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
+  themeId: z.string().optional(),
+});
+
+const themeFormSchema = z.object({
+  name: z.string().min(1, "Theme name is required"),
+  description: z.string().optional(),
+  colorHex: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Must be a valid hex color"),
 });
 
 type ProjectFormData = z.infer<typeof projectFormSchema>;
+type ThemeFormData = z.infer<typeof themeFormSchema>;
+
+interface Theme {
+  id: string;
+  name: string;
+  description?: string;
+  colorHex: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export default function Projects() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isThemeDialogOpen, setIsThemeDialogOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [editingTheme, setEditingTheme] = useState<Theme | null>(null);
   const [viewingProject, setViewingProject] = useState<Project | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedThemeFilter, setSelectedThemeFilter] = useState<string>("all");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: projects = [], isLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects"],
+  });
+
+  const { data: themes = [] } = useQuery<Theme[]>({
+    queryKey: ["/api/themes"],
   });
 
   const { data: episodes = [] } = useQuery<Episode[]>({
@@ -82,6 +107,16 @@ export default function Projects() {
     defaultValues: {
       name: "",
       description: "",
+      themeId: "",
+    },
+  });
+
+  const themeForm = useForm<ThemeFormData>({
+    resolver: zodResolver(themeFormSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      colorHex: "#3B82F6",
     },
   });
 
@@ -150,6 +185,71 @@ export default function Projects() {
     },
   });
 
+  const createThemeMutation = useMutation({
+    mutationFn: async (data: ThemeFormData) => {
+      return apiRequest("POST", "/api/themes", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/themes"] });
+      toast({
+        title: "Success",
+        description: "Theme created successfully",
+      });
+      setIsThemeDialogOpen(false);
+      themeForm.reset();
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to create theme",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateThemeMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<ThemeFormData> }) => {
+      return apiRequest("PUT", `/api/themes/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/themes"] });
+      toast({
+        title: "Success",
+        description: "Theme updated successfully",
+      });
+      setIsThemeDialogOpen(false);
+      setEditingTheme(null);
+      themeForm.reset();
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update theme",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteThemeMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return apiRequest("DELETE", `/api/themes/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/themes"] });
+      toast({
+        title: "Success",
+        description: "Theme deleted successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete theme",
+        variant: "destructive",
+      });
+    },
+  });
+
   const onSubmit = (data: ProjectFormData) => {
     if (editingProject) {
       updateMutation.mutate(data);
@@ -158,11 +258,40 @@ export default function Projects() {
     }
   };
 
+  const onThemeSubmit = (data: ThemeFormData) => {
+    if (editingTheme) {
+      updateThemeMutation.mutate({ id: editingTheme.id, data });
+    } else {
+      createThemeMutation.mutate(data);
+    }
+  };
+
+  const handleCreateTheme = () => {
+    setEditingTheme(null);
+    themeForm.reset({
+      name: "",
+      description: "",
+      colorHex: "#3B82F6",
+    });
+    setIsThemeDialogOpen(true);
+  };
+
+  const handleEditTheme = (theme: Theme) => {
+    setEditingTheme(theme);
+    themeForm.reset({
+      name: theme.name,
+      description: theme.description || "",
+      colorHex: theme.colorHex,
+    });
+    setIsThemeDialogOpen(true);
+  };
+
   const handleEdit = (project: Project) => {
     setEditingProject(project);
     form.reset({
       name: project.name,
       description: project.description || "",
+      themeId: project.themeId || "",
     });
   };
 
@@ -172,10 +301,16 @@ export default function Projects() {
     }
   };
 
-  const filteredProjects = projects.filter((project) =>
-    project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (project.description && project.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredProjects = projects.filter((project) => {
+    const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (project.description && project.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const matchesTheme = selectedThemeFilter === "all" || 
+      project.themeId === selectedThemeFilter ||
+      (selectedThemeFilter === "unthemed" && !project.themeId);
+    
+    return matchesSearch && matchesTheme;
+  });
 
   const projectFiles = allFiles?.files || [];
 
@@ -251,6 +386,30 @@ export default function Projects() {
                         )}
                       />
                       
+                      <FormField
+                        control={form.control}
+                        name="themeId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Theme (Optional)</FormLabel>
+                            <FormControl>
+                              <select
+                                {...field}
+                                className="w-full h-10 px-3 border border-gray-200 rounded-md bg-white focus:border-blue-500 focus:ring-blue-500/20"
+                              >
+                                <option value="">No theme</option>
+                                {themes.map((theme) => (
+                                  <option key={theme.id} value={theme.id}>
+                                    {theme.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
                       <div className="flex justify-end space-x-3 pt-4">
                         <Button 
                           type="button" 
@@ -278,18 +437,90 @@ export default function Projects() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Search Bar */}
+        {/* Search and Filter Bar */}
         <div className="mb-8">
           <Card className="bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-xl">
             <CardContent className="p-6">
-              <div className="relative max-w-xl mx-auto">
-                <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400" />
-                <Input
-                  placeholder="Search projects by name or description..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-12 h-12 text-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
-                />
+              <div className="flex flex-col lg:flex-row gap-4">
+                <div className="relative flex-1 max-w-xl">
+                  <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400" />
+                  <Input
+                    placeholder="Search projects by name or description..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-12 h-12 text-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                  />
+                </div>
+                <div className="flex items-center gap-3">
+                  <select
+                    value={selectedThemeFilter}
+                    onChange={(e) => setSelectedThemeFilter(e.target.value)}
+                    className="h-12 px-4 border border-gray-200 rounded-lg bg-white focus:border-blue-500 focus:ring-blue-500/20 text-sm"
+                  >
+                    <option value="all">All Themes</option>
+                    <option value="unthemed">Unthemed</option>
+                    {themes.map((theme) => (
+                      <option key={theme.id} value={theme.id}>
+                        {theme.name}
+                      </option>
+                    ))}
+                  </select>
+                  <Button
+                    variant="outline"
+                    onClick={handleCreateTheme}
+                    className="h-12 px-4 border-gray-200 hover:bg-blue-50 hover:border-blue-300"
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Themes
+                  </Button>
+                </div>
+              </div>
+              {/* Theme Pills */}
+              <div className="flex flex-wrap gap-2 mt-4">
+                <Badge
+                  variant={selectedThemeFilter === "all" ? "default" : "outline"}
+                  className={`cursor-pointer transition-all ${
+                    selectedThemeFilter === "all" 
+                      ? "bg-blue-500 text-white" 
+                      : "hover:bg-blue-50"
+                  }`}
+                  onClick={() => setSelectedThemeFilter("all")}
+                >
+                  All Projects ({projects.length})
+                </Badge>
+                {themes.map((theme) => {
+                  const themeProjectCount = projects.filter(p => p.themeId === theme.id).length;
+                  return (
+                    <Badge
+                      key={theme.id}
+                      variant={selectedThemeFilter === theme.id ? "default" : "outline"}
+                      className={`cursor-pointer transition-all ${
+                        selectedThemeFilter === theme.id 
+                          ? "text-white" 
+                          : "hover:bg-blue-50"
+                      }`}
+                      style={{
+                        backgroundColor: selectedThemeFilter === theme.id ? theme.colorHex : undefined,
+                        borderColor: theme.colorHex,
+                        color: selectedThemeFilter === theme.id ? "white" : theme.colorHex
+                      }}
+                      onClick={() => setSelectedThemeFilter(theme.id)}
+                    >
+                      {theme.name} ({themeProjectCount})
+                    </Badge>
+                  );
+                })}
+                <Badge
+                  variant={selectedThemeFilter === "unthemed" ? "default" : "outline"}
+                  className={`cursor-pointer transition-all ${
+                    selectedThemeFilter === "unthemed" 
+                      ? "bg-gray-500 text-white" 
+                      : "hover:bg-gray-50"
+                  }`}
+                  onClick={() => setSelectedThemeFilter("unthemed")}
+                >
+                  Unthemed ({projects.filter(p => !p.themeId).length})
+                </Badge>
               </div>
             </CardContent>
           </Card>
@@ -347,6 +578,7 @@ export default function Projects() {
                 file.entityType === 'scripts' && 
                 (file.entityId === project.id || projectScripts.some(script => script.id === file.entityId))
               );
+              const projectTheme = themes.find(theme => theme.id === project.themeId);
               
               return (
                 <Card key={project.id} className="group hover:shadow-2xl transition-all duration-500 bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-xl hover:scale-[1.02] hover:shadow-blue-500/10">
@@ -389,9 +621,23 @@ export default function Projects() {
                     </div>
                     
                     <div className="space-y-4">
-                      <h3 className="text-2xl font-bold text-gray-800 line-clamp-2 group-hover:text-blue-700 transition-colors duration-300">
-                        {project.name}
-                      </h3>
+                      <div className="flex items-start justify-between">
+                        <h3 className="text-2xl font-bold text-gray-800 line-clamp-2 group-hover:text-blue-700 transition-colors duration-300 flex-1">
+                          {project.name}
+                        </h3>
+                        {projectTheme && (
+                          <Badge 
+                            className="ml-2 shrink-0"
+                            style={{ 
+                              backgroundColor: projectTheme.colorHex + '20',
+                              color: projectTheme.colorHex,
+                              borderColor: projectTheme.colorHex + '40'
+                            }}
+                          >
+                            {projectTheme.name}
+                          </Badge>
+                        )}
+                      </div>
                       
                       {project.description && (
                         <p className="text-gray-600 line-clamp-3 leading-relaxed">
@@ -486,6 +732,30 @@ export default function Projects() {
                 )}
               />
               
+              <FormField
+                control={form.control}
+                name="themeId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Theme (Optional)</FormLabel>
+                    <FormControl>
+                      <select
+                        {...field}
+                        className="w-full h-10 px-3 border border-gray-200 rounded-md bg-white focus:border-blue-500 focus:ring-blue-500/20"
+                      >
+                        <option value="">No theme</option>
+                        {themes.map((theme) => (
+                          <option key={theme.id} value={theme.id}>
+                            {theme.name}
+                          </option>
+                        ))}
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
               <div className="flex justify-end space-x-3 pt-4">
                 <Button 
                   type="button" 
@@ -504,6 +774,166 @@ export default function Projects() {
               </div>
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Theme Management Dialog */}
+      <Dialog open={isThemeDialogOpen} onOpenChange={setIsThemeDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3 text-xl">
+              <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg">
+                <Sparkles className="h-5 w-5 text-white" />
+              </div>
+              Theme Management
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6">
+            {/* Create New Theme Form */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold mb-4">
+                {editingTheme ? "Edit Theme" : "Create New Theme"}
+              </h3>
+              <Form {...themeForm}>
+                <form onSubmit={themeForm.handleSubmit(onThemeSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={themeForm.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Theme Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Technology, Sports, etc." {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={themeForm.control}
+                      name="colorHex"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Color</FormLabel>
+                          <FormControl>
+                            <div className="flex gap-2">
+                              <Input 
+                                type="color" 
+                                {...field} 
+                                className="w-16 h-10 p-1 border rounded"
+                              />
+                              <Input 
+                                placeholder="#3B82F6"
+                                {...field}
+                                className="flex-1"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <FormField
+                    control={themeForm.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description (Optional)</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Brief description of this theme..." 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="submit"
+                      disabled={createThemeMutation.isPending || updateThemeMutation.isPending}
+                      className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                    >
+                      {editingTheme ? "Update" : "Create"} Theme
+                    </Button>
+                    {editingTheme && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setEditingTheme(null);
+                          themeForm.reset({ name: "", description: "", colorHex: "#3B82F6" });
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                  </div>
+                </form>
+              </Form>
+            </div>
+
+            {/* Existing Themes */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Existing Themes</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-60 overflow-y-auto">
+                {themes.map((theme) => {
+                  const projectCount = projects.filter(p => p.themeId === theme.id).length;
+                  return (
+                    <Card key={theme.id} className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div 
+                            className="w-6 h-6 rounded-full border-2 border-gray-300"
+                            style={{ backgroundColor: theme.colorHex }}
+                          />
+                          <div>
+                            <h4 className="font-medium">{theme.name}</h4>
+                            <p className="text-sm text-gray-500">
+                              {projectCount} project{projectCount !== 1 ? 's' : ''}
+                            </p>
+                            {theme.description && (
+                              <p className="text-xs text-gray-400 mt-1">{theme.description}</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleEditTheme(theme)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              if (projectCount > 0) {
+                                alert(`Cannot delete theme: ${projectCount} project(s) are using this theme.`);
+                                return;
+                              }
+                              if (window.confirm(`Delete theme "${theme.name}"?`)) {
+                                deleteThemeMutation.mutate(theme.id);
+                              }
+                            }}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 

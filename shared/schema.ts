@@ -56,11 +56,23 @@ export const otpVerifications = pgTable("otp_verifications", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Themes table
+export const themes = pgTable("themes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 255 }).notNull().unique(),
+  description: text("description"),
+  colorHex: varchar("color_hex", { length: 7 }).default("#3B82F6"), // Default blue color
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Projects table
 export const projects = pgTable("projects", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
+  themeId: uuid("theme_id"), // Reference to theme
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -159,7 +171,15 @@ export const otpVerificationsRelations = relations(otpVerifications, ({ one }) =
   }),
 }));
 
-export const projectsRelations = relations(projects, ({ many }) => ({
+export const themesRelations = relations(themes, ({ many }) => ({
+  projects: many(projects),
+}));
+
+export const projectsRelations = relations(projects, ({ one, many }) => ({
+  theme: one(themes, {
+    fields: [projects.themeId],
+    references: [themes.id],
+  }),
   episodes: many(episodes),
   scripts: many(scripts),
   freeAccess: many(freeProjectAccess),
@@ -233,6 +253,12 @@ export const upsertUserSchema = createInsertSchema(users).omit({
   updatedAt: true,
 });
 
+export const insertThemeSchema = createInsertSchema(themes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertProjectSchema = createInsertSchema(projects).omit({
   id: true,
   createdAt: true,
@@ -281,6 +307,9 @@ export const insertOtpVerificationSchema = createInsertSchema(otpVerifications).
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof insertUserSchema._type;
 export type UpsertUser = typeof upsertUserSchema._type;
+
+export type Theme = typeof themes.$inferSelect;
+export type InsertTheme = typeof insertThemeSchema._type;
 
 export type Project = typeof projects.$inferSelect;
 export type InsertProject = typeof insertProjectSchema._type;

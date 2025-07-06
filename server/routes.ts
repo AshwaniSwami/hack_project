@@ -18,6 +18,7 @@ import { getSession } from "./replitAuth";
 import bcrypt from "bcryptjs";
 import {
   insertUserSchema,
+  insertThemeSchema,
   insertProjectSchema,
   insertEpisodeSchema,
   insertScriptSchema,
@@ -257,6 +258,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error activating user:", error);
       res.status(500).json({ message: "Failed to activate user" });
+    }
+  });
+
+  // Themes API
+  app.get("/api/themes", async (req, res) => {
+    try {
+      const themes = await storage.getAllThemes();
+      res.json(themes);
+    } catch (error) {
+      console.error("Error fetching themes:", error);
+      res.status(500).json({ message: "Failed to fetch themes" });
+    }
+  });
+
+  app.get("/api/themes/active", async (req, res) => {
+    try {
+      const themes = await storage.getActiveThemes();
+      res.json(themes);
+    } catch (error) {
+      console.error("Error fetching active themes:", error);
+      res.status(500).json({ message: "Failed to fetch active themes" });
+    }
+  });
+
+  app.get("/api/themes/:id", async (req, res) => {
+    try {
+      const theme = await storage.getTheme(req.params.id);
+      if (!theme) {
+        return res.status(404).json({ message: "Theme not found" });
+      }
+      res.json(theme);
+    } catch (error) {
+      console.error("Error fetching theme:", error);
+      res.status(500).json({ message: "Failed to fetch theme" });
+    }
+  });
+
+  // Helper middleware to check if user can edit themes (admin or editor)
+  const canEditThemes = (req: any, res: any, next: any) => {
+    if (req.user && (req.user.role === 'admin' || req.user.role === 'editor')) {
+      next();
+    } else {
+      res.status(403).json({ message: "Only admins and editors can manage themes" });
+    }
+  };
+
+  app.post("/api/themes", isAuthenticated, canEditThemes, async (req, res) => {
+    try {
+      const themeData = insertThemeSchema.parse(req.body);
+      const theme = await storage.createTheme(themeData);
+      res.status(201).json(theme);
+    } catch (error) {
+      console.error("Error creating theme:", error);
+      res.status(400).json({ message: "Failed to create theme" });
+    }
+  });
+
+  app.put("/api/themes/:id", isAuthenticated, canEditThemes, async (req, res) => {
+    try {
+      const themeData = insertThemeSchema.partial().parse(req.body);
+      const theme = await storage.updateTheme(req.params.id, themeData);
+      res.json(theme);
+    } catch (error) {
+      console.error("Error updating theme:", error);
+      res.status(400).json({ message: "Failed to update theme" });
+    }
+  });
+
+  app.delete("/api/themes/:id", isAuthenticated, canEditThemes, async (req, res) => {
+    try {
+      await storage.deleteTheme(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting theme:", error);
+      res.status(500).json({ message: "Failed to delete theme" });
+    }
+  });
+
+  app.get("/api/themes/:id/projects", async (req, res) => {
+    try {
+      const projects = await storage.getProjectsByTheme(req.params.id);
+      res.json(projects);
+    } catch (error) {
+      console.error("Error fetching projects by theme:", error);
+      res.status(500).json({ message: "Failed to fetch projects by theme" });
     }
   });
 
