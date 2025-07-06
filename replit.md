@@ -149,6 +149,9 @@ The application uses a relational database with the following core entities:
 - June 21, 2025: Implemented comprehensive color gradients from indigo to purple to pink across UI components
 - June 21, 2025: Enhanced user experience with interactive elements, scale transforms, and smooth transitions
 - January 6, 2025: Successfully migrated project from Replit Agent to Replit environment with authentication fixes
+- January 6, 2025: Added comprehensive theme system for project categorization with role-based access control
+- January 6, 2025: Implemented theme filtering, management interface, and project-theme associations
+- January 6, 2025: Only admin and editor roles can create/edit themes, members can view and filter by themes
 - December 19, 2024: Configured PostgreSQL database and applied migrations
 - December 19, 2024: Fixed script file upload routing and file association with projects
 - December 19, 2024: Updated project statistics to properly count script files in project management page
