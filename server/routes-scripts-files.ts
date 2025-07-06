@@ -29,8 +29,8 @@ export function registerScriptFileRoutes(app: Express) {
       }
 
       const fileData = {
-        filename: `script_${scriptId}_${Date.now()}_${req.file.originalname}`,
-        originalName: req.file.originalname,
+        filename: `script_${scriptId}_${Date.now()}_${Buffer.from(req.file.originalname, 'utf8').toString('utf8')}`,
+        originalName: Buffer.from(req.file.originalname, 'utf8').toString('utf8'),
         mimeType: req.file.mimetype,
         fileSize: req.file.size,
         fileData: req.file.buffer.toString('base64'),

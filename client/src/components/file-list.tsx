@@ -77,7 +77,9 @@ export function FileList({ entityType, entityId, title = "Files" }: FileListProp
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/files'] });
-      queryClient.refetchQueries({ queryKey: ['/api/files'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/episodes'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/scripts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
       toast({
         title: "Success",
         description: "File deleted successfully",
@@ -154,7 +156,15 @@ export function FileList({ entityType, entityId, title = "Files" }: FileListProp
               <div className="flex items-center space-x-3">
                 {getFileIcon(file.mimeType)}
                 <div>
-                  <p className="font-medium text-sm">{file.originalName}</p>
+                  <p className="font-medium text-sm" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+                    {(() => {
+                      try {
+                        return decodeURIComponent(file.originalName);
+                      } catch {
+                        return file.originalName;
+                      }
+                    })()}
+                  </p>
                   <p className="text-xs text-muted-foreground">
                     {formatFileSize(file.fileSize)} • {new Date(file.createdAt).toLocaleDateString()}
                   </p>

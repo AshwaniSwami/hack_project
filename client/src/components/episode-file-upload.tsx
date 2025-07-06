@@ -93,7 +93,12 @@ export function EpisodeFileUpload() {
       setFile(null);
       setSelectedProject("");
       setSelectedEpisode("none");
+      
+      // Invalidate all related queries to update project stats
       queryClient.invalidateQueries({ queryKey: ['/api/files'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/episodes'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/scripts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
       
       // Reset the file input
       const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
