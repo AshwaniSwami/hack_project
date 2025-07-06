@@ -5,7 +5,8 @@ import { storage } from "./storage";
 import { registerProjectFileRoutes } from "./routes-projects-files";
 import { registerEpisodeFileRoutes } from "./routes-episodes-files";
 import { registerScriptFileRoutes } from "./routes-scripts-files";
-import { setupAuth, isAuthenticated, isAdmin } from "./replitAuth";
+import { isAuthenticated, isAdmin, login, register, logout, getCurrentUser } from "./auth";
+import { getSession } from "./replitAuth";
 import bcrypt from "bcryptjs";
 import {
   insertUserSchema,
@@ -31,8 +32,8 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
+  // Session middleware
+  app.use(getSession());
 
   // Register file upload routes for organized content management
   registerProjectFileRoutes(app);
@@ -40,16 +41,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerScriptFileRoutes(app);
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+  app.post('/api/auth/login', login);
+  app.post('/api/auth/register', register);
+  app.post('/api/auth/logout', logout);
+  app.get('/api/auth/user', getCurrentUser);
 
   // Emergency admin promotion for first user
   app.post('/api/auth/promote-first-admin', isAuthenticated, async (req: any, res) => {

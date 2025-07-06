@@ -11,7 +11,7 @@ import Episodes from "@/pages/episodes";
 import Scripts from "@/pages/scripts";
 import RadioStations from "@/pages/radio-stations";
 import Users from "@/pages/users";
-import Landing from "@/pages/landing";
+import AuthPage from "@/pages/AuthPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -22,11 +22,26 @@ function Router() {
       {isAuthenticated && <Navbar />}
       <main>
         <Switch>
-          {isLoading || !isAuthenticated ? (
-            <Route path="/" component={Landing} />
+          {isLoading ? (
+            <Route path="*">
+              <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+              </div>
+            </Route>
+          ) : !isAuthenticated ? (
+            <>
+              <Route path="/dashboard" component={AuthPage} />
+              <Route path="/projects" component={AuthPage} />
+              <Route path="/episodes" component={AuthPage} />
+              <Route path="/scripts" component={AuthPage} />
+              <Route path="/radio-stations" component={AuthPage} />
+              <Route path="/users" component={AuthPage} />
+              <Route path="/" component={AuthPage} />
+            </>
           ) : (
             <>
               <Route path="/" component={Dashboard} />
+              <Route path="/dashboard" component={Dashboard} />
               <Route path="/projects" component={Projects} />
               <Route path="/episodes" component={Episodes} />
               <Route path="/scripts" component={Scripts} />

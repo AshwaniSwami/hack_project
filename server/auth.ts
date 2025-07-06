@@ -1,0 +1,186 @@
+import { Request, Response, NextFunction } from "express";
+import bcrypt from "bcryptjs";
+import { storage } from "./storage";
+import { nanoid } from "nanoid";
+
+export interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    email: string;
+    role: string;
+    firstName?: string;
+    lastName?: string;
+  };
+}
+
+// Middleware to check if user is authenticated
+export const isAuthenticated = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  if (req.session && (req.session as any).userId) {
+    next();
+  } else {
+    res.status(401).json({ message: "Unauthorized" });
+  }
+};
+
+// Middleware to check if user is admin
+export const isAdmin = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  if (req.session && (req.session as any).userId) {
+    // Get user from storage to check role
+    storage.getUser((req.session as any).userId)
+      .then(user => {
+        if (user && user.role === 'admin') {
+          next();
+        } else {
+          res.status(403).json({ message: "Admin access required" });
+        }
+      })
+      .catch(() => {
+        res.status(500).json({ message: "Error checking user permissions" });
+      });
+  } else {
+    res.status(401).json({ message: "Unauthorized" });
+  }
+};
+
+// Login handler
+export const login = async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    // Get all users and find by email (since we don't have email-specific query)
+    const users = await storage.getAllUsers();
+    const user = users.find(u => u.email === email);
+    
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    // Check password
+    const isValid = user.password ? await bcrypt.compare(password, user.password) : false;
+    
+    if (!isValid) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    // Update login stats
+    await storage.updateUser(user.id, {
+      loginCount: (user.loginCount || 0) + 1,
+      lastLoginAt: new Date(),
+    });
+
+    // Store user ID in session
+    (req.session as any).userId = user.id;
+    
+    res.json({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+      }
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Login failed" });
+  }
+};
+
+// Register handler
+export const register = async (req: Request, res: Response) => {
+  try {
+    const { email, password, firstName, lastName } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    // Check if user already exists
+    const users = await storage.getAllUsers();
+    const existingUser = users.find(u => u.email === email);
+    
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    // Determine role - first user is admin, rest are members
+    const isFirstUser = users.length === 0;
+    const role = isFirstUser ? 'admin' : 'member';
+
+    // Create user
+    const newUser = await storage.createUser({
+      id: nanoid(),
+      email,
+      password: hashedPassword,
+      firstName,
+      lastName,
+      role,
+      isActive: true,
+      loginCount: 1,
+      lastLoginAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    // Store user ID in session
+    (req.session as any).userId = newUser.id;
+    
+    res.json({
+      success: true,
+      user: {
+        id: newUser.id,
+        email: newUser.email,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        role: newUser.role,
+      }
+    });
+  } catch (error) {
+    console.error("Registration error:", error);
+    res.status(500).json({ message: "Registration failed" });
+  }
+};
+
+// Logout handler
+export const logout = (req: Request, res: Response) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ message: "Logout failed" });
+    }
+    res.json({ success: true });
+  });
+};
+
+// Get current user
+export const getCurrentUser = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = (req.session as any).userId;
+    if (!userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    const user = await storage.getUser(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+    });
+  } catch (error) {
+    console.error("Get user error:", error);
+    res.status(500).json({ message: "Failed to get user" });
+  }
+};

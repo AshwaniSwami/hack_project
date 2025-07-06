@@ -20,6 +20,9 @@ SMART Radio Content Hub is a comprehensive content management system designed fo
 - **Language**: TypeScript with ES modules
 - **Database ORM**: Drizzle ORM for type-safe database operations
 - **Database**: PostgreSQL (configured for Neon serverless)
+- **Authentication**: Custom authentication system with bcrypt password hashing
+- **Session Management**: Express sessions with PostgreSQL store (fallback to memory store)
+- **Authorization**: Role-based access control (admin, editor, member)
 - **File Handling**: Multer for multipart file uploads with memory storage
 - **API Design**: RESTful API with JSON responses
 
@@ -117,6 +120,11 @@ The application uses a relational database with the following core entities:
 
 ## Recent Changes
 
+- January 6, 2025: Removed Replit authentication and implemented custom authentication system
+- January 6, 2025: Created custom login/register page with role-based access control
+- January 6, 2025: Updated navigation to hide Users tab for non-admin users
+- January 6, 2025: First registered user automatically becomes admin
+- January 6, 2025: Implemented secure password hashing with bcrypt
 - January 21, 2025: Redesigned all main pages (Episodes, Projects, Scripts, Users, Radio Stations) with consistent blue-emerald color scheme and compact headers
 - January 21, 2025: Fixed script editor functionality with consistent ReactQuill implementation across dashboard and scripts page
 - January 21, 2025: Added episode selection support to scripts (optional relationship)
