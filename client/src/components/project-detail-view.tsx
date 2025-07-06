@@ -75,117 +75,13 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
         </CardHeader>
       </Card>
 
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview" className="flex items-center gap-2">
-            <FolderOpen className="h-4 w-4" />
-            Overview
-          </TabsTrigger>
+      <Tabs defaultValue="episodes" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="episodes">Episodes</TabsTrigger>
           <TabsTrigger value="scripts">Scripts</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Episodes Section */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  Episodes ({episodes.length})
-                </h3>
-              </div>
-              
-              {episodes.length === 0 ? (
-                <Card>
-                  <CardContent className="p-6 text-center text-muted-foreground">
-                    No episodes created yet
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-3">
-                  {episodes.slice(0, 5).map((episode) => (
-                    <Card key={episode.id}>
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <h4 className="font-medium">{episode.title}</h4>
-                            <p className="text-sm text-muted-foreground">Episode #{episode.episodeNumber}</p>
-                            {episode.description && (
-                              <p className="text-sm mt-1 line-clamp-2">{episode.description}</p>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2 ml-4">
-                            {episode.isPremium && (
-                              <Badge variant="secondary">Premium</Badge>
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                  {episodes.length > 5 && (
-                    <p className="text-sm text-muted-foreground text-center">
-                      ... and {episodes.length - 5} more episodes
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
 
-            {/* Scripts Section */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Scripts ({scripts.length})
-                </h3>
-              </div>
-              
-              {scripts.length === 0 ? (
-                <Card>
-                  <CardContent className="p-6 text-center text-muted-foreground">
-                    No scripts created yet
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-3">
-                  {scripts.slice(0, 5).map((script) => (
-                    <Card key={script.id}>
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <h4 className="font-medium">{script.title}</h4>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Badge variant="outline" className="text-xs">
-                                {script.status}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">
-                                {new Date(script.updatedAt).toLocaleDateString()}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                  {scripts.length > 5 && (
-                    <p className="text-sm text-muted-foreground text-center">
-                      ... and {scripts.length - 5} more scripts
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-          
-          {/* Project Files Section */}
-          <EnhancedFileManager 
-            entityType="projects" 
-            entityId={project.id} 
-            title="Project Files"
-          />
-        </TabsContent>
 
         <TabsContent value="episodes" className="space-y-4">
           <h3 className="text-lg font-semibold">Episodes</h3>
@@ -256,7 +152,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
           
           <div className="grid gap-4">
             {scripts.map((script) => {
-              const episode = episodes.find(ep => ep.id === script.episodeId);
+              // Scripts don't have episodeId field in current schema
               return (
                 <Card key={script.id}>
                   <CardContent className="p-4">
@@ -264,7 +160,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                       <div>
                         <h4 className="font-medium">{script.title}</h4>
                         <p className="text-sm text-muted-foreground">
-                          Episode: {episode?.title} (#{episode?.episodeNumber})
+                          {script.updatedAt ? new Date(script.updatedAt).toLocaleDateString() : 'No date'}
                         </p>
                         <Badge className="mt-2" variant="outline">
                           {script.status}
