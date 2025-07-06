@@ -5,7 +5,14 @@ import { storage } from "./storage";
 import { registerProjectFileRoutes } from "./routes-projects-files";
 import { registerEpisodeFileRoutes } from "./routes-episodes-files";
 import { registerScriptFileRoutes } from "./routes-scripts-files";
-import { isAuthenticated, isAdmin, login, register, logout, getCurrentUser } from "./auth";
+import { isDatabaseAvailable } from "./db";
+// Import both auth modules
+import * as realAuth from "./auth";
+import * as tempAuth from "./tempAuth";
+
+// Use temp auth when database is not available, real auth when database is ready
+const authModule = isDatabaseAvailable() ? realAuth : tempAuth;
+const { isAuthenticated, isAdmin, login, register, logout, getCurrentUser } = authModule;
 import { getSession } from "./replitAuth";
 import bcrypt from "bcryptjs";
 import {

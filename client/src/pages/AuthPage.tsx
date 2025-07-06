@@ -97,6 +97,13 @@ export default function AuthPage() {
           <CardHeader className="text-center">
             <CardTitle>Welcome</CardTitle>
             <CardDescription>Sign in to your account or create a new one</CardDescription>
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <strong>Demo Mode:</strong> Database not yet configured.
+                <br />
+                Use: <code className="bg-white px-1 rounded">admin@example.com</code> / <code className="bg-white px-1 rounded">password</code>
+              </p>
+            </div>
           </CardHeader>
           <CardContent>
             {error && (
