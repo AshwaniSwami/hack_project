@@ -249,45 +249,7 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(projects.createdAt));
   }
 
-  async getProjectsByParent(parentProjectId?: string): Promise<Project[]> {
-    if (parentProjectId) {
-      return await db
-        .select()
-        .from(projects)
-        .where(and(
-          eq(projects.parentProjectId, parentProjectId),
-          eq(projects.isActive, true)
-        ))
-        .orderBy(asc(projects.sortOrder), asc(projects.name));
-    } else {
-      return await db
-        .select()
-        .from(projects)
-        .where(and(
-          sql`parent_project_id IS NULL`,
-          eq(projects.isActive, true)
-        ))
-        .orderBy(asc(projects.sortOrder), asc(projects.name));
-    }
-  }
 
-  async getProjectHierarchy(projectId: string): Promise<Project[]> {
-    // Get the project and all its parent projects
-    const hierarchy: Project[] = [];
-    let currentProjectId: string | null = projectId;
-
-    while (currentProjectId) {
-      const project = await this.getProject(currentProjectId);
-      if (project) {
-        hierarchy.unshift(project); // Add to beginning to maintain order
-        currentProjectId = project.parentProjectId;
-      } else {
-        break;
-      }
-    }
-
-    return hierarchy;
-  }
 
   async getProjectsByTheme(themeId: string): Promise<Project[]> {
     return await db.select().from(projects).where(eq(projects.themeId, themeId)).orderBy(desc(projects.createdAt));

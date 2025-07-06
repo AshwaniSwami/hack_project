@@ -73,17 +73,15 @@ export const projects = pgTable("projects", {
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
   themeId: uuid("theme_id"), // Reference to theme
-  parentProjectId: uuid("parent_project_id"), // For subprojects hierarchy
-  projectType: varchar("project_type", { length: 50 }).default("main"), // main, subproject, template
+  projectType: varchar("project_type", { length: 50 }).default("main"), // main, template
   isTemplate: boolean("is_template").default(false),
   sortOrder: integer("sort_order").default(0),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
-  index("idx_projects_parent").on(table.parentProjectId),
   index("idx_projects_type").on(table.projectType),
-  index("idx_projects_sort").on(table.parentProjectId, table.sortOrder),
+  index("idx_projects_sort").on(table.sortOrder),
 ]);
 
 // Episodes table
@@ -229,11 +227,6 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
     fields: [projects.themeId],
     references: [themes.id],
   }),
-  parentProject: one(projects, {
-    fields: [projects.parentProjectId],
-    references: [projects.id],
-  }),
-  subprojects: many(projects),
   episodes: many(episodes),
   scripts: many(scripts),
   freeAccess: many(freeProjectAccess),

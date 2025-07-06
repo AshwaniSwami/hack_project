@@ -36,7 +36,7 @@ SMART Radio Content Hub is a comprehensive content management system designed fo
 ### Database Schema
 The application uses a relational database with the following core entities:
 - **Users**: User authentication and profile management with role-based access control
-- **Projects**: Hierarchical project organization with subproject support and theme categorization
+- **Projects**: Project organization with theme categorization
 - **Episodes**: Individual radio episodes linked to projects with premium content support
 - **Scripts**: Content scripts with rich text support, workflow status, and topic associations
 - **Radio Stations**: External radio station entities with contact information and project access
@@ -126,7 +126,6 @@ The application uses a relational database with the following core entities:
 ## Recent Changes
 
 - January 6, 2025: Implemented advanced file storage system with folder organization, search, and enhanced metadata
-- January 6, 2025: Added subproject support allowing hierarchical project organization with parent-child relationships
 - January 6, 2025: Enhanced file management with versioning, tagging, access levels, and checksum validation
 - January 6, 2025: Fixed UUID validation error in script creation by using authenticated user ID
 - January 6, 2025: Added comprehensive API endpoints for folder management and file search functionality
@@ -160,6 +159,9 @@ The application uses a relational database with the following core entities:
 - June 21, 2025: Added glassmorphism effects, backdrop blur, and hover animations throughout dashboard interface
 - June 21, 2025: Implemented comprehensive color gradients from indigo to purple to pink across UI components
 - June 21, 2025: Enhanced user experience with interactive elements, scale transforms, and smooth transitions
+- January 21, 2025: Removed subproject feature entirely from the system to simplify project management
+- January 21, 2025: Enhanced Overview tab with project summary, statistics, and recent activity display  
+- January 21, 2025: Fixed database schema by removing subproject relations and hierarchy functionality
 - January 6, 2025: Successfully migrated project from Replit Agent to Replit environment with authentication fixes
 - January 6, 2025: Added comprehensive theme system for project categorization with role-based access control
 - January 6, 2025: Implemented theme filtering, management interface, and project-theme associations

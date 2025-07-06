@@ -6,14 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileList } from "@/components/file-list";
 import { EnhancedFileManager } from "@/components/enhanced-file-manager";
-import { SubprojectManager } from "@/components/subproject-manager";
 import { 
   Plus, 
   FileText, 
   Users, 
   Calendar,
-  FolderOpen,
-  FolderTree
+  FolderOpen
 } from "lucide-react";
 import type { Project, Episode, Script } from "@shared/schema";
 
@@ -78,34 +76,87 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
       </Card>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <FolderOpen className="h-4 w-4" />
             Overview
-          </TabsTrigger>
-          <TabsTrigger value="subprojects" className="flex items-center gap-2">
-            <FolderTree className="h-4 w-4" />
-            Subprojects
           </TabsTrigger>
           <TabsTrigger value="episodes">Episodes</TabsTrigger>
           <TabsTrigger value="scripts">Scripts</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Project Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Episodes</span>
+                  <Badge variant="secondary">{episodes.length}</Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Scripts</span>
+                  <Badge variant="secondary">{scripts.length}</Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Episode Files</span>
+                  <Badge variant="secondary">{projectEpisodeFiles.length}</Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Script Files</span>
+                  <Badge variant="secondary">{projectScriptFiles.length}</Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Created</span>
+                  <span className="text-sm">{new Date(project.createdAt).toLocaleDateString()}</span>
+                </div>
+                {project.updatedAt !== project.createdAt && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Last Updated</span>
+                    <span className="text-sm">{new Date(project.updatedAt).toLocaleDateString()}</span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Activity</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {episodes.slice(0, 3).map((episode) => (
+                  <div key={episode.id} className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">Episode {episode.episodeNumber}</p>
+                      <p className="text-xs text-muted-foreground truncate">{episode.title}</p>
+                    </div>
+                    <Badge variant="outline">Episode</Badge>
+                  </div>
+                ))}
+                {scripts.slice(0, 3).map((script) => (
+                  <div key={script.id} className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{script.title}</p>
+                      <p className="text-xs text-muted-foreground">{script.status}</p>
+                    </div>
+                    <Badge variant="outline">Script</Badge>
+                  </div>
+                ))}
+                {episodes.length === 0 && scripts.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No recent activity
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+          
           <EnhancedFileManager 
             entityType="projects" 
             entityId={project.id} 
             title="Project Files"
-          />
-        </TabsContent>
-
-        <TabsContent value="subprojects" className="space-y-4">
-          <SubprojectManager 
-            parentProjectId={project.id}
-            onSubprojectSelect={(subproject) => {
-              // Handle subproject selection - could navigate or expand
-              console.log('Selected subproject:', subproject);
-            }}
           />
         </TabsContent>
 
