@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Trash2, Download, Eye, FileText, Image, Music, Video, File as FileIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useFilePermissions } from "@/hooks/useFilePermissions";
 
 interface FileListProps {
   entityType: string;
@@ -53,6 +54,7 @@ function canPreview(mimeType: string): boolean {
 export function FileList({ entityType, entityId, title = "Files" }: FileListProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { permissions, isLoading: permissionsLoading } = useFilePermissions();
 
   const { data: filesResponse = { files: [] }, isLoading, refetch } = useQuery({
     queryKey: ['/api/files', entityType, entityId],
@@ -159,7 +161,7 @@ export function FileList({ entityType, entityId, title = "Files" }: FileListProp
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                {canPreview(file.mimeType) && (
+                {canPreview(file.mimeType) && permissions.canView && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -169,23 +171,27 @@ export function FileList({ entityType, entityId, title = "Files" }: FileListProp
                     View
                   </Button>
                 )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDownload(file.id, file.originalName)}
-                >
-                  <Download className="h-3 w-3 mr-1" />
-                  Download
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDelete(file.id)}
-                  disabled={deleteMutation.isPending}
-                >
-                  <Trash2 className="h-3 w-3 mr-1" />
-                  Delete
-                </Button>
+                {permissions.canDownload && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDownload(file.id, file.originalName)}
+                  >
+                    <Download className="h-3 w-3 mr-1" />
+                    Download
+                  </Button>
+                )}
+                {permissions.canDelete && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDelete(file.id)}
+                    disabled={deleteMutation.isPending}
+                  >
+                    <Trash2 className="h-3 w-3 mr-1" />
+                    Delete
+                  </Button>
+                )}
               </div>
             </div>
           ))}

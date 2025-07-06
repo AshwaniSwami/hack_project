@@ -9,6 +9,7 @@ import { isDatabaseAvailable } from "./db";
 // Import both auth modules
 import * as realAuth from "./auth";
 import * as tempAuth from "./tempAuth";
+import { getFilePermissions, requireFilePermission } from "./filePermissions";
 
 // Use temp auth when database is not available, real auth when database is ready
 const authModule = isDatabaseAvailable() ? realAuth : tempAuth;
@@ -52,6 +53,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/register', register);
   app.post('/api/auth/logout', logout);
   app.get('/api/auth/user', getCurrentUser);
+
+  // Get user permissions for role-based access control
+  app.get('/api/auth/permissions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const user = await storage.getUser(userId);
+      const permissions = getFilePermissions(user);
+      res.json(permissions);
+    } catch (error) {
+      console.error("Error getting user permissions:", error);
+      res.status(500).json({ message: "Failed to get user permissions" });
+    }
+  });
 
   // Emergency admin promotion for first user
   app.post('/api/auth/promote-first-admin', isAuthenticated, async (req: any, res) => {
@@ -768,8 +782,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Files API
-  app.get("/api/files", async (req, res) => {
+  app.get("/api/files", isAuthenticated, async (req: any, res) => {
     try {
+      const user = await storage.getUser(req.user.id);
+      if (!requireFilePermission('canView', user)) {
+        return res.status(403).json({ message: "Insufficient permissions to view files" });
+      }
+
       const { entityType, entityId } = req.query;
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
       const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
@@ -802,8 +821,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/files/:id", async (req, res) => {
+  app.get("/api/files/:id", isAuthenticated, async (req: any, res) => {
     try {
+      const user = await storage.getUser(req.user.id);
+      if (!requireFilePermission('canView', user)) {
+        return res.status(403).json({ message: "Insufficient permissions to view files" });
+      }
+
       const file = await storage.getFile(req.params.id);
       if (!file) {
         return res.status(404).json({ message: "File not found" });
@@ -815,8 +839,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/files/:id/download", async (req, res) => {
+  app.get("/api/files/:id/download", isAuthenticated, async (req: any, res) => {
     try {
+      const user = await storage.getUser(req.user.id);
+      if (!requireFilePermission('canDownload', user)) {
+        return res.status(403).json({ message: "Insufficient permissions to download files" });
+      }
+
       const file = await storage.getFile(req.params.id);
       if (!file) {
         return res.status(404).json({ message: "File not found" });
@@ -835,8 +864,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/files/:id/view", async (req, res) => {
+  app.get("/api/files/:id/view", isAuthenticated, async (req: any, res) => {
     try {
+      const user = await storage.getUser(req.user.id);
+      if (!requireFilePermission('canView', user)) {
+        return res.status(403).json({ message: "Insufficient permissions to view files" });
+      }
+
       const file = await storage.getFile(req.params.id);
       if (!file) {
         return res.status(404).json({ message: "File not found" });
@@ -854,8 +888,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/files/:id", async (req, res) => {
+  app.delete("/api/files/:id", isAuthenticated, async (req: any, res) => {
     try {
+      const user = await storage.getUser(req.user.id);
+      if (!requireFilePermission('canDelete', user)) {
+        return res.status(403).json({ message: "Insufficient permissions to delete files" });
+      }
+
       await storage.deleteFile(req.params.id);
       res.status(204).send();
     } catch (error) {

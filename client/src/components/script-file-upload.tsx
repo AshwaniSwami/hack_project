@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useFilePermissions } from "@/hooks/useFilePermissions";
 import type { Project, Episode, Script } from "@shared/schema";
 
 export function ScriptFileUpload() {
@@ -24,6 +25,7 @@ export function ScriptFileUpload() {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { permissions, isLoading: permissionsLoading } = useFilePermissions();
 
   const { data: projects = [] } = useQuery<Project[]>({
     queryKey: ["/api/projects"],
@@ -120,6 +122,25 @@ export function ScriptFileUpload() {
       setIsUploading(false);
     }
   };
+
+  // Show permission denied message for users without upload access
+  if (!permissions.canUpload) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Upload className="h-5 w-5" />
+            Upload Script Files
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground text-center py-8">
+            You don't have permission to upload files. Only Admin and Editor users can upload files.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>

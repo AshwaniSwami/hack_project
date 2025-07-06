@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Upload, FileText, Download, Trash2, File as FileIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useFilePermissions } from "@/hooks/useFilePermissions";
 import type { Script } from "@shared/schema";
 
 interface ScriptFileManagerProps {
@@ -45,6 +46,7 @@ export function ScriptFileManager({ script }: ScriptFileManagerProps) {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { permissions } = useFilePermissions();
 
   const { data: scriptFiles = [] } = useQuery<FileData[]>({
     queryKey: ['/api/files', 'scripts', script.id],
@@ -147,39 +149,47 @@ export function ScriptFileManager({ script }: ScriptFileManagerProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         {/* File Upload Section */}
-        <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
-          <div className="space-y-2">
-            <Label htmlFor="script-file-upload">Upload Document</Label>
-            <Input
-              id="script-file-upload"
-              type="file"
-              accept=".pdf,.doc,.docx,.txt,.rtf"
-              onChange={handleFileChange}
-              className="cursor-pointer"
-            />
-            <p className="text-sm text-muted-foreground">
-              Supported formats: PDF, DOC, DOCX, TXT, RTF
+        {permissions.canUpload ? (
+          <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
+            <div className="space-y-2">
+              <Label htmlFor="script-file-upload">Upload Document</Label>
+              <Input
+                id="script-file-upload"
+                type="file"
+                accept=".pdf,.doc,.docx,.txt,.rtf"
+                onChange={handleFileChange}
+                className="cursor-pointer"
+              />
+              <p className="text-sm text-muted-foreground">
+                Supported formats: PDF, DOC, DOCX, TXT, RTF
+              </p>
+            </div>
+
+            {file && (
+              <div className="flex items-center gap-2 p-2 border rounded bg-white">
+                <FileText className="h-4 w-4" />
+                <span className="text-sm font-medium">{file.name}</span>
+                <span className="text-xs text-muted-foreground">
+                  ({formatFileSize(file.size)})
+                </span>
+              </div>
+            )}
+
+            <Button 
+              onClick={handleUpload} 
+              disabled={!file || isUploading}
+              className="w-full"
+            >
+              {isUploading ? "Uploading..." : "Upload File"}
+            </Button>
+          </div>
+        ) : (
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <p className="text-muted-foreground text-center">
+              You don't have permission to upload files. Only Admin and Editor users can upload files.
             </p>
           </div>
-
-          {file && (
-            <div className="flex items-center gap-2 p-2 border rounded bg-white">
-              <FileText className="h-4 w-4" />
-              <span className="text-sm font-medium">{file.name}</span>
-              <span className="text-xs text-muted-foreground">
-                ({formatFileSize(file.size)})
-              </span>
-            </div>
-          )}
-
-          <Button 
-            onClick={handleUpload} 
-            disabled={!file || isUploading}
-            className="w-full"
-          >
-            {isUploading ? "Uploading..." : "Upload File"}
-          </Button>
-        </div>
+        )}
 
         {/* Files List */}
         <div className="space-y-3">
@@ -202,21 +212,25 @@ export function ScriptFileManager({ script }: ScriptFileManagerProps) {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDownload(file.id, file.originalName)}
-                    >
-                      <Download className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => deleteFileMutation.mutate(file.id)}
-                      disabled={deleteFileMutation.isPending}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
+                    {permissions.canDownload && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDownload(file.id, file.originalName)}
+                      >
+                        <Download className="h-3 w-3" />
+                      </Button>
+                    )}
+                    {permissions.canDelete && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => deleteFileMutation.mutate(file.id)}
+                        disabled={deleteFileMutation.isPending}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))}
