@@ -159,6 +159,7 @@ The application uses a relational database with the following core entities:
 - June 21, 2025: Added glassmorphism effects, backdrop blur, and hover animations throughout dashboard interface
 - June 21, 2025: Implemented comprehensive color gradients from indigo to purple to pink across UI components
 - June 21, 2025: Enhanced user experience with interactive elements, scale transforms, and smooth transitions
+- January 21, 2025: Fixed script creation authentication issue by adding proper isAuthenticated middleware to script API routes
 - January 21, 2025: Removed subproject feature entirely from the system to simplify project management
 - January 21, 2025: Enhanced Overview tab with project summary, statistics, and recent activity display  
 - January 21, 2025: Fixed database schema by removing subproject relations and hierarchy functionality

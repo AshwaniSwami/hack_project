@@ -610,18 +610,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/scripts", async (req, res) => {
+  app.post("/api/scripts", isAuthenticated, async (req: any, res) => {
     try {
-      const user = req.session?.user;
-      if (!user) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
-
       const scriptData = insertScriptSchema.parse(req.body);
       
       const script = await storage.createScript({
         ...scriptData,
-        authorId: user.id
+        authorId: req.user.id
       });
       res.status(201).json(script);
     } catch (error) {
@@ -690,7 +685,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/scripts/:id", async (req, res) => {
+  app.put("/api/scripts/:id", isAuthenticated, async (req: any, res) => {
     try {
       const scriptData = insertScriptSchema.partial().parse(req.body);
       const script = await storage.updateScript(req.params.id, scriptData);
@@ -701,7 +696,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/scripts/:id", async (req, res) => {
+  app.delete("/api/scripts/:id", isAuthenticated, async (req: any, res) => {
     try {
       await storage.deleteScript(req.params.id);
       res.status(204).send();
