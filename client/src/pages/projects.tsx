@@ -44,12 +44,11 @@ import { ProjectDetailView } from "@/components/project-detail-view";
 const projectFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
-  themeId: z.string().optional(),
+  themeId: z.string().optional().transform((val) => val === "" ? undefined : val),
 });
 
 const themeFormSchema = z.object({
   name: z.string().min(1, "Theme name is required"),
-  description: z.string().optional(),
   colorHex: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Must be a valid hex color"),
 });
 
@@ -115,7 +114,6 @@ export default function Projects() {
     resolver: zodResolver(themeFormSchema),
     defaultValues: {
       name: "",
-      description: "",
       colorHex: "#3B82F6",
     },
   });
@@ -270,7 +268,6 @@ export default function Projects() {
     setEditingTheme(null);
     themeForm.reset({
       name: "",
-      description: "",
       colorHex: "#3B82F6",
     });
     setIsThemeDialogOpen(true);
@@ -280,7 +277,6 @@ export default function Projects() {
     setEditingTheme(theme);
     themeForm.reset({
       name: theme.name,
-      description: theme.description || "",
       colorHex: theme.colorHex,
     });
     setIsThemeDialogOpen(true);
@@ -836,22 +832,7 @@ export default function Projects() {
                     />
                   </div>
                   
-                  <FormField
-                    control={themeForm.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Description (Optional)</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Brief description of this theme..." 
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+
                   
                   <div className="flex items-center gap-2">
                     <Button
@@ -867,7 +848,7 @@ export default function Projects() {
                         variant="outline"
                         onClick={() => {
                           setEditingTheme(null);
-                          themeForm.reset({ name: "", description: "", colorHex: "#3B82F6" });
+                          themeForm.reset({ name: "", colorHex: "#3B82F6" });
                         }}
                       >
                         Cancel
@@ -881,56 +862,55 @@ export default function Projects() {
             {/* Existing Themes */}
             <div>
               <h3 className="text-lg font-semibold mb-4">Existing Themes</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-60 overflow-y-auto">
-                {themes.map((theme) => {
-                  const projectCount = projects.filter(p => p.themeId === theme.id).length;
-                  return (
-                    <Card key={theme.id} className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div 
-                            className="w-6 h-6 rounded-full border-2 border-gray-300"
-                            style={{ backgroundColor: theme.colorHex }}
-                          />
-                          <div>
-                            <h4 className="font-medium">{theme.name}</h4>
-                            <p className="text-sm text-gray-500">
-                              {projectCount} project{projectCount !== 1 ? 's' : ''}
-                            </p>
-                            {theme.description && (
-                              <p className="text-xs text-gray-400 mt-1">{theme.description}</p>
-                            )}
+              <div className="max-h-96 overflow-y-auto pr-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {themes.map((theme) => {
+                    const projectCount = projects.filter(p => p.themeId === theme.id).length;
+                    return (
+                      <Card key={theme.id} className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div 
+                              className="w-6 h-6 rounded-full border-2 border-gray-300"
+                              style={{ backgroundColor: theme.colorHex }}
+                            />
+                            <div>
+                              <h4 className="font-medium">{theme.name}</h4>
+                              <p className="text-sm text-gray-500">
+                                {projectCount} project{projectCount !== 1 ? 's' : ''}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleEditTheme(theme)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                if (projectCount > 0) {
+                                  alert(`Cannot delete theme: ${projectCount} project(s) are using this theme.`);
+                                  return;
+                                }
+                                if (window.confirm(`Delete theme "${theme.name}"?`)) {
+                                  deleteThemeMutation.mutate(theme.id);
+                                }
+                              }}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleEditTheme(theme)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => {
-                              if (projectCount > 0) {
-                                alert(`Cannot delete theme: ${projectCount} project(s) are using this theme.`);
-                                return;
-                              }
-                              if (window.confirm(`Delete theme "${theme.name}"?`)) {
-                                deleteThemeMutation.mutate(theme.id);
-                              }
-                            }}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </Card>
-                  );
-                })}
+                      </Card>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>

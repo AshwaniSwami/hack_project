@@ -152,6 +152,9 @@ The application uses a relational database with the following core entities:
 - January 6, 2025: Added comprehensive theme system for project categorization with role-based access control
 - January 6, 2025: Implemented theme filtering, management interface, and project-theme associations
 - January 6, 2025: Only admin and editor roles can create/edit themes, members can view and filter by themes
+- January 6, 2025: Removed description field from theme creation for cleaner interface
+- January 6, 2025: Fixed theme visibility optimization with improved scrolling and layout
+- January 6, 2025: Fixed UUID validation error for project theme assignment
 - December 19, 2024: Configured PostgreSQL database and applied migrations
 - December 19, 2024: Fixed script file upload routing and file association with projects
 - December 19, 2024: Updated project statistics to properly count script files in project management page
