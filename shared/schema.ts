@@ -38,10 +38,22 @@ export const users = pgTable("users", {
   password: varchar("password"), // For custom users (not Replit users)
   role: varchar("role").default("member"), // admin, editor, member
   isActive: boolean("is_active").default(true),
+  isVerified: boolean("is_verified").default(false), // Email verification status
   loginCount: integer("login_count").default(0),
   lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// OTP verification table
+export const otpVerifications = pgTable("otp_verifications", {
+  id: varchar("id").primaryKey().notNull(),
+  userId: varchar("user_id").notNull(),
+  otpCode: varchar("otp_code", { length: 6 }).notNull(),
+  purpose: varchar("purpose", { length: 50 }).notNull(), // 'account_verification', 'account_deletion'
+  expiresAt: timestamp("expires_at").notNull(),
+  isUsed: boolean("is_used").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Projects table
@@ -137,6 +149,14 @@ export const usersRelations = relations(users, ({ many }) => ({
   scripts: many(scripts),
   radioStations: many(radioStations),
   grantedAccess: many(freeProjectAccess),
+  otpVerifications: many(otpVerifications),
+}));
+
+export const otpVerificationsRelations = relations(otpVerifications, ({ one }) => ({
+  user: one(users, {
+    fields: [otpVerifications.userId],
+    references: [users.id],
+  }),
 }));
 
 export const projectsRelations = relations(projects, ({ many }) => ({
@@ -253,6 +273,10 @@ export const insertFileSchema = createInsertSchema(files).omit({
   createdAt: true,
 });
 
+export const insertOtpVerificationSchema = createInsertSchema(otpVerifications).omit({
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof insertUserSchema._type;
@@ -278,3 +302,6 @@ export type InsertFreeProjectAccess = typeof insertFreeProjectAccessSchema._type
 
 export type File = typeof files.$inferSelect;
 export type InsertFile = typeof insertFileSchema._type;
+
+export type OtpVerification = typeof otpVerifications.$inferSelect;
+export type InsertOtpVerification = typeof insertOtpVerificationSchema._type;

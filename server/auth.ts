@@ -59,6 +59,16 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    // Check if user is active
+    if (!user.isActive) {
+      return res.status(403).json({ message: "Account has been suspended. Please contact an administrator." });
+    }
+
+    // Check if user is verified (except for admin who is auto-verified)
+    if (!user.isVerified && user.role !== 'admin') {
+      return res.status(403).json({ message: "Account pending verification. Please wait for admin approval." });
+    }
+
     // Check password
     const isValid = user.password ? await bcrypt.compare(password, user.password) : false;
     
@@ -114,6 +124,9 @@ export const register = async (req: Request, res: Response) => {
     // Determine role - first user is admin, rest are members
     const isFirstUser = users.length === 0;
     const role = isFirstUser ? 'admin' : 'member';
+    
+    // First user (admin) is auto-verified, others need verification
+    const isVerified = isFirstUser;
 
     // Create user
     const newUser = await storage.createUser({
@@ -123,15 +136,16 @@ export const register = async (req: Request, res: Response) => {
       firstName,
       lastName,
       role,
-      isActive: true,
-      loginCount: 1,
-      lastLoginAt: new Date(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      isActive: isFirstUser, // Only admin is active by default
+      isVerified,
+      loginCount: isFirstUser ? 1 : 0,
+      lastLoginAt: isFirstUser ? new Date() : undefined,
     });
 
-    // Store user ID in session
-    (req.session as any).userId = newUser.id;
+    // Only log in admin users immediately, others need verification
+    if (isFirstUser) {
+      (req.session as any).userId = newUser.id;
+    }
     
     res.json({
       success: true,
@@ -141,7 +155,10 @@ export const register = async (req: Request, res: Response) => {
         firstName: newUser.firstName,
         lastName: newUser.lastName,
         role: newUser.role,
-      }
+      },
+      message: isFirstUser 
+        ? "Welcome! Your admin account has been created successfully." 
+        : "Account created successfully! Please wait for admin verification before you can log in."
     });
   } catch (error) {
     console.error("Registration error:", error);

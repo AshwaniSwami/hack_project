@@ -91,6 +91,12 @@ export interface IStorage {
   deleteFile(id: string): Promise<void>;
   getAllFiles(): Promise<File[]>;
   getFilesByEntity(entityType: string, entityId?: string): Promise<File[]>;
+
+  // Admin User Management
+  verifyUser(userId: string): Promise<User>;
+  suspendUser(userId: string): Promise<User>;
+  activateUser(userId: string): Promise<User>;
+  getUsersPendingVerification(): Promise<User[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -400,6 +406,60 @@ export class DatabaseStorage implements IStorage {
         .orderBy(desc(files.createdAt));
     }
   }
+
+  // Admin User Management Methods
+  async verifyUser(userId: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        isVerified: true, 
+        isActive: true,
+        updatedAt: new Date() 
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    if (!user) {
+      throw new Error("User not found");
+    }
+    return user;
+  }
+
+  async suspendUser(userId: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        isActive: false,
+        updatedAt: new Date() 
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    if (!user) {
+      throw new Error("User not found");
+    }
+    return user;
+  }
+
+  async activateUser(userId: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        isActive: true,
+        updatedAt: new Date() 
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    if (!user) {
+      throw new Error("User not found");
+    }
+    return user;
+  }
+
+  async getUsersPendingVerification(): Promise<User[]> {
+    return await db.select().from(users).where(eq(users.isVerified, false));
+  }
 }
 
 // Fallback storage class for when database is not available
@@ -468,6 +528,12 @@ export class FallbackStorage implements IStorage {
   async deleteFile(id: string): Promise<void> { return this.throwDatabaseError(); }
   async getAllFiles(): Promise<File[]> { return this.throwDatabaseError(); }
   async getFilesByEntity(entityType: string, entityId?: string): Promise<File[]> { return this.throwDatabaseError(); }
+
+  // Admin User Management
+  async verifyUser(userId: string): Promise<User> { return this.throwDatabaseError(); }
+  async suspendUser(userId: string): Promise<User> { return this.throwDatabaseError(); }
+  async activateUser(userId: string): Promise<User> { return this.throwDatabaseError(); }
+  async getUsersPendingVerification(): Promise<User[]> { return this.throwDatabaseError(); }
 }
 
 // Use appropriate storage based on database availability

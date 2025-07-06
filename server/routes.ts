@@ -205,6 +205,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin User Management API
+  app.get("/api/admin/users/pending", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const pendingUsers = await storage.getUsersPendingVerification();
+      res.json(pendingUsers);
+    } catch (error) {
+      console.error("Error fetching pending users:", error);
+      res.status(500).json({ message: "Failed to fetch pending users" });
+    }
+  });
+
+  app.patch("/api/admin/users/:id/verify", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const user = await storage.verifyUser(req.params.id);
+      res.json({ message: "User verified successfully", user });
+    } catch (error) {
+      console.error("Error verifying user:", error);
+      res.status(500).json({ message: "Failed to verify user" });
+    }
+  });
+
+  app.patch("/api/admin/users/:id/suspend", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const user = await storage.suspendUser(req.params.id);
+      res.json({ message: "User suspended successfully", user });
+    } catch (error) {
+      console.error("Error suspending user:", error);
+      res.status(500).json({ message: "Failed to suspend user" });
+    }
+  });
+
+  app.patch("/api/admin/users/:id/activate", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const user = await storage.activateUser(req.params.id);
+      res.json({ message: "User activated successfully", user });
+    } catch (error) {
+      console.error("Error activating user:", error);
+      res.status(500).json({ message: "Failed to activate user" });
+    }
+  });
+
   // Projects API
   app.get("/api/projects", async (req, res) => {
     try {
