@@ -153,8 +153,20 @@ export const files = pgTable("files", {
   entityType: varchar("entity_type", { length: 50 }).notNull(), // users, projects, episodes, scripts, radio-stations
   entityId: uuid("entity_id"), // Optional: link to specific entity
   uploadedBy: uuid("uploaded_by"), // Optional: user who uploaded
+  sortOrder: integer("sort_order").default(0), // For manual reordering
+  parentFileId: uuid("parent_file_id"), // For subproject/nested file support
+  tags: text("tags").array(), // For better categorization and search
+  description: text("description"), // Optional file description
+  version: integer("version").default(1), // For file versioning
+  isActive: boolean("is_active").default(true), // For soft delete
   createdAt: timestamp("created_at").defaultNow(),
-});
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_files_entity").on(table.entityType, table.entityId),
+  index("idx_files_sort_order").on(table.entityType, table.entityId, table.sortOrder),
+  index("idx_files_created_at").on(table.createdAt),
+  index("idx_files_parent").on(table.parentFileId),
+]);
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
@@ -242,6 +254,18 @@ export const freeProjectAccessRelations = relations(freeProjectAccess, ({ one })
   }),
 }));
 
+export const filesRelations = relations(files, ({ one, many }) => ({
+  uploadedByUser: one(users, {
+    fields: [files.uploadedBy],
+    references: [users.id],
+  }),
+  parentFile: one(files, {
+    fields: [files.parentFileId],
+    references: [files.id],
+  }),
+  childFiles: many(files),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
@@ -297,6 +321,7 @@ export const insertFreeProjectAccessSchema = createInsertSchema(freeProjectAcces
 export const insertFileSchema = createInsertSchema(files).omit({
   id: true,
   createdAt: true,
+  updatedAt: true,
 });
 
 export const insertOtpVerificationSchema = createInsertSchema(otpVerifications).omit({

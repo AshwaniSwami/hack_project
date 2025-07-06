@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Download, Eye, FileText, Image, Music, Video, File as FileIcon } from "lucide-react";
+import { Trash2, Download, Eye, FileText, Image, Music, Video, File as FileIcon, GripVertical, ArrowUp, ArrowDown, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useFilePermissions } from "@/hooks/useFilePermissions";
@@ -56,6 +56,9 @@ export function FileList({ entityType, entityId, title = "Files" }: FileListProp
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { permissions, isLoading: permissionsLoading } = useFilePermissions();
+  const [isReordering, setIsReordering] = useState(false);
+  const [draggedItem, setDraggedItem] = useState<number | null>(null);
+  const [localFiles, setLocalFiles] = useState<FileData[]>([]);
 
   const { data: filesResponse = { files: [] }, isLoading, refetch } = useQuery({
     queryKey: ['/api/files', entityType, entityId],
@@ -95,6 +98,35 @@ export function FileList({ entityType, entityId, title = "Files" }: FileListProp
     },
   });
 
+  const reorderMutation = useMutation({
+    mutationFn: async ({ entityType, entityId, fileIds }: { entityType: string; entityId: string | null; fileIds: string[] }) => {
+      const response = await fetch('/api/files/reorder', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ entityType, entityId, fileIds }),
+      });
+      if (!response.ok) throw new Error('Failed to reorder files');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/files'] });
+      toast({
+        title: "Success",
+        description: "Files reordered successfully",
+      });
+      setIsReordering(false);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to reorder files",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleView = (fileId: string) => {
     window.open(`/api/files/${fileId}/view`, '_blank');
   };
@@ -114,7 +146,43 @@ export function FileList({ entityType, entityId, title = "Files" }: FileListProp
     }
   };
 
+  // Reordering functions
+  const handleMoveUp = (index: number) => {
+    if (index === 0) return;
+    const newFiles = [...(localFiles.length > 0 ? localFiles : files)];
+    [newFiles[index], newFiles[index - 1]] = [newFiles[index - 1], newFiles[index]];
+    setLocalFiles(newFiles);
+  };
+
+  const handleMoveDown = (index: number) => {
+    const fileArray = localFiles.length > 0 ? localFiles : files;
+    if (index === fileArray.length - 1) return;
+    const newFiles = [...fileArray];
+    [newFiles[index], newFiles[index + 1]] = [newFiles[index + 1], newFiles[index]];
+    setLocalFiles(newFiles);
+  };
+
+  const handleSaveOrder = () => {
+    const fileIds = localFiles.map(file => file.id);
+    reorderMutation.mutate({
+      entityType,
+      entityId: entityId || null,
+      fileIds
+    });
+  };
+
+  const handleCancelReorder = () => {
+    setLocalFiles([]);
+    setIsReordering(false);
+  };
+
+  const handleStartReorder = () => {
+    setLocalFiles([...files]);
+    setIsReordering(true);
+  };
+
   const files = filesResponse.files || [];
+  const displayFiles = isReordering ? localFiles : files;
 
   if (isLoading) {
     return (
@@ -147,13 +215,50 @@ export function FileList({ entityType, entityId, title = "Files" }: FileListProp
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           {title}
-          <Badge variant="secondary">{files.length} file{files.length !== 1 ? 's' : ''}</Badge>
+          <div className="flex items-center space-x-2">
+            <Badge variant="secondary">{displayFiles.length} file{displayFiles.length !== 1 ? 's' : ''}</Badge>
+            {permissions.canEdit && displayFiles.length > 1 && (
+              <>
+                {!isReordering ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleStartReorder}
+                    className="h-6 px-2 text-xs"
+                  >
+                    <GripVertical className="h-3 w-3 mr-1" />
+                    Reorder
+                  </Button>
+                ) : (
+                  <div className="flex items-center space-x-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleSaveOrder}
+                      disabled={reorderMutation.isPending}
+                      className="h-6 px-2 text-xs bg-green-50 hover:bg-green-100"
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleCancelReorder}
+                      className="h-6 px-2 text-xs"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {files && files.map((file: FileData) => (
-            <div key={file.id} className="flex items-center justify-between p-3 border rounded-lg">
+          {displayFiles && displayFiles.map((file: FileData, index: number) => (
+            <div key={file.id} className={`flex items-center justify-between p-3 border rounded-lg ${isReordering ? 'bg-blue-50 border-blue-200' : ''}`}>
               <div className="flex items-center space-x-3">
                 {getFileIcon(file.mimeType)}
                 <div>
@@ -166,36 +271,62 @@ export function FileList({ entityType, entityId, title = "Files" }: FileListProp
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                {canPreview(file.mimeType) && permissions.canView && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleView(file.id)}
-                  >
-                    <Eye className="h-3 w-3 mr-1" />
-                    View
-                  </Button>
+                {isReordering && (
+                  <div className="flex items-center space-x-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleMoveUp(index)}
+                      disabled={index === 0}
+                      className="h-7 w-7 p-0"
+                    >
+                      <ArrowUp className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleMoveDown(index)}
+                      disabled={index === displayFiles.length - 1}
+                      className="h-7 w-7 p-0"
+                    >
+                      <ArrowDown className="h-3 w-3" />
+                    </Button>
+                  </div>
                 )}
-                {permissions.canDownload && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDownload(file.id, file.originalName)}
-                  >
-                    <Download className="h-3 w-3 mr-1" />
-                    Download
-                  </Button>
-                )}
-                {permissions.canDelete && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDelete(file.id)}
-                    disabled={deleteMutation.isPending}
-                  >
-                    <Trash2 className="h-3 w-3 mr-1" />
-                    Delete
-                  </Button>
+                {!isReordering && (
+                  <>
+                    {canPreview(file.mimeType) && permissions.canView && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleView(file.id)}
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        View
+                      </Button>
+                    )}
+                    {permissions.canDownload && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDownload(file.id, file.originalName)}
+                      >
+                        <Download className="h-3 w-3 mr-1" />
+                        Download
+                      </Button>
+                    )}
+                    {permissions.canDelete && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(file.id)}
+                        disabled={deleteMutation.isPending}
+                      >
+                        <Trash2 className="h-3 w-3 mr-1" />
+                        Delete
+                      </Button>
+                    )}
+                  </>
                 )}
               </div>
             </div>

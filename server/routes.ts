@@ -989,6 +989,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // File reordering endpoint
+  app.post("/api/files/reorder", isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      if (!requireFilePermission('canEdit', user)) {
+        return res.status(403).json({ message: "Insufficient permissions to reorder files" });
+      }
+
+      const { entityType, entityId, fileIds } = req.body;
+      
+      if (!entityType || !Array.isArray(fileIds)) {
+        return res.status(400).json({ message: "Invalid request: entityType and fileIds array required" });
+      }
+
+      await storage.reorderFiles(entityType, entityId || null, fileIds);
+      res.json({ message: "Files reordered successfully" });
+    } catch (error) {
+      console.error("Error reordering files:", error);
+      res.status(500).json({ message: "Failed to reorder files" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

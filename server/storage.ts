@@ -31,6 +31,7 @@ import {
 } from "@shared/schema";
 import { db, isDatabaseAvailable, requireDatabase } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
+import { asc } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -103,6 +104,8 @@ export interface IStorage {
   deleteFile(id: string): Promise<void>;
   getAllFiles(): Promise<File[]>;
   getFilesByEntity(entityType: string, entityId?: string): Promise<File[]>;
+  reorderFiles(entityType: string, entityId: string | null, fileIds: string[]): Promise<void>;
+  getFilesByParent(parentFileId: string): Promise<File[]>;
 
   // Admin User Management
   verifyUser(userId: string): Promise<User>;
@@ -402,7 +405,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createFile(insertFile: InsertFile): Promise<File> {
-    const [file] = await db.insert(files).values(insertFile).returning();
+    // Calculate the next sort order for queue-like behavior (newest at bottom)
+    const maxSortOrder = await db
+      .select({ max: sql`COALESCE(MAX(sort_order), 0)` })
+      .from(files)
+      .where(
+        and(
+          eq(files.entityType, insertFile.entityType),
+          insertFile.entityId ? eq(files.entityId, insertFile.entityId) : sql`entity_id IS NULL`
+        )
+      );
+    
+    const nextSortOrder = Number(maxSortOrder[0]?.max || 0) + 1;
+    
+    const [file] = await db.insert(files).values({
+      ...insertFile,
+      sortOrder: nextSortOrder
+    }).returning();
     return file;
   }
 
@@ -419,9 +438,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllFiles(limit?: number, offset?: number, entityType?: string): Promise<File[]> {
-    let query = db.select().from(files).orderBy(desc(files.createdAt));
+    let query = db.select().from(files)
+      .where(eq(files.isActive, true))
+      .orderBy(asc(files.sortOrder), asc(files.createdAt));
+    
     if (entityType) {
-      query = query.where(eq(files.entityType, entityType));
+      query = query.where(and(eq(files.entityType, entityType), eq(files.isActive, true)));
     }
     if (limit) {
       query = query.limit(limit);
@@ -446,13 +468,42 @@ export class DatabaseStorage implements IStorage {
     
     if (entityId) {
       return await baseQuery
-        .where(and(eq(files.entityType, entityType), eq(files.entityId, entityId)))
-        .orderBy(desc(files.createdAt));
+        .where(and(
+          eq(files.entityType, entityType), 
+          eq(files.entityId, entityId),
+          eq(files.isActive, true)
+        ))
+        .orderBy(asc(files.sortOrder), asc(files.createdAt));
     } else {
       return await baseQuery
-        .where(eq(files.entityType, entityType))
-        .orderBy(desc(files.createdAt));
+        .where(and(eq(files.entityType, entityType), eq(files.isActive, true)))
+        .orderBy(asc(files.sortOrder), asc(files.createdAt));
     }
+  }
+
+  async reorderFiles(entityType: string, entityId: string | null, fileIds: string[]): Promise<void> {
+    // Update sort orders for the provided file IDs
+    for (let i = 0; i < fileIds.length; i++) {
+      await db
+        .update(files)
+        .set({ sortOrder: i + 1 })
+        .where(and(
+          eq(files.id, fileIds[i]),
+          eq(files.entityType, entityType),
+          entityId ? eq(files.entityId, entityId) : sql`entity_id IS NULL`
+        ));
+    }
+  }
+
+  async getFilesByParent(parentFileId: string): Promise<File[]> {
+    return await db
+      .select()
+      .from(files)
+      .where(and(
+        eq(files.parentFileId, parentFileId),
+        eq(files.isActive, true)
+      ))
+      .orderBy(asc(files.sortOrder), asc(files.createdAt));
   }
 
   // Admin User Management Methods
@@ -525,12 +576,21 @@ export class FallbackStorage implements IStorage {
   async deleteUser(id: string): Promise<void> { return this.throwDatabaseError(); }
   async getAllUsers(): Promise<User[]> { return this.throwDatabaseError(); }
 
+  // Themes
+  async getTheme(id: string): Promise<Theme | undefined> { return this.throwDatabaseError(); }
+  async createTheme(theme: InsertTheme): Promise<Theme> { return this.throwDatabaseError(); }
+  async updateTheme(id: string, theme: Partial<InsertTheme>): Promise<Theme> { return this.throwDatabaseError(); }
+  async deleteTheme(id: string): Promise<void> { return this.throwDatabaseError(); }
+  async getAllThemes(): Promise<Theme[]> { return this.throwDatabaseError(); }
+  async getActiveThemes(): Promise<Theme[]> { return this.throwDatabaseError(); }
+
   // Projects
   async getProject(id: string): Promise<Project | undefined> { return this.throwDatabaseError(); }
   async createProject(project: InsertProject): Promise<Project> { return this.throwDatabaseError(); }
   async updateProject(id: string, project: Partial<InsertProject>): Promise<Project> { return this.throwDatabaseError(); }
   async deleteProject(id: string): Promise<void> { return this.throwDatabaseError(); }
   async getAllProjects(): Promise<Project[]> { return this.throwDatabaseError(); }
+  async getProjectsByTheme(themeId: string): Promise<Project[]> { return this.throwDatabaseError(); }
 
   // Episodes
   async getEpisode(id: string): Promise<Episode | undefined> { return this.throwDatabaseError(); }
@@ -576,6 +636,8 @@ export class FallbackStorage implements IStorage {
   async deleteFile(id: string): Promise<void> { return this.throwDatabaseError(); }
   async getAllFiles(): Promise<File[]> { return this.throwDatabaseError(); }
   async getFilesByEntity(entityType: string, entityId?: string): Promise<File[]> { return this.throwDatabaseError(); }
+  async reorderFiles(entityType: string, entityId: string | null, fileIds: string[]): Promise<void> { return this.throwDatabaseError(); }
+  async getFilesByParent(parentFileId: string): Promise<File[]> { return this.throwDatabaseError(); }
 
   // Admin User Management
   async verifyUser(userId: string): Promise<User> { return this.throwDatabaseError(); }
