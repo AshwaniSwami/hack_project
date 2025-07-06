@@ -32,6 +32,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/api";
 import { 
   Plus, 
@@ -67,6 +68,7 @@ export default function Episodes() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingEpisode, setEditingEpisode] = useState<Episode | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   const { data: episodes = [], isLoading } = useQuery<Episode[]>({
@@ -212,13 +214,14 @@ export default function Episodes() {
                 </div>
               </div>
               
-              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button size="lg" className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-blue-500/25 border-0">
-                    <Plus className="h-5 w-5 mr-3" />
-                    New Episode
-                  </Button>
-                </DialogTrigger>
+              {(user?.role === 'admin' || user?.role === 'editor') && (
+                <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="lg" className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-blue-500/25 border-0">
+                      <Plus className="h-5 w-5 mr-3" />
+                      New Episode
+                    </Button>
+                  </DialogTrigger>
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-3 text-xl">
@@ -340,7 +343,8 @@ export default function Episodes() {
                     </form>
                   </Form>
                 </DialogContent>
-              </Dialog>
+                </Dialog>
+              )}
             </div>
           </div>
         </div>
@@ -420,22 +424,26 @@ export default function Episodes() {
                             </div>
                           </div>
                           <div className="flex space-x-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEdit(episode)}
-                              className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-blue-50 hover:scale-110"
-                            >
-                              <Edit className="h-5 w-5 text-blue-600" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDelete(episode.id)}
-                              className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-50 hover:scale-110"
-                            >
-                              <Trash2 className="h-5 w-5 text-red-500" />
-                            </Button>
+                            {(user?.role === 'admin' || user?.role === 'editor') && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(episode)}
+                                className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-blue-50 hover:scale-110"
+                              >
+                                <Edit className="h-5 w-5 text-blue-600" />
+                              </Button>
+                            )}
+                            {(user?.role === 'admin' || user?.role === 'editor') && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDelete(episode.id)}
+                                className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-50 hover:scale-110"
+                              >
+                                <Trash2 className="h-5 w-5 text-red-500" />
+                              </Button>
+                            )}
                           </div>
                         </div>
 

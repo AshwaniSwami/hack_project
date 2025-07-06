@@ -24,6 +24,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/api";
 import { 
   Plus, 
@@ -74,6 +75,7 @@ export default function Projects() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedThemeFilter, setSelectedThemeFilter] = useState<string>("all");
   const { toast } = useToast();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   const { data: projects = [], isLoading } = useQuery<Project[]>({
@@ -333,13 +335,14 @@ export default function Projects() {
                 </div>
               </div>
               
-              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button size="lg" className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-blue-500/25 border-0">
-                    <Plus className="h-5 w-5 mr-3" />
-                    New Project
-                  </Button>
-                </DialogTrigger>
+              {(user?.role === 'admin' || user?.role === 'editor') && (
+                <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="lg" className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-blue-500/25 border-0">
+                      <Plus className="h-5 w-5 mr-3" />
+                      New Project
+                    </Button>
+                  </DialogTrigger>
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-3 text-xl">
@@ -425,7 +428,8 @@ export default function Projects() {
                     </form>
                   </Form>
                 </DialogContent>
-              </Dialog>
+                </Dialog>
+              )}
             </div>
           </div>
         </div>
@@ -461,14 +465,16 @@ export default function Projects() {
                       </option>
                     ))}
                   </select>
-                  <Button
-                    variant="outline"
-                    onClick={handleCreateTheme}
-                    className="h-12 px-4 border-gray-200 hover:bg-blue-50 hover:border-blue-300"
-                  >
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Themes
-                  </Button>
+                  {(user?.role === 'admin' || user?.role === 'editor') && (
+                    <Button
+                      variant="outline"
+                      onClick={handleCreateTheme}
+                      className="h-12 px-4 border-gray-200 hover:bg-blue-50 hover:border-blue-300"
+                    >
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Themes
+                    </Button>
+                  )}
                 </div>
               </div>
               {/* Theme Pills */}
@@ -550,10 +556,12 @@ export default function Projects() {
               <p className="text-gray-600 mb-8 text-xl max-w-md mx-auto">
                 {searchTerm 
                   ? "Try adjusting your search terms to find projects" 
-                  : "Start organizing your radio content with your first project"
+                  : (user?.role === 'admin' || user?.role === 'editor') 
+                    ? "Start organizing your radio content with your first project"
+                    : "No projects available yet. Contact an admin or editor to create projects."
                 }
               </p>
-              {!searchTerm && (
+              {!searchTerm && (user?.role === 'admin' || user?.role === 'editor') && (
                 <Button 
                   onClick={() => setIsCreateDialogOpen(true)}
                   size="lg"
@@ -597,22 +605,26 @@ export default function Projects() {
                         >
                           <Eye className="h-5 w-5 text-emerald-600" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleEdit(project)}
-                          className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-blue-50 hover:scale-110"
-                        >
-                          <Edit className="h-5 w-5 text-blue-600" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleDelete(project.id)}
-                          className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-50 hover:scale-110"
-                        >
-                          <Trash2 className="h-5 w-5 text-red-500" />
-                        </Button>
+                        {(user?.role === 'admin' || user?.role === 'editor') && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleEdit(project)}
+                            className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-blue-50 hover:scale-110"
+                          >
+                            <Edit className="h-5 w-5 text-blue-600" />
+                          </Button>
+                        )}
+                        {(user?.role === 'admin' || user?.role === 'editor') && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleDelete(project.id)}
+                            className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-50 hover:scale-110"
+                          >
+                            <Trash2 className="h-5 w-5 text-red-500" />
+                          </Button>
+                        )}
                       </div>
                     </div>
                     
