@@ -499,151 +499,282 @@ export function AnalyticsPage() {
 
         {/* Scripts Tab */}
         <TabsContent value="scripts" className="space-y-6">
-          {/* Script Downloads by Project - Main Focus */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FolderOpen className="h-5 w-5" />
+          {/* Script Downloads by Project - Enhanced Visual */}
+          <Card className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/20 dark:via-indigo-950/20 dark:to-purple-950/20 border-blue-200 dark:border-blue-800">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-3 text-xl">
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
+                  <FolderOpen className="h-6 w-6 text-white" />
+                </div>
                 Script Downloads by Project
               </CardTitle>
-              <CardDescription>
-                Track which project scripts are downloaded most
+              <CardDescription className="text-base">
+                Visual breakdown of which projects have the most script downloads
               </CardDescription>
             </CardHeader>
             <CardContent>
               {scriptsLoading ? (
-                <div className="text-center py-8 text-gray-500">Loading...</div>
+                <div className="text-center py-12 text-gray-500">
+                  <div className="animate-pulse">Loading project analytics...</div>
+                </div>
               ) : scriptStats?.scriptDownloadsByProject?.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">No script downloads found</div>
+                <div className="text-center py-12 text-gray-500">
+                  <FolderOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No script downloads found for the selected timeframe</p>
+                </div>
               ) : (
-                <div className="space-y-3">
-                  {scriptStats?.scriptDownloadsByProject?.map((project: any) => (
-                    <div
-                      key={project.projectId}
-                      className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 rounded-lg border border-blue-200 dark:border-blue-800"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg">
-                          <FolderOpen className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                <div className="space-y-4">
+                  {scriptStats?.scriptDownloadsByProject?.map((project: any, index: number) => {
+                    const maxDownloads = Math.max(...(scriptStats?.scriptDownloadsByProject?.map((p: any) => p.downloadCount) || [1]));
+                    const percentage = ((project.downloadCount || 0) / maxDownloads) * 100;
+                    const colors = [
+                      'from-blue-500 to-blue-600',
+                      'from-purple-500 to-purple-600', 
+                      'from-indigo-500 to-indigo-600',
+                      'from-teal-500 to-teal-600',
+                      'from-emerald-500 to-emerald-600'
+                    ];
+                    const bgColors = [
+                      'from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/30',
+                      'from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-900/30',
+                      'from-indigo-50 to-indigo-100 dark:from-indigo-950/30 dark:to-indigo-900/30',
+                      'from-teal-50 to-teal-100 dark:from-teal-950/30 dark:to-teal-900/30',
+                      'from-emerald-50 to-emerald-100 dark:from-emerald-950/30 dark:to-emerald-900/30'
+                    ];
+                    
+                    return (
+                      <div
+                        key={project.projectId}
+                        className={`relative p-5 bg-gradient-to-r ${bgColors[index % bgColors.length]} rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200`}
+                      >
+                        {/* Progress bar background */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-xl" 
+                             style={{ width: `${Math.max(percentage, 10)}%` }}>
                         </div>
-                        <div>
-                          <p className="font-semibold text-lg">{project.projectName || 'Unknown Project'}</p>
-                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                            <Badge variant="outline" className="text-xs">
-                              {project.scriptCount || 0} scripts
-                            </Badge>
-                            <span>•</span>
-                            <span>{project.uniqueDownloaders || 0} unique users</span>
+                        
+                        <div className="relative flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className={`p-3 bg-gradient-to-br ${colors[index % colors.length]} rounded-lg shadow-md`}>
+                              <FolderOpen className="h-7 w-7 text-white" />
+                            </div>
+                            <div>
+                              <h3 className="font-bold text-xl text-gray-900 dark:text-gray-100">
+                                {project.projectName || 'Unknown Project'}
+                              </h3>
+                              <div className="flex items-center gap-3 mt-1">
+                                <Badge variant="outline" className="text-sm font-medium bg-white/50 dark:bg-black/20">
+                                  📄 {project.scriptCount || 0} scripts
+                                </Badge>
+                                <Badge variant="outline" className="text-sm font-medium bg-white/50 dark:bg-black/20">
+                                  👥 {project.uniqueDownloaders || 0} users
+                                </Badge>
+                                <span className="text-xs text-gray-500 dark:text-gray-400 bg-white/30 dark:bg-black/20 px-2 py-1 rounded">
+                                  ID: {project.projectId?.slice(-8)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className={`p-1 bg-gradient-to-br ${colors[index % colors.length]} rounded`}>
+                                <Download className="h-4 w-4 text-white" />
+                              </div>
+                              <span className="font-black text-2xl text-gray-900 dark:text-gray-100">
+                                {project.downloadCount || 0}
+                              </span>
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              <div>{formatBytes(project.totalDataDownloaded || 0)}</div>
+                              {project.lastDownload && (
+                                <div className="text-xs mt-1">
+                                  Last: {format(new Date(project.lastDownload), 'MMM dd, HH:mm')}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold text-xl text-blue-600 dark:text-blue-400">
-                          {project.downloadCount || 0} downloads
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {formatBytes(project.totalDataDownloaded || 0)}
-                        </p>
-                        {project.lastDownload && (
-                          <p className="text-xs text-gray-400">
-                            Last: {format(new Date(project.lastDownload), 'MMM dd, HH:mm')}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Visual Chart for Project Script Downloads */}
-          {scriptStats?.scriptDownloadsByProject && scriptStats.scriptDownloadsByProject.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5" />
-                  Project Script Downloads Chart
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={scriptStats.scriptDownloadsByProject}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        dataKey="projectName" 
-                        angle={-45} 
-                        textAnchor="end" 
-                        height={100}
-                        interval={0}
-                      />
-                      <YAxis />
-                      <Tooltip 
-                        formatter={(value, name) => [
-                          `${value} ${name === 'downloadCount' ? 'downloads' : 'scripts'}`,
-                          name === 'downloadCount' ? 'Script Downloads' : 'Total Scripts'
-                        ]}
-                      />
-                      <Bar dataKey="downloadCount" fill="#3B82F6" name="downloadCount" />
-                      <Bar dataKey="scriptCount" fill="#10B981" name="scriptCount" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          {/* Enhanced Visual Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Bar Chart for Project Downloads */}
+            {scriptStats?.scriptDownloadsByProject && scriptStats.scriptDownloadsByProject.length > 0 && (
+              <Card className="bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-950/20 dark:to-teal-950/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5 text-green-600" />
+                    Downloads by Project
+                  </CardTitle>
+                  <CardDescription>Comparison of script downloads across projects</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={scriptStats.scriptDownloadsByProject}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <XAxis 
+                          dataKey="projectName" 
+                          angle={-45} 
+                          textAnchor="end" 
+                          height={100}
+                          interval={0}
+                          fontSize={12}
+                        />
+                        <YAxis fontSize={12} />
+                        <Tooltip 
+                          formatter={(value, name) => [
+                            `${value} ${name === 'downloadCount' ? 'downloads' : 'scripts'}`,
+                            name === 'downloadCount' ? 'Script Downloads' : 'Total Scripts'
+                          ]}
+                          contentStyle={{
+                            backgroundColor: '#f8fafc',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '8px'
+                          }}
+                        />
+                        <Bar dataKey="downloadCount" fill="#059669" name="downloadCount" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="scriptCount" fill="#0891b2" name="scriptCount" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
-          {/* Individual Script Downloads */}
-          <Card>
+            {/* Pie Chart for Project Distribution */}
+            {scriptStats?.scriptDownloadsByProject && scriptStats.scriptDownloadsByProject.length > 0 && (
+              <Card className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-orange-600" />
+                    Project Distribution
+                  </CardTitle>
+                  <CardDescription>Percentage breakdown of script downloads by project</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={scriptStats.scriptDownloadsByProject.map((project: any, index: number) => ({
+                            name: project.projectName,
+                            value: project.downloadCount,
+                            fill: [
+                              '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444',
+                              '#06B6D4', '#84CC16', '#F97316', '#EC4899', '#6366F1'
+                            ][index % 10]
+                          }))}
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={100}
+                          dataKey="value"
+                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
+                          labelLine={false}
+                        >
+                          {scriptStats.scriptDownloadsByProject.map((entry: any, index: number) => (
+                            <Cell key={`cell-${index}`} fill={[
+                              '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444',
+                              '#06B6D4', '#84CC16', '#F97316', '#EC4899', '#6366F1'
+                            ][index % 10]} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          formatter={(value) => [`${value} downloads`, 'Downloads']}
+                          contentStyle={{
+                            backgroundColor: '#f8fafc',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '8px'
+                          }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Individual Script Downloads with Enhanced Project Visibility */}
+          <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Individual Script Downloads
+                <FileText className="h-5 w-5 text-amber-600" />
+                Individual Script Downloads by Project
               </CardTitle>
               <CardDescription>
-                Detailed view of downloaded scripts and their projects
+                Detailed breakdown showing exactly which project each downloaded script belongs to
               </CardDescription>
             </CardHeader>
             <CardContent>
               {scriptsLoading ? (
-                <div className="text-center py-8 text-gray-500">Loading...</div>
+                <div className="text-center py-8 text-gray-500">
+                  <div className="animate-pulse">Loading individual scripts...</div>
+                </div>
               ) : scriptStats?.scripts?.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">No individual script downloads found</div>
+                <div className="text-center py-8 text-gray-500">
+                  <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No individual script downloads found</p>
+                </div>
               ) : (
                 <div className="space-y-3">
-                  {scriptStats?.scripts?.map((script: any) => (
-                    <div
-                      key={script.scriptId}
-                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-lg">
-                          <FileText className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                        </div>
-                        <div>
-                          <p className="font-medium">{script.scriptTitle || 'Untitled Script'}</p>
-                          <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <Badge variant="secondary" className="text-xs">
-                              {script.projectName || 'No Project'}
-                            </Badge>
-                            <span>•</span>
-                            <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                              ID: {script.scriptId?.slice(-8)}
-                            </span>
+                  {scriptStats?.scripts?.map((script: any, index: number) => {
+                    const projectColors = [
+                      { bg: 'from-blue-500/10 to-blue-600/10', text: 'text-blue-700 dark:text-blue-300', border: 'border-blue-200 dark:border-blue-800' },
+                      { bg: 'from-purple-500/10 to-purple-600/10', text: 'text-purple-700 dark:text-purple-300', border: 'border-purple-200 dark:border-purple-800' },
+                      { bg: 'from-green-500/10 to-green-600/10', text: 'text-green-700 dark:text-green-300', border: 'border-green-200 dark:border-green-800' },
+                      { bg: 'from-orange-500/10 to-orange-600/10', text: 'text-orange-700 dark:text-orange-300', border: 'border-orange-200 dark:border-orange-800' },
+                      { bg: 'from-teal-500/10 to-teal-600/10', text: 'text-teal-700 dark:text-teal-300', border: 'border-teal-200 dark:border-teal-800' }
+                    ];
+                    const colorScheme = projectColors[index % projectColors.length];
+                    
+                    return (
+                      <div
+                        key={script.scriptId}
+                        className={`relative flex items-center justify-between p-4 bg-gradient-to-r ${colorScheme.bg} rounded-lg border ${colorScheme.border} hover:shadow-md transition-all duration-200`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg shadow-sm">
+                            <FileText className="h-5 w-5 text-white" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100">
+                              {script.scriptTitle || 'Untitled Script'}
+                            </h4>
+                            <div className="flex items-center gap-3 mt-1">
+                              <Badge variant="outline" className={`text-sm font-medium ${colorScheme.text} bg-white/50 dark:bg-black/20`}>
+                                📁 {script.projectName || 'No Project'}
+                              </Badge>
+                              <span className="text-xs text-gray-500 dark:text-gray-400 bg-white/30 dark:bg-black/20 px-2 py-1 rounded">
+                                Script ID: {script.scriptId?.slice(-8)}
+                              </span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400 bg-white/30 dark:bg-black/20 px-2 py-1 rounded">
+                                Project ID: {script.projectId?.slice(-8)}
+                              </span>
+                            </div>
                           </div>
                         </div>
+                        <div className="text-right">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Download className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                            <span className="font-bold text-lg text-gray-900 dark:text-gray-100">
+                              {script.downloadCount || 0}
+                            </span>
+                          </div>
+                          {script.lastDownload && (
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              Last: {format(new Date(script.lastDownload), 'MMM dd, HH:mm')}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-semibold">{script.downloadCount || 0} downloads</p>
-                        {script.lastDownload && (
-                          <p className="text-xs text-gray-400">
-                            Last: {format(new Date(script.lastDownload), 'MMM dd, HH:mm')}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </CardContent>
