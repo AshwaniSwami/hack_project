@@ -499,57 +499,143 @@ export function AnalyticsPage() {
 
         {/* Scripts Tab */}
         <TabsContent value="scripts" className="space-y-6">
+          {/* Script Downloads by Project - Main Focus */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FolderOpen className="h-5 w-5" />
+                Script Downloads by Project
+              </CardTitle>
+              <CardDescription>
+                Track which project scripts are downloaded most
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {scriptsLoading ? (
+                <div className="text-center py-8 text-gray-500">Loading...</div>
+              ) : scriptStats?.scriptDownloadsByProject?.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">No script downloads found</div>
+              ) : (
+                <div className="space-y-3">
+                  {scriptStats?.scriptDownloadsByProject?.map((project: any) => (
+                    <div
+                      key={project.projectId}
+                      className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 rounded-lg border border-blue-200 dark:border-blue-800"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg">
+                          <FolderOpen className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-lg">{project.projectName || 'Unknown Project'}</p>
+                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                            <Badge variant="outline" className="text-xs">
+                              {project.scriptCount || 0} scripts
+                            </Badge>
+                            <span>•</span>
+                            <span>{project.uniqueDownloaders || 0} unique users</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-xl text-blue-600 dark:text-blue-400">
+                          {project.downloadCount || 0} downloads
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {formatBytes(project.totalDataDownloaded || 0)}
+                        </p>
+                        {project.lastDownload && (
+                          <p className="text-xs text-gray-400">
+                            Last: {format(new Date(project.lastDownload), 'MMM dd, HH:mm')}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Visual Chart for Project Script Downloads */}
+          {scriptStats?.scriptDownloadsByProject && scriptStats.scriptDownloadsByProject.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Project Script Downloads Chart
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={scriptStats.scriptDownloadsByProject}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis 
+                        dataKey="projectName" 
+                        angle={-45} 
+                        textAnchor="end" 
+                        height={100}
+                        interval={0}
+                      />
+                      <YAxis />
+                      <Tooltip 
+                        formatter={(value, name) => [
+                          `${value} ${name === 'downloadCount' ? 'downloads' : 'scripts'}`,
+                          name === 'downloadCount' ? 'Script Downloads' : 'Total Scripts'
+                        ]}
+                      />
+                      <Bar dataKey="downloadCount" fill="#3B82F6" name="downloadCount" />
+                      <Bar dataKey="scriptCount" fill="#10B981" name="scriptCount" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Individual Script Downloads */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                Script Download Analytics
+                Individual Script Downloads
               </CardTitle>
               <CardDescription>
-                Track downloads by script and project to understand content usage
+                Detailed view of downloaded scripts and their projects
               </CardDescription>
             </CardHeader>
             <CardContent>
               {scriptsLoading ? (
                 <div className="text-center py-8 text-gray-500">Loading...</div>
               ) : scriptStats?.scripts?.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">No script downloads found</div>
+                <div className="text-center py-8 text-gray-500">No individual script downloads found</div>
               ) : (
                 <div className="space-y-3">
                   {scriptStats?.scripts?.map((script: any) => (
                     <div
                       key={script.scriptId}
-                      className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
                     >
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-lg">
-                          <FileText className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                          <FileText className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                         </div>
                         <div>
                           <p className="font-medium">{script.scriptTitle || 'Untitled Script'}</p>
                           <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <Badge variant={
-                              script.scriptStatus === 'Published' ? 'default' :
-                              script.scriptStatus === 'Draft' ? 'secondary' : 'outline'
-                            }>
-                              {script.scriptStatus}
+                            <Badge variant="secondary" className="text-xs">
+                              {script.projectName || 'No Project'}
                             </Badge>
                             <span>•</span>
-                            <span>{script.projectName || 'No Project'}</span>
-                            <span>•</span>
                             <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                              {script.filesCount || 0} files
+                              ID: {script.scriptId?.slice(-8)}
                             </span>
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className="font-semibold">{script.downloadCount || 0} downloads</p>
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                          <span>{formatBytes(script.totalDataDownloaded || 0)}</span>
-                          <span>•</span>
-                          <span>{script.uniqueDownloaders || 0} users</span>
-                        </div>
                         {script.lastDownload && (
                           <p className="text-xs text-gray-400">
                             Last: {format(new Date(script.lastDownload), 'MMM dd, HH:mm')}
@@ -562,37 +648,6 @@ export function AnalyticsPage() {
               )}
             </CardContent>
           </Card>
-
-          {/* Script Downloads by Project Chart */}
-          {scriptStats?.downloadsByProject && scriptStats.downloadsByProject.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5" />
-                  Script Downloads by Project
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={scriptStats.downloadsByProject}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="projectName" angle={-45} textAnchor="end" height={100} />
-                      <YAxis />
-                      <Tooltip 
-                        formatter={(value, name) => [
-                          name === 'downloadCount' ? `${value} downloads` : `${value} scripts`,
-                          name === 'downloadCount' ? 'Downloads' : 'Scripts'
-                        ]}
-                      />
-                      <Bar dataKey="downloadCount" fill="#F59E0B" name="downloadCount" />
-                      <Bar dataKey="scriptCount" fill="#10B981" name="scriptCount" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </TabsContent>
 
         {/* Users Tab */}

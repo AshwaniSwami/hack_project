@@ -42,20 +42,37 @@ export function registerScriptAnalyticsRoutes(app: Express) {
         )`);
       }
 
-      // Get script download statistics with project info
+      // Get script downloads grouped by project (simplified)
+      const scriptDownloadsByProject = await db
+        .select({
+          projectId: scripts.projectId,
+          projectName: projects.name,
+          scriptCount: sql<number>`COUNT(DISTINCT ${scripts.id})`,
+          downloadCount: count(downloadLogs.id),
+          totalDataDownloaded: sum(downloadLogs.downloadSize),
+          uniqueDownloaders: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`,
+          lastDownload: sql<Date>`MAX(${downloadLogs.downloadedAt})`
+        })
+        .from(files)
+        .leftJoin(downloadLogs, and(
+          eq(files.id, downloadLogs.fileId),
+          gte(downloadLogs.downloadedAt, startDate)
+        ))
+        .leftJoin(scripts, eq(files.entityId, scripts.id))
+        .leftJoin(projects, eq(scripts.projectId, projects.id))
+        .where(and(...whereConditions))
+        .groupBy(scripts.projectId, projects.name)
+        .orderBy(desc(count(downloadLogs.id)));
+
+      // Get individual script downloads with project info
       const scriptStats = await db
         .select({
           scriptId: files.entityId,
           scriptTitle: scripts.title,
-          scriptStatus: scripts.status,
           projectId: scripts.projectId,
           projectName: projects.name,
           downloadCount: count(downloadLogs.id),
-          totalDataDownloaded: sum(downloadLogs.downloadSize),
-          uniqueDownloaders: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`,
-          filesCount: sql<number>`COUNT(DISTINCT ${files.id})`,
-          lastDownload: sql<Date>`MAX(${downloadLogs.downloadedAt})`,
-          avgDownloadSize: sql<number>`AVG(${downloadLogs.downloadSize})`
+          lastDownload: sql<Date>`MAX(${downloadLogs.downloadedAt})`
         })
         .from(files)
         .leftJoin(downloadLogs, and(
@@ -68,7 +85,6 @@ export function registerScriptAnalyticsRoutes(app: Express) {
         .groupBy(
           files.entityId, 
           scripts.title, 
-          scripts.status, 
           scripts.projectId, 
           projects.name
         )
@@ -153,9 +169,8 @@ export function registerScriptAnalyticsRoutes(app: Express) {
         timeframe,
         startDate,
         endDate: now,
+        scriptDownloadsByProject,
         scripts: scriptStats,
-        downloadsByStatus,
-        downloadsByProject,
         topScriptFiles
       });
 
