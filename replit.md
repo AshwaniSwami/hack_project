@@ -125,6 +125,11 @@ The application uses a relational database with the following core entities:
 
 ## Recent Changes
 
+- January 7, 2025: Implemented comprehensive download tracking system with analytics dashboard for admin users to monitor file download patterns, user activity, and usage statistics
+- January 7, 2025: Added download logs table with detailed tracking including user info, IP addresses, download duration, and status
+- January 7, 2025: Created admin-only Analytics page with overview, user downloads, file statistics, and activity logs tabs
+- January 7, 2025: Enhanced file permissions to allow members to download files while tracking all download activity
+- January 7, 2025: Updated file manager components to show download counts and use new tracking endpoints
 - January 6, 2025: Implemented advanced file storage system with folder organization, search, and enhanced metadata
 - January 6, 2025: Enhanced file management with versioning, tagging, access levels, and checksum validation
 - January 6, 2025: Fixed UUID validation error in script creation by using authenticated user ID

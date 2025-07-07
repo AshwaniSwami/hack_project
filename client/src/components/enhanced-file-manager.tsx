@@ -246,6 +246,14 @@ export function EnhancedFileManager({ entityType, entityId, title = "Files" }: E
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+      
+      // Refresh data to show updated download count
+      queryClient.invalidateQueries({ queryKey: ["/api/files"] });
+      
+      toast({ 
+        title: "Download started", 
+        description: `${file.originalName} is being downloaded` 
+      });
     } catch (error) {
       toast({ 
         title: "Failed to download file", 
@@ -414,6 +422,12 @@ export function EnhancedFileManager({ entityType, entityId, title = "Files" }: E
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <span>{formatFileSize(file.fileSize)}</span>
                       <span>v{file.version}</span>
+                      {file.downloadCount > 0 && (
+                        <Badge variant="outline" className="text-xs flex items-center gap-1">
+                          <Download className="h-3 w-3" />
+                          {file.downloadCount}
+                        </Badge>
+                      )}
                       {file.tags && file.tags.length > 0 && (
                         <div className="flex gap-1">
                           {file.tags.slice(0, 2).map((tag, index) => (

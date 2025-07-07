@@ -24,7 +24,8 @@ import {
   Users,
   Settings,
   LogOut,
-  User
+  User,
+  TrendingUp
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/hooks/useAuth";
@@ -45,6 +46,7 @@ export function Navbar() {
     { href: "/scripts", label: "Scripts", icon: FileText },
     { href: "/radio-stations", label: "Stations", icon: RadioTower },
     ...(isAdmin ? [{ href: "/users", label: "Users", icon: Users }] : []),
+    ...(isAdmin ? [{ href: "/analytics", label: "Analytics", icon: TrendingUp }] : []),
   ];
 
   const handleLogout = async () => {

@@ -131,13 +131,35 @@ export function FileList({ entityType, entityId, title = "Files" }: FileListProp
     window.open(`/api/files/${fileId}/view`, '_blank');
   };
 
-  const handleDownload = (fileId: string, filename: string) => {
-    const link = document.createElement('a');
-    link.href = `/api/files/${fileId}/download`;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownload = async (fileId: string, filename: string) => {
+    try {
+      const response = await fetch(`/api/files/${fileId}/download`);
+      if (!response.ok) throw new Error("Failed to download file");
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(link);
+      
+      // Refresh data to show updated download count
+      queryClient.invalidateQueries({ queryKey: ['/api/files'] });
+      
+      toast({
+        title: "Download started",
+        description: `${filename} is being downloaded`,
+      });
+    } catch (error) {
+      toast({
+        title: "Download failed",
+        description: "Failed to download the file",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDelete = (fileId: string) => {

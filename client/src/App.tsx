@@ -11,6 +11,7 @@ import Episodes from "@/pages/episodes";
 import Scripts from "@/pages/scripts";
 import RadioStations from "@/pages/radio-stations";
 import Users from "@/pages/users";
+import { AnalyticsPage } from "@/pages/AnalyticsPage";
 import AuthPage from "@/pages/AuthPage";
 import NotFound from "@/pages/not-found";
 
@@ -36,6 +37,7 @@ function Router() {
               <Route path="/scripts" component={AuthPage} />
               <Route path="/radio-stations" component={AuthPage} />
               <Route path="/users" component={AuthPage} />
+              <Route path="/analytics" component={AuthPage} />
               <Route path="/" component={AuthPage} />
             </>
           ) : (
@@ -47,6 +49,7 @@ function Router() {
               <Route path="/scripts" component={Scripts} />
               <Route path="/radio-stations" component={RadioStations} />
               {isAdmin && <Route path="/users" component={Users} />}
+              {isAdmin && <Route path="/analytics" component={AnalyticsPage} />}
             </>
           )}
           <Route component={NotFound} />

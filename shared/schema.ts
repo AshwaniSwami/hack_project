@@ -203,6 +203,31 @@ export const files = pgTable("files", {
   index("idx_files_tags").on(table.tags),
 ]);
 
+// Download Logs table for tracking file downloads
+export const downloadLogs = pgTable("download_logs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  fileId: uuid("file_id").notNull(),
+  userId: varchar("user_id").notNull(), // User who downloaded
+  userEmail: varchar("user_email"), // Store email for easier analytics
+  userName: varchar("user_name"), // Store name for easier analytics
+  userRole: varchar("user_role"), // Store role at time of download
+  ipAddress: varchar("ip_address", { length: 45 }), // Support IPv4 and IPv6
+  userAgent: text("user_agent"), // Browser/device info
+  downloadSize: integer("download_size"), // File size at time of download
+  downloadDuration: integer("download_duration"), // Time taken in milliseconds
+  downloadStatus: varchar("download_status", { length: 20 }).default("completed"), // completed, failed, interrupted
+  entityType: varchar("entity_type", { length: 50 }), // context: project, episode, script
+  entityId: uuid("entity_id"), // context entity
+  refererPage: text("referer_page"), // Which page initiated the download
+  downloadedAt: timestamp("downloaded_at").defaultNow(),
+}, (table) => [
+  index("idx_downloads_file").on(table.fileId),
+  index("idx_downloads_user").on(table.userId),
+  index("idx_downloads_date").on(table.downloadedAt),
+  index("idx_downloads_entity").on(table.entityType, table.entityId),
+  index("idx_downloads_status").on(table.downloadStatus),
+]);
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   scripts: many(scripts),
@@ -301,13 +326,26 @@ export const fileFoldersRelations = relations(fileFolders, ({ one, many }) => ({
 }));
 
 // Files Relations
-export const filesRelations = relations(files, ({ one }) => ({
+export const filesRelations = relations(files, ({ one, many }) => ({
   folder: one(fileFolders, {
     fields: [files.folderId],
     references: [fileFolders.id],
   }),
   uploader: one(users, {
     fields: [files.uploadedBy],
+    references: [users.id],
+  }),
+  downloadLogs: many(downloadLogs),
+}));
+
+// Download Logs Relations
+export const downloadLogsRelations = relations(downloadLogs, ({ one }) => ({
+  file: one(files, {
+    fields: [downloadLogs.fileId],
+    references: [files.id],
+  }),
+  user: one(users, {
+    fields: [downloadLogs.userId],
     references: [users.id],
   }),
 }));
@@ -380,6 +418,11 @@ export const insertOtpVerificationSchema = createInsertSchema(otpVerifications).
   createdAt: true,
 });
 
+export const insertDownloadLogSchema = createInsertSchema(downloadLogs).omit({
+  id: true,
+  downloadedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof insertUserSchema._type;
@@ -414,3 +457,6 @@ export type InsertFileFolder = typeof insertFileFolderSchema._type;
 
 export type OtpVerification = typeof otpVerifications.$inferSelect;
 export type InsertOtpVerification = typeof insertOtpVerificationSchema._type;
+
+export type DownloadLog = typeof downloadLogs.$inferSelect;
+export type InsertDownloadLog = typeof insertDownloadLogSchema._type;
