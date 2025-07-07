@@ -49,20 +49,21 @@ export function registerAnalyticsRoutes(app: Express) {
         .from(downloadLogs)
         .where(gte(downloadLogs.downloadedAt, startDate));
 
-      // Get most popular files
+      // Get most popular files with project info
       const popularFiles = await db
         .select({
           fileId: downloadLogs.fileId,
           filename: files.filename,
           originalName: files.originalName,
           entityType: files.entityType,
+          entityId: files.entityId,
           downloadCount: count(downloadLogs.id),
           totalSize: sum(downloadLogs.downloadSize)
         })
         .from(downloadLogs)
         .innerJoin(files, eq(downloadLogs.fileId, files.id))
         .where(gte(downloadLogs.downloadedAt, startDate))
-        .groupBy(downloadLogs.fileId, files.filename, files.originalName, files.entityType)
+        .groupBy(downloadLogs.fileId, files.filename, files.originalName, files.entityType, files.entityId)
         .orderBy(desc(count(downloadLogs.id)))
         .limit(10);
 
@@ -209,6 +210,7 @@ export function registerAnalyticsRoutes(app: Express) {
           downloadDuration: downloadLogs.downloadDuration,
           downloadStatus: downloadLogs.downloadStatus,
           entityType: downloadLogs.entityType,
+          entityId: downloadLogs.entityId,
           refererPage: downloadLogs.refererPage,
           downloadedAt: downloadLogs.downloadedAt
         })
@@ -269,6 +271,7 @@ export function registerAnalyticsRoutes(app: Express) {
           filename: files.filename,
           originalName: files.originalName,
           entityType: files.entityType,
+          entityId: files.entityId,
           fileSize: files.fileSize,
           downloadCount: count(downloadLogs.id),
           totalDownloadSize: sum(downloadLogs.downloadSize),
@@ -284,6 +287,7 @@ export function registerAnalyticsRoutes(app: Express) {
           files.filename, 
           files.originalName, 
           files.entityType, 
+          files.entityId,
           files.fileSize, 
           files.createdAt
         )

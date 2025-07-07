@@ -130,6 +130,9 @@ The application uses a relational database with the following core entities:
 - January 7, 2025: Created admin-only Analytics page with overview, user downloads, file statistics, and activity logs tabs
 - January 7, 2025: Enhanced file permissions to allow members to download files while tracking all download activity
 - January 7, 2025: Updated file manager components to show download counts and use new tracking endpoints
+- January 7, 2025: Added project-specific analytics to track which project each downloaded file belongs to
+- January 7, 2025: Enhanced analytics dashboard with Projects tab showing download statistics aggregated by project
+- January 7, 2025: Improved analytics displays to show entity IDs and project associations for better content tracking
 - January 6, 2025: Implemented advanced file storage system with folder organization, search, and enhanced metadata
 - January 6, 2025: Enhanced file management with versioning, tagging, access levels, and checksum validation
 - January 6, 2025: Fixed UUID validation error in script creation by using authenticated user ID

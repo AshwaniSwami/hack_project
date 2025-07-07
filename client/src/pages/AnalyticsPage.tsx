@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Download, Users, FileText, TrendingUp, Eye, Calendar, Clock, Database } from "lucide-react";
+import { Download, Users, FileText, TrendingUp, Eye, Calendar, Clock, Database, FolderOpen } from "lucide-react";
 import { format } from "date-fns";
 
 interface DownloadOverview {
@@ -130,6 +130,16 @@ export function AnalyticsPage() {
     },
   });
 
+  // Project Analytics Query
+  const { data: projectStats, isLoading: projectsLoading } = useQuery({
+    queryKey: ["/api/analytics/projects", timeframe],
+    queryFn: async () => {
+      const response = await fetch(`/api/analytics/projects?timeframe=${timeframe}`);
+      if (!response.ok) throw new Error("Failed to fetch project analytics");
+      return response.json();
+    },
+  });
+
   return (
     <div className="container mx-auto px-6 py-8 max-w-7xl">
       {/* Header */}
@@ -163,8 +173,9 @@ export function AnalyticsPage() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="projects">Projects</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="files">Files</TabsTrigger>
           <TabsTrigger value="logs">Activity Logs</TabsTrigger>
@@ -260,12 +271,82 @@ export function AnalyticsPage() {
                         </Badge>
                         <div>
                           <p className="font-medium">{file.originalName}</p>
-                          <p className="text-sm text-gray-500 capitalize">{file.entityType}</p>
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <span className="capitalize">{file.entityType}</span>
+                            {file.entityId && (
+                              <>
+                                <span>•</span>
+                                <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                                  {file.entityType}: {file.entityId.slice(-8)}
+                                </span>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className="font-semibold">{file.downloadCount} downloads</p>
                         <p className="text-sm text-gray-500">{formatBytes(file.totalSize)}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Projects Tab */}
+        <TabsContent value="projects" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FolderOpen className="h-5 w-5" />
+                Project Download Analytics
+              </CardTitle>
+              <CardDescription>
+                Track download activity by project to understand content popularity
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {projectsLoading ? (
+                <div className="text-center py-8 text-gray-500">Loading...</div>
+              ) : projectStats?.projects?.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">No project downloads found</div>
+              ) : (
+                <div className="space-y-3">
+                  {projectStats?.projects?.map((project: any) => (
+                    <div
+                      key={project.projectId}
+                      className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg">
+                          <FolderOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{project.projectName || 'Unknown Project'}</p>
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <span>{project.filesCount || 0} files</span>
+                            <span>•</span>
+                            <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                              ID: {project.projectId?.slice(-8)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold">{project.downloadCount || 0} downloads</p>
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <span>{formatBytes(project.totalDataDownloaded || 0)}</span>
+                          <span>•</span>
+                          <span>{project.uniqueDownloaders || 0} users</span>
+                        </div>
+                        {project.lastDownload && (
+                          <p className="text-xs text-gray-400">
+                            Last: {format(new Date(project.lastDownload), 'MMM dd, HH:mm')}
+                          </p>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -364,7 +445,17 @@ export function AnalyticsPage() {
                         </div>
                         <div>
                           <p className="font-medium">{file.originalName}</p>
-                          <p className="text-sm text-gray-500 capitalize">{file.entityType}</p>
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <span className="capitalize">{file.entityType}</span>
+                            {file.entityId && (
+                              <>
+                                <span>•</span>
+                                <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                                  ID: {file.entityId.slice(-8)}
+                                </span>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
                       <div className="text-right">
@@ -447,7 +538,17 @@ export function AnalyticsPage() {
                         </Badge>
                         <div>
                           <p className="font-medium">{log.originalName}</p>
-                          <p className="text-sm text-gray-500">{log.userName} • {log.userEmail}</p>
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <span>{log.userName} • {log.userEmail}</span>
+                            {log.entityId && (
+                              <>
+                                <span>•</span>
+                                <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded capitalize">
+                                  {log.entityType}: {log.entityId.slice(-8)}
+                                </span>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
                       <div className="text-right">
