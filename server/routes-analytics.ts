@@ -72,12 +72,35 @@ export function registerAnalyticsRoutes(app: Express) {
         .select({
           date: sql<string>`DATE(${downloadLogs.downloadedAt})`,
           count: count(downloadLogs.id),
-          uniqueUsers: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`
+          uniqueUsers: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`,
+          totalSize: sum(downloadLogs.downloadSize)
         })
         .from(downloadLogs)
         .where(gte(downloadLogs.downloadedAt, startDate))
         .groupBy(sql`DATE(${downloadLogs.downloadedAt})`)
         .orderBy(sql`DATE(${downloadLogs.downloadedAt})`);
+
+      // Get downloads by entity type
+      const downloadsByType = await db
+        .select({
+          entityType: downloadLogs.entityType,
+          count: count(downloadLogs.id),
+          totalSize: sum(downloadLogs.downloadSize)
+        })
+        .from(downloadLogs)
+        .where(gte(downloadLogs.downloadedAt, startDate))
+        .groupBy(downloadLogs.entityType);
+
+      // Get top download hours
+      const downloadsByHour = await db
+        .select({
+          hour: sql<number>`EXTRACT(hour FROM ${downloadLogs.downloadedAt})`,
+          count: count(downloadLogs.id)
+        })
+        .from(downloadLogs)
+        .where(gte(downloadLogs.downloadedAt, startDate))
+        .groupBy(sql`EXTRACT(hour FROM ${downloadLogs.downloadedAt})`)
+        .orderBy(sql`EXTRACT(hour FROM ${downloadLogs.downloadedAt})`);
 
       res.json({
         timeframe,
@@ -87,7 +110,9 @@ export function registerAnalyticsRoutes(app: Express) {
         uniqueDownloaders: uniqueDownloaders[0]?.count || 0,
         totalDataDownloaded: totalDataDownloaded[0]?.total || 0,
         popularFiles,
-        downloadsByDay
+        downloadsByDay,
+        downloadsByType,
+        downloadsByHour
       });
     } catch (error) {
       console.error("Error fetching download analytics:", error);

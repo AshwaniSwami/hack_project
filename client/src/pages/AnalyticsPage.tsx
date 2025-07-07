@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Download, Users, FileText, TrendingUp, Eye, Calendar, Clock, Database, FolderOpen } from "lucide-react";
+import { Download, Users, FileText, TrendingUp, Eye, Calendar, Clock, Database, FolderOpen, BarChart3 } from "lucide-react";
 import { format } from "date-fns";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, Area, AreaChart } from "recharts";
 
 interface DownloadOverview {
   timeframe: string;
@@ -26,6 +27,16 @@ interface DownloadOverview {
     date: string;
     count: number;
     uniqueUsers: number;
+    totalSize: number;
+  }>;
+  downloadsByType: Array<{
+    entityType: string;
+    count: number;
+    totalSize: number;
+  }>;
+  downloadsByHour: Array<{
+    hour: number;
+    count: number;
   }>;
 }
 
@@ -140,6 +151,16 @@ export function AnalyticsPage() {
     },
   });
 
+  // Script Analytics Query
+  const { data: scriptStats, isLoading: scriptsLoading } = useQuery({
+    queryKey: ["/api/analytics/scripts", timeframe],
+    queryFn: async () => {
+      const response = await fetch(`/api/analytics/scripts?timeframe=${timeframe}`);
+      if (!response.ok) throw new Error("Failed to fetch script analytics");
+      return response.json();
+    },
+  });
+
   return (
     <div className="container mx-auto px-6 py-8 max-w-7xl">
       {/* Header */}
@@ -173,12 +194,13 @@ export function AnalyticsPage() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="charts">Charts</TabsTrigger>
           <TabsTrigger value="projects">Projects</TabsTrigger>
+          <TabsTrigger value="scripts">Scripts</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="files">Files</TabsTrigger>
-          <TabsTrigger value="logs">Activity Logs</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
@@ -296,6 +318,125 @@ export function AnalyticsPage() {
           </Card>
         </TabsContent>
 
+        {/* Charts Tab */}
+        <TabsContent value="charts" className="space-y-6">
+          {/* Downloads Over Time Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Downloads Over Time
+              </CardTitle>
+              <CardDescription>
+                Daily download activity and user engagement
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {overviewLoading ? (
+                <div className="h-80 flex items-center justify-center text-gray-500">Loading chart...</div>
+              ) : overview?.downloadsByDay?.length === 0 ? (
+                <div className="h-80 flex items-center justify-center text-gray-500">No data available</div>
+              ) : (
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={overview?.downloadsByDay || []}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <Tooltip 
+                        formatter={(value, name) => [
+                          name === 'count' ? `${value} downloads` : `${value} users`,
+                          name === 'count' ? 'Downloads' : 'Unique Users'
+                        ]}
+                        labelFormatter={(date) => `Date: ${date}`}
+                      />
+                      <Area type="monotone" dataKey="count" stackId="1" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.6} />
+                      <Area type="monotone" dataKey="uniqueUsers" stackId="2" stroke="#10B981" fill="#10B981" fillOpacity={0.6} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Downloads by Content Type */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Downloads by Content Type
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {overviewLoading ? (
+                  <div className="h-64 flex items-center justify-center text-gray-500">Loading...</div>
+                ) : (
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={overview?.downloadsByType?.map((item: any) => ({
+                            name: item.entityType,
+                            value: item.count,
+                            fill: item.entityType === 'projects' ? '#3B82F6' : 
+                                 item.entityType === 'episodes' ? '#10B981' : 
+                                 item.entityType === 'scripts' ? '#F59E0B' : '#EF4444'
+                          })) || []}
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={80}
+                          dataKey="value"
+                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        >
+                          {overview?.downloadsByType?.map((entry: any, index: number) => (
+                            <Cell key={`cell-${index}`} fill={
+                              entry.entityType === 'projects' ? '#3B82F6' : 
+                              entry.entityType === 'episodes' ? '#10B981' : 
+                              entry.entityType === 'scripts' ? '#F59E0B' : '#EF4444'
+                            } />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value) => [`${value} downloads`, 'Downloads']} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Downloads by Hour */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5" />
+                  Downloads by Hour
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {overviewLoading ? (
+                  <div className="h-64 flex items-center justify-center text-gray-500">Loading...</div>
+                ) : (
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={overview?.downloadsByHour || []}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="hour" tickFormatter={(hour) => `${hour}:00`} />
+                        <YAxis />
+                        <Tooltip 
+                          formatter={(value) => [`${value} downloads`, 'Downloads']}
+                          labelFormatter={(hour) => `Time: ${hour}:00`}
+                        />
+                        <Bar dataKey="count" fill="#8B5CF6" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
         {/* Projects Tab */}
         <TabsContent value="projects" className="space-y-6">
           <Card>
@@ -354,6 +495,104 @@ export function AnalyticsPage() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Scripts Tab */}
+        <TabsContent value="scripts" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Script Download Analytics
+              </CardTitle>
+              <CardDescription>
+                Track downloads by script and project to understand content usage
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {scriptsLoading ? (
+                <div className="text-center py-8 text-gray-500">Loading...</div>
+              ) : scriptStats?.scripts?.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">No script downloads found</div>
+              ) : (
+                <div className="space-y-3">
+                  {scriptStats?.scripts?.map((script: any) => (
+                    <div
+                      key={script.scriptId}
+                      className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-lg">
+                          <FileText className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{script.scriptTitle || 'Untitled Script'}</p>
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <Badge variant={
+                              script.scriptStatus === 'Published' ? 'default' :
+                              script.scriptStatus === 'Draft' ? 'secondary' : 'outline'
+                            }>
+                              {script.scriptStatus}
+                            </Badge>
+                            <span>•</span>
+                            <span>{script.projectName || 'No Project'}</span>
+                            <span>•</span>
+                            <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                              {script.filesCount || 0} files
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold">{script.downloadCount || 0} downloads</p>
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <span>{formatBytes(script.totalDataDownloaded || 0)}</span>
+                          <span>•</span>
+                          <span>{script.uniqueDownloaders || 0} users</span>
+                        </div>
+                        {script.lastDownload && (
+                          <p className="text-xs text-gray-400">
+                            Last: {format(new Date(script.lastDownload), 'MMM dd, HH:mm')}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Script Downloads by Project Chart */}
+          {scriptStats?.downloadsByProject && scriptStats.downloadsByProject.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Script Downloads by Project
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={scriptStats.downloadsByProject}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="projectName" angle={-45} textAnchor="end" height={100} />
+                      <YAxis />
+                      <Tooltip 
+                        formatter={(value, name) => [
+                          name === 'downloadCount' ? `${value} downloads` : `${value} scripts`,
+                          name === 'downloadCount' ? 'Downloads' : 'Scripts'
+                        ]}
+                      />
+                      <Bar dataKey="downloadCount" fill="#F59E0B" name="downloadCount" />
+                      <Bar dataKey="scriptCount" fill="#10B981" name="scriptCount" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         {/* Users Tab */}

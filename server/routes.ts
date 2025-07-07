@@ -54,9 +54,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const { registerAnalyticsRoutes } = await import("./routes-analytics");
   const { registerDownloadTrackingRoutes } = await import("./routes-download-tracking");
   const { registerProjectAnalyticsRoutes } = await import("./routes-projects-analytics");
+  const { registerScriptAnalyticsRoutes } = await import("./routes-script-analytics");
   registerAnalyticsRoutes(app);
   registerDownloadTrackingRoutes(app);
   registerProjectAnalyticsRoutes(app);
+  registerScriptAnalyticsRoutes(app);
 
   // Auth routes
   app.post('/api/auth/login', login);
