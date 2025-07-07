@@ -255,6 +255,17 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(projects).where(eq(projects.themeId, themeId)).orderBy(desc(projects.createdAt));
   }
 
+  // Note: Subproject feature was removed, these methods return empty arrays or all projects
+  async getProjectsByParent(parentProjectId?: string): Promise<Project[]> {
+    // Since subprojects were removed, return empty array
+    return [];
+  }
+
+  async getProjectHierarchy(projectId: string): Promise<Project[]> {
+    // Since subprojects were removed, return empty array
+    return [];
+  }
+
   // Episodes
   async getEpisode(id: string): Promise<Episode | undefined> {
     const [episode] = await db.select().from(episodes).where(eq(episodes.id, id));
@@ -697,6 +708,8 @@ export class FallbackStorage implements IStorage {
   async deleteProject(id: string): Promise<void> { return this.throwDatabaseError(); }
   async getAllProjects(): Promise<Project[]> { return this.throwDatabaseError(); }
   async getProjectsByTheme(themeId: string): Promise<Project[]> { return this.throwDatabaseError(); }
+  async getProjectsByParent(parentProjectId?: string): Promise<Project[]> { return this.throwDatabaseError(); }
+  async getProjectHierarchy(projectId: string): Promise<Project[]> { return this.throwDatabaseError(); }
 
   // Episodes
   async getEpisode(id: string): Promise<Episode | undefined> { return this.throwDatabaseError(); }
@@ -742,8 +755,19 @@ export class FallbackStorage implements IStorage {
   async deleteFile(id: string): Promise<void> { return this.throwDatabaseError(); }
   async getAllFiles(): Promise<File[]> { return this.throwDatabaseError(); }
   async getFilesByEntity(entityType: string, entityId?: string): Promise<File[]> { return this.throwDatabaseError(); }
+  async getFilesByFolder(folderId: string): Promise<File[]> { return this.throwDatabaseError(); }
   async reorderFiles(entityType: string, entityId: string | null, fileIds: string[]): Promise<void> { return this.throwDatabaseError(); }
-  async getFilesByParent(parentFileId: string): Promise<File[]> { return this.throwDatabaseError(); }
+  async searchFiles(query: string, entityType?: string, entityId?: string): Promise<File[]> { return this.throwDatabaseError(); }
+
+  // File Folders
+  async getFileFolder(id: string): Promise<FileFolder | undefined> { return this.throwDatabaseError(); }
+  async createFileFolder(folder: InsertFileFolder): Promise<FileFolder> { return this.throwDatabaseError(); }
+  async updateFileFolder(id: string, folder: Partial<InsertFileFolder>): Promise<FileFolder> { return this.throwDatabaseError(); }
+  async deleteFileFolder(id: string): Promise<void> { return this.throwDatabaseError(); }
+  async getAllFileFolders(): Promise<FileFolder[]> { return this.throwDatabaseError(); }
+  async getFileFoldersByEntity(entityType: string, entityId?: string): Promise<FileFolder[]> { return this.throwDatabaseError(); }
+  async getFoldersByEntity(entityType: string, entityId?: string): Promise<FileFolder[]> { return this.throwDatabaseError(); }
+  async getFoldersByParent(parentFolderId: string): Promise<FileFolder[]> { return this.throwDatabaseError(); }
 
   // Admin User Management
   async verifyUser(userId: string): Promise<User> { return this.throwDatabaseError(); }
