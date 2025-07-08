@@ -1,0 +1,111 @@
+Shared Global Element: Floating Action Button (FAB)
+
+Visibility: This FAB should be present for Admin and Editor roles. It should not be visible for 'Normal Users' or 'Contributors'.
+
+Placement: Fixed at the bottom-right corner of the screen.
+
+Functionality: When clicked, it expands (e.g., vertically) to reveal distinct smaller icons/buttons for:
+
++ New Project
+
++ New Episode
+
++ New Script
+
+Purpose: Provides omnipresent, quick access to core content creation/management tasks.
+
+Dashboard View for 'Normal User' (Consumer Role):
+
+Primary Purpose: Content discovery, consumption, and platform engagement. No creation/management access.
+
+Sections:
+
+Engaging Welcome: "Welcome, [User Name]! Discover what's new."
+
+"What's New Since Your Last Visit?" Section:
+
+A prominent, visually appealing carousel or list displaying the newest Episodes/Scripts published since the user last logged in.
+
+Each item should have a clear title, appealing placeholder image/thumbnail, and a "View Details" button.
+
+Include a "Mark All As Read" or "Dismiss New" option.
+
+"Trending Now" / "Popular Content" Section:
+
+A section with visually engaging Material-UI Card components showcasing content (Scripts/Episodes) that are currently highly popular (e.g., highest downloads in the last 7 days).
+
+Each Card MUST display: Title, Placeholder Image/Thumbnail, a concise engaging description, and a specific content statistic (e.g., "Downloaded X times," "Y views") directly on the card.
+
+Clear "View Details" or "Listen Now" buttons.
+
+"Recommended For You" Section:
+
+Content recommendations based on inferred user preferences (e.g., "Because you viewed 'Topic X'"). If no history, default to popular content or diverse categories.
+
+Similar card layout to "Trending Now."
+
+"Explore by Category/Topic" (Optional, if topics are key): Visually attractive buttons or a small tag cloud linking to popular content categories/topics, encouraging Browse.
+
+Primary Call to Action: A prominent button/link: "Explore Our Full Content Library."
+
+Dashboard View for 'Contributor' Role (e.g., Scriptwriter):
+
+Primary Purpose: Personal content creation workflow and monitoring their submitted work.
+
+Sections:
+
+Welcome & Quick Action: "Welcome back, [User Name]! Let's create something great."
+
+"My Active Scripts & Drafts" Widget: A prioritized list of scripts this user is actively working on or has in draft. Direct links to edit.
+
+"Scripts Awaiting My Revision" Widget: A clear list of scripts needing changes specifically from this user.
+
+"My Submitted Scripts Status" Widget: Concise list of this user's submitted scripts, showing current status (e.g., "Under Review," "Approved," "Needs Recording").
+
+"My Projects Overview" Widget: A simple overview of projects they are assigned to or have contributed to, with brief status.
+
+"Recent Platform Highlights" Feed: A curated feed of recently published content or major project launches across the platform (e.g., "Episode 'X' Published," "Project 'Y' Launched"). Not detailed internal workflow.
+
+Dashboard View for 'Editor' Role (e.g., Producer, Content Manager):
+
+Primary Purpose: Content workflow management, review, and team oversight.
+
+Sections:
+
+Welcome & Command Center: "Welcome back, [User Name]! Time to review and manage."
+
+"Scripts Awaiting My Review" Widget: Highly prominent. A clear, prioritized list of scripts specifically assigned to this editor for review. Direct links to review.
+
+"Projects with Pending Items" Widget: Summary of projects this editor manages that have content in "Draft," "Needs Revision," or "Under Review" status, with clear counts of pending items.
+
+"Overall Content Workflow Snapshot": A small, clean visual (e.g., donut chart) showing the distribution of all scripts across the platform by status (Draft, In Review, Approved, Needs Revision). This helps identify system-wide bottlenecks.
+
+"Team Activity Feed": A more detailed feed of recent content progress across the platform (e.g., "Script 'X' submitted by [User Y]," "Episode 'Z' status changed to 'Ready for Recording'").
+
+"Top Performance Overview (Editor's Pick)": A highly visible card highlighting the 1-2 "most impactful" content pieces based on recent trends (e.g., high downloads) with direct links.
+
+Dashboard View for 'Admin' Role (Super User, Platform Manager):
+
+Primary Purpose: Comprehensive system oversight, user/organization management, platform health & growth.
+
+Sections:
+
+Welcome & Global Control: "Welcome, Admin [User Name]! Global overview."
+
+Platform Health & KPIs (Prominent Cards): Large, scannable numbers for: Total Projects, Total Episodes, Total Scripts, Total Users (with breakdown by role), Total Downloads (Overall). Include small, clear trend indicators (e.g., "↑ 5% this month").
+
+"Content Creation Trend" (Mini-Chart): A small, engaging line or bar chart showing "New Scripts/Episodes Added Over Last 30 Days."
+
+"User Engagement Highlights": A high-level metric like "X Active Users This Week."
+
+"System-Wide Urgent Items": A combined, prioritized list of all critical pending actions across the platform (e.g., "X Scripts Awaiting Review," "Y Projects with Overdue Deadlines," "New User/Organization Pending Approval").
+
+"Recent Global Activity Feed": A comprehensive, chronological feed of all significant platform events (content creation, status changes, user/organization management actions, critical system alerts).
+
+"Top Performance Overview" (Detailed Snippet): A clear listing of the "Top 5 Most Downloaded Content" by title and precise count.
+
+Prominent "Go to Analytics Dashboard" Button: Clearly links to the separate, detailed analytics page.
+
+"User Roles Summary": A small chart showing the distribution of users by role.
+
+Platform Health Indicators: Small, clear status icons for "Database Connection: OK," "Storage Remaining: XX GB" (if applicable).

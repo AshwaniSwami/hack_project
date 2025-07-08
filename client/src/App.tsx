@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Navbar } from "@/components/navbar";
+import { FloatingActionButton } from "@/components/floating-action-button";
 import { useAuth } from "@/hooks/useAuth";
 import Dashboard from "@/pages/dashboard";
 import Projects from "@/pages/projects";
@@ -21,6 +22,7 @@ function Router() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {isAuthenticated && <Navbar />}
+      {isAuthenticated && <FloatingActionButton />}
       <main>
         <Switch>
           {isLoading ? (
