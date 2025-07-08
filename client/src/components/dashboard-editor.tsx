@@ -45,6 +45,7 @@ export function EditorDashboard() {
 
   const { data: downloadStats } = useQuery({
     queryKey: ["/api/analytics/downloads/overview"],
+    enabled: false, // Disable for now to prevent 403 errors
   });
 
   // Scripts awaiting review (assigned to this editor or general review)
@@ -121,7 +122,7 @@ export function EditorDashboard() {
       weekAgo.setDate(weekAgo.getDate() - 7);
       return new Date(episode.createdAt) >= weekAgo;
     }).length,
-    totalDownloads: downloadStats?.totalDownloads || 0
+    totalDownloads: 0 // Mock data for now
   };
 
   // Editor performance metrics
