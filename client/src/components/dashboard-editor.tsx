@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { 
   FileText, 
   Clock, 
@@ -13,13 +15,21 @@ import {
   Star,
   BarChart3,
   Edit,
-  Timer
+  Timer,
+  Calendar,
+  Target,
+  Activity,
+  Download,
+  Radio,
+  Zap,
+  PieChart
 } from "lucide-react";
-import type { Script, Project } from "@shared/schema";
+import type { Script, Project, Episode } from "@shared/schema";
 import { useAuth } from "@/hooks/useAuth";
 
 export function EditorDashboard() {
   const { user } = useAuth();
+  const [showStats, setShowStats] = useState(true);
   
   const { data: scripts = [] } = useQuery<Script[]>({
     queryKey: ["/api/scripts"],
@@ -27,6 +37,14 @@ export function EditorDashboard() {
 
   const { data: projects = [] } = useQuery<Project[]>({
     queryKey: ["/api/projects"],
+  });
+
+  const { data: episodes = [] } = useQuery<Episode[]>({
+    queryKey: ["/api/episodes"],
+  });
+
+  const { data: downloadStats } = useQuery({
+    queryKey: ["/api/analytics/downloads/overview"],
   });
 
   // Scripts awaiting review (assigned to this editor or general review)
@@ -83,13 +101,134 @@ export function EditorDashboard() {
     }
   };
 
+  // Weekly and monthly statistics
+  const weeklyStats = {
+    scriptsReviewed: scripts.filter(script => {
+      if (!script.updatedAt) return false;
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      return new Date(script.updatedAt) >= weekAgo && script.status === 'Approved';
+    }).length,
+    newSubmissions: scripts.filter(script => {
+      if (!script.createdAt) return false;
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      return new Date(script.createdAt) >= weekAgo;
+    }).length,
+    episodesPublished: episodes.filter(episode => {
+      if (!episode.createdAt) return false;
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      return new Date(episode.createdAt) >= weekAgo;
+    }).length,
+    totalDownloads: downloadStats?.totalDownloads || 0
+  };
+
+  // Editor performance metrics
+  const editorMetrics = {
+    productivity: weeklyStats.scriptsReviewed,
+    efficiency: scripts.length > 0 ? Math.round((workflowStats.approved / scripts.length) * 100) : 0,
+    responsiveness: scriptsAwaitingReview.length === 0 ? 100 : Math.max(0, 100 - (scriptsAwaitingReview.length * 10))
+  };
+
   return (
     <div className="space-y-8">
-      {/* Header */}
+      {/* Enhanced Header with Quick Stats */}
       <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 rounded-2xl p-8 text-white">
-        <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.firstName}! Time to review and manage.</h1>
-        <p className="text-white/80">Content workflow management, review, and team oversight</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.firstName}! Time to review and manage.</h1>
+            <p className="text-white/80 text-lg">Content workflow management, review, and team oversight</p>
+            <div className="flex items-center space-x-6 mt-4">
+              <div className="flex items-center space-x-2">
+                <Calendar className="h-4 w-4" />
+                <span className="text-sm">{new Date().toLocaleDateString()}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Activity className="h-4 w-4" />
+                <span className="text-sm">{weeklyStats.scriptsReviewed} scripts reviewed this week</span>
+              </div>
+            </div>
+          </div>
+          <div className="hidden lg:flex space-x-4">
+            <Button 
+              size="lg"
+              className="bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm"
+              onClick={() => setShowStats(!showStats)}
+            >
+              <BarChart3 className="h-5 w-5 mr-2" />
+              {showStats ? 'Hide Stats' : 'Show Stats'}
+            </Button>
+            <Link href="/analytics">
+              <Button 
+                size="lg"
+                className="bg-amber-500 text-white hover:bg-amber-600"
+              >
+                <Target className="h-5 w-5 mr-2" />
+                Full Analytics
+              </Button>
+            </Link>
+          </div>
+        </div>
       </div>
+
+      {/* Editor Performance Stats */}
+      {showStats && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="bg-gradient-to-br from-green-50 to-emerald-100 border-green-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-green-600">Weekly Productivity</p>
+                  <p className="text-3xl font-bold text-green-900">{weeklyStats.scriptsReviewed}</p>
+                  <p className="text-sm text-green-700">Scripts reviewed</p>
+                </div>
+                <Zap className="h-12 w-12 text-green-600" />
+              </div>
+              <div className="mt-4">
+                <Progress value={Math.min((weeklyStats.scriptsReviewed / 10) * 100, 100)} className="h-2" />
+                <p className="text-xs text-green-600 mt-1">Target: 10 per week</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-blue-50 to-cyan-100 border-blue-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-blue-600">Team Efficiency</p>
+                  <p className="text-3xl font-bold text-blue-900">{editorMetrics.efficiency}%</p>
+                  <p className="text-sm text-blue-700">Approval rate</p>
+                </div>
+                <Target className="h-12 w-12 text-blue-600" />
+              </div>
+              <div className="mt-4">
+                <Progress value={editorMetrics.efficiency} className="h-2" />
+                <p className="text-xs text-blue-600 mt-1">Scripts approved vs total</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-50 to-indigo-100 border-purple-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-purple-600">Platform Impact</p>
+                  <p className="text-3xl font-bold text-purple-900">{weeklyStats.totalDownloads}</p>
+                  <p className="text-sm text-purple-700">Total downloads</p>
+                </div>
+                <Download className="h-12 w-12 text-purple-600" />
+              </div>
+              <div className="mt-4">
+                <div className="flex items-center justify-between text-xs text-purple-600">
+                  <span>{weeklyStats.episodesPublished} episodes published</span>
+                  <span>{weeklyStats.newSubmissions} new submissions</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Scripts Awaiting Review - Highly Prominent */}
       <Card className="border-2 border-yellow-200 bg-gradient-to-r from-yellow-50 to-amber-50">

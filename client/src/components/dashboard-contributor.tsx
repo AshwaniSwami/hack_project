@@ -91,12 +91,101 @@ export function ContributorDashboard() {
     }
   };
 
+  // Contributor productivity metrics
+  const contributorStats = {
+    weeklyOutput: myScripts.filter(script => {
+      if (!script.createdAt) return false;
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      return new Date(script.createdAt) >= weekAgo;
+    }).length,
+    approvalRate: myScripts.length > 0 ? Math.round((myScripts.filter(s => s.status === 'Approved').length / myScripts.length) * 100) : 0,
+    totalWordCount: myScripts.reduce((total, script) => total + (script.content?.length || 0), 0),
+    avgWordsPerScript: myScripts.length > 0 ? Math.round(myScripts.reduce((total, script) => total + (script.content?.length || 0), 0) / myScripts.length) : 0
+  };
+
   return (
     <div className="space-y-8">
-      {/* Header */}
+      {/* Enhanced Header with Personal Stats */}
       <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 rounded-2xl p-8 text-white">
-        <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.firstName}! Let's create something great.</h1>
-        <p className="text-white/80">Personal content creation workflow and monitoring your submitted work</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.firstName}! Let's create something great.</h1>
+            <p className="text-white/80 text-lg mb-4">Personal content creation workflow and monitoring your submitted work</p>
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-2">
+                <FileText className="h-4 w-4" />
+                <span className="text-sm">{myScripts.length} total scripts</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="h-4 w-4" />
+                <span className="text-sm">{contributorStats.approvalRate}% approval rate</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Star className="h-4 w-4" />
+                <span className="text-sm">{contributorStats.weeklyOutput} scripts this week</span>
+              </div>
+            </div>
+          </div>
+          <div className="hidden lg:block">
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
+              <p className="text-sm text-white/80">Writing Progress</p>
+              <p className="text-2xl font-bold">{contributorStats.totalWordCount.toLocaleString()}</p>
+              <p className="text-xs text-white/70">words written</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Contributor Performance Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <Card className="bg-gradient-to-br from-blue-50 to-indigo-100 border-blue-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-blue-600">Active Drafts</p>
+                <p className="text-3xl font-bold text-blue-900">{myActiveScripts.length}</p>
+              </div>
+              <Edit className="h-8 w-8 text-blue-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-yellow-50 to-orange-100 border-yellow-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-orange-600">Need Revision</p>
+                <p className="text-3xl font-bold text-orange-900">{scriptsAwaitingRevision.length}</p>
+              </div>
+              <AlertCircle className="h-8 w-8 text-orange-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-green-50 to-emerald-100 border-green-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-green-600">Approved</p>
+                <p className="text-3xl font-bold text-green-900">{myScripts.filter(s => s.status === 'Approved').length}</p>
+              </div>
+              <CheckCircle className="h-8 w-8 text-green-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-purple-50 to-indigo-100 border-purple-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-purple-600">Projects</p>
+                <p className="text-3xl font-bold text-purple-900">{myProjects.length}</p>
+              </div>
+              <Briefcase className="h-8 w-8 text-purple-600" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* My Active Scripts & Drafts - Priority Widget */}

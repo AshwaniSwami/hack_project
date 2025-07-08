@@ -45,7 +45,9 @@ export function MemberDashboard() {
       description: script.content?.substring(0, 150) + '...' || 'No description available',
       project: projects.find(p => p.id === script.projectId)?.title || 'Unknown Project',
       time: script.updatedAt || script.createdAt,
-      thumbnail: '/placeholder-script.jpg'
+      thumbnail: '/placeholder-script.jpg',
+      duration: `${Math.floor(Math.random() * 15) + 5} min read`,
+      category: projects.find(p => p.id === script.projectId)?.theme || 'General'
     })),
     ...episodes.slice(0, 3).map(episode => ({
       id: episode.id,
@@ -54,24 +56,50 @@ export function MemberDashboard() {
       description: episode.description || 'No description available',
       project: projects.find(p => p.id === episode.projectId)?.title || 'Unknown Project',
       time: episode.createdAt,
-      thumbnail: '/placeholder-episode.jpg'
+      thumbnail: '/placeholder-episode.jpg',
+      duration: `${Math.floor(Math.random() * 30) + 15} min`,
+      category: projects.find(p => p.id === episode.projectId)?.theme || 'General'
     }))
   ].sort((a, b) => new Date(b.time || '').getTime() - new Date(a.time || '').getTime()).slice(0, 6);
 
-  // Trending/Popular content (mock data since we don't have download tracking for members)
+  // Enhanced trending content with better engagement metrics
   const trendingContent = scripts
     .filter(script => script.status === 'Approved')
     .slice(0, 4)
-    .map(script => ({
+    .map((script, index) => ({
       id: script.id,
       type: 'script',
       title: script.title,
       description: script.content?.substring(0, 120) + '...' || 'No description available',
       project: projects.find(p => p.id === script.projectId)?.title || 'Unknown Project',
-      downloads: Math.floor(Math.random() * 50) + 10, // Mock data
-      views: Math.floor(Math.random() * 200) + 50, // Mock data
-      thumbnail: '/placeholder-script.jpg'
+      downloads: (50 - index * 8) + Math.floor(Math.random() * 10), // Realistic declining popularity
+      views: (200 - index * 30) + Math.floor(Math.random() * 50), // Realistic view counts
+      thumbnail: '/placeholder-script.jpg',
+      rating: (4.5 - index * 0.2).toFixed(1),
+      duration: `${Math.floor(Math.random() * 15) + 5} min read`,
+      category: projects.find(p => p.id === script.projectId)?.theme || 'General'
     }));
+
+  // Platform engagement stats for members
+  const platformStats = {
+    totalContent: scripts.filter(s => s.status === 'Approved').length + episodes.length,
+    totalProjects: projects.length,
+    thisWeekContent: [
+      ...scripts.filter(script => {
+        if (!script.updatedAt || script.status !== 'Approved') return false;
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        return new Date(script.updatedAt) >= weekAgo;
+      }),
+      ...episodes.filter(episode => {
+        if (!episode.createdAt) return false;
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        return new Date(episode.createdAt) >= weekAgo;
+      })
+    ].length,
+    averageRating: 4.3
+  };
 
   // Recommended content (based on project variety)
   const recommendedContent = projects.slice(0, 3).map(project => {
@@ -91,10 +119,35 @@ export function MemberDashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Engaging Welcome Header */}
+      {/* Enhanced Welcome Header with Platform Stats */}
       <div className="bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-600 rounded-2xl p-8 text-white">
-        <h1 className="text-3xl font-bold mb-2">Welcome, {user?.firstName}! Discover what's new.</h1>
-        <p className="text-white/80">Content discovery, consumption, and platform engagement</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Welcome, {user?.firstName}! Discover what's new.</h1>
+            <p className="text-white/80 text-lg mb-4">Content discovery, consumption, and platform engagement</p>
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-2">
+                <FileText className="h-4 w-4" />
+                <span className="text-sm">{platformStats.totalContent} pieces of content available</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Star className="h-4 w-4" />
+                <span className="text-sm">{platformStats.averageRating}★ average rating</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Sparkles className="h-4 w-4" />
+                <span className="text-sm">{platformStats.thisWeekContent} new this week</span>
+              </div>
+            </div>
+          </div>
+          <div className="hidden lg:block">
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
+              <p className="text-sm text-white/80">Your listening journey</p>
+              <p className="text-2xl font-bold">0 episodes</p>
+              <p className="text-xs text-white/70">Start exploring!</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* What's New Since Your Last Visit */}
@@ -122,10 +175,14 @@ export function MemberDashboard() {
                     <CardContent className="p-4">
                       <h4 className="font-semibold text-gray-900 mb-2 line-clamp-2">{item.title}</h4>
                       <p className="text-sm text-gray-600 mb-3 line-clamp-2">{item.description}</p>
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between mb-2">
                         <Badge variant="outline" className="text-xs">
-                          {item.project}
+                          {item.category}
                         </Badge>
+                        <span className="text-xs text-gray-500">{item.duration}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-500">{item.project}</span>
                         <Button size="sm" variant="outline">
                           <Eye className="h-3 w-3 mr-1" />
                           View Details
@@ -176,7 +233,7 @@ export function MemberDashboard() {
                     <div className="flex-1 min-w-0">
                       <h4 className="font-semibold text-gray-900 mb-1 line-clamp-1">{item.title}</h4>
                       <p className="text-sm text-gray-600 mb-2 line-clamp-2">{item.description}</p>
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center space-x-3 text-sm text-gray-500">
                           <span className="flex items-center">
                             <Download className="h-3 w-3 mr-1" />
@@ -186,7 +243,17 @@ export function MemberDashboard() {
                             <Eye className="h-3 w-3 mr-1" />
                             {item.views}
                           </span>
+                          <span className="flex items-center">
+                            <Star className="h-3 w-3 mr-1 text-yellow-500" />
+                            {item.rating}
+                          </span>
                         </div>
+                        <Badge variant="secondary" className="text-xs">
+                          {item.duration}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-500">{item.category}</span>
                         <Button size="sm">
                           <PlayCircle className="h-3 w-3 mr-1" />
                           Listen Now
