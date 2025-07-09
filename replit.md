@@ -144,6 +144,9 @@ The application uses a relational database with the following core entities:
 - January 9, 2025: Removed "recently published content" section and achievements system from member dashboard
 - January 9, 2025: Simplified dashboard to focus on single "Explore Projects" action with enhanced user engagement features
 - January 9, 2025: Repositioned level progress system and removed member level from stats cards for cleaner layout
+- January 9, 2025: Added progress level display to navbar with level indicator and progress bar for all users
+- January 9, 2025: Restricted notification bell to admin users only - removed for normal users and editors
+- January 9, 2025: Enhanced mobile navbar with detailed progress view showing level advancement
 - January 7, 2025: Implemented comprehensive download tracking system with analytics dashboard for admin users to monitor file download patterns, user activity, and usage statistics
 - January 7, 2025: Added download logs table with detailed tracking including user info, IP addresses, download duration, and status
 - January 7, 2025: Created admin-only Analytics page with overview, user downloads, file statistics, and activity logs tabs

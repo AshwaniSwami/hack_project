@@ -2,6 +2,7 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { 
   Bell, 
   Radio, 
@@ -13,11 +14,14 @@ import {
   FileText,
   RadioTower,
   Users,
-  TrendingUp
+  TrendingUp,
+  Target
 } from "lucide-react";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import type { Script, Project, Episode } from "@shared/schema";
 
 export function Navbar() {
   const [location] = useLocation();
@@ -25,6 +29,28 @@ export function Navbar() {
   const { user, isLoading, isAuthenticated, isAdmin } = useAuth();
 
   const canAccessAdvancedFeatures = user?.role === 'admin' || user?.role === 'editor' || user?.role === 'contributor';
+
+  // Get user progress data for level display
+  const { data: scripts = [] } = useQuery<Script[]>({
+    queryKey: ["/api/scripts"],
+    enabled: isAuthenticated,
+  });
+
+  const { data: projects = [] } = useQuery<Project[]>({
+    queryKey: ["/api/projects"],
+    enabled: isAuthenticated,
+  });
+
+  const { data: episodes = [] } = useQuery<Episode[]>({
+    queryKey: ["/api/episodes"],
+    enabled: isAuthenticated,
+  });
+
+  // Calculate member level and progress
+  const memberStats = {
+    totalContent: scripts.filter(s => s.status === 'Approved').length + episodes.length,
+    memberLevel: Math.min(Math.floor((scripts.filter(s => s.status === 'Approved').length + episodes.length) / 5) + 1, 10)
+  };
 
   const navItems = [
     { href: "/", label: "Dashboard", icon: Home },
@@ -86,16 +112,33 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center space-x-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="relative p-3 text-white/90 hover:text-white hover:bg-white/15 transition-all duration-300 rounded-xl group"
-            >
-              <Bell className="h-5 w-5 group-hover:scale-105 transition-transform duration-200" />
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 bg-red-500 hover:bg-red-500 text-xs flex items-center justify-center border-2 border-white/20">
-                3
-              </Badge>
-            </Button>
+            {/* Progress Level Display */}
+            <div className="hidden md:flex items-center space-x-3 bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2 border border-white/20">
+              <div className="flex items-center space-x-2">
+                <Target className="h-4 w-4 text-blue-300" />
+                <span className="text-sm font-medium text-white">Level {memberStats.memberLevel}</span>
+              </div>
+              <div className="w-16">
+                <Progress 
+                  value={(memberStats.totalContent % 5) * 20} 
+                  className="h-1.5 bg-white/20" 
+                />
+              </div>
+            </div>
+
+            {/* Notification Bell - Only for Admins */}
+            {isAdmin && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="relative p-3 text-white/90 hover:text-white hover:bg-white/15 transition-all duration-300 rounded-xl group"
+              >
+                <Bell className="h-5 w-5 group-hover:scale-105 transition-transform duration-200" />
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 bg-red-500 hover:bg-red-500 text-xs flex items-center justify-center border-2 border-white/20">
+                  3
+                </Badge>
+              </Button>
+            )}
 
             <ProfileDropdown />
 
@@ -116,6 +159,23 @@ export function Navbar() {
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="lg:hidden border-t border-white/10 py-6 backdrop-blur-md">
+            {/* Mobile Progress Level */}
+            <div className="mb-4 mx-4 bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <Target className="h-4 w-4 text-blue-300" />
+                  <span className="text-sm font-medium text-white">Level {memberStats.memberLevel}</span>
+                </div>
+                <span className="text-xs text-white/70">
+                  {5 - (memberStats.totalContent % 5)} to next level
+                </span>
+              </div>
+              <Progress 
+                value={(memberStats.totalContent % 5) * 20} 
+                className="h-2 bg-white/20" 
+              />
+            </div>
+
             <nav className="space-y-3">
               {navItems.map((item) => {
                 const Icon = item.icon;
