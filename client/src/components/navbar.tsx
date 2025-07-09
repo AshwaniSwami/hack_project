@@ -22,10 +22,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import type { Script, Project, Episode } from "@shared/schema";
+import { ProgressModal } from "./progress-modal";
 
 export function Navbar() {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProgressModalOpen, setIsProgressModalOpen] = useState(false);
   const { user, isLoading, isAuthenticated, isAdmin } = useAuth();
 
   const canAccessAdvancedFeatures = user?.role === 'admin' || user?.role === 'editor' || user?.role === 'contributor';
@@ -113,7 +115,11 @@ export function Navbar() {
 
           <div className="flex items-center space-x-3">
             {/* Progress Level Display */}
-            <div className="hidden md:flex items-center space-x-3 bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2 border border-white/20">
+            <Button 
+              variant="ghost"
+              onClick={() => setIsProgressModalOpen(true)}
+              className="hidden md:flex items-center space-x-3 bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2 border border-white/20 hover:bg-white/20 transition-colors duration-200 h-auto"
+            >
               <div className="flex items-center space-x-2">
                 <Target className="h-4 w-4 text-blue-300" />
                 <span className="text-sm font-medium text-white">Level {memberStats.memberLevel}</span>
@@ -124,7 +130,7 @@ export function Navbar() {
                   className="h-1.5 bg-white/20" 
                 />
               </div>
-            </div>
+            </Button>
 
             {/* Notification Bell - Only for Admins */}
             {isAdmin && (
@@ -160,21 +166,30 @@ export function Navbar() {
         {isMobileMenuOpen && (
           <div className="lg:hidden border-t border-white/10 py-6 backdrop-blur-md">
             {/* Mobile Progress Level */}
-            <div className="mb-4 mx-4 bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
-                  <Target className="h-4 w-4 text-blue-300" />
-                  <span className="text-sm font-medium text-white">Level {memberStats.memberLevel}</span>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setIsProgressModalOpen(true);
+                setIsMobileMenuOpen(false);
+              }}
+              className="mb-4 mx-4 bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 hover:bg-white/20 transition-colors duration-200 w-auto h-auto"
+            >
+              <div className="w-full">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <Target className="h-4 w-4 text-blue-300" />
+                    <span className="text-sm font-medium text-white">Level {memberStats.memberLevel}</span>
+                  </div>
+                  <span className="text-xs text-white/70">
+                    {5 - (memberStats.totalContent % 5)} to next level
+                  </span>
                 </div>
-                <span className="text-xs text-white/70">
-                  {5 - (memberStats.totalContent % 5)} to next level
-                </span>
+                <Progress 
+                  value={(memberStats.totalContent % 5) * 20} 
+                  className="h-2 bg-white/20" 
+                />
               </div>
-              <Progress 
-                value={(memberStats.totalContent % 5) * 20} 
-                className="h-2 bg-white/20" 
-              />
-            </div>
+            </Button>
 
             <nav className="space-y-3">
               {navItems.map((item) => {
@@ -200,6 +215,15 @@ export function Navbar() {
           </div>
         )}
       </div>
+      
+      {/* Progress Modal */}
+      <ProgressModal
+        isOpen={isProgressModalOpen}
+        onClose={() => setIsProgressModalOpen(false)}
+        currentLevel={memberStats.memberLevel}
+        currentProgress={(memberStats.totalContent % 5) * 20}
+        totalContent={memberStats.totalContent}
+      />
     </header>
   );
 }

@@ -128,8 +128,8 @@ export function MemberDashboard() {
         </div>
 
         {/* Quick Stats with Radio Icons */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="text-center hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border-0 shadow-md">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 justify-items-center">
+          <Card className="text-center hover:shadow-md transition-shadow duration-200 border-0 shadow-sm w-full max-w-xs">
             <CardContent className="p-6">
               <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-full p-3 w-fit mx-auto mb-4 shadow-sm">
                 <Podcast className="h-8 w-8 text-blue-600" />
@@ -139,7 +139,7 @@ export function MemberDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="text-center hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border-0 shadow-md">
+          <Card className="text-center hover:shadow-md transition-shadow duration-200 border-0 shadow-sm w-full max-w-xs">
             <CardContent className="p-6">
               <div className="bg-gradient-to-br from-green-100 to-green-200 rounded-full p-3 w-fit mx-auto mb-4 shadow-sm">
                 <Radio className="h-8 w-8 text-green-600" />
@@ -149,7 +149,7 @@ export function MemberDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="text-center hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border-0 shadow-md">
+          <Card className="text-center hover:shadow-md transition-shadow duration-200 border-0 shadow-sm w-full max-w-xs">
             <CardContent className="p-6">
               <div className="bg-gradient-to-br from-purple-100 to-purple-200 rounded-full p-3 w-fit mx-auto mb-4 shadow-sm">
                 <Music className="h-8 w-8 text-purple-600" />
@@ -161,17 +161,17 @@ export function MemberDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="text-center">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6">Ready to Explore?</h3>
-          <div className="flex justify-center">
+        <div className="flex justify-center">
+          <div className="w-full max-w-2xl">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Ready to Explore?</h3>
             {quickActions.map((action, index) => (
-              <Card key={index} className="hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer border-0 shadow-md max-w-xl w-full" onClick={action.action}>
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6">
-                    <div className={`bg-gradient-to-r ${action.color} rounded-full p-4 shadow-md`}>
+              <Card key={index} className="hover:shadow-md transition-shadow duration-200 cursor-pointer border-0 shadow-sm" onClick={action.action}>
+                <CardContent className="p-8">
+                  <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6 text-center md:text-left">
+                    <div className={`bg-gradient-to-r ${action.color} rounded-full p-4 shadow-md flex-shrink-0`}>
                       <action.icon className="h-10 w-10 text-white" />
                     </div>
-                    <div className="flex-1 text-center md:text-left">
+                    <div className="flex-1">
                       <h4 className="text-xl font-bold text-gray-900 mb-2">{action.title}</h4>
                       <p className="text-base text-gray-600 mb-4 leading-relaxed">{action.description}</p>
                       <Button size="default" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-6 py-2 shadow-md">
@@ -186,31 +186,7 @@ export function MemberDashboard() {
           </div>
         </div>
 
-        {/* Member Level Progress - Repositioned */}
-        <div className="flex justify-center">
-          <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200 shadow-md max-w-xl w-full">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center">
-                  <Target className="h-6 w-6 mr-3 text-indigo-600" />
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">Your Progress</h3>
-                    <p className="text-sm text-gray-600">Level {memberStats.memberLevel} Member</p>
-                  </div>
-                </div>
-                <Badge className="bg-indigo-600 text-white px-3 py-1 text-sm">
-                  Level {memberStats.memberLevel}
-                </Badge>
-              </div>
-              <div className="space-y-2">
-                <Progress value={(memberStats.totalContent % 5) * 20} className="h-3" />
-                <p className="text-sm text-gray-600 text-center">
-                  {5 - (memberStats.totalContent % 5)} more content pieces to reach level {memberStats.memberLevel + 1}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+
       </div>
     </div>
   );
