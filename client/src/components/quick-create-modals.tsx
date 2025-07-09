@@ -111,7 +111,7 @@ export function QuickCreateModals({
   // Mutations
   const createProjectMutation = useMutation({
     mutationFn: (data: z.infer<typeof projectSchema>) => 
-      apiRequest("/api/projects", "POST", data),
+      apiRequest("POST", "/api/projects", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       projectForm.reset();
@@ -133,7 +133,7 @@ export function QuickCreateModals({
 
   const createEpisodeMutation = useMutation({
     mutationFn: (data: z.infer<typeof episodeSchema>) => 
-      apiRequest("/api/episodes", "POST", data),
+      apiRequest("POST", "/api/episodes", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/episodes"] });
       episodeForm.reset();
@@ -155,7 +155,7 @@ export function QuickCreateModals({
 
   const createScriptMutation = useMutation({
     mutationFn: (data: z.infer<typeof scriptSchema>) => 
-      apiRequest("/api/scripts", "POST", data),
+      apiRequest("POST", "/api/scripts", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/scripts"] });
       scriptForm.reset();
