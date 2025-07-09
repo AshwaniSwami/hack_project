@@ -12,14 +12,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { User, LogOut, Settings, Copy, Check } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export function ProfileDropdown() {
   const { user, logout } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [copiedId, setCopiedId] = useState(false);
+
 
   if (!user) return null;
 
@@ -36,23 +36,7 @@ export function ProfileDropdown() {
     }
   };
 
-  const copyUserId = async () => {
-    try {
-      await navigator.clipboard.writeText(user.id);
-      setCopiedId(true);
-      toast({
-        title: "User ID copied",
-        description: "Your user ID has been copied to clipboard.",
-      });
-      setTimeout(() => setCopiedId(false), 2000);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to copy user ID.",
-        variant: "destructive",
-      });
-    }
-  };
+
 
   const getUserInitials = () => {
     if (user.firstName && user.lastName) {
@@ -112,27 +96,6 @@ export function ProfileDropdown() {
             </div>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        
-        <DropdownMenuItem onClick={copyUserId} className="cursor-pointer">
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center space-x-2">
-              <User className="h-4 w-4" />
-              <span className="text-sm">User ID</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <code className="text-xs bg-gray-100 px-2 py-1 rounded max-w-[120px] truncate">
-                {user.id}
-              </code>
-              {copiedId ? (
-                <Check className="h-4 w-4 text-green-500" />
-              ) : (
-                <Copy className="h-4 w-4" />
-              )}
-            </div>
-          </div>
-        </DropdownMenuItem>
-
         <DropdownMenuSeparator />
         
         <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 focus:text-red-600">

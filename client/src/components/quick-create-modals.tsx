@@ -29,9 +29,9 @@ import type { Project } from "@shared/schema";
 
 // Schemas for form validation
 const projectSchema = z.object({
-  title: z.string().min(1, "Title is required"),
+  name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
-  themeId: z.string().optional(),
+  themeId: z.string().optional().transform(val => val === "" ? undefined : val),
 });
 
 const episodeSchema = z.object({
@@ -80,7 +80,7 @@ export function QuickCreateModals({
   const projectForm = useForm<z.infer<typeof projectSchema>>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
-      title: "",
+      name: "",
       description: "",
       themeId: "",
     },
@@ -193,12 +193,12 @@ export function QuickCreateModals({
             <form onSubmit={projectForm.handleSubmit((data) => createProjectMutation.mutate(data))} className="space-y-6">
               <FormField
                 control={projectForm.control}
-                name="title"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Project Title</FormLabel>
+                    <FormLabel>Project Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter project title..." {...field} />
+                      <Input placeholder="Enter project name..." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -288,7 +288,7 @@ export function QuickCreateModals({
                       <SelectContent>
                         {projects.map((project) => (
                           <SelectItem key={project.id} value={project.id}>
-                            {project.title}
+                            {project.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -392,7 +392,7 @@ export function QuickCreateModals({
                       <SelectContent>
                         {projects.map((project) => (
                           <SelectItem key={project.id} value={project.id}>
-                            {project.title}
+                            {project.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
