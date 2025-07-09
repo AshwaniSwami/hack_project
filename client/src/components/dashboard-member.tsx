@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 export function MemberDashboard() {
   const { user } = useAuth();
+  const [, setLocation] = useLocation();
 
   const { data: scripts = [] } = useQuery<Script[]>({
     queryKey: ["/api/scripts"],
@@ -158,13 +160,13 @@ export function MemberDashboard() {
       <div className="max-w-4xl mx-auto text-center">
         <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-8">
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Ready to explore?</h3>
-          <p className="text-gray-600 mb-6">Browse our collection of radio scripts, episodes, and projects.</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
-              <PlayCircle className="h-5 w-5 mr-2" />
-              Browse Scripts
-            </Button>
-            <Button size="lg" variant="outline">
+          <p className="text-gray-600 mb-6">Browse our collection of radio projects and discover amazing content.</p>
+          <div className="flex justify-center">
+            <Button 
+              size="lg" 
+              className="bg-blue-600 hover:bg-blue-700"
+              onClick={() => setLocation("/projects")}
+            >
               <Radio className="h-5 w-5 mr-2" />
               Explore Projects
             </Button>

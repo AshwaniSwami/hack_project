@@ -121,7 +121,8 @@ export function QuickCreateModals({
         description: "Your project has been created successfully.",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Project creation error:", error);
       toast({
         title: "Error",
         description: "Failed to create project. Please try again.",
@@ -142,7 +143,8 @@ export function QuickCreateModals({
         description: "Your episode has been created successfully.",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Episode creation error:", error);
       toast({
         title: "Error",
         description: "Failed to create episode. Please try again.",
@@ -163,7 +165,8 @@ export function QuickCreateModals({
         description: "Your script has been created successfully.",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Script creation error:", error);
       toast({
         title: "Error",
         description: "Failed to create script. Please try again.",

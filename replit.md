@@ -136,6 +136,9 @@ The application uses a relational database with the following core entities:
 - January 8, 2025: Fixed dashboard crashes by disabling analytics queries for non-admin users and correcting syntax errors
 - January 8, 2025: Completely redesigned Member dashboard with clean, minimal interface featuring daily inspirational quotes, simple stats, and call-to-action buttons
 - January 8, 2025: Simplified member experience by removing overwhelming content and focusing on motivational elements and easy navigation
+- January 8, 2025: Restricted script and episode access for normal users - only admin, editor, and contributor roles can access these features
+- January 8, 2025: Enhanced profile functionality with dropdown menu showing user ID, role, and logout option
+- January 8, 2025: Fixed navigation restrictions and member dashboard button functionality
 - January 7, 2025: Implemented comprehensive download tracking system with analytics dashboard for admin users to monitor file download patterns, user activity, and usage statistics
 - January 7, 2025: Added download logs table with detailed tracking including user info, IP addresses, download duration, and status
 - January 7, 2025: Created admin-only Analytics page with overview, user downloads, file statistics, and activity logs tabs

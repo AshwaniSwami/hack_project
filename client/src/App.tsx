@@ -17,7 +17,8 @@ import AuthPage from "@/pages/AuthPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
-  const { isAuthenticated, isLoading, isAdmin } = useAuth();
+  const { isAuthenticated, isLoading, isAdmin, user } = useAuth();
+  const canAccessAdvancedFeatures = user?.role === 'admin' || user?.role === 'editor' || user?.role === 'contributor';
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -47,9 +48,9 @@ function Router() {
               <Route path="/" component={Dashboard} />
               <Route path="/dashboard" component={Dashboard} />
               <Route path="/projects" component={Projects} />
-              <Route path="/episodes" component={Episodes} />
-              <Route path="/scripts" component={Scripts} />
               <Route path="/radio-stations" component={RadioStations} />
+              {canAccessAdvancedFeatures && <Route path="/episodes" component={Episodes} />}
+              {canAccessAdvancedFeatures && <Route path="/scripts" component={Scripts} />}
               {isAdmin && <Route path="/users" component={Users} />}
               {isAdmin && <Route path="/analytics" component={AnalyticsPage} />}
             </>

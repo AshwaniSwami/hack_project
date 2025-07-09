@@ -1,18 +1,9 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { 
   Bell, 
-  ChevronDown, 
   Radio, 
   Menu, 
   X, 
@@ -22,12 +13,9 @@ import {
   FileText,
   RadioTower,
   Users,
-  Settings,
-  LogOut,
-  User,
   TrendingUp
 } from "lucide-react";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ProfileDropdown } from "@/components/profile-dropdown";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 
@@ -36,49 +24,17 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, isLoading, isAuthenticated, isAdmin } = useAuth();
 
-  // Debug admin status
-  console.log("Admin status:", { isAdmin, userRole: user?.role, user });
+  const canAccessAdvancedFeatures = user?.role === 'admin' || user?.role === 'editor' || user?.role === 'contributor';
 
   const navItems = [
     { href: "/", label: "Dashboard", icon: Home },
     { href: "/projects", label: "Projects", icon: FolderOpen },
-    { href: "/episodes", label: "Episodes", icon: Play },
-    { href: "/scripts", label: "Scripts", icon: FileText },
+    ...(canAccessAdvancedFeatures ? [{ href: "/episodes", label: "Episodes", icon: Play }] : []),
+    ...(canAccessAdvancedFeatures ? [{ href: "/scripts", label: "Scripts", icon: FileText }] : []),
     { href: "/radio-stations", label: "Stations", icon: RadioTower },
     ...(isAdmin ? [{ href: "/users", label: "Users", icon: Users }] : []),
     ...(isAdmin ? [{ href: "/analytics", label: "Analytics", icon: TrendingUp }] : []),
   ];
-
-  const handleLogout = async () => {
-    try {
-      await fetch("/api/auth/logout", { method: "POST" });
-      window.location.href = "/";
-    } catch (error) {
-      console.error("Logout failed:", error);
-      window.location.href = "/";
-    }
-  };
-
-  // Get user initials
-  const getUserInitials = () => {
-    if (user?.firstName && user?.lastName) {
-      return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
-    }
-    if (user?.email) {
-      return user.email.substring(0, 2).toUpperCase();
-    }
-    return "U";
-  };
-
-  const getUserDisplayName = () => {
-    if (user?.firstName && user?.lastName) {
-      return `${user.firstName} ${user.lastName}`;
-    }
-    if (user?.email) {
-      return user.email;
-    }
-    return "User";
-  };
 
   return (
     <header className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-900 text-white shadow-2xl sticky top-0 z-50 backdrop-blur-md border-b border-white/10">
@@ -141,50 +97,7 @@ export function Navbar() {
               </Badge>
             </Button>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="flex items-center space-x-3 text-white/90 hover:text-white hover:bg-white/15 transition-all duration-300 rounded-xl px-3 py-2 group"
-                >
-                  <Avatar className="h-9 w-9 border-2 border-white/30 shadow-lg">
-                    {user?.profileImageUrl && (
-                      <AvatarImage 
-                        src={user.profileImageUrl} 
-                        alt={getUserDisplayName()}
-                        className="object-cover"
-                      />
-                    )}
-                    <AvatarFallback className="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 text-white text-sm font-bold">
-                      {getUserInitials()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="hidden sm:block text-left">
-                    <p className="text-sm font-semibold">{getUserDisplayName()}</p>
-                    <p className="text-xs text-white/70">{user?.email || "User"}</p>
-                  </div>
-                  <ChevronDown className="h-4 w-4 group-hover:rotate-180 transition-transform duration-300" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-white/95 backdrop-blur-md border border-white/20 shadow-2xl">
-                <DropdownMenuItem className="cursor-pointer group">
-                  <User className="h-4 w-4 mr-3 group-hover:scale-110 transition-transform duration-200" />
-                  <span>Profile</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer group">
-                  <Settings className="h-4 w-4 mr-3 group-hover:rotate-90 transition-transform duration-300" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  className="cursor-pointer text-red-600 group"
-                  onClick={handleLogout}
-                >
-                  <LogOut className="h-4 w-4 mr-3 group-hover:scale-110 transition-transform duration-200" />
-                  <span>Logout</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <ProfileDropdown />
 
             <Button
               variant="ghost"
