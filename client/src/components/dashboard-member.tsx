@@ -87,49 +87,10 @@ export function MemberDashboard() {
   const quickActions = [
     {
       title: "Explore Projects",
-      description: "Discover amazing radio content",
+      description: "Discover amazing radio content and start your journey",
       icon: Radio,
       color: "from-blue-500 to-cyan-500",
       action: () => setLocation("/projects")
-    },
-    {
-      title: "Browse Content",
-      description: "Find your next favorite show",
-      icon: Headphones,
-      color: "from-purple-500 to-pink-500",
-      action: () => setLocation("/projects")
-    },
-    {
-      title: "Audio Library", 
-      description: "Listen to podcast episodes",
-      icon: Volume2,
-      color: "from-green-500 to-emerald-500",
-      action: () => setLocation("/projects")
-    }
-  ];
-
-  // Member achievements/milestones
-  const achievements = [
-    {
-      title: "Radio Explorer",
-      description: "Discovered 5+ projects",
-      icon: Search,
-      earned: memberStats.totalProjects >= 1,
-      color: "text-blue-500"
-    },
-    {
-      title: "Content Enthusiast", 
-      description: "Engaged with 10+ pieces",
-      icon: Heart,
-      earned: memberStats.totalContent >= 5,
-      color: "text-red-500"
-    },
-    {
-      title: "Weekly Listener",
-      description: "Active this week",
-      icon: Calendar,
-      earned: memberStats.thisWeekContent > 0,
-      color: "text-green-500"
     }
   ];
 
@@ -147,10 +108,6 @@ export function MemberDashboard() {
                 <Badge className="bg-white/20 text-white border-white/30">
                   Level {memberStats.memberLevel} Member
                 </Badge>
-                <div className="flex items-center text-white/80">
-                  <Trophy className="h-4 w-4 mr-1" />
-                  <span className="text-sm">{achievements.filter(a => a.earned).length}/3 Achievements</span>
-                </div>
               </div>
             </div>
             <div className="hidden md:block">
@@ -174,7 +131,7 @@ export function MemberDashboard() {
       </div>
 
       {/* Quick Stats with Radio Icons */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
         <Card className="text-center hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="bg-blue-100 rounded-full p-3 w-fit mx-auto mb-4">
@@ -204,91 +161,55 @@ export function MemberDashboard() {
             <p className="text-sm text-gray-600">New This Week</p>
           </CardContent>
         </Card>
-
-        <Card className="text-center hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="bg-indigo-100 rounded-full p-3 w-fit mx-auto mb-4">
-              <Mic className="h-8 w-8 text-indigo-600" />
-            </div>
-            <p className="text-2xl font-bold text-gray-900 mb-1">{memberStats.memberLevel}</p>
-            <p className="text-sm text-gray-600">Member Level</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Member Progress */}
-      <div className="max-w-4xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Target className="h-5 w-5 mr-2 text-blue-500" />
-              Your Radio Journey
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium">Level Progress</span>
-                  <span className="text-sm text-gray-500">Level {memberStats.memberLevel}</span>
-                </div>
-                <Progress value={(memberStats.totalContent % 5) * 20} className="h-2" />
-                <p className="text-xs text-gray-500 mt-1">
-                  {5 - (memberStats.totalContent % 5)} more content pieces to reach level {memberStats.memberLevel + 1}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Quick Actions */}
-      <div className="max-w-6xl mx-auto">
-        <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Explore Radio Content</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="max-w-4xl mx-auto">
+        <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Ready to Explore?</h3>
+        <div className="grid grid-cols-1 gap-6">
           {quickActions.map((action, index) => (
             <Card key={index} className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer" onClick={action.action}>
-              <CardContent className="p-6">
-                <div className={`bg-gradient-to-r ${action.color} rounded-lg p-4 mb-4`}>
-                  <action.icon className="h-8 w-8 text-white mx-auto" />
+              <CardContent className="p-8">
+                <div className="flex items-center justify-center space-x-6">
+                  <div className={`bg-gradient-to-r ${action.color} rounded-full p-6`}>
+                    <action.icon className="h-12 w-12 text-white" />
+                  </div>
+                  <div className="flex-1 text-center">
+                    <h4 className="text-2xl font-bold text-gray-900 mb-2">{action.title}</h4>
+                    <p className="text-gray-600 mb-4">{action.description}</p>
+                    <Button size="lg" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+                      <PlayCircle className="h-5 w-5 mr-2" />
+                      Start Exploring
+                    </Button>
+                  </div>
                 </div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-2">{action.title}</h4>
-                <p className="text-sm text-gray-600 mb-4">{action.description}</p>
-                <Button variant="outline" size="sm" className="w-full">
-                  <PlayCircle className="h-4 w-4 mr-2" />
-                  Get Started
-                </Button>
               </CardContent>
             </Card>
           ))}
         </div>
       </div>
 
-      {/* Achievements */}
+      {/* Member Level Progress - Repositioned */}
       <div className="max-w-4xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Trophy className="h-5 w-5 mr-2 text-yellow-500" />
-              Your Achievements
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {achievements.map((achievement, index) => (
-                <div key={index} className={`p-4 rounded-lg border ${achievement.earned ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
-                  <div className="flex items-center mb-2">
-                    <achievement.icon className={`h-5 w-5 mr-2 ${achievement.earned ? achievement.color : 'text-gray-400'}`} />
-                    <h4 className={`font-semibold ${achievement.earned ? 'text-gray-900' : 'text-gray-500'}`}>
-                      {achievement.title}
-                    </h4>
-                    {achievement.earned && <Badge className="ml-auto bg-green-500">Earned</Badge>}
-                  </div>
-                  <p className={`text-sm ${achievement.earned ? 'text-gray-700' : 'text-gray-500'}`}>
-                    {achievement.description}
-                  </p>
+        <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                <Target className="h-6 w-6 mr-3 text-indigo-600" />
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Your Progress</h3>
+                  <p className="text-sm text-gray-600">Level {memberStats.memberLevel} Member</p>
                 </div>
-              ))}
+              </div>
+              <Badge className="bg-indigo-600 text-white">
+                Level {memberStats.memberLevel}
+              </Badge>
+            </div>
+            <div className="space-y-2">
+              <Progress value={(memberStats.totalContent % 5) * 20} className="h-3" />
+              <p className="text-sm text-gray-600 text-center">
+                {5 - (memberStats.totalContent % 5)} more content pieces to reach level {memberStats.memberLevel + 1}
+              </p>
             </div>
           </CardContent>
         </Card>

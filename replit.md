@@ -139,6 +139,11 @@ The application uses a relational database with the following core entities:
 - January 8, 2025: Restricted script and episode access for normal users - only admin, editor, and contributor roles can access these features
 - January 8, 2025: Enhanced profile functionality with dropdown menu showing user ID, role, and logout option
 - January 8, 2025: Fixed navigation restrictions and member dashboard button functionality
+- January 9, 2025: Fixed logout functionality by implementing proper logout method in useAuth hook
+- January 9, 2025: Completely redesigned member dashboard with proper radio-themed icons (Podcast, Radio, Mic, Music, Volume2)
+- January 9, 2025: Removed "recently published content" section and achievements system from member dashboard
+- January 9, 2025: Simplified dashboard to focus on single "Explore Projects" action with enhanced user engagement features
+- January 9, 2025: Repositioned level progress system and removed member level from stats cards for cleaner layout
 - January 7, 2025: Implemented comprehensive download tracking system with analytics dashboard for admin users to monitor file download patterns, user activity, and usage statistics
 - January 7, 2025: Added download logs table with detailed tracking including user info, IP addresses, download duration, and status
 - January 7, 2025: Created admin-only Analytics page with overview, user downloads, file statistics, and activity logs tabs
