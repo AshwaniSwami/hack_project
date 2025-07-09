@@ -26,8 +26,14 @@ export function ProfileDropdown() {
   const handleLogout = async () => {
     try {
       await logout();
+      // Clear any local state and navigate to home
       setLocation("/");
+      // Force a page reload to ensure clean state
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 100);
     } catch (error) {
+      console.error("Logout error:", error);
       toast({
         title: "Error",
         description: "Failed to logout. Please try again.",
