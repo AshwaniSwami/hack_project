@@ -28,141 +28,75 @@ export function registerProjectAnalyticsRoutes(app: Express) {
           startDate.setDate(now.getDate() - 30);
       }
 
-      // Get project download statistics (direct project files)
-      const projectStats = await db
+      // Get all projects with their names first
+      const allProjects = await db
         .select({
-          projectId: files.entityId,
-          projectName: projects.name,
-          projectDescription: projects.description,
+          id: projects.id,
+          name: projects.name,
+          description: projects.description
+        })
+        .from(projects);
+
+      // Create a map for quick project lookup
+      const projectMap = new Map(allProjects.map(p => [p.id, p]));
+
+      // Get download stats aggregated by project
+      const projectDownloadStats = await db
+        .select({
+          projectId: sql<string>`CASE 
+            WHEN ${files.entityType} = 'projects' THEN ${files.entityId}
+            WHEN ${files.entityType} = 'episodes' THEN ${episodes.projectId}
+            WHEN ${files.entityType} = 'scripts' THEN ${scripts.projectId}
+            ELSE NULL
+          END`,
           downloadCount: count(downloadLogs.id),
           totalDataDownloaded: sum(downloadLogs.downloadSize),
           uniqueDownloaders: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`,
           filesCount: sql<number>`COUNT(DISTINCT ${files.id})`,
-          lastDownload: sql<Date>`MAX(${downloadLogs.downloadedAt})`,
-          avgDownloadSize: sql<number>`AVG(${downloadLogs.downloadSize})`
+          lastDownload: sql<string>`MAX(${downloadLogs.downloadedAt})`
         })
-        .from(files)
-        .leftJoin(downloadLogs, and(
-          eq(files.id, downloadLogs.fileId),
-          gte(downloadLogs.downloadedAt, startDate)
+        .from(downloadLogs)
+        .innerJoin(files, eq(downloadLogs.fileId, files.id))
+        .leftJoin(episodes, and(
+          eq(files.entityType, 'episodes'),
+          eq(files.entityId, episodes.id)
         ))
-        .leftJoin(projects, eq(files.entityId, projects.id))
+        .leftJoin(scripts, and(
+          eq(files.entityType, 'scripts'),
+          eq(files.entityId, scripts.id)
+        ))
         .where(and(
-          eq(files.entityType, 'projects'),
+          gte(downloadLogs.downloadedAt, startDate),
           eq(files.isActive, true)
         ))
-        .groupBy(files.entityId, projects.name, projects.description)
+        .groupBy(sql`CASE 
+          WHEN ${files.entityType} = 'projects' THEN ${files.entityId}
+          WHEN ${files.entityType} = 'episodes' THEN ${episodes.projectId}
+          WHEN ${files.entityType} = 'scripts' THEN ${scripts.projectId}
+          ELSE NULL
+        END`)
+        .having(sql`CASE 
+          WHEN ${files.entityType} = 'projects' THEN ${files.entityId}
+          WHEN ${files.entityType} = 'episodes' THEN ${episodes.projectId}
+          WHEN ${files.entityType} = 'scripts' THEN ${scripts.projectId}
+          ELSE NULL
+        END IS NOT NULL`)
         .orderBy(desc(count(downloadLogs.id)));
 
-      // Get episode download statistics with proper project association
-      const episodeStats = await db
-        .select({
-          projectId: episodes.projectId,
-          entityId: files.entityId,
-          downloadCount: count(downloadLogs.id),
-          totalDataDownloaded: sum(downloadLogs.downloadSize),
-          uniqueDownloaders: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`,
-          filesCount: sql<number>`COUNT(DISTINCT ${files.id})`,
-          lastDownload: sql<Date>`MAX(${downloadLogs.downloadedAt})`
-        })
-        .from(files)
-        .leftJoin(downloadLogs, and(
-          eq(files.id, downloadLogs.fileId),
-          gte(downloadLogs.downloadedAt, startDate)
-        ))
-        .leftJoin(episodes, eq(files.entityId, episodes.id))
-        .where(and(
-          eq(files.entityType, 'episodes'),
-          eq(files.isActive, true)
-        ))
-        .groupBy(files.entityId, episodes.projectId);
-
-      // Get script download statistics with proper project association
-      const scriptStats = await db
-        .select({
-          projectId: scripts.projectId,
-          entityId: files.entityId,
-          downloadCount: count(downloadLogs.id),
-          totalDataDownloaded: sum(downloadLogs.downloadSize),
-          uniqueDownloaders: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`,
-          filesCount: sql<number>`COUNT(DISTINCT ${files.id})`,
-          lastDownload: sql<Date>`MAX(${downloadLogs.downloadedAt})`
-        })
-        .from(files)
-        .leftJoin(downloadLogs, and(
-          eq(files.id, downloadLogs.fileId),
-          gte(downloadLogs.downloadedAt, startDate)
-        ))
-        .leftJoin(scripts, eq(files.entityId, scripts.id))
-        .where(and(
-          eq(files.entityType, 'scripts'),
-          eq(files.isActive, true)
-        ))
-        .groupBy(files.entityId, scripts.projectId);
-
-      // Aggregate episode and script stats by project
-      const projectAggregatedStats = new Map();
-
-      // Initialize with direct project downloads
-      projectStats.forEach(stat => {
-        if (stat.projectId) {
-          projectAggregatedStats.set(stat.projectId, {
-            ...stat,
-            episodeDownloads: 0,
-            scriptDownloads: 0
-          });
-        }
+      // Combine project info with download stats
+      const finalStats = projectDownloadStats.map(stat => {
+        const project = projectMap.get(stat.projectId);
+        return {
+          projectId: stat.projectId,
+          projectName: project?.name || 'Unknown Project',
+          projectDescription: project?.description || '',
+          downloadCount: stat.downloadCount || 0,
+          totalDataDownloaded: stat.totalDataDownloaded || 0,
+          uniqueDownloaders: stat.uniqueDownloaders || 0,
+          filesCount: stat.filesCount || 0,
+          lastDownload: stat.lastDownload
+        };
       });
-
-      // Add episode downloads to project totals
-      episodeStats.forEach(stat => {
-        if (stat.projectId) {
-          const existing = projectAggregatedStats.get(stat.projectId) || {
-            projectId: stat.projectId,
-            projectName: 'Unknown Project',
-            downloadCount: 0,
-            totalDataDownloaded: 0,
-            uniqueDownloaders: 0,
-            filesCount: 0,
-            episodeDownloads: 0,
-            scriptDownloads: 0
-          };
-          
-          existing.episodeDownloads += stat.downloadCount || 0;
-          existing.downloadCount += stat.downloadCount || 0;
-          existing.totalDataDownloaded += stat.totalDataDownloaded || 0;
-          existing.filesCount += stat.filesCount || 0;
-          
-          projectAggregatedStats.set(stat.projectId, existing);
-        }
-      });
-
-      // Add script downloads to project totals
-      scriptStats.forEach(stat => {
-        if (stat.projectId) {
-          const existing = projectAggregatedStats.get(stat.projectId) || {
-            projectId: stat.projectId,
-            projectName: 'Unknown Project',
-            downloadCount: 0,
-            totalDataDownloaded: 0,
-            uniqueDownloaders: 0,
-            filesCount: 0,
-            episodeDownloads: 0,
-            scriptDownloads: 0
-          };
-          
-          existing.scriptDownloads += stat.downloadCount || 0;
-          existing.downloadCount += stat.downloadCount || 0;
-          existing.totalDataDownloaded += stat.totalDataDownloaded || 0;
-          existing.filesCount += stat.filesCount || 0;
-          
-          projectAggregatedStats.set(stat.projectId, existing);
-        }
-      });
-
-      // Convert map to array and sort by download count
-      const finalStats = Array.from(projectAggregatedStats.values())
-        .sort((a, b) => (b.downloadCount || 0) - (a.downloadCount || 0));
 
       res.json({
         timeframe,

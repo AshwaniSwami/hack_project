@@ -496,7 +496,7 @@ export function AnalyticsPage() {
                         </div>
                         {project.lastDownload && (
                           <p className="text-xs text-gray-400">
-                            Last: {format(new Date(project.lastDownload), 'MMM dd, HH:mm')}
+                            Last: {format(new Date(project.lastDownload), 'MMM dd, yyyy HH:mm')}
                           </p>
                         )}
                       </div>
@@ -558,7 +558,7 @@ export function AnalyticsPage() {
                         </div>
                         {episode.lastDownload && (
                           <p className="text-xs text-gray-400">
-                            Last: {format(new Date(episode.lastDownload), 'MMM dd, HH:mm')}
+                            Last: {format(new Date(episode.lastDownload), 'MMM dd, yyyy HH:mm')}
                           </p>
                         )}
                       </div>
@@ -660,7 +660,7 @@ export function AnalyticsPage() {
                               <div>{formatBytes(project.totalDataDownloaded || 0)}</div>
                               {project.lastDownload && (
                                 <div className="text-xs mt-1">
-                                  Last: {format(new Date(project.lastDownload), 'MMM dd, HH:mm')}
+                                  Last: {format(new Date(project.lastDownload), 'MMM dd, yyyy HH:mm')}
                                 </div>
                               )}
                             </div>
@@ -841,7 +841,7 @@ export function AnalyticsPage() {
                           </div>
                           {script.lastDownload && (
                             <p className="text-xs text-gray-500 dark:text-gray-400">
-                              Last: {format(new Date(script.lastDownload), 'MMM dd, HH:mm')}
+                              Last: {format(new Date(script.lastDownload), 'MMM dd, yyyy HH:mm')}
                             </p>
                           )}
                         </div>
@@ -902,7 +902,7 @@ export function AnalyticsPage() {
                         <p className="font-semibold">{user.downloadCount} downloads</p>
                         <p className="text-sm text-gray-500">{formatBytes(user.totalSize)}</p>
                         <p className="text-xs text-gray-400">
-                          Last: {format(new Date(user.lastDownload), 'MMM dd, HH:mm')}
+                          Last: {format(new Date(user.lastDownload), 'MMM dd, yyyy HH:mm')}
                         </p>
                       </div>
                     </div>
@@ -960,7 +960,7 @@ export function AnalyticsPage() {
                         <p className="font-semibold">{file.downloadCount || 0} downloads</p>
                         <p className="text-sm text-gray-500">{file.uniqueDownloaders || 0} unique users</p>
                         <p className="text-xs text-gray-400">
-                          {file.lastDownload ? format(new Date(file.lastDownload), 'MMM dd, HH:mm') : 'Never'}
+                          {file.lastDownload ? format(new Date(file.lastDownload), 'MMM dd, yyyy HH:mm') : 'Never'}
                         </p>
                       </div>
                     </div>
@@ -1053,7 +1053,7 @@ export function AnalyticsPage() {
                         <p className="text-sm">{formatBytes(log.downloadSize)}</p>
                         <p className="text-sm text-gray-500">{formatDuration(log.downloadDuration)}</p>
                         <p className="text-xs text-gray-400">
-                          {format(new Date(log.downloadedAt), 'MMM dd, HH:mm:ss')}
+                          {format(new Date(log.downloadedAt), 'MMM dd, yyyy HH:mm:ss')}
                         </p>
                       </div>
                     </div>

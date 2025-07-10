@@ -47,7 +47,7 @@ export function registerEpisodeAnalyticsRoutes(app: Express) {
           downloadCount: count(downloadLogs.id),
           totalDataDownloaded: sum(downloadLogs.downloadSize),
           uniqueDownloaders: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`,
-          lastDownload: sql<Date>`MAX(${downloadLogs.downloadedAt})`
+          lastDownload: sql<string>`MAX(${downloadLogs.downloadedAt})`
         })
         .from(files)
         .leftJoin(downloadLogs, and(
@@ -69,7 +69,10 @@ export function registerEpisodeAnalyticsRoutes(app: Express) {
           projectId: episodes.projectId,
           projectName: projects.name,
           downloadCount: count(downloadLogs.id),
-          lastDownload: sql<Date>`MAX(${downloadLogs.downloadedAt})`
+          totalDataDownloaded: sum(downloadLogs.downloadSize),
+          uniqueDownloaders: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`,
+          filesCount: sql<number>`COUNT(DISTINCT ${files.id})`,
+          lastDownload: sql<string>`MAX(${downloadLogs.downloadedAt})`
         })
         .from(files)
         .leftJoin(downloadLogs, and(
