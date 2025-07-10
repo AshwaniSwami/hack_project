@@ -166,6 +166,10 @@ The application uses a relational database with the following core entities:
 - January 7, 2025: Enhanced visual experience with gradient cards, progress bars, and color-coded project identification
 - January 7, 2025: Added dual chart system (bar chart and pie chart) for comprehensive project script download visualization  
 - January 7, 2025: Optimized individual script display to clearly show project associations with visual indicators
+- January 10, 2025: Fixed timezone synchronization issues in download tracking by converting database timestamps to timestamptz (timezone-aware)
+- January 10, 2025: Resolved project name display issues in analytics by implementing proper JOIN operations and project mapping
+- January 10, 2025: Enhanced date/time formatting across all analytics tabs with proper year display and timezone handling
+- January 10, 2025: Optimized analytics SQL queries for better performance and accurate data association between files and projects
 - January 6, 2025: Implemented advanced file storage system with folder organization, search, and enhanced metadata
 - January 6, 2025: Enhanced file management with versioning, tagging, access levels, and checksum validation
 - January 6, 2025: Fixed UUID validation error in script creation by using authenticated user ID
