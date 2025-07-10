@@ -607,55 +607,7 @@ export function AnalyticsPage() {
             )}
           </div>
 
-          {/* Project Data Transfer Chart */}
-          {projectStats?.projects && projectStats.projects.length > 0 && (
-            <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Database className="h-5 w-5 text-green-600" />
-                  Data Transfer by Project
-                </CardTitle>
-                <CardDescription>Volume of data downloaded per project</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={projectStats.projects}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      <XAxis 
-                        dataKey="projectName" 
-                        angle={-45} 
-                        textAnchor="end" 
-                        height={100}
-                        interval={0}
-                        fontSize={12}
-                      />
-                      <YAxis 
-                        fontSize={12}
-                        tickFormatter={(value) => formatBytes(value)}
-                      />
-                      <Tooltip 
-                        formatter={(value) => [formatBytes(Number(value)), 'Data Downloaded']}
-                        contentStyle={{
-                          backgroundColor: '#f8fafc',
-                          border: '1px solid #e2e8f0',
-                          borderRadius: '8px'
-                        }}
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="totalDataDownloaded" 
-                        stroke="#10B981" 
-                        fill="#10B981" 
-                        fillOpacity={0.6}
-                        strokeWidth={2}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+
         </TabsContent>
 
         {/* Episodes Tab */}
@@ -720,17 +672,69 @@ export function AnalyticsPage() {
             </CardContent>
           </Card>
 
-          {/* Episode Analytics Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Episode Downloads by Project Bar Chart */}
-            {episodeStats?.episodeDownloadsByProject && episodeStats.episodeDownloadsByProject.length > 0 && (
-              <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20">
+          {/* Individual Episode Performance */}
+          {episodeStats?.episodes && episodeStats.episodes.length > 0 && (
+            <Card className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-orange-600" />
+                  Top Episode Performance
+                </CardTitle>
+                <CardDescription>Individual episode download performance</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={episodeStats.episodes.slice(0, 8).map((episode: any, index: number) => ({
+                          name: episode.episodeTitle || 'Unknown Episode',
+                          value: episode.downloadCount || 0,
+                          fill: [
+                            '#F59E0B', '#EF4444', '#EC4899', '#8B5CF6', '#6366F1',
+                            '#3B82F6', '#06B6D4', '#10B981'
+                          ][index % 8]
+                        }))}
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={90}
+                        dataKey="value"
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
+                        labelLine={false}
+                      >
+                        {episodeStats.episodes.slice(0, 8).map((entry: any, index: number) => (
+                          <Cell key={`cell-${index}`} fill={[
+                            '#F59E0B', '#EF4444', '#EC4899', '#8B5CF6', '#6366F1',
+                            '#3B82F6', '#06B6D4', '#10B981'
+                          ][index % 8]} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        formatter={(value) => [`${value} downloads`, 'Downloads']}
+                        contentStyle={{
+                          backgroundColor: '#f8fafc',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '8px'
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Episode Project Distribution */}
+          {episodeStats?.episodeDownloadsByProject && episodeStats.episodeDownloadsByProject.length > 0 && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Episode Downloads by Project Bar Chart */}
+              <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5 text-emerald-600" />
+                    <BarChart3 className="h-5 w-5 text-purple-600" />
                     Episode Downloads by Project
                   </CardTitle>
-                  <CardDescription>How episodes perform across different projects</CardDescription>
+                  <CardDescription>Episode download distribution across projects</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="h-80">
@@ -757,50 +761,48 @@ export function AnalyticsPage() {
                             borderRadius: '8px'
                           }}
                         />
-                        <Bar dataKey="downloadCount" fill="#10B981" name="downloadCount" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="downloadCount" fill="#8B5CF6" name="downloadCount" radius={[4, 4, 0, 0]} />
                         <Bar dataKey="episodeCount" fill="#06B6D4" name="episodeCount" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                 </CardContent>
               </Card>
-            )}
 
-            {/* Individual Episode Performance */}
-            {episodeStats?.episodes && episodeStats.episodes.length > 0 && (
-              <Card className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20">
+              {/* Episode Project Distribution Pie Chart */}
+              <Card className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-950/20 dark:to-blue-950/20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-orange-600" />
-                    Top Episode Performance
+                    <TrendingUp className="h-5 w-5 text-cyan-600" />
+                    Episode Project Distribution
                   </CardTitle>
-                  <CardDescription>Individual episode download performance</CardDescription>
+                  <CardDescription>Percentage breakdown of episode downloads by project</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
-                          data={episodeStats.episodes.slice(0, 8).map((episode: any, index: number) => ({
-                            name: episode.episodeTitle || 'Unknown Episode',
-                            value: episode.downloadCount || 0,
+                          data={episodeStats.episodeDownloadsByProject.map((project: any, index: number) => ({
+                            name: project.projectName || 'Unknown Project',
+                            value: project.downloadCount || 0,
                             fill: [
-                              '#F59E0B', '#EF4444', '#EC4899', '#8B5CF6', '#6366F1',
-                              '#3B82F6', '#06B6D4', '#10B981'
-                            ][index % 8]
+                              '#8B5CF6', '#06B6D4', '#10B981', '#F59E0B', '#EF4444',
+                              '#EC4899', '#6366F1', '#3B82F6', '#84CC16', '#F97316'
+                            ][index % 10]
                           }))}
                           cx="50%"
                           cy="50%"
-                          outerRadius={90}
+                          outerRadius={100}
                           dataKey="value"
                           label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
                           labelLine={false}
                         >
-                          {episodeStats.episodes.slice(0, 8).map((entry: any, index: number) => (
+                          {episodeStats.episodeDownloadsByProject.map((entry: any, index: number) => (
                             <Cell key={`cell-${index}`} fill={[
-                              '#F59E0B', '#EF4444', '#EC4899', '#8B5CF6', '#6366F1',
-                              '#3B82F6', '#06B6D4', '#10B981'
-                            ][index % 8]} />
+                              '#8B5CF6', '#06B6D4', '#10B981', '#F59E0B', '#EF4444',
+                              '#EC4899', '#6366F1', '#3B82F6', '#84CC16', '#F97316'
+                            ][index % 10]} />
                           ))}
                         </Pie>
                         <Tooltip 
@@ -816,105 +818,8 @@ export function AnalyticsPage() {
                   </div>
                 </CardContent>
               </Card>
-            )}
-          </div>
-
-          {/* Episode Data Transfer and User Engagement */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Episode Data Transfer */}
-            {episodeStats?.episodes && episodeStats.episodes.length > 0 && (
-              <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Database className="h-5 w-5 text-purple-600" />
-                    Episode Data Transfer
-                  </CardTitle>
-                  <CardDescription>Data volume downloaded per episode</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={episodeStats.episodes.slice(0, 10)}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis 
-                          dataKey="episodeTitle" 
-                          angle={-45} 
-                          textAnchor="end" 
-                          height={100}
-                          interval={0}
-                          fontSize={10}
-                        />
-                        <YAxis 
-                          fontSize={12}
-                          tickFormatter={(value) => formatBytes(value)}
-                        />
-                        <Tooltip 
-                          formatter={(value) => [formatBytes(Number(value)), 'Data Downloaded']}
-                          contentStyle={{
-                            backgroundColor: '#f8fafc',
-                            border: '1px solid #e2e8f0',
-                            borderRadius: '8px'
-                          }}
-                        />
-                        <Area 
-                          type="monotone" 
-                          dataKey="totalDataDownloaded" 
-                          stroke="#8B5CF6" 
-                          fill="#8B5CF6" 
-                          fillOpacity={0.6}
-                          strokeWidth={2}
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Episode User Engagement */}
-            {episodeStats?.episodes && episodeStats.episodes.length > 0 && (
-              <Card className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-950/20 dark:to-blue-950/20">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5 text-cyan-600" />
-                    Episode User Engagement
-                  </CardTitle>
-                  <CardDescription>User engagement metrics per episode</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={episodeStats.episodes.slice(0, 10)}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis 
-                          dataKey="episodeTitle" 
-                          angle={-45} 
-                          textAnchor="end" 
-                          height={100}
-                          interval={0}
-                          fontSize={10}
-                        />
-                        <YAxis fontSize={12} />
-                        <Tooltip 
-                          formatter={(value, name) => [
-                            `${value} ${name === 'downloadCount' ? 'downloads' : name === 'uniqueDownloaders' ? 'users' : 'files'}`,
-                            name === 'downloadCount' ? 'Downloads' : name === 'uniqueDownloaders' ? 'Unique Users' : 'Files'
-                          ]}
-                          contentStyle={{
-                            backgroundColor: '#f8fafc',
-                            border: '1px solid #e2e8f0',
-                            borderRadius: '8px'
-                          }}
-                        />
-                        <Bar dataKey="downloadCount" fill="#06B6D4" name="downloadCount" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey="uniqueDownloaders" fill="#3B82F6" name="uniqueDownloaders" radius={[4, 4, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+            </div>
+          )}
         </TabsContent>
 
         {/* Scripts Tab */}
