@@ -1,7 +1,7 @@
 import { Express, Request, Response } from "express";
 import { eq, desc, and, gte, sql, count, sum } from "drizzle-orm";
 import { db } from "./db";
-import { downloadLogs, files, projects } from "@shared/schema";
+import { downloadLogs, files, projects, episodes, scripts } from "@shared/schema";
 import { isAuthenticated, isAdmin, type AuthenticatedRequest } from "./auth";
 
 export function registerProjectAnalyticsRoutes(app: Express) {
@@ -28,7 +28,7 @@ export function registerProjectAnalyticsRoutes(app: Express) {
           startDate.setDate(now.getDate() - 30);
       }
 
-      // Get project download statistics
+      // Get project download statistics (direct project files)
       const projectStats = await db
         .select({
           projectId: files.entityId,
@@ -54,10 +54,10 @@ export function registerProjectAnalyticsRoutes(app: Express) {
         .groupBy(files.entityId, projects.name, projects.description)
         .orderBy(desc(count(downloadLogs.id)));
 
-      // Get episode download statistics
+      // Get episode download statistics with proper project association
       const episodeStats = await db
         .select({
-          projectId: sql<string>`(SELECT project_id FROM episodes WHERE episodes.id = ${files.entityId})`,
+          projectId: episodes.projectId,
           entityId: files.entityId,
           downloadCount: count(downloadLogs.id),
           totalDataDownloaded: sum(downloadLogs.downloadSize),
@@ -70,16 +70,17 @@ export function registerProjectAnalyticsRoutes(app: Express) {
           eq(files.id, downloadLogs.fileId),
           gte(downloadLogs.downloadedAt, startDate)
         ))
+        .leftJoin(episodes, eq(files.entityId, episodes.id))
         .where(and(
           eq(files.entityType, 'episodes'),
           eq(files.isActive, true)
         ))
-        .groupBy(files.entityId);
+        .groupBy(files.entityId, episodes.projectId);
 
-      // Get script download statistics
+      // Get script download statistics with proper project association
       const scriptStats = await db
         .select({
-          projectId: sql<string>`(SELECT project_id FROM scripts WHERE scripts.id = ${files.entityId})`,
+          projectId: scripts.projectId,
           entityId: files.entityId,
           downloadCount: count(downloadLogs.id),
           totalDataDownloaded: sum(downloadLogs.downloadSize),
@@ -92,11 +93,12 @@ export function registerProjectAnalyticsRoutes(app: Express) {
           eq(files.id, downloadLogs.fileId),
           gte(downloadLogs.downloadedAt, startDate)
         ))
+        .leftJoin(scripts, eq(files.entityId, scripts.id))
         .where(and(
           eq(files.entityType, 'scripts'),
           eq(files.isActive, true)
         ))
-        .groupBy(files.entityId);
+        .groupBy(files.entityId, scripts.projectId);
 
       // Aggregate episode and script stats by project
       const projectAggregatedStats = new Map();

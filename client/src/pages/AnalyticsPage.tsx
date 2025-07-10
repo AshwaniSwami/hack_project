@@ -161,6 +161,16 @@ export function AnalyticsPage() {
     },
   });
 
+  // Episode Analytics Query
+  const { data: episodeStats, isLoading: episodesLoading } = useQuery({
+    queryKey: ["/api/analytics/episodes", timeframe],
+    queryFn: async () => {
+      const response = await fetch(`/api/analytics/episodes?timeframe=${timeframe}`);
+      if (!response.ok) throw new Error("Failed to fetch episode analytics");
+      return response.json();
+    },
+  });
+
   return (
     <div className="container mx-auto px-6 py-8 max-w-7xl">
       {/* Header */}
@@ -194,10 +204,11 @@ export function AnalyticsPage() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="charts">Charts</TabsTrigger>
           <TabsTrigger value="projects">Projects</TabsTrigger>
+          <TabsTrigger value="episodes">Episodes</TabsTrigger>
           <TabsTrigger value="scripts">Scripts</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="files">Files</TabsTrigger>
@@ -486,6 +497,68 @@ export function AnalyticsPage() {
                         {project.lastDownload && (
                           <p className="text-xs text-gray-400">
                             Last: {format(new Date(project.lastDownload), 'MMM dd, HH:mm')}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Episodes Tab */}
+        <TabsContent value="episodes" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Eye className="h-5 w-5" />
+                Episode Download Analytics
+              </CardTitle>
+              <CardDescription>
+                Track download activity by episode to understand content popularity
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {episodesLoading ? (
+                <div className="text-center py-8 text-gray-500">Loading...</div>
+              ) : episodeStats?.episodes?.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">No episode downloads found</div>
+              ) : (
+                <div className="space-y-3">
+                  {episodeStats?.episodes?.map((episode: any) => (
+                    <div
+                      key={episode.episodeId}
+                      className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-lg">
+                          <Eye className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{episode.episodeTitle || 'Unknown Episode'}</p>
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <span>Project: {episode.projectName || 'Unknown'}</span>
+                            <span>•</span>
+                            <span>{episode.filesCount || 0} files</span>
+                            <span>•</span>
+                            <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                              ID: {episode.episodeId?.slice(-8)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold">{episode.downloadCount || 0} downloads</p>
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <span>{formatBytes(episode.totalDataDownloaded || 0)}</span>
+                          <span>•</span>
+                          <span>{episode.uniqueDownloaders || 0} users</span>
+                        </div>
+                        {episode.lastDownload && (
+                          <p className="text-xs text-gray-400">
+                            Last: {format(new Date(episode.lastDownload), 'MMM dd, HH:mm')}
                           </p>
                         )}
                       </div>
