@@ -97,16 +97,18 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                     <div>
                       <h4 className="font-medium">{episode.title}</h4>
                       <p className="text-sm text-muted-foreground">Episode #{episode.episodeNumber}</p>
-                      {episode.description ? (
-                        <div className="mt-2 p-3 bg-blue-50/80 rounded-md border border-blue-200">
-                          <p className="text-xs font-medium text-blue-600 mb-1">Episode Description</p>
-                          <p className="text-sm text-blue-700 leading-relaxed">{episode.description}</p>
-                        </div>
-                      ) : (
-                        <div className="mt-2 p-2 bg-gray-50/80 rounded-md border border-gray-200">
-                          <p className="text-xs text-gray-500 italic">No description added</p>
-                        </div>
-                      )}
+                      <div className="mt-2">
+                        {episode.description && episode.description.trim() !== '' ? (
+                          <div className="p-3 bg-blue-50/80 rounded-md border border-blue-200">
+                            <p className="text-xs font-medium text-blue-600 mb-1">Episode Description</p>
+                            <p className="text-sm text-blue-700 leading-relaxed">{episode.description}</p>
+                          </div>
+                        ) : (
+                          <div className="p-2 bg-gray-50/80 rounded-md border border-gray-200">
+                            <p className="text-xs text-gray-500 italic">No description added</p>
+                          </div>
+                        )}
+                      </div>
                       {episode.broadcastDate && (
                         <p className="text-xs text-muted-foreground mt-2">
                           Broadcast: {new Date(episode.broadcastDate).toLocaleDateString()}
@@ -172,16 +174,18 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                         <p className="text-sm text-muted-foreground">
                           {script.updatedAt ? new Date(script.updatedAt).toLocaleDateString() : 'No date'}
                         </p>
-                        {script.description ? (
-                          <div className="mt-2 p-3 bg-emerald-50/80 rounded-md border border-emerald-200">
-                            <p className="text-xs font-medium text-emerald-600 mb-1">Script Description</p>
-                            <p className="text-sm text-emerald-700 leading-relaxed">{script.description}</p>
-                          </div>
-                        ) : (
-                          <div className="mt-2 p-2 bg-gray-50/80 rounded-md border border-gray-200">
-                            <p className="text-xs text-gray-500 italic">No description added</p>
-                          </div>
-                        )}
+                        <div className="mt-2">
+                          {script.description && script.description.trim() !== '' ? (
+                            <div className="p-3 bg-emerald-50/80 rounded-md border border-emerald-200">
+                              <p className="text-xs font-medium text-emerald-600 mb-1">Script Description</p>
+                              <p className="text-sm text-emerald-700 leading-relaxed">{script.description}</p>
+                            </div>
+                          ) : (
+                            <div className="p-2 bg-gray-50/80 rounded-md border border-gray-200">
+                              <p className="text-xs text-gray-500 italic">No description added</p>
+                            </div>
+                          )}
+                        </div>
                         <Badge className="mt-2" variant="outline">
                           {script.status}
                         </Badge>
