@@ -124,6 +124,13 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                         )}
                       </div>
                       
+                      {episode.description && (
+                        <div className="mb-3 p-3 bg-blue-50/80 rounded-md border border-blue-200">
+                          <p className="text-xs font-medium text-blue-600 mb-1">Episode Description</p>
+                          <p className="text-sm text-blue-700 leading-relaxed">{episode.description}</p>
+                        </div>
+                      )}
+                      
                       {episode.broadcastDate && (
                         <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
                           Broadcast: {new Date(episode.broadcastDate).toLocaleDateString()}
@@ -139,13 +146,6 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                       />
                     </div>
                   </div>
-                  
-                  {episode.description && (
-                    <div className="mt-2 p-3 bg-blue-50/80 rounded-md border border-blue-200">
-                      <p className="text-xs font-medium text-blue-600 mb-1">Episode Description</p>
-                      <p className="text-sm text-blue-700 leading-relaxed">{episode.description}</p>
-                    </div>
-                  )}
                 </div>
               </div>
             ))}
