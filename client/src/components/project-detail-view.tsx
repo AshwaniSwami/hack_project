@@ -215,6 +215,13 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                           </Badge>
                         </div>
                         
+                        {script.content && (
+                          <div className="mb-3 p-3 bg-emerald-50/80 rounded-md border border-emerald-200">
+                            <p className="text-xs font-medium text-emerald-600 mb-1">Script Content</p>
+                            <p className="text-sm text-emerald-700 leading-relaxed">{script.content}</p>
+                          </div>
+                        )}
+                        
                         <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
                           Updated: {script.updatedAt ? new Date(script.updatedAt).toLocaleDateString() : 'No date'}
                         </p>
@@ -228,13 +235,6 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                         />
                       </div>
                     </div>
-                    
-                    {script.content && (
-                      <div className="mt-2 p-3 bg-emerald-50/80 rounded-md border border-emerald-200">
-                        <p className="text-xs font-medium text-emerald-600 mb-1">Script Content</p>
-                        <p className="text-sm text-emerald-700 leading-relaxed">{script.content}</p>
-                      </div>
-                    )}
                   </div>
                 </div>
               );
