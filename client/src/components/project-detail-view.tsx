@@ -99,13 +99,10 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                       <p className="text-sm text-muted-foreground">Episode #{episode.episodeNumber}</p>
                       <div className="mt-2 p-2 bg-gray-50/80 rounded-md">
                         <p className="text-xs font-medium text-gray-600">Project: {project.name}</p>
-                        {project.description && (
-                          <p className="text-xs text-gray-500 mt-1 line-clamp-2">{project.description}</p>
-                        )}
                       </div>
                       {episode.description && (
                         <div className="mt-3 p-2 bg-blue-50/80 rounded-md">
-                          <p className="text-xs font-medium text-blue-600 mb-1">Episode Description</p>
+                          <p className="text-xs font-medium text-blue-600 mb-1">Description</p>
                           <p className="text-sm text-blue-700">{episode.description}</p>
                         </div>
                       )}
@@ -176,13 +173,10 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                         </p>
                         <div className="mt-2 p-2 bg-gray-50/80 rounded-md">
                           <p className="text-xs font-medium text-gray-600">Project: {project.name}</p>
-                          {project.description && (
-                            <p className="text-xs text-gray-500 mt-1 line-clamp-2">{project.description}</p>
-                          )}
                         </div>
                         {script.description && (
                           <div className="mt-3 p-2 bg-emerald-50/80 rounded-md">
-                            <p className="text-xs font-medium text-emerald-600 mb-1">Script Description</p>
+                            <p className="text-xs font-medium text-emerald-600 mb-1">Description</p>
                             <p className="text-sm text-emerald-700">{script.description}</p>
                           </div>
                         )}
