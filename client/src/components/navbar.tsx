@@ -2,7 +2,6 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { 
   Bell, 
   Radio, 
@@ -14,45 +13,20 @@ import {
   FileText,
   RadioTower,
   Users,
-  TrendingUp,
-  Target
+  TrendingUp
 } from "lucide-react";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import type { Script, Project, Episode } from "@shared/schema";
-import { ProgressModal } from "./progress-modal";
 
 export function Navbar() {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isProgressModalOpen, setIsProgressModalOpen] = useState(false);
   const { user, isLoading, isAuthenticated, isAdmin } = useAuth();
 
   const canAccessAdvancedFeatures = user?.role === 'admin' || user?.role === 'editor' || user?.role === 'contributor';
 
-  // Get user progress data for level display
-  const { data: scripts = [] } = useQuery<Script[]>({
-    queryKey: ["/api/scripts"],
-    enabled: isAuthenticated,
-  });
 
-  const { data: projects = [] } = useQuery<Project[]>({
-    queryKey: ["/api/projects"],
-    enabled: isAuthenticated,
-  });
-
-  const { data: episodes = [] } = useQuery<Episode[]>({
-    queryKey: ["/api/episodes"],
-    enabled: isAuthenticated,
-  });
-
-  // Calculate member level and progress
-  const memberStats = {
-    totalContent: scripts.filter(s => s.status === 'Approved').length + episodes.length,
-    memberLevel: Math.min(Math.floor((scripts.filter(s => s.status === 'Approved').length + episodes.length) / 5) + 1, 10)
-  };
 
   const navItems = [
     { href: "/", label: "Dashboard", icon: Home },
@@ -114,23 +88,7 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center space-x-3">
-            {/* Progress Level Display */}
-            <Button 
-              variant="ghost"
-              onClick={() => setIsProgressModalOpen(true)}
-              className="hidden md:flex items-center space-x-3 bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2 border border-white/20 hover:bg-white/20 transition-colors duration-200 h-auto"
-            >
-              <div className="flex items-center space-x-2">
-                <Target className="h-4 w-4 text-blue-300" />
-                <span className="text-sm font-medium text-white">Level {memberStats.memberLevel}</span>
-              </div>
-              <div className="w-16">
-                <Progress 
-                  value={(memberStats.totalContent % 5) * 20} 
-                  className="h-1.5 bg-white/20" 
-                />
-              </div>
-            </Button>
+
 
             {/* Notification Bell - Only for Admins */}
             {isAdmin && (
@@ -165,31 +123,7 @@ export function Navbar() {
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="lg:hidden border-t border-white/10 py-6 backdrop-blur-md">
-            {/* Mobile Progress Level */}
-            <Button
-              variant="ghost"
-              onClick={() => {
-                setIsProgressModalOpen(true);
-                setIsMobileMenuOpen(false);
-              }}
-              className="mb-4 mx-4 bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 hover:bg-white/20 transition-colors duration-200 w-auto h-auto"
-            >
-              <div className="w-full">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center space-x-2">
-                    <Target className="h-4 w-4 text-blue-300" />
-                    <span className="text-sm font-medium text-white">Level {memberStats.memberLevel}</span>
-                  </div>
-                  <span className="text-xs text-white/70">
-                    {5 - (memberStats.totalContent % 5)} to next level
-                  </span>
-                </div>
-                <Progress 
-                  value={(memberStats.totalContent % 5) * 20} 
-                  className="h-2 bg-white/20" 
-                />
-              </div>
-            </Button>
+
 
             <nav className="space-y-3">
               {navItems.map((item) => {
@@ -216,14 +150,7 @@ export function Navbar() {
         )}
       </div>
       
-      {/* Progress Modal */}
-      <ProgressModal
-        isOpen={isProgressModalOpen}
-        onClose={() => setIsProgressModalOpen(false)}
-        currentLevel={memberStats.memberLevel}
-        currentProgress={(memberStats.totalContent % 5) * 20}
-        totalContent={memberStats.totalContent}
-      />
+
     </header>
   );
 }
