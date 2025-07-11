@@ -233,12 +233,9 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                     </div>
                     
                     {script.content && (
-                      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-lg p-4 border border-emerald-200/50 dark:border-emerald-800/50">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="w-1 h-4 bg-emerald-500 rounded-full"></div>
-                          <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">Script Content</span>
-                        </div>
-                        <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{script.content}</p>
+                      <div className="mt-2 p-3 bg-emerald-50/80 rounded-md border border-emerald-200">
+                        <p className="text-xs font-medium text-emerald-600 mb-1">Script Content</p>
+                        <p className="text-sm text-emerald-700 leading-relaxed">{script.content}</p>
                       </div>
                     )}
                   </div>

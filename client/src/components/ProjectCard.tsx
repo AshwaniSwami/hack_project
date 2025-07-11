@@ -94,9 +94,12 @@ export function ProjectCard({ project, theme, user, onView, onEdit, onDelete }: 
           </h3>
           
           {project.description && (
-            <p className="text-gray-600 line-clamp-2 text-sm leading-relaxed">
-              {project.description}
-            </p>
+            <div className="bg-blue-50/50 border border-blue-200/50 rounded-lg p-3">
+              <p className="text-xs font-medium text-blue-600 mb-1">Description</p>
+              <p className="text-gray-700 text-sm leading-relaxed line-clamp-3">
+                {project.description}
+              </p>
+            </div>
           )}
           
           <div className="grid grid-cols-2 gap-3 pt-2">
