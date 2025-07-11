@@ -248,7 +248,14 @@ export default function Episodes() {
                               <SelectContent>
                                 {projects.map((project) => (
                                   <SelectItem key={project.id} value={project.id}>
-                                    {project.name}
+                                    <div className="flex flex-col items-start">
+                                      <span className="font-medium">{project.name}</span>
+                                      {project.description && (
+                                        <span className="text-sm text-gray-500 line-clamp-1">
+                                          {project.description}
+                                        </span>
+                                      )}
+                                    </div>
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -601,7 +608,14 @@ export default function Episodes() {
                       <SelectContent>
                         {projects.map((project) => (
                           <SelectItem key={project.id} value={project.id}>
-                            {project.name}
+                            <div className="flex flex-col items-start">
+                              <span className="font-medium">{project.name}</span>
+                              {project.description && (
+                                <span className="text-sm text-gray-500 line-clamp-1">
+                                  {project.description}
+                                </span>
+                              )}
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
