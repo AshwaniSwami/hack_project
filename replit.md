@@ -196,6 +196,7 @@ The application uses a relational database with the following core entities:
 - January 11, 2025: Removed project descriptions from all creation forms and optimized episode/script description positioning in project details
 - January 11, 2025: Restricted radio station creation, editing, and deletion to admin and editor roles only - members can only view station information
 - January 11, 2025: Removed level bar and progress tracking system for all users from the navbar
+- January 11, 2025: Cleaned up all project selection dropdowns to show only project names without descriptions in episode, script, and file upload forms
 - January 21, 2025: Added episode selection support to scripts (optional relationship)
 - January 21, 2025: Enhanced script viewer with proper read-only mode and improved formatting
 - January 21, 2025: Reduced header heights across all pages for better space utilization and enhanced visual consistency
