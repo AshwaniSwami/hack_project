@@ -231,17 +231,27 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
             </Badge>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             {selectedProjectData && (
-              <div className="flex items-center space-x-3 p-3 bg-white/60 rounded-lg">
-                <div className="font-semibold text-gray-700">Project:</div>
-                <div className="text-gray-600">{selectedProjectData.name}</div>
+              <div className="p-4 bg-blue-50/80 rounded-lg border border-blue-200">
+                <div className="font-semibold text-blue-800 mb-2">Project: {selectedProjectData.name}</div>
+                {selectedProjectData.description && (
+                  <div className="text-sm text-blue-700 bg-white/60 p-2 rounded">
+                    <span className="font-medium">Description: </span>
+                    {selectedProjectData.description}
+                  </div>
+                )}
               </div>
             )}
             {selectedEpisodeData && (
-              <div className="flex items-center space-x-3 p-3 bg-white/60 rounded-lg">
-                <div className="font-semibold text-gray-700">Episode:</div>
-                <div className="text-gray-600">{selectedEpisodeData.title}</div>
+              <div className="p-4 bg-emerald-50/80 rounded-lg border border-emerald-200">
+                <div className="font-semibold text-emerald-800 mb-2">Episode: {selectedEpisodeData.title}</div>
+                {selectedEpisodeData.description && (
+                  <div className="text-sm text-emerald-700 bg-white/60 p-2 rounded">
+                    <span className="font-medium">Description: </span>
+                    {selectedEpisodeData.description}
+                  </div>
+                )}
               </div>
             )}
           </div>

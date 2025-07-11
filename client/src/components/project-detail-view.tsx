@@ -70,7 +70,10 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
             </Badge>
           </CardTitle>
           {project.description && (
-            <p className="text-muted-foreground">{project.description}</p>
+            <div className="mt-4 p-4 bg-blue-50/80 rounded-lg border border-blue-200">
+              <h4 className="text-sm font-semibold text-blue-800 mb-2">Project Description</h4>
+              <p className="text-blue-700 leading-relaxed">{project.description}</p>
+            </div>
           )}
         </CardHeader>
       </Card>
@@ -94,8 +97,17 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                     <div>
                       <h4 className="font-medium">{episode.title}</h4>
                       <p className="text-sm text-muted-foreground">Episode #{episode.episodeNumber}</p>
+                      <div className="mt-2 p-2 bg-gray-50/80 rounded-md">
+                        <p className="text-xs font-medium text-gray-600">Project: {project.name}</p>
+                        {project.description && (
+                          <p className="text-xs text-gray-500 mt-1 line-clamp-2">{project.description}</p>
+                        )}
+                      </div>
                       {episode.description && (
-                        <p className="text-sm mt-2">{episode.description}</p>
+                        <div className="mt-3 p-2 bg-blue-50/80 rounded-md">
+                          <p className="text-xs font-medium text-blue-600 mb-1">Episode Description</p>
+                          <p className="text-sm text-blue-700">{episode.description}</p>
+                        </div>
                       )}
                       {episode.broadcastDate && (
                         <p className="text-xs text-muted-foreground mt-1">
@@ -162,6 +174,18 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                         <p className="text-sm text-muted-foreground">
                           {script.updatedAt ? new Date(script.updatedAt).toLocaleDateString() : 'No date'}
                         </p>
+                        <div className="mt-2 p-2 bg-gray-50/80 rounded-md">
+                          <p className="text-xs font-medium text-gray-600">Project: {project.name}</p>
+                          {project.description && (
+                            <p className="text-xs text-gray-500 mt-1 line-clamp-2">{project.description}</p>
+                          )}
+                        </div>
+                        {script.description && (
+                          <div className="mt-3 p-2 bg-emerald-50/80 rounded-md">
+                            <p className="text-xs font-medium text-emerald-600 mb-1">Script Description</p>
+                            <p className="text-sm text-emerald-700">{script.description}</p>
+                          </div>
+                        )}
                         <Badge className="mt-2" variant="outline">
                           {script.status}
                         </Badge>
