@@ -168,10 +168,10 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                         <p className="text-sm text-muted-foreground">
                           {script.updatedAt ? new Date(script.updatedAt).toLocaleDateString() : 'No date'}
                         </p>
-                        {script.description && (
+                        {script.content && (
                           <div className="mt-2 p-3 bg-emerald-50/80 rounded-md border border-emerald-200">
-                            <p className="text-xs font-medium text-emerald-600 mb-1">Script Description</p>
-                            <p className="text-sm text-emerald-700 leading-relaxed">{script.description}</p>
+                            <p className="text-xs font-medium text-emerald-600 mb-1">Script Content</p>
+                            <p className="text-sm text-emerald-700 leading-relaxed">{script.content}</p>
                           </div>
                         )}
                         <Badge className="mt-2" variant="outline">

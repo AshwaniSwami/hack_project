@@ -191,6 +191,7 @@ The application uses a relational database with the following core entities:
 - January 6, 2025: Successfully tested and deployed complete admin user management system
 - January 21, 2025: Redesigned all main pages (Episodes, Projects, Scripts, Users, Radio Stations) with consistent blue-emerald color scheme and compact headers
 - January 21, 2025: Fixed script editor functionality with consistent ReactQuill implementation across dashboard and scripts page
+- January 11, 2025: Fixed project detail view to properly display script content instead of non-existent description field
 - January 21, 2025: Added episode selection support to scripts (optional relationship)
 - January 21, 2025: Enhanced script viewer with proper read-only mode and improved formatting
 - January 21, 2025: Reduced header heights across all pages for better space utilization and enhanced visual consistency
