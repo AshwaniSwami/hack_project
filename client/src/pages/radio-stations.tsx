@@ -39,6 +39,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/api";
 import { Plus, Edit, Trash2, Radio, Phone, Mail, MapPin, Sparkles, Waves, Antenna, Clock, CheckCircle, XCircle, Search, Eye, MoreHorizontal, Filter } from "lucide-react";
 import type { RadioStation } from "@shared/schema";
@@ -59,6 +60,7 @@ export default function RadioStations() {
   const [editingStation, setEditingStation] = useState<RadioStation | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -217,13 +219,14 @@ export default function RadioStations() {
                 </div>
               </div>
               
-              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button size="lg" className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-blue-500/25 border-0">
-                    <Plus className="h-5 w-5 mr-3" />
-                    New Station
-                  </Button>
-                </DialogTrigger>
+              {(user?.role === "admin" || user?.role === "editor") && (
+                <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="lg" className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-blue-500/25 border-0">
+                      <Plus className="h-5 w-5 mr-3" />
+                      New Station
+                    </Button>
+                  </DialogTrigger>
                 <DialogContent className="max-w-3xl">
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-3 text-xl">
@@ -358,7 +361,8 @@ export default function RadioStations() {
                     </form>
                   </Form>
                 </DialogContent>
-              </Dialog>
+                </Dialog>
+              )}
             </div>
           </div>
         </div>
@@ -436,7 +440,7 @@ export default function RadioStations() {
                   : "Start building your network by adding your first radio station partner"
                 }
               </p>
-              {!searchTerm && (
+              {!searchTerm && (user?.role === "admin" || user?.role === "editor") && (
                 <Button 
                   onClick={() => setIsCreateDialogOpen(true)}
                   size="lg"
@@ -542,26 +546,32 @@ export default function RadioStations() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuItem onClick={() => handleEdit(station)}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit Station
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => handleDelete(station.id)}
-                              className="text-red-600 focus:text-red-600"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete Station
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        {(user?.role === "admin" || user?.role === "editor") ? (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuItem onClick={() => handleEdit(station)}>
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit Station
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => handleDelete(station.id)}
+                                className="text-red-600 focus:text-red-600"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete Station
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        ) : (
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" disabled>
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
