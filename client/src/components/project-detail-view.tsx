@@ -58,25 +58,37 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <FolderOpen className="h-5 w-5" />
-              {project.name}
+      {/* Modern Project Header */}
+      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-6 shadow-sm">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+              <FolderOpen className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
-            <Badge variant="secondary">
-              {episodes.length + projectEpisodeFiles.length} episodes • {scripts.length + projectScriptFiles.length} scripts
-            </Badge>
-          </CardTitle>
-          {project.description && (
-            <div className="mt-4 p-4 bg-blue-50/80 rounded-lg border border-blue-200">
-              <h4 className="text-sm font-semibold text-blue-800 mb-2">Project Description</h4>
-              <p className="text-blue-700 leading-relaxed">{project.description}</p>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{project.name}</h1>
+              <div className="flex items-center gap-4 mt-1">
+                <Badge variant="outline" className="bg-white/80 dark:bg-gray-800/80">
+                  {episodes.length + projectEpisodeFiles.length} episodes
+                </Badge>
+                <Badge variant="outline" className="bg-white/80 dark:bg-gray-800/80">
+                  {scripts.length + projectScriptFiles.length} scripts
+                </Badge>
+              </div>
             </div>
-          )}
-        </CardHeader>
-      </Card>
+          </div>
+        </div>
+        
+        {project.description && (
+          <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl p-4 border border-white/20 dark:border-gray-700/20">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
+              <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wide">About this project</h3>
+            </div>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-base">{project.description}</p>
+          </div>
+        )}
+      </div>
 
       <Tabs defaultValue="episodes" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
@@ -86,33 +98,40 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
 
 
 
-        <TabsContent value="episodes" className="space-y-4">
-          <h3 className="text-lg font-semibold">Episodes</h3>
+        <TabsContent value="episodes" className="space-y-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+              <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Episodes</h3>
+          </div>
           
-          <div className="grid gap-4">
+          <div className="grid gap-6">
             {episodes.map((episode) => (
-              <Card key={episode.id}>
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-medium">{episode.title}</h4>
-                      <p className="text-sm text-muted-foreground">Episode #{episode.episodeNumber}</p>
-                      {episode.description && (
-                        <div className="mt-2 p-3 bg-blue-50/80 rounded-md border border-blue-200">
-                          <p className="text-xs font-medium text-blue-600 mb-1">Episode Description</p>
-                          <p className="text-sm text-blue-700 leading-relaxed">{episode.description}</p>
-                        </div>
-                      )}
+              <div key={episode.id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{episode.title}</h4>
+                        <Badge variant="outline" className="text-xs">
+                          Episode #{episode.episodeNumber}
+                        </Badge>
+                        {episode.isPremium && (
+                          <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                            Premium
+                          </Badge>
+                        )}
+                      </div>
+                      
                       {episode.broadcastDate && (
-                        <p className="text-xs text-muted-foreground mt-2">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
                           Broadcast: {new Date(episode.broadcastDate).toLocaleDateString()}
                         </p>
                       )}
                     </div>
+                    
                     <div className="flex items-center gap-2">
-                      {episode.isPremium && (
-                        <Badge variant="secondary">Premium</Badge>
-                      )}
                       <FileList 
                         entityType="episodes" 
                         entityId={episode.id}
@@ -120,100 +139,141 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                       />
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                  
+                  {episode.description && (
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-lg p-4 border border-blue-200/50 dark:border-blue-800/50">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
+                        <span className="text-xs font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wide">Description</span>
+                      </div>
+                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{episode.description}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             ))}
             
             {/* Show project-level episode files only if there are any */}
             {projectEpisodeFiles.length > 0 && (
-              <Card>
-                <CardContent className="p-4">
-                  <div className="space-y-2">
-                    <h4 className="font-medium">Project Episode Files</h4>
-                    <p className="text-sm text-muted-foreground">Audio/video files uploaded to this project</p>
-                    <FileList 
-                      entityType="episodes" 
-                      entityId={project.id}
-                      title=""
-                    />
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-xl p-6 border border-blue-200/50 dark:border-blue-800/50">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                    <FolderOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   </div>
-                </CardContent>
-              </Card>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 dark:text-gray-100">Project Episode Files</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Audio/video files uploaded to this project</p>
+                  </div>
+                </div>
+                <FileList 
+                  entityType="episodes" 
+                  entityId={project.id}
+                  title=""
+                />
+              </div>
             )}
             
             {episodes.length === 0 && projectEpisodeFiles.length === 0 && (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">No episodes yet</p>
-                  <p className="text-sm text-muted-foreground mt-2">Episodes can be created from the Episodes page</p>
-                </CardContent>
-              </Card>
+              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-12 text-center border border-gray-200 dark:border-gray-700">
+                <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-full w-fit mx-auto mb-4">
+                  <Calendar className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No episodes yet</h3>
+                <p className="text-gray-600 dark:text-gray-400">Episodes can be created from the Episodes page</p>
+              </div>
             )}
           </div>
         </TabsContent>
 
-        <TabsContent value="scripts" className="space-y-4">
-          <h3 className="text-lg font-semibold">Scripts</h3>
+        <TabsContent value="scripts" className="space-y-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+              <FileText className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Scripts</h3>
+          </div>
           
-          <div className="grid gap-4">
+          <div className="grid gap-6">
             {scripts.map((script) => {
-              // Scripts don't have episodeId field in current schema
+              // Get status color
+              const getStatusColor = (status: string) => {
+                switch (status) {
+                  case 'Draft': return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
+                  case 'Under Review': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
+                  case 'Approved': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
+                  case 'Needs Revision': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
+                  default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
+                }
+              };
+
               return (
-                <Card key={script.id}>
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-medium">{script.title}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {script.updatedAt ? new Date(script.updatedAt).toLocaleDateString() : 'No date'}
+                <div key={script.id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                  <div className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{script.title}</h4>
+                          <Badge variant="outline" className={`text-xs ${getStatusColor(script.status)}`}>
+                            {script.status}
+                          </Badge>
+                        </div>
+                        
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                          Updated: {script.updatedAt ? new Date(script.updatedAt).toLocaleDateString() : 'No date'}
                         </p>
-                        {script.content && (
-                          <div className="mt-2 p-3 bg-emerald-50/80 rounded-md border border-emerald-200">
-                            <p className="text-xs font-medium text-emerald-600 mb-1">Script Content</p>
-                            <p className="text-sm text-emerald-700 leading-relaxed">{script.content}</p>
-                          </div>
-                        )}
-                        <Badge className="mt-2" variant="outline">
-                          {script.status}
-                        </Badge>
                       </div>
-                      <FileList 
-                        entityType="scripts" 
-                        entityId={script.id}
-                        title={`${script.title} Files`}
-                      />
+                      
+                      <div className="flex items-center gap-2">
+                        <FileList 
+                          entityType="scripts" 
+                          entityId={script.id}
+                          title={`${script.title} Files`}
+                        />
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
+                    
+                    {script.content && (
+                      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-lg p-4 border border-emerald-200/50 dark:border-emerald-800/50">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-1 h-4 bg-emerald-500 rounded-full"></div>
+                          <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">Script Content</span>
+                        </div>
+                        <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{script.content}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               );
             })}
             
             {/* Show project-level script files only if there are any */}
             {projectScriptFiles.length > 0 && (
-              <Card>
-                <CardContent className="p-4">
-                  <div className="space-y-2">
-                    <h4 className="font-medium">Project Script Files</h4>
-                    <p className="text-sm text-muted-foreground">Document files uploaded to this project</p>
-                    <FileList 
-                      entityType="scripts" 
-                      entityId={project.id}
-                      title=""
-                    />
+              <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-xl p-6 border border-emerald-200/50 dark:border-emerald-800/50">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                    <FolderOpen className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                   </div>
-                </CardContent>
-              </Card>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 dark:text-gray-100">Project Script Files</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Document files uploaded to this project</p>
+                  </div>
+                </div>
+                <FileList 
+                  entityType="scripts" 
+                  entityId={project.id}
+                  title=""
+                />
+              </div>
             )}
             
             {scripts.length === 0 && projectScriptFiles.length === 0 && (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">No scripts yet</p>
-                  <p className="text-sm text-muted-foreground">Create episodes first, then add scripts</p>
-                </CardContent>
-              </Card>
+              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-12 text-center border border-gray-200 dark:border-gray-700">
+                <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-full w-fit mx-auto mb-4">
+                  <FileText className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No scripts yet</h3>
+                <p className="text-gray-600 dark:text-gray-400">Scripts can be created from the Scripts page</p>
+              </div>
             )}
           </div>
         </TabsContent>
