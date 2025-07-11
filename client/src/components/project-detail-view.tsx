@@ -97,9 +97,6 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                     <div>
                       <h4 className="font-medium">{episode.title}</h4>
                       <p className="text-sm text-muted-foreground">Episode #{episode.episodeNumber}</p>
-                      <div className="mt-2 p-2 bg-gray-50/80 rounded-md">
-                        <p className="text-xs font-medium text-gray-600">Project: {project.name}</p>
-                      </div>
                       {episode.description && (
                         <div className="mt-3 p-2 bg-blue-50/80 rounded-md">
                           <p className="text-xs font-medium text-blue-600 mb-1">Description</p>
@@ -171,9 +168,6 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                         <p className="text-sm text-muted-foreground">
                           {script.updatedAt ? new Date(script.updatedAt).toLocaleDateString() : 'No date'}
                         </p>
-                        <div className="mt-2 p-2 bg-gray-50/80 rounded-md">
-                          <p className="text-xs font-medium text-gray-600">Project: {project.name}</p>
-                        </div>
                         {script.description && (
                           <div className="mt-3 p-2 bg-emerald-50/80 rounded-md">
                             <p className="text-xs font-medium text-emerald-600 mb-1">Description</p>
