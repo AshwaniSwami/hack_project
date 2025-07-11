@@ -141,12 +141,9 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                   </div>
                   
                   {episode.description && (
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-lg p-4 border border-blue-200/50 dark:border-blue-800/50">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
-                        <span className="text-xs font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wide">Description</span>
-                      </div>
-                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{episode.description}</p>
+                    <div className="mt-2 p-3 bg-blue-50/80 rounded-md border border-blue-200">
+                      <p className="text-xs font-medium text-blue-600 mb-1">Episode Description</p>
+                      <p className="text-sm text-blue-700 leading-relaxed">{episode.description}</p>
                     </div>
                   )}
                 </div>
