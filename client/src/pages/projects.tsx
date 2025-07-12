@@ -699,8 +699,8 @@ export default function Projects() {
           </DialogHeader>
           <div className="space-y-6">
             {/* Create New Theme Form */}
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-lg font-semibold mb-4">
+            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
                 {editingTheme ? "Edit Theme" : "Create New Theme"}
               </h3>
               <Form {...themeForm}>

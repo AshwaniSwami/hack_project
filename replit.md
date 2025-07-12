@@ -129,6 +129,11 @@ The application uses a relational database with the following core entities:
 - July 12, 2025: Fixed dark mode text visibility issues on Users and Radio Stations pages with proper contrast improvements
 - July 12, 2025: Enhanced table headers, badges, and content text with proper dark mode styling across all pages
 - July 12, 2025: Applied consistent dark mode variants to ensure all text elements are properly visible in both light and dark themes
+- July 12, 2025: Fixed dark mode text visibility issues on Projects page including theme creation dialog and project cards
+- July 12, 2025: Enhanced theme selection dropdowns with proper dark mode styling (dark background, light text)
+- July 12, 2025: Updated ProjectCard component with comprehensive dark mode support for all text elements and backgrounds
+- July 12, 2025: Fixed theme management dialog background and text colors for better visibility in dark mode
+- July 12, 2025: Improved project statistics cards and description sections with proper dark mode color schemes
 - July 12, 2025: Fixed dark mode text visibility issues in Users page - enhanced table headers, table cells, badges, and card backgrounds for proper contrast in dark mode
 - July 12, 2025: Completed comprehensive text visibility fixes across all pages (Users, Radio Stations, Episodes, Projects, Scripts)
 - July 12, 2025: Enhanced dark mode text colors with proper contrast (gray-500 → gray-400, gray-600 → gray-400, gray-700 → gray-200)
