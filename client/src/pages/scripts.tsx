@@ -536,17 +536,11 @@ export default function Scripts() {
                             </p>
                           )}
 
-                          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                          <div className="flex items-center pt-2 border-t border-gray-100">
                             <div className="flex items-center space-x-1">
                               <Clock className="h-3 w-3 text-gray-400" />
                               <span className="text-xs text-gray-500">
                                 {new Date(script.createdAt).toLocaleDateString()}
-                              </span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <User className="h-3 w-3 text-gray-400" />
-                              <span className="text-xs text-gray-500 truncate max-w-[60px]">
-                                {script.authorId}
                               </span>
                             </div>
                           </div>
@@ -584,10 +578,6 @@ export default function Scripts() {
                                 <div className="flex items-center space-x-1 text-xs text-gray-500">
                                   <Clock className="h-3 w-3 text-gray-400" />
                                   <span>{new Date(script.createdAt).toLocaleDateString()}</span>
-                                </div>
-                                <div className="flex items-center space-x-1 text-xs text-gray-500">
-                                  <User className="h-3 w-3 text-gray-400" />
-                                  <span className="truncate max-w-[100px]">{script.authorId}</span>
                                 </div>
                               </div>
                             </div>
