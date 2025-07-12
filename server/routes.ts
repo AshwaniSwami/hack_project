@@ -14,7 +14,6 @@ import { getFilePermissions, requireFilePermission } from "./filePermissions";
 // Use temp auth when database is not available, real auth when database is ready
 const authModule = isDatabaseAvailable() ? realAuth : tempAuth;
 const { isAuthenticated, isAdmin, login, register, logout, getCurrentUser } = authModule;
-import { getSession } from "./replitAuth";
 import bcrypt from "bcryptjs";
 import {
   insertUserSchema,
@@ -28,6 +27,7 @@ import {
   insertFileSchema,
   insertFileFolderSchema,
 } from "@shared/schema";
+import session from "express-session";
 
 // Configure multer for file uploads
 const upload = multer({
@@ -42,14 +42,23 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Session middleware
-  app.use(getSession());
+  // Session configuration for custom auth
+  app.use(session({
+    secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+    },
+  }));
 
   // Register file upload routes for organized content management
   registerProjectFileRoutes(app);
   registerEpisodeFileRoutes(app);
   registerScriptFileRoutes(app);
-  
+
   // Register analytics and download tracking routes
   const { registerAnalyticsRoutes } = await import("./routes-analytics");
   const { registerDownloadTrackingRoutes } = await import("./routes-download-tracking");
@@ -86,7 +95,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const allUsers = await storage.getAllUsers();
-      
+
       // Only allow if there are no admins in the system
       const adminUsers = allUsers.filter(u => u.role === 'admin');
       if (adminUsers.length === 0) {
@@ -135,19 +144,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/users", isAuthenticated, isAdmin, async (req, res) => {
     try {
       const userData = insertUserSchema.parse(req.body);
-      
+
       // Hash password if provided (for custom users)
       if (userData.password) {
         userData.password = await bcrypt.hash(userData.password, 10);
       }
-      
+
       // Generate a unique ID for custom users
       if (!userData.id) {
         userData.id = `custom_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       }
-      
+
       const user = await storage.createUser(userData);
-      
+
       // Don't return password in response
       const { password, ...userResponse } = user;
       res.status(201).json(userResponse);
@@ -184,7 +193,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           const fileContent = req.file.buffer.toString("utf-8");
           const users = JSON.parse(fileContent);
-          
+
           if (Array.isArray(users)) {
             for (const userData of users) {
               try {
@@ -430,7 +439,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           const fileContent = req.file.buffer.toString("utf-8");
           const projects = JSON.parse(fileContent);
-          
+
           if (Array.isArray(projects)) {
             for (const projectData of projects) {
               try {
@@ -545,7 +554,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           const fileContent = req.file.buffer.toString("utf-8");
           const episodes = JSON.parse(fileContent);
-          
+
           if (Array.isArray(episodes)) {
             for (const episodeData of episodes) {
               try {
@@ -625,7 +634,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/scripts", isAuthenticated, async (req: any, res) => {
     try {
       const scriptData = insertScriptSchema.parse(req.body);
-      
+
       const script = await storage.createScript({
         ...scriptData,
         authorId: req.user.id
@@ -664,7 +673,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           const fileContent = req.file.buffer.toString("utf-8");
           const scripts = JSON.parse(fileContent);
-          
+
           if (Array.isArray(scripts)) {
             for (const scriptData of scripts) {
               try {
@@ -808,7 +817,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           const fileContent = req.file.buffer.toString("utf-8");
           const stations = JSON.parse(fileContent);
-          
+
           if (Array.isArray(stations)) {
             for (const stationData of stations) {
               try {
@@ -890,10 +899,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { entityType, entityId } = req.query;
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
       const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
-      
+
       let files;
       let totalCount;
-      
+
       if (entityType) {
         files = await storage.getFilesByEntity(entityType as string, entityId as string);
         totalCount = files.length;
@@ -901,13 +910,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         files = await storage.getAllFiles(limit, offset);
         totalCount = await storage.getFileCount();
       }
-      
+
       // Don't send file data in list view for performance
       const filesWithoutData = files.map(file => ({
         ...file,
         fileData: undefined
       }));
-      
+
       res.json({
         files: filesWithoutData,
         totalCount,
@@ -950,11 +959,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const buffer = Buffer.from(file.fileData, 'base64');
-      
+
       res.setHeader('Content-Disposition', `attachment; filename="${file.originalName}"`);
       res.setHeader('Content-Type', file.mimeType);
       res.setHeader('Content-Length', buffer.length);
-      
+
       res.send(buffer);
     } catch (error) {
       console.error("Error downloading file:", error);
@@ -975,10 +984,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const buffer = Buffer.from(file.fileData, 'base64');
-      
+
       res.setHeader('Content-Type', file.mimeType);
       res.setHeader('Content-Length', buffer.length);
-      
+
       res.send(buffer);
     } catch (error) {
       console.error("Error viewing file:", error);
@@ -1010,7 +1019,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { entityType, entityId, fileIds } = req.body;
-      
+
       if (!entityType || !Array.isArray(fileIds)) {
         return res.status(400).json({ message: "Invalid request: entityType and fileIds array required" });
       }
@@ -1032,7 +1041,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { q: query, entityType, entityId } = req.query;
-      
+
       if (!query) {
         return res.status(400).json({ message: "Search query is required" });
       }
@@ -1042,7 +1051,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         entityType as string, 
         entityId as string
       );
-      
+
       // Don't send file data in search results for performance
       const filesWithoutData = files.map(file => ({
         ...file,
@@ -1065,7 +1074,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { entityType, entityId, parentFolderId } = req.query;
-      
+
       let folders;
       if (entityType && entityId) {
         folders = await storage.getFoldersByEntity(entityType as string, entityId as string);
@@ -1074,7 +1083,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         return res.status(400).json({ message: "Either entityType/entityId or parentFolderId is required" });
       }
-      
+
       res.json(folders);
     } catch (error) {
       console.error("Error fetching folders:", error);
@@ -1129,9 +1138,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-
-
-
+  // Authentication routes
+  app.post("/api/login", login);
+  app.post("/api/register", register);
+  app.post("/api/logout", logout);
+  app.get("/api/me", getCurrentUser);
 
   const httpServer = createServer(app);
   return httpServer;
