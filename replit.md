@@ -125,7 +125,9 @@ The application uses a relational database with the following core entities:
 
 ## Recent Changes
 
-- July 12, 2025: Successfully migrated project from Replit Agent to Replit environment with full PostgreSQL database setup
+- July 12, 2025: Successfully completed migration from Replit Agent to Replit environment with full PostgreSQL database setup and database migrations applied
+- July 12, 2025: Fixed text visibility issues in dark mode across Scripts page and other components for better readability
+- July 12, 2025: Enhanced dark mode text colors with proper contrast (gray-500 → gray-400, gray-600 → gray-400, gray-700 → gray-200)
 - July 12, 2025: Enhanced visual design with light blue and red color scheme throughout the platform
 - July 12, 2025: Reduced page header sizes from text-4xl/text-3xl to text-2xl for better proportions
 - July 12, 2025: Updated all page headers with sky-blue to red gradient text effects

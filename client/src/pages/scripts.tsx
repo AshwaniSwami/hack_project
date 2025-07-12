@@ -666,27 +666,27 @@ export default function Scripts() {
                         </div>
 
                         <div className="space-y-3">
-                          <h3 className="font-semibold text-sm text-gray-800 line-clamp-2 group-hover:text-blue-700 transition-colors duration-300 leading-tight">
+                          <h3 className="font-semibold text-sm text-gray-800 dark:text-gray-200 line-clamp-2 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors duration-300 leading-tight">
                             {script.title}
                           </h3>
                           
                           {project && (
-                            <div className="flex items-center space-x-2 text-xs text-gray-600">
-                              <FolderOpen className="h-3 w-3 text-blue-500" />
+                            <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+                              <FolderOpen className="h-3 w-3 text-blue-500 dark:text-blue-400" />
                               <span className="truncate">{project.name}</span>
                             </div>
                           )}
 
                           {script.description && (
-                            <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
                               {script.description}
                             </p>
                           )}
 
-                          <div className="flex items-center pt-2 border-t border-gray-100">
+                          <div className="flex items-center pt-2 border-t border-gray-100 dark:border-gray-700">
                             <div className="flex items-center space-x-1">
-                              <Clock className="h-3 w-3 text-gray-400" />
-                              <span className="text-xs text-gray-500">
+                              <Clock className="h-3 w-3 text-gray-400 dark:text-gray-500" />
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
                                 {new Date(script.createdAt).toLocaleDateString()}
                               </span>
                             </div>
@@ -722,18 +722,18 @@ export default function Scripts() {
                               </Badge>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-sm text-gray-800 truncate group-hover:text-blue-700 transition-colors duration-300">
+                              <h3 className="font-semibold text-sm text-gray-800 dark:text-gray-200 truncate group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors duration-300">
                                 {script.title}
                               </h3>
                               <div className="flex items-center space-x-4 mt-1">
                                 {project && (
-                                  <div className="flex items-center space-x-1 text-xs text-gray-600">
-                                    <FolderOpen className="h-3 w-3 text-blue-500" />
+                                  <div className="flex items-center space-x-1 text-xs text-gray-600 dark:text-gray-400">
+                                    <FolderOpen className="h-3 w-3 text-blue-500 dark:text-blue-400" />
                                     <span>{project.name}</span>
                                   </div>
                                 )}
-                                <div className="flex items-center space-x-1 text-xs text-gray-500">
-                                  <Clock className="h-3 w-3 text-gray-400" />
+                                <div className="flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-400">
+                                  <Clock className="h-3 w-3 text-gray-400 dark:text-gray-500" />
                                   <span>{new Date(script.createdAt).toLocaleDateString()}</span>
                                 </div>
                               </div>
@@ -809,9 +809,9 @@ export default function Scripts() {
                   {projects.map((project) => {
                     const projectScripts = scripts.filter(script => script.projectId === project.id);
                     return (
-                      <Card key={project.id} className="bg-gradient-to-br from-gray-50 to-blue-50/50 border border-gray-200 shadow-lg">
+                      <Card key={project.id} className="bg-gradient-to-br from-gray-50 to-blue-50/50 dark:from-gray-800 dark:to-blue-900/20 border border-gray-200 dark:border-gray-700 shadow-lg">
                         <CardHeader className="pb-4">
-                          <CardTitle className="text-lg flex items-center gap-3">
+                          <CardTitle className="text-lg flex items-center gap-3 text-gray-900 dark:text-gray-100">
                             <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
                               <FolderOpen className="h-5 w-5 text-white" />
                             </div>
@@ -820,8 +820,8 @@ export default function Scripts() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                           <div>
-                            <h5 className="text-sm font-semibold mb-3 text-gray-700 flex items-center gap-3 p-2 bg-blue-50/80 rounded-lg">
-                              <FileText className="h-5 w-5 text-blue-600" />
+                            <h5 className="text-sm font-semibold mb-3 text-gray-800 dark:text-gray-200 flex items-center gap-3 p-2 bg-blue-50/80 dark:bg-blue-900/20 rounded-lg">
+                              <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                               Project Script Files
                             </h5>
                             <FileList 
@@ -832,9 +832,9 @@ export default function Scripts() {
                           </div>
 
                           {projectScripts.map((script) => (
-                            <div key={script.id} className="pl-6 border-l-2 border-emerald-200 bg-emerald-50/30 rounded-r-lg">
-                              <h5 className="text-sm font-semibold mb-3 text-gray-700 flex items-center gap-3 p-2">
-                                <Zap className="h-5 w-5 text-emerald-600" />
+                            <div key={script.id} className="pl-6 border-l-2 border-emerald-200 dark:border-emerald-700 bg-emerald-50/30 dark:bg-emerald-900/20 rounded-r-lg">
+                              <h5 className="text-sm font-semibold mb-3 text-gray-800 dark:text-gray-200 flex items-center gap-3 p-2">
+                                <Zap className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                                 {script.title}
                               </h5>
                               <FileList 
