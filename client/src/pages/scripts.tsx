@@ -284,10 +284,10 @@ export default function Scripts() {
                   </div>
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold text-slate-800 mb-2 bg-gradient-to-r from-blue-700 to-sky-700 bg-clip-text text-transparent">
+                  <h1 className="text-2xl font-bold text-slate-800 mb-2 bg-gradient-to-r from-sky-500 to-red-500 bg-clip-text text-transparent">
                     Scripts
                   </h1>
-                  <p className="text-slate-600 text-lg">Create and manage your radio scripts and content</p>
+                  <p className="text-slate-600 text-sm">Create and manage your radio scripts and content</p>
                 </div>
               </div>
 

@@ -179,7 +179,7 @@ export function AnalyticsPage() {
           <div className="p-2 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg">
             <TrendingUp className="h-6 w-6 text-blue-600" />
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-sky-500 to-red-500 bg-clip-text text-transparent">
             Download Analytics
           </h1>
         </div>

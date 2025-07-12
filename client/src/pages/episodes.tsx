@@ -274,10 +274,10 @@ export default function Episodes() {
                   </div>
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold text-slate-800 mb-2 bg-gradient-to-r from-blue-700 to-sky-700 bg-clip-text text-transparent">
+                  <h1 className="text-2xl font-bold text-slate-800 mb-2 bg-gradient-to-r from-sky-500 to-red-500 bg-clip-text text-transparent">
                     Episodes
                   </h1>
-                  <p className="text-slate-600 text-lg">Manage your radio episodes and audio content</p>
+                  <p className="text-slate-600 text-sm">Manage your radio episodes and audio content</p>
                 </div>
               </div>
               

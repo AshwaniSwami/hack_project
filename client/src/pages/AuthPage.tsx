@@ -101,7 +101,7 @@ export default function AuthPage() {
           <div className="flex items-center justify-center mb-4">
             <Radio className="h-12 w-12 text-indigo-600" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">SMART Radio Hub</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-sky-500 to-red-500 bg-clip-text text-transparent">SMART Radio Hub</h1>
           <p className="text-gray-600 mt-2">Content Management System</p>
         </div>
 

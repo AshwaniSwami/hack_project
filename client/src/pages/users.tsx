@@ -317,7 +317,7 @@ export default function Users() {
                   </div>
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-slate-800 mb-1 bg-gradient-to-r from-blue-700 to-sky-700 bg-clip-text text-transparent">
+                  <h1 className="text-2xl font-bold text-slate-800 mb-1 bg-gradient-to-r from-sky-500 to-red-500 bg-clip-text text-transparent">
                     Users
                   </h1>
                   <p className="text-slate-600 text-sm">Manage user accounts and permissions</p>

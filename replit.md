@@ -125,6 +125,12 @@ The application uses a relational database with the following core entities:
 
 ## Recent Changes
 
+- July 12, 2025: Successfully migrated project from Replit Agent to Replit environment with full PostgreSQL database setup
+- July 12, 2025: Enhanced visual design with light blue and red color scheme throughout the platform
+- July 12, 2025: Reduced page header sizes from text-4xl/text-3xl to text-2xl for better proportions
+- July 12, 2025: Updated all page headers with sky-blue to red gradient text effects
+- July 12, 2025: Enhanced navbar with light blue and red color accents and improved visual hierarchy
+- July 12, 2025: Applied light blue and red theme to dashboard background gradients
 - January 12, 2025: Transformed application design to light blue color scheme with whitish transparent navbar for NGO-appropriate branding
 - January 12, 2025: Updated all page headers (Projects, Episodes, Scripts, Users, Radio Stations) with light blue theme and white backgrounds
 - January 12, 2025: Enhanced navbar with whitish transparent background and dark text for better readability
