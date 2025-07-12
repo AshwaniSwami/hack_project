@@ -102,11 +102,11 @@ export function AdminDashboard() {
   return (
     <div className="space-y-8">
       {/* Enhanced Header with Real-time Metrics */}
-      <div className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-900 rounded-2xl p-8 text-white">
+      <div className="gradient-primary rounded-2xl p-8 text-white ngo-shadow">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Welcome, Admin! Global overview.</h1>
-            <p className="text-white/80 text-lg mb-4">Comprehensive system oversight and platform management</p>
+            <h1 className="text-3xl font-bold mb-2">Welcome, Admin! NGO Impact Dashboard</h1>
+            <p className="text-white/80 text-lg mb-4">Empowering communities through radio content management</p>
             <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-2">
                 <TrendingUp className="h-4 w-4" />
@@ -131,7 +131,7 @@ export function AdminDashboard() {
             <Link href="/analytics">
               <Button 
                 size="lg"
-                className="bg-amber-500 text-white hover:bg-amber-600"
+                className="bg-white/20 text-white hover:bg-white/30 transition-all duration-300"
               >
                 <BarChart3 className="h-5 w-5 mr-2" />
                 Analytics Hub
@@ -143,70 +143,70 @@ export function AdminDashboard() {
 
       {/* Enhanced Platform Health & KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+        <Card className="gradient-card hover:shadow-lg transition-all duration-300 hover:scale-105 border-0 shadow-md ngo-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-600">Total Projects</p>
-                <p className="text-3xl font-bold text-blue-900">{kpis.totalProjects}</p>
-                <div className="flex items-center mt-2 text-sm text-blue-700">
+                <p className="text-sm font-medium text-green-600">Total Projects</p>
+                <p className="text-3xl font-bold text-green-900 dark:text-green-100">{kpis.totalProjects}</p>
+                <div className="flex items-center mt-2 text-sm text-green-700 dark:text-green-300">
                   <TrendingUp className="h-4 w-4 mr-1" />
                   <span>Active</span>
                 </div>
               </div>
-              <FileText className="h-12 w-12 text-blue-600" />
+              <FileText className="h-12 w-12 text-green-600" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+        <Card className="gradient-card hover:shadow-lg transition-all duration-300 hover:scale-105 border-0 shadow-md ngo-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-green-600">Total Episodes</p>
-                <p className="text-3xl font-bold text-green-900">{kpis.totalEpisodes}</p>
-                <div className="flex items-center mt-2 text-sm text-green-700">
+                <p className="text-sm font-medium text-emerald-600">Total Episodes</p>
+                <p className="text-3xl font-bold text-emerald-900 dark:text-emerald-100">{kpis.totalEpisodes}</p>
+                <div className="flex items-center mt-2 text-sm text-emerald-700 dark:text-emerald-300">
                   <Radio className="h-4 w-4 mr-1" />
                   <span>Published</span>
                 </div>
               </div>
-              <Radio className="h-12 w-12 text-green-600" />
+              <Radio className="h-12 w-12 text-emerald-600" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+        <Card className="gradient-card hover:shadow-lg transition-all duration-300 hover:scale-105 border-0 shadow-md ngo-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-purple-600">Total Scripts</p>
-                <p className="text-3xl font-bold text-purple-900">{kpis.totalScripts}</p>
-                <div className="flex items-center mt-2 text-sm text-purple-700">
+                <p className="text-sm font-medium text-teal-600">Total Scripts</p>
+                <p className="text-3xl font-bold text-teal-900 dark:text-teal-100">{kpis.totalScripts}</p>
+                <div className="flex items-center mt-2 text-sm text-teal-700 dark:text-teal-300">
                   <FileText className="h-4 w-4 mr-1" />
                   <span>Created</span>
                 </div>
               </div>
-              <FileText className="h-12 w-12 text-purple-600" />
+              <FileText className="h-12 w-12 text-teal-600" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200">
+        <Card className="gradient-card hover:shadow-lg transition-all duration-300 hover:scale-105 border-0 shadow-md ngo-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-amber-600">Total Users</p>
-                <p className="text-3xl font-bold text-amber-900">{kpis.totalUsers}</p>
-                <div className="flex items-center mt-2 text-sm text-amber-700">
+                <p className="text-sm font-medium text-cyan-600">Total Users</p>
+                <p className="text-3xl font-bold text-cyan-900 dark:text-cyan-100">{kpis.totalUsers}</p>
+                <div className="flex items-center mt-2 text-sm text-cyan-700 dark:text-cyan-300">
                   <TrendingUp className="h-4 w-4 mr-1" />
                   <span>+{adminMetrics.growthRate}% this month</span>
                 </div>
               </div>
-              <Users className="h-12 w-12 text-amber-600" />
+              <Users className="h-12 w-12 text-cyan-600" />
             </div>
             <div className="mt-4">
               <Progress value={(kpis.activeUsers / kpis.totalUsers) * 100} className="h-2" />
-              <p className="text-xs text-amber-600 mt-1">{kpis.activeUsers} active users</p>
+              <p className="text-xs text-cyan-600 mt-1">{kpis.activeUsers} active users</p>
             </div>
           </CardContent>
         </Card>

@@ -1,40 +1,38 @@
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTheme } from "@/components/theme-provider";
-import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") as "light" | "dark";
+    const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    const initialTheme = savedTheme || systemTheme;
+    
+    setTheme(initialTheme);
+    document.documentElement.classList.toggle("dark", initialTheme === "dark");
+  }, []);
 
   const toggleTheme = () => {
-    if (theme === "light") {
-      setTheme("dark");
-    } else if (theme === "dark") {
-      setTheme("light");
-    } else {
-      // If system theme, switch to light
-      setTheme("light");
-    }
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+    document.documentElement.classList.toggle("dark", newTheme === "dark");
   };
 
-  const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-
   return (
-    <Button 
-      variant="outline" 
-      size="icon" 
+    <Button
+      variant="ghost"
+      size="sm"
       onClick={toggleTheme}
-      className="relative"
+      className="relative p-3 text-white/90 hover:text-white hover:bg-white/20 transition-all duration-300 rounded-xl group"
     >
-      <Sun className={cn(
-        "h-[1.2rem] w-[1.2rem] transition-all duration-300",
-        isDark ? "rotate-90 scale-0" : "rotate-0 scale-100"
-      )} />
-      <Moon className={cn(
-        "absolute h-[1.2rem] w-[1.2rem] transition-all duration-300",
-        isDark ? "rotate-0 scale-100" : "-rotate-90 scale-0"
-      )} />
-      <span className="sr-only">Toggle theme</span>
+      {theme === "light" ? (
+        <Moon className="h-5 w-5 group-hover:scale-105 transition-transform duration-200" />
+      ) : (
+        <Sun className="h-5 w-5 group-hover:scale-105 transition-transform duration-200" />
+      )}
     </Button>
   );
 }
