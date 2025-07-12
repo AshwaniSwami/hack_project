@@ -50,7 +50,15 @@ import {
   Radio,
   Grid3X3,
   List,
-  Search
+  Search,
+  Filter,
+  SortAsc,
+  SortDesc,
+  Star,
+  ArrowUpDown,
+  Copy,
+  Archive,
+  RefreshCw
 } from "lucide-react";
 import { EpisodeFileUpload } from "@/components/episode-file-upload";
 import { FileList } from "@/components/file-list";
@@ -72,6 +80,10 @@ export default function Episodes() {
   const [editingEpisode, setEditingEpisode] = useState<Episode | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
+  const [projectFilter, setProjectFilter] = useState('all');
+  const [sortBy, setSortBy] = useState<'title' | 'date' | 'episode'>('episode');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [selectedEpisodes, setSelectedEpisodes] = useState<string[]>([]);
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -196,17 +208,54 @@ export default function Episodes() {
     }
   };
 
-  // Filter episodes based on search query
-  const filteredEpisodes = episodes.filter(episode => {
-    const project = projects.find(p => p.id === episode.projectId);
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      episode.title.toLowerCase().includes(searchLower) ||
-      episode.description?.toLowerCase().includes(searchLower) ||
-      project?.name.toLowerCase().includes(searchLower) ||
-      episode.episodeNumber.toString().includes(searchLower)
+  const handleBulkDelete = () => {
+    if (selectedEpisodes.length === 0) return;
+    if (window.confirm(`Are you sure you want to delete ${selectedEpisodes.length} episodes?`)) {
+      selectedEpisodes.forEach(id => deleteMutation.mutate(id));
+      setSelectedEpisodes([]);
+    }
+  };
+
+  const toggleEpisodeSelection = (id: string) => {
+    setSelectedEpisodes(prev => 
+      prev.includes(id) ? prev.filter(eid => eid !== id) : [...prev, id]
     );
-  });
+  };
+
+  const toggleSelectAll = () => {
+    setSelectedEpisodes(
+      selectedEpisodes.length === filteredAndSortedEpisodes.length ? [] : filteredAndSortedEpisodes.map(e => e.id)
+    );
+  };
+
+  const filteredAndSortedEpisodes = episodes
+    .filter((episode) => {
+      const project = projects.find(p => p.id === episode.projectId);
+      const searchLower = searchQuery.toLowerCase();
+      const matchesSearch = episode.title.toLowerCase().includes(searchLower) ||
+        (episode.description && episode.description.toLowerCase().includes(searchLower)) ||
+        (project?.name.toLowerCase().includes(searchLower)) ||
+        episode.episodeNumber.toString().includes(searchLower);
+      const matchesProject = projectFilter === 'all' || episode.projectId === projectFilter;
+      return matchesSearch && matchesProject;
+    })
+    .sort((a, b) => {
+      let compareValue = 0;
+      
+      switch (sortBy) {
+        case 'title':
+          compareValue = a.title.localeCompare(b.title);
+          break;
+        case 'date':
+          compareValue = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          break;
+        case 'episode':
+          compareValue = a.episodeNumber - b.episodeNumber;
+          break;
+      }
+      
+      return sortOrder === 'asc' ? compareValue : -compareValue;
+    });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
@@ -386,37 +435,137 @@ export default function Episodes() {
           </TabsList>
 
           <TabsContent value="episodes" className="space-y-6">
-            {/* Search and View Controls */}
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search episodes..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600 mr-2">View:</span>
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                  className={viewMode === 'grid' ? 'bg-blue-600 hover:bg-blue-700' : ''}
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                  className={viewMode === 'list' ? 'bg-blue-600 hover:bg-blue-700' : ''}
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+            {/* Enhanced Controls Panel */}
+            <Card className="bg-white/90 backdrop-blur-md border border-gray-200/50 shadow-lg">
+              <CardContent className="p-4">
+                <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+                  {/* Search and Filters */}
+                  <div className="flex flex-col sm:flex-row gap-3 flex-1">
+                    <div className="relative flex-1 max-w-sm">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        placeholder="Search episodes..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10 bg-white border-gray-300 focus:border-blue-500"
+                      />
+                    </div>
+                    <Select value={projectFilter} onValueChange={setProjectFilter}>
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="All Projects" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Projects</SelectItem>
+                        {projects.map((project) => (
+                          <SelectItem key={project.id} value={project.id}>
+                            {project.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    
+                    {/* Sort Options */}
+                    <div className="flex items-center gap-2">
+                      <Select value={sortBy} onValueChange={(value: 'title' | 'date' | 'episode') => setSortBy(value)}>
+                        <SelectTrigger className="w-36">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="episode">Episode #</SelectItem>
+                          <SelectItem value="title">Title</SelectItem>
+                          <SelectItem value="date">Date</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                        className="px-2"
+                      >
+                        {sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  {/* Action Controls */}
+                  <div className="flex items-center gap-2">
+                    {selectedEpisodes.length > 0 && (user?.role === 'admin' || user?.role === 'editor') && (
+                      <div className="flex items-center gap-2 mr-4">
+                        <span className="text-sm text-gray-600">{selectedEpisodes.length} selected</span>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={handleBulkDelete}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Delete
+                        </Button>
+                      </div>
+                    )}
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/episodes"] })}
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                    
+                    <div className="flex items-center gap-1 border rounded-md">
+                      <Button
+                        variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                        size="sm"
+                        onClick={() => setViewMode('grid')}
+                        className={`rounded-r-none ${viewMode === 'grid' ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''}`}
+                      >
+                        <Grid3X3 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant={viewMode === 'list' ? 'default' : 'ghost'}
+                        size="sm"
+                        onClick={() => setViewMode('list')}
+                        className={`rounded-l-none ${viewMode === 'list' ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''}`}
+                      >
+                        <List className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Results Count & Select All */}
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
+                  <div className="flex items-center gap-4">
+                    <div className="text-sm text-gray-600">
+                      Showing {filteredAndSortedEpisodes.length} of {episodes.length} episodes
+                    </div>
+                    {(user?.role === 'admin' || user?.role === 'editor') && filteredAndSortedEpisodes.length > 0 && (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedEpisodes.length === filteredAndSortedEpisodes.length}
+                          onChange={toggleSelectAll}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-gray-600">Select all</span>
+                      </div>
+                    )}
+                  </div>
+                  {(searchQuery || projectFilter !== 'all') && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setSearchQuery('');
+                        setProjectFilter('all');
+                      }}
+                      className="text-xs"
+                    >
+                      Clear filters
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
 
             {isLoading ? (
               <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" : "space-y-3"}>
@@ -430,7 +579,7 @@ export default function Episodes() {
                   </Card>
                 ))}
               </div>
-            ) : filteredEpisodes.length === 0 ? (
+            ) : filteredAndSortedEpisodes.length === 0 ? (
               <Card className="bg-white/80 backdrop-blur-md border-0 shadow-xl">
                 <CardContent className="text-center py-16">
                   <div className="relative mb-6">
@@ -440,12 +589,12 @@ export default function Episodes() {
                     </div>
                   </div>
                   <h3 className="text-xl font-bold text-gray-800 mb-2">
-                    {searchQuery ? 'No episodes found' : 'No episodes yet'}
+                    {searchQuery || projectFilter !== 'all' ? 'No episodes found' : 'No episodes yet'}
                   </h3>
                   <p className="text-gray-600 mb-6 max-w-sm mx-auto">
-                    {searchQuery ? 'Try adjusting your search terms' : 'Start creating engaging radio content for your audience'}
+                    {searchQuery || projectFilter !== 'all' ? 'Try adjusting your search filters' : 'Start creating engaging radio content for your audience'}
                   </p>
-                  {!searchQuery && (user?.role === 'admin' || user?.role === 'editor') && (
+                  {(!searchQuery && projectFilter === 'all') && (user?.role === 'admin' || user?.role === 'editor') && (
                     <Button 
                       onClick={() => setIsCreateDialogOpen(true)}
                       size="lg"
@@ -459,15 +608,25 @@ export default function Episodes() {
               </Card>
             ) : viewMode === 'grid' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {filteredEpisodes.map((episode) => {
+                {filteredAndSortedEpisodes.map((episode) => {
                   const project = projects.find(p => p.id === episode.projectId);
                   return (
                     <Card key={episode.id} className="group hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm border border-gray-200/50 hover:scale-[1.02] hover:border-blue-300">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-3">
-                          <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-1">
-                            #{episode.episodeNumber}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            {(user?.role === 'admin' || user?.role === 'editor') && (
+                              <input
+                                type="checkbox"
+                                checked={selectedEpisodes.includes(episode.id)}
+                                onChange={() => toggleEpisodeSelection(episode.id)}
+                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                              />
+                            )}
+                            <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-1">
+                              #{episode.episodeNumber}
+                            </Badge>
+                          </div>
                           <div className="flex space-x-1">
                             {(user?.role === 'admin' || user?.role === 'editor') && (
                               <>
@@ -531,16 +690,26 @@ export default function Episodes() {
               </div>
             ) : (
               <div className="space-y-3">
-                {filteredEpisodes.map((episode) => {
+                {filteredAndSortedEpisodes.map((episode) => {
                   const project = projects.find(p => p.id === episode.projectId);
                   return (
                     <Card key={episode.id} className="group hover:shadow-md transition-all duration-300 bg-white/80 backdrop-blur-sm border border-gray-200/50 hover:border-blue-300">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-4 flex-1">
-                            <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-1 shrink-0">
-                              #{episode.episodeNumber}
-                            </Badge>
+                            <div className="flex items-center gap-2">
+                              {(user?.role === 'admin' || user?.role === 'editor') && (
+                                <input
+                                  type="checkbox"
+                                  checked={selectedEpisodes.includes(episode.id)}
+                                  onChange={() => toggleEpisodeSelection(episode.id)}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                              )}
+                              <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-1 shrink-0">
+                                #{episode.episodeNumber}
+                              </Badge>
+                            </div>
                             <div className="flex-1 min-w-0">
                               <h3 className="font-semibold text-sm text-gray-800 truncate group-hover:text-blue-700 transition-colors duration-300">
                                 {episode.title}

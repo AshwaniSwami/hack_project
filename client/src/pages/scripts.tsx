@@ -52,7 +52,17 @@ import {
   Calendar,
   Zap,
   Grid3X3,
-  List
+  List,
+  Filter,
+  SortAsc,
+  SortDesc,
+  Star,
+  ArrowUpDown,
+  Copy,
+  Archive,
+  RefreshCw,
+  BookOpen,
+  Target
 } from "lucide-react";
 import { ScriptEditor } from "@/components/script-editor";
 import { ScriptFileUpload } from "@/components/script-file-upload";
@@ -89,6 +99,10 @@ export default function Scripts() {
   const [viewingScript, setViewingScript] = useState<Script | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [projectFilter, setProjectFilter] = useState('all');
+  const [sortBy, setSortBy] = useState<'title' | 'date' | 'status'>('date');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [selectedScripts, setSelectedScripts] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const { toast } = useToast();
   const { user } = useAuth();
@@ -203,15 +217,55 @@ export default function Scripts() {
     }
   };
 
-  const filteredScripts = scripts.filter((script) => {
-    const project = projects.find(p => p.id === script.projectId);
-    const searchLower = searchTerm.toLowerCase();
-    const matchesSearch = script.title.toLowerCase().includes(searchLower) ||
-      (script.description && script.description.toLowerCase().includes(searchLower)) ||
-      (project?.name.toLowerCase().includes(searchLower));
-    const matchesStatus = statusFilter === "all" || script.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const handleBulkDelete = () => {
+    if (selectedScripts.length === 0) return;
+    if (window.confirm(`Are you sure you want to delete ${selectedScripts.length} scripts?`)) {
+      selectedScripts.forEach(id => deleteMutation.mutate(id));
+      setSelectedScripts([]);
+    }
+  };
+
+  const toggleScriptSelection = (id: string) => {
+    setSelectedScripts(prev => 
+      prev.includes(id) ? prev.filter(sid => sid !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    setSelectedScripts(
+      selectedScripts.length === filteredAndSortedScripts.length ? [] : filteredAndSortedScripts.map(s => s.id)
+    );
+  };
+
+  const filteredAndSortedScripts = scripts
+    .filter((script) => {
+      const project = projects.find(p => p.id === script.projectId);
+      const searchLower = searchTerm.toLowerCase();
+      const matchesSearch = script.title.toLowerCase().includes(searchLower) ||
+        (script.description && script.description.toLowerCase().includes(searchLower)) ||
+        (project?.name.toLowerCase().includes(searchLower));
+      const matchesStatus = statusFilter === "all" || script.status === statusFilter;
+      const matchesProject = projectFilter === 'all' || script.projectId === projectFilter;
+      return matchesSearch && matchesStatus && matchesProject;
+    })
+    .sort((a, b) => {
+      let compareValue = 0;
+      
+      switch (sortBy) {
+        case 'title':
+          compareValue = a.title.localeCompare(b.title);
+          break;
+        case 'date':
+          compareValue = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          break;
+        case 'status':
+          const statusOrder = ['Draft', 'Under Review', 'Approved', 'Published'];
+          compareValue = statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
+          break;
+      }
+      
+      return sortOrder === 'asc' ? compareValue : -compareValue;
+    });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
@@ -385,51 +439,152 @@ export default function Scripts() {
           </TabsList>
 
           <TabsContent value="scripts" className="space-y-6">
-            {/* Search and View Controls */}
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-              <div className="flex flex-col sm:flex-row gap-4 flex-1">
-                <div className="relative flex-1 max-w-md">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    placeholder="Search scripts..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500"
-                  />
+            {/* Enhanced Controls Panel */}
+            <Card className="bg-white/90 backdrop-blur-md border border-gray-200/50 shadow-lg">
+              <CardContent className="p-4">
+                <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+                  {/* Search and Filters */}
+                  <div className="flex flex-col sm:flex-row gap-3 flex-1">
+                    <div className="relative flex-1 max-w-sm">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        placeholder="Search scripts..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 bg-white border-gray-300 focus:border-blue-500"
+                      />
+                    </div>
+                    
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger className="w-40">
+                        <SelectValue placeholder="All Statuses" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        <SelectItem value="Draft">Draft</SelectItem>
+                        <SelectItem value="Under Review">Under Review</SelectItem>
+                        <SelectItem value="Approved">Approved</SelectItem>
+                        <SelectItem value="Published">Published</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    <Select value={projectFilter} onValueChange={setProjectFilter}>
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="All Projects" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Projects</SelectItem>
+                        {projects.map((project) => (
+                          <SelectItem key={project.id} value={project.id}>
+                            {project.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    
+                    {/* Sort Options */}
+                    <div className="flex items-center gap-2">
+                      <Select value={sortBy} onValueChange={(value: 'title' | 'date' | 'status') => setSortBy(value)}>
+                        <SelectTrigger className="w-32">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="date">Date</SelectItem>
+                          <SelectItem value="title">Title</SelectItem>
+                          <SelectItem value="status">Status</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                        className="px-2"
+                      >
+                        {sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  {/* Action Controls */}
+                  <div className="flex items-center gap-2">
+                    {selectedScripts.length > 0 && (user?.role === 'admin' || user?.role === 'editor') && (
+                      <div className="flex items-center gap-2 mr-4">
+                        <span className="text-sm text-gray-600">{selectedScripts.length} selected</span>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={handleBulkDelete}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Delete
+                        </Button>
+                      </div>
+                    )}
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/scripts"] })}
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                    
+                    <div className="flex items-center gap-1 border rounded-md">
+                      <Button
+                        variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                        size="sm"
+                        onClick={() => setViewMode('grid')}
+                        className={`rounded-r-none ${viewMode === 'grid' ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''}`}
+                      >
+                        <Grid3X3 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant={viewMode === 'list' ? 'default' : 'ghost'}
+                        size="sm"
+                        onClick={() => setViewMode('list')}
+                        className={`rounded-l-none ${viewMode === 'list' ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''}`}
+                      >
+                        <List className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="Draft">Draft</SelectItem>
-                    <SelectItem value="Under Review">Under Review</SelectItem>
-                    <SelectItem value="Approved">Approved</SelectItem>
-                    <SelectItem value="Published">Published</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600 mr-2">View:</span>
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                  className={viewMode === 'grid' ? 'bg-blue-600 hover:bg-blue-700' : ''}
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                  className={viewMode === 'list' ? 'bg-blue-600 hover:bg-blue-700' : ''}
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+                
+                {/* Results Count & Select All */}
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
+                  <div className="flex items-center gap-4">
+                    <div className="text-sm text-gray-600">
+                      Showing {filteredAndSortedScripts.length} of {scripts.length} scripts
+                    </div>
+                    {(user?.role === 'admin' || user?.role === 'editor') && filteredAndSortedScripts.length > 0 && (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedScripts.length === filteredAndSortedScripts.length}
+                          onChange={toggleSelectAll}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-gray-600">Select all</span>
+                      </div>
+                    )}
+                  </div>
+                  {(searchTerm || statusFilter !== 'all' || projectFilter !== 'all') && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setSearchTerm('');
+                        setStatusFilter('all');
+                        setProjectFilter('all');
+                      }}
+                      className="text-xs"
+                    >
+                      Clear filters
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Scripts List */}
             {isLoading ? (
@@ -444,7 +599,7 @@ export default function Scripts() {
                   </Card>
                 ))}
               </div>
-            ) : filteredScripts.length === 0 ? (
+            ) : filteredAndSortedScripts.length === 0 ? (
               <Card className="bg-white/80 backdrop-blur-md border-0 shadow-xl">
                 <CardContent className="text-center py-16">
                   <div className="relative mb-6">
@@ -454,14 +609,14 @@ export default function Scripts() {
                     </div>
                   </div>
                   <h3 className="text-xl font-bold text-gray-800 mb-2">
-                    {searchTerm || statusFilter !== "all" ? 'No scripts found' : 'No scripts yet'}
+                    {searchTerm || statusFilter !== "all" || projectFilter !== 'all' ? 'No scripts found' : 'No scripts yet'}
                   </h3>
                   <p className="text-gray-600 mb-6 max-w-sm mx-auto">
-                    {searchTerm || statusFilter !== "all" 
+                    {searchTerm || statusFilter !== "all" || projectFilter !== 'all'
                       ? "Try adjusting your search filters" 
                       : "Start creating your first radio script"}
                   </p>
-                  {(!searchTerm && statusFilter === "all") && (user?.role === 'admin' || user?.role === 'editor') && (
+                  {(!searchTerm && statusFilter === "all" && projectFilter === 'all') && (user?.role === 'admin' || user?.role === 'editor') && (
                     <Button 
                       onClick={() => setIsCreateDialogOpen(true)}
                       size="lg"
@@ -475,17 +630,27 @@ export default function Scripts() {
               </Card>
             ) : viewMode === 'grid' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {filteredScripts.map((script) => {
+                {filteredAndSortedScripts.map((script) => {
                   const project = projects.find(p => p.id === script.projectId);
                   const StatusIcon = statusIcons[script.status as keyof typeof statusIcons];
                   return (
                     <Card key={script.id} className="group hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm border border-gray-200/50 hover:scale-[1.02] hover:border-blue-300">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-3">
-                          <Badge variant="secondary" className={`text-xs px-2 py-1 ${statusColors[script.status as keyof typeof statusColors]}`}>
-                            <StatusIcon className="h-3 w-3 mr-1" />
-                            {script.status}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            {(user?.role === 'admin' || user?.role === 'editor') && (
+                              <input
+                                type="checkbox"
+                                checked={selectedScripts.includes(script.id)}
+                                onChange={() => toggleScriptSelection(script.id)}
+                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                              />
+                            )}
+                            <Badge variant="secondary" className={`text-xs px-2 py-1 ${statusColors[script.status as keyof typeof statusColors]}`}>
+                              <StatusIcon className="h-3 w-3 mr-1" />
+                              {script.status}
+                            </Badge>
+                          </div>
                           <div className="flex space-x-1">
                             <Button
                               variant="ghost"
@@ -552,7 +717,7 @@ export default function Scripts() {
               </div>
             ) : (
               <div className="space-y-3">
-                {filteredScripts.map((script) => {
+                {filteredAndSortedScripts.map((script) => {
                   const project = projects.find(p => p.id === script.projectId);
                   const StatusIcon = statusIcons[script.status as keyof typeof statusIcons];
                   return (
@@ -560,10 +725,20 @@ export default function Scripts() {
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-4 flex-1">
-                            <Badge variant="secondary" className={`text-xs px-2 py-1 shrink-0 ${statusColors[script.status as keyof typeof statusColors]}`}>
-                              <StatusIcon className="h-3 w-3 mr-1" />
-                              {script.status}
-                            </Badge>
+                            <div className="flex items-center gap-2">
+                              {(user?.role === 'admin' || user?.role === 'editor') && (
+                                <input
+                                  type="checkbox"
+                                  checked={selectedScripts.includes(script.id)}
+                                  onChange={() => toggleScriptSelection(script.id)}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                              )}
+                              <Badge variant="secondary" className={`text-xs px-2 py-1 shrink-0 ${statusColors[script.status as keyof typeof statusColors]}`}>
+                                <StatusIcon className="h-3 w-3 mr-1" />
+                                {script.status}
+                              </Badge>
+                            </div>
                             <div className="flex-1 min-w-0">
                               <h3 className="font-semibold text-sm text-gray-800 truncate group-hover:text-blue-700 transition-colors duration-300">
                                 {script.title}
