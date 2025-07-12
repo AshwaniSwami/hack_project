@@ -39,6 +39,7 @@ import {
   FileText,
   Mic
 } from "lucide-react";
+import { colors, getCardStyle, getGradientStyle } from "@/lib/colors";
 import type { Project, Episode, Script } from "@shared/schema";
 import { ProjectDetailView } from "@/components/project-detail-view";
 import { ProjectCard } from "@/components/ProjectCard";

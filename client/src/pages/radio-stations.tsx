@@ -41,6 +41,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/api";
+import { colors, getCardStyle, getGradientStyle } from "@/lib/colors";
 import { Plus, Edit, Trash2, Radio, Phone, Mail, MapPin, Sparkles, Waves, Antenna, Clock, CheckCircle, XCircle, Search, Eye, MoreHorizontal, Filter } from "lucide-react";
 import type { RadioStation } from "@shared/schema";
 

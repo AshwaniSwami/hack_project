@@ -50,7 +50,9 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
+import { colors, getCardStyle, getGradientStyle } from "@/lib/colors";
 import { 
   Plus, 
   Edit, 
