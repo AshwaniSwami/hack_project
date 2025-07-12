@@ -148,6 +148,24 @@ The application uses a relational database with the following core entities:
 - July 12, 2025: Created centralized color management system in @/lib/colors.ts for consistent theming
 - July 12, 2025: Enhanced color storage and management with helper functions for status colors, gradients, and card styles
 - July 12, 2025: Updated all pages to use the new centralized color system for better maintainability
+- July 12, 2025: Enhanced visual design with light blue and red color scheme throughout the platform
+- July 12, 2025: Reduced page header sizes from text-4xl/text-3xl to text-2xl for better proportions
+- July 12, 2025: Updated all page headers with sky-blue to red gradient text effects
+- July 12, 2025: Enhanced navbar with light blue and red color accents and improved visual hierarchy
+- July 12, 2025: Applied light blue and red theme to dashboard background gradients
+- July 12, 2025: Fixed dark mode text visibility issues across all pages with proper contrast
+- July 12, 2025: Improved header integration by reducing padding and making them more compact
+- July 12, 2025: Enhanced dark mode colors using lighter gray tones (avoiding extreme dark colors)
+- July 12, 2025: Fixed Scripts page theme consistency to match other pages with light blue and red accents
+- July 12, 2025: Optimized dark mode CSS variables for better readability and user experience
+- July 12, 2025: Applied consistent Scripts page styling (search functionality and colors) across all pages
+- July 12, 2025: Updated Projects, Episodes, Users, and Radio Stations pages with uniform light blue and red theme
+- July 12, 2025: Standardized search bars with proper dark mode support and sky-blue focus colors
+- July 12, 2025: Enhanced all page cards with consistent backdrop-blur effects and dark mode compatibility
+- July 12, 2025: Removed "select all" functionality from both Episodes and Scripts pages for cleaner interface
+- July 12, 2025: Created centralized color management system in @/lib/colors.ts for consistent theming
+- July 12, 2025: Enhanced color storage and management with helper functions for status colors, gradients, and card styles
+- July 12, 2025: Updated all pages to use the new centralized color system for better maintainability
 - January 12, 2025: Transformed application design to light blue color scheme with whitish transparent navbar for NGO-appropriate branding
 - January 12, 2025: Updated all page headers (Projects, Episodes, Scripts, Users, Radio Stations) with light blue theme and white backgrounds
 - January 12, 2025: Enhanced navbar with whitish transparent background and dark text for better readability
