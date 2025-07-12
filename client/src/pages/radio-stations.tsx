@@ -372,16 +372,16 @@ export default function RadioStations() {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Search and Filter Bar */}
         <div className="mb-8">
-          <Card className="bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-xl">
-            <CardContent className="p-6">
+          <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border border-gray-200/50 dark:border-gray-700/50 shadow-lg">
+            <CardContent className="p-4">
               <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
                 <div className="relative flex-1 max-w-md">
-                  <Search className="absolute left-4 top-3 h-5 w-5 text-gray-400" />
+                  <Search className="absolute left-4 top-3 h-5 w-5 text-gray-400 dark:text-gray-500" />
                   <Input
                     placeholder="Search stations by name, contact, or email..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-12 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                    className="pl-12 h-11 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-sky-500 text-gray-900 dark:text-gray-100"
                   />
                 </div>
                 <div className="flex items-center gap-4">

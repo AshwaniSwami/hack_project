@@ -420,16 +420,16 @@ export default function Episodes() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         <Tabs defaultValue="episodes" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-3 lg:w-[450px] bg-white/80 backdrop-blur-md shadow-xl border border-gray-200/50 p-1">
-            <TabsTrigger value="episodes" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white transition-all duration-300">
+          <TabsList className="grid w-full grid-cols-3 lg:w-[450px] bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-1">
+            <TabsTrigger value="episodes" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-rose-500 data-[state=active]:text-white transition-all duration-300 text-gray-700 dark:text-gray-300">
               <Play className="h-4 w-4" />
               Episodes
             </TabsTrigger>
-            <TabsTrigger value="upload" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white transition-all duration-300">
+            <TabsTrigger value="upload" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-rose-500 data-[state=active]:text-white transition-all duration-300 text-gray-700 dark:text-gray-300">
               <Upload className="h-4 w-4" />
               Upload
             </TabsTrigger>
-            <TabsTrigger value="files" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white transition-all duration-300">
+            <TabsTrigger value="files" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-rose-500 data-[state=active]:text-white transition-all duration-300 text-gray-700 dark:text-gray-300">
               <FolderOpen className="h-4 w-4" />
               Files
             </TabsTrigger>
@@ -437,18 +437,18 @@ export default function Episodes() {
 
           <TabsContent value="episodes" className="space-y-6">
             {/* Enhanced Controls Panel */}
-            <Card className="bg-white/90 backdrop-blur-md border border-gray-200/50 shadow-lg">
+            <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border border-gray-200/50 dark:border-gray-700/50 shadow-lg">
               <CardContent className="p-4">
                 <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
                   {/* Search and Filters */}
                   <div className="flex flex-col sm:flex-row gap-3 flex-1">
                     <div className="relative flex-1 max-w-sm">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
                       <Input
                         placeholder="Search episodes..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10 bg-white border-gray-300 focus:border-blue-500"
+                        className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:border-sky-500 text-gray-900 dark:text-gray-100"
                       />
                     </div>
                     <Select value={projectFilter} onValueChange={setProjectFilter}>
@@ -492,7 +492,7 @@ export default function Episodes() {
                   <div className="flex items-center gap-2">
                     {selectedEpisodes.length > 0 && (user?.role === 'admin' || user?.role === 'editor') && (
                       <div className="flex items-center gap-2 mr-4">
-                        <span className="text-sm text-gray-600">{selectedEpisodes.length} selected</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">{selectedEpisodes.length} selected</span>
                         <Button
                           variant="destructive"
                           size="sm"

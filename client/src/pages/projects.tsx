@@ -441,23 +441,23 @@ export default function Projects() {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Search and Filter Bar */}
         <div className="mb-8">
-          <Card className="bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-xl">
-            <CardContent className="p-6">
+          <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border border-gray-200/50 dark:border-gray-700/50 shadow-lg">
+            <CardContent className="p-4">
               <div className="flex flex-col lg:flex-row gap-4">
                 <div className="relative flex-1 max-w-xl">
-                  <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400" />
+                  <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400 dark:text-gray-500" />
                   <Input
                     placeholder="Search projects by name or description..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-12 h-12 text-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                    className="pl-12 h-12 text-lg bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-sky-500 text-gray-900 dark:text-gray-100"
                   />
                 </div>
                 <div className="flex items-center gap-3">
                   <select
                     value={selectedThemeFilter}
                     onChange={(e) => setSelectedThemeFilter(e.target.value)}
-                    className="h-12 px-4 border border-gray-200 rounded-lg bg-white focus:border-blue-500 focus:ring-blue-500/20 text-sm"
+                    className="h-12 px-4 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-sky-500 focus:ring-sky-500/20 text-sm"
                   >
                     <option value="all">All Themes</option>
                     <option value="unthemed">Unthemed</option>
@@ -471,7 +471,7 @@ export default function Projects() {
                     <Button
                       variant="outline"
                       onClick={handleCreateTheme}
-                      className="h-12 px-4 border-gray-200 hover:bg-blue-50 hover:border-blue-300"
+                      className="h-12 px-4 border-gray-200 dark:border-gray-600 hover:bg-sky-50 dark:hover:bg-gray-700 hover:border-sky-300"
                     >
                       <Sparkles className="h-4 w-4 mr-2" />
                       Themes
@@ -485,8 +485,8 @@ export default function Projects() {
                   variant={selectedThemeFilter === "all" ? "default" : "outline"}
                   className={`cursor-pointer transition-all ${
                     selectedThemeFilter === "all" 
-                      ? "bg-blue-500 text-white" 
-                      : "hover:bg-blue-50"
+                      ? "bg-sky-500 text-white" 
+                      : "hover:bg-sky-50 dark:hover:bg-gray-700"
                   }`}
                   onClick={() => setSelectedThemeFilter("all")}
                 >
@@ -501,7 +501,7 @@ export default function Projects() {
                       className={`cursor-pointer transition-all ${
                         selectedThemeFilter === theme.id 
                           ? "text-white" 
-                          : "hover:bg-blue-50"
+                          : "hover:bg-sky-50 dark:hover:bg-gray-700"
                       }`}
                       style={{
                         backgroundColor: selectedThemeFilter === theme.id ? theme.colorHex : undefined,
@@ -519,7 +519,7 @@ export default function Projects() {
                   className={`cursor-pointer transition-all ${
                     selectedThemeFilter === "unthemed" 
                       ? "bg-gray-500 text-white" 
-                      : "hover:bg-gray-50"
+                      : "hover:bg-gray-50 dark:hover:bg-gray-700"
                   }`}
                   onClick={() => setSelectedThemeFilter("unthemed")}
                 >
@@ -544,18 +544,18 @@ export default function Projects() {
             ))}
           </div>
         ) : filteredProjects.length === 0 ? (
-          <Card className="bg-white/80 backdrop-blur-md border-0 shadow-2xl">
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-0 shadow-2xl">
             <CardContent className="text-center py-20">
               <div className="relative mb-8">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full blur-lg opacity-25 w-32 h-32 mx-auto"></div>
-                <div className="relative p-6 bg-gradient-to-br from-blue-50 to-emerald-50 rounded-full w-32 h-32 mx-auto flex items-center justify-center border border-blue-100">
-                  <FolderOpen className="h-16 w-16 text-blue-600" />
+                <div className="absolute inset-0 bg-gradient-to-r from-sky-500 to-rose-500 rounded-full blur-lg opacity-25 w-32 h-32 mx-auto"></div>
+                <div className="relative p-6 bg-gradient-to-br from-sky-50 to-rose-50 dark:from-gray-700 dark:to-gray-600 rounded-full w-32 h-32 mx-auto flex items-center justify-center border border-sky-100 dark:border-gray-600">
+                  <FolderOpen className="h-16 w-16 text-sky-600 dark:text-sky-400" />
                 </div>
               </div>
-              <h3 className="text-3xl font-bold text-gray-800 mb-3">
+              <h3 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-3">
                 {searchTerm ? "No projects found" : "No projects yet"}
               </h3>
-              <p className="text-gray-600 mb-8 text-xl max-w-md mx-auto">
+              <p className="text-gray-600 dark:text-gray-400 mb-8 text-xl max-w-md mx-auto">
                 {searchTerm 
                   ? "Try adjusting your search terms to find projects" 
                   : (user?.role === 'admin' || user?.role === 'editor') 

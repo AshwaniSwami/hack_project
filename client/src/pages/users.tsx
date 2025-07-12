@@ -341,15 +341,15 @@ export default function Users() {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Search Bar */}
         <div className="mb-8">
-          <Card className="bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-xl">
-            <CardContent className="p-6">
+          <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border border-gray-200/50 dark:border-gray-700/50 shadow-lg">
+            <CardContent className="p-4">
               <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-4 top-3 h-5 w-5 text-gray-400" />
+                <Search className="absolute left-4 top-3 h-5 w-5 text-gray-400 dark:text-gray-500" />
                 <Input
                   placeholder="Search users by name or email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-12 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                  className="pl-12 h-11 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-sky-500 text-gray-900 dark:text-gray-100"
                 />
               </div>
             </CardContent>
@@ -358,12 +358,12 @@ export default function Users() {
 
         {/* Tabs for User Management */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="all" className="flex items-center gap-2">
+          <TabsList className="grid w-full grid-cols-2 mb-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-gray-200/50 dark:border-gray-700/50">
+            <TabsTrigger value="all" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-rose-500 data-[state=active]:text-white transition-all duration-300 text-gray-700 dark:text-gray-300">
               <UsersIcon className="h-4 w-4" />
               All Users ({filteredUsers.length})
             </TabsTrigger>
-            <TabsTrigger value="pending" className="flex items-center gap-2">
+            <TabsTrigger value="pending" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-rose-500 data-[state=active]:text-white transition-all duration-300 text-gray-700 dark:text-gray-300">
               <Clock className="h-4 w-4" />
               Pending Verification ({pendingUsers.length})
             </TabsTrigger>
