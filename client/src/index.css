@@ -137,28 +137,28 @@
 }
 
 .dark {
-  --background: hsl(224, 71%, 4%);
+  --background: hsl(215, 25%, 12%);
   --foreground: hsl(210, 40%, 98%);
-  --muted: hsl(223, 47%, 11%);
-  --muted-foreground: hsl(215, 16%, 57%);
-  --popover: hsl(224, 71%, 4%);
+  --muted: hsl(215, 25%, 18%);
+  --muted-foreground: hsl(215, 16%, 70%);
+  --popover: hsl(215, 25%, 15%);
   --popover-foreground: hsl(210, 40%, 98%);
-  --card: hsl(224, 71%, 4%);
+  --card: hsl(215, 25%, 15%);
   --card-foreground: hsl(210, 40%, 98%);
-  --border: hsl(216, 34%, 17%);
-  --input: hsl(216, 34%, 17%);
-  --primary: hsl(263, 70%, 50%);
+  --border: hsl(216, 34%, 25%);
+  --input: hsl(216, 34%, 25%);
+  --primary: hsl(199, 89%, 48%);
   --primary-foreground: hsl(210, 40%, 98%);
-  --secondary: hsl(215, 28%, 17%);
+  --secondary: hsl(215, 25%, 22%);
   --secondary-foreground: hsl(210, 40%, 98%);
-  --accent: hsl(216, 34%, 17%);
+  --accent: hsl(216, 34%, 25%);
   --accent-foreground: hsl(210, 40%, 98%);
-  --destructive: hsl(0, 63%, 31%);
+  --destructive: hsl(0, 63%, 45%);
   --destructive-foreground: hsl(210, 40%, 98%);
-  --ring: hsl(263, 70%, 50%);
+  --ring: hsl(199, 89%, 48%);
   --radius: 0.75rem;
-  --gradient-start: hsl(263, 70%, 50%);
-  --gradient-end: hsl(221, 83%, 53%);
+  --gradient-start: hsl(199, 89%, 48%);
+  --gradient-end: hsl(0, 63%, 45%);
   --success: hsl(142, 76%, 36%);
   --warning: hsl(38, 92%, 50%);
   --info: hsl(199, 89%, 48%);

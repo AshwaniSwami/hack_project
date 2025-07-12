@@ -131,6 +131,11 @@ The application uses a relational database with the following core entities:
 - July 12, 2025: Updated all page headers with sky-blue to red gradient text effects
 - July 12, 2025: Enhanced navbar with light blue and red color accents and improved visual hierarchy
 - July 12, 2025: Applied light blue and red theme to dashboard background gradients
+- July 12, 2025: Fixed dark mode text visibility issues across all pages with proper contrast
+- July 12, 2025: Improved header integration by reducing padding and making them more compact
+- July 12, 2025: Enhanced dark mode colors using lighter gray tones (avoiding extreme dark colors)
+- July 12, 2025: Fixed Scripts page theme consistency to match other pages with light blue and red accents
+- July 12, 2025: Optimized dark mode CSS variables for better readability and user experience
 - January 12, 2025: Transformed application design to light blue color scheme with whitish transparent navbar for NGO-appropriate branding
 - January 12, 2025: Updated all page headers (Projects, Episodes, Scripts, Users, Radio Stations) with light blue theme and white backgrounds
 - January 12, 2025: Enhanced navbar with whitish transparent background and dark text for better readability

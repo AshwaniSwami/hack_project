@@ -424,16 +424,16 @@ export default function Scripts() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         <Tabs defaultValue="scripts" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-3 lg:w-[450px] bg-white/80 backdrop-blur-md shadow-xl border border-gray-200/50 p-1">
-            <TabsTrigger value="scripts" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white transition-all duration-300">
+          <TabsList className="grid w-full grid-cols-3 lg:w-[450px] bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-1">
+            <TabsTrigger value="scripts" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-rose-500 data-[state=active]:text-white transition-all duration-300 text-gray-700 dark:text-gray-300">
               <FileText className="h-4 w-4" />
               Scripts
             </TabsTrigger>
-            <TabsTrigger value="upload" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white transition-all duration-300">
+            <TabsTrigger value="upload" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-rose-500 data-[state=active]:text-white transition-all duration-300 text-gray-700 dark:text-gray-300">
               <Upload className="h-4 w-4" />
               Upload
             </TabsTrigger>
-            <TabsTrigger value="files" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white transition-all duration-300">
+            <TabsTrigger value="files" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-rose-500 data-[state=active]:text-white transition-all duration-300 text-gray-700 dark:text-gray-300">
               <FolderOpen className="h-4 w-4" />
               Files
             </TabsTrigger>
@@ -441,18 +441,18 @@ export default function Scripts() {
 
           <TabsContent value="scripts" className="space-y-6">
             {/* Enhanced Controls Panel */}
-            <Card className="bg-white/90 backdrop-blur-md border border-gray-200/50 shadow-lg">
+            <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border border-gray-200/50 dark:border-gray-700/50 shadow-lg">
               <CardContent className="p-4">
                 <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
                   {/* Search and Filters */}
                   <div className="flex flex-col sm:flex-row gap-3 flex-1">
                     <div className="relative flex-1 max-w-sm">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
                       <Input
                         placeholder="Search scripts..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 bg-white border-gray-300 focus:border-blue-500"
+                        className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:border-sky-500 text-gray-900 dark:text-gray-100"
                       />
                     </div>
                     
@@ -510,7 +510,7 @@ export default function Scripts() {
                   <div className="flex items-center gap-2">
                     {selectedScripts.length > 0 && (user?.role === 'admin' || user?.role === 'editor') && (
                       <div className="flex items-center gap-2 mr-4">
-                        <span className="text-sm text-gray-600">{selectedScripts.length} selected</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">{selectedScripts.length} selected</span>
                         <Button
                           variant="destructive"
                           size="sm"
@@ -535,7 +535,7 @@ export default function Scripts() {
                         variant={viewMode === 'grid' ? 'default' : 'ghost'}
                         size="sm"
                         onClick={() => setViewMode('grid')}
-                        className={`rounded-r-none ${viewMode === 'grid' ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''}`}
+                        className={`rounded-r-none ${viewMode === 'grid' ? 'bg-sky-600 hover:bg-sky-700 text-white' : ''}`}
                       >
                         <Grid3X3 className="h-4 w-4" />
                       </Button>
@@ -543,7 +543,7 @@ export default function Scripts() {
                         variant={viewMode === 'list' ? 'default' : 'ghost'}
                         size="sm"
                         onClick={() => setViewMode('list')}
-                        className={`rounded-l-none ${viewMode === 'list' ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''}`}
+                        className={`rounded-l-none ${viewMode === 'list' ? 'bg-sky-600 hover:bg-sky-700 text-white' : ''}`}
                       >
                         <List className="h-4 w-4" />
                       </Button>
@@ -554,7 +554,7 @@ export default function Scripts() {
                 {/* Results Count & Select All */}
                 <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
                   <div className="flex items-center gap-4">
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
                       Showing {filteredAndSortedScripts.length} of {scripts.length} scripts
                     </div>
                     {(user?.role === 'admin' || user?.role === 'editor') && filteredAndSortedScripts.length > 0 && (
@@ -565,7 +565,7 @@ export default function Scripts() {
                           onChange={toggleSelectAll}
                           className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                         />
-                        <span className="text-sm text-gray-600">Select all</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Select all</span>
                       </div>
                     )}
                   </div>
@@ -601,18 +601,18 @@ export default function Scripts() {
                 ))}
               </div>
             ) : filteredAndSortedScripts.length === 0 ? (
-              <Card className="bg-white/80 backdrop-blur-md border-0 shadow-xl">
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-0 shadow-xl">
                 <CardContent className="text-center py-16">
                   <div className="relative mb-6">
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full blur-lg opacity-25 w-24 h-24 mx-auto"></div>
-                    <div className="relative p-4 bg-gradient-to-br from-blue-50 to-emerald-50 rounded-full w-24 h-24 mx-auto flex items-center justify-center border border-blue-100">
-                      <FileText className="h-12 w-12 text-blue-600" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-sky-500 to-rose-500 rounded-full blur-lg opacity-25 w-24 h-24 mx-auto"></div>
+                    <div className="relative p-4 bg-gradient-to-br from-sky-50 to-rose-50 dark:from-gray-700 dark:to-gray-600 rounded-full w-24 h-24 mx-auto flex items-center justify-center border border-sky-100 dark:border-gray-600">
+                      <FileText className="h-12 w-12 text-sky-600 dark:text-sky-400" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">
+                  <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                     {searchTerm || statusFilter !== "all" || projectFilter !== 'all' ? 'No scripts found' : 'No scripts yet'}
                   </h3>
-                  <p className="text-gray-600 mb-6 max-w-sm mx-auto">
+                  <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-sm mx-auto">
                     {searchTerm || statusFilter !== "all" || projectFilter !== 'all'
                       ? "Try adjusting your search filters" 
                       : "Start creating your first radio script"}
