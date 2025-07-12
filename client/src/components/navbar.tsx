@@ -40,22 +40,21 @@ export function Navbar() {
   ];
 
   return (
-    <header className="glassmorphism text-white shadow-2xl sticky top-0 z-50 border-b border-white/10">
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/80 via-purple-600/80 to-indigo-600/80 backdrop-blur-lg"></div>
+    <header className="navbar-whitish text-slate-800 shadow-xl sticky top-0 z-50 border-b border-blue-200/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="flex justify-between items-center h-20">
           <div className="flex items-center space-x-6">
             <Link href="/">
               <div className="flex items-center space-x-3 cursor-pointer group">
-                <div className="relative p-3 bg-white/15 rounded-2xl backdrop-blur-sm group-hover:bg-white/25 transition-all duration-300 shadow-lg ngo-shadow">
-                  <Radio className="h-7 w-7 text-white drop-shadow-sm" />
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative p-3 bg-blue-50 rounded-2xl backdrop-blur-sm group-hover:bg-blue-100 transition-all duration-300 shadow-lg">
+                  <Radio className="h-7 w-7 text-blue-600 drop-shadow-sm" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-100/30 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
                 <div className="group-hover:scale-105 transition-transform duration-200">
-                  <h1 className="text-xl font-bold bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+                  <h1 className="text-xl font-bold bg-gradient-to-r from-blue-900 to-blue-700 bg-clip-text text-transparent">
                     SMART Radio
                   </h1>
-                  <p className="text-xs text-white/90 font-medium tracking-wide">NGO Content Hub</p>
+                  <p className="text-xs text-blue-700 font-medium tracking-wide">NGO Content Hub</p>
                 </div>
               </div>
             </Link>
@@ -70,8 +69,8 @@ export function Navbar() {
                       variant="ghost"
                       size="sm"
                       className={cn(
-                        "relative flex items-center space-x-2 px-4 py-2 rounded-xl text-white/90 hover:text-white hover:bg-white/20 transition-all duration-300 group",
-                        isActive && "bg-white/25 text-white font-semibold shadow-lg backdrop-blur-sm ngo-shadow"
+                        "relative flex items-center space-x-2 px-4 py-2 rounded-xl text-slate-700 hover:text-blue-800 hover:bg-blue-50 transition-all duration-300 group",
+                        isActive && "bg-blue-100 text-blue-800 font-semibold shadow-lg backdrop-blur-sm"
                       )}
                     >
                       <Icon className={cn(
@@ -80,7 +79,7 @@ export function Navbar() {
                       )} />
                       <span className="text-sm">{item.label}</span>
                       {isActive && (
-                        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-white rounded-full"></div>
+                        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-blue-600 rounded-full"></div>
                       )}
                     </Button>
                   </Link>

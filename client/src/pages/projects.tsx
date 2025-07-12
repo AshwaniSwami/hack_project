@@ -314,33 +314,33 @@ export default function Projects() {
   const projectFiles = allFiles?.files || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-sky-50 to-cyan-50 relative">
       <div className="floating-bg"></div>
       {/* Enhanced Header */}
-      <div className="relative overflow-hidden glassmorphism">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/70 via-purple-600/70 to-indigo-600/70"></div>
-        <div className="relative px-6 py-10">
+      <div className="relative overflow-hidden bg-white shadow-lg border-b border-blue-100">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-sky-500/10 to-cyan-500/10"></div>
+        <div className="relative px-6 py-12">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-6">
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-xl blur opacity-75"></div>
-                  <div className="relative p-4 bg-white/20 backdrop-blur-sm rounded-xl">
-                    <FolderOpen className="h-8 w-8 text-white" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-sky-400 rounded-xl blur opacity-30"></div>
+                  <div className="relative p-4 bg-blue-50 backdrop-blur-sm rounded-xl border border-blue-200">
+                    <FolderOpen className="h-8 w-8 text-blue-600" />
                   </div>
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold text-white mb-2 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+                  <h1 className="text-4xl font-bold text-slate-800 mb-2 bg-gradient-to-r from-blue-700 to-sky-700 bg-clip-text text-transparent">
                     Projects
                   </h1>
-                  <p className="text-blue-100 text-lg">Manage your radio projects and content</p>
+                  <p className="text-slate-600 text-lg">Manage your radio projects and content</p>
                 </div>
               </div>
               
               {(user?.role === 'admin' || user?.role === 'editor') && (
                 <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button size="lg" className="bg-white/20 text-white hover:bg-white/30 shadow-lg transition-all duration-300 hover:scale-105 border-0 backdrop-blur-sm">
+                    <Button size="lg" className="bg-blue-600 text-white hover:bg-blue-700 shadow-lg transition-all duration-300 hover:scale-105 border-0">
                       <Plus className="h-5 w-5 mr-3" />
                       New Project
                     </Button>
