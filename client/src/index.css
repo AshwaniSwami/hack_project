@@ -202,10 +202,10 @@
     border-bottom: 1px solid rgba(59, 130, 246, 0.2);
   }
   
-  .navbar-whitish {
-    background: rgba(255, 255, 255, 0.95);
+  .navbar-light-blue {
+    background: rgba(135, 206, 235, 0.85);
     backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+    border-bottom: 1px solid rgba(135, 206, 235, 0.3);
   }
   
   .dark .glassmorphism {
