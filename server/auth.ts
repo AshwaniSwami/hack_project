@@ -107,6 +107,7 @@ export const login = async (req: Request, res: Response) => {
 
     // Store user ID in session
     (req.session as any).userId = user.id;
+    console.log("Login successful - stored userId in session:", user.id, "sessionID:", req.sessionID);
     
     res.json({
       success: true,
@@ -203,15 +204,20 @@ export const logout = (req: Request, res: Response) => {
 export const getCurrentUser = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = (req.session as any).userId;
+    console.log("Session check - userId:", userId, "sessionID:", req.sessionID);
+    
     if (!userId) {
+      console.log("No userId in session");
       return res.status(401).json({ message: "Not authenticated" });
     }
 
     const user = await storage.getUser(userId);
     if (!user) {
+      console.log("User not found for userId:", userId);
       return res.status(404).json({ message: "User not found" });
     }
 
+    console.log("Successfully retrieved user:", user.email);
     res.json({
       id: user.id,
       email: user.email,

@@ -47,12 +47,12 @@ export default function AuthPage() {
       const data = await response.json();
 
       if (response.ok) {
+        // Clear any existing cached auth data
+        queryClient.setQueryData(["/api/auth/user"], data.user);
         // Invalidate and refetch auth data
         queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-        // Small delay to ensure query updates
-        setTimeout(() => {
-          setLocation("/dashboard");
-        }, 100);
+        // Navigate immediately since we have the user data
+        setLocation("/dashboard");
       } else {
         setError(data.message || "Login failed");
       }
