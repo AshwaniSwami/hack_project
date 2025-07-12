@@ -402,10 +402,10 @@ export default function Users() {
                         <UsersIcon className="h-16 w-16 text-blue-600" />
                       </div>
                     </div>
-                    <h3 className="text-3xl font-bold text-gray-800 mb-3">
+                    <h3 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-3">
                       {searchTerm ? "No users found" : "No users yet"}
                     </h3>
-                    <p className="text-gray-600 mb-8 text-xl max-w-md mx-auto">
+                    <p className="text-gray-600 dark:text-gray-400 mb-8 text-xl max-w-md mx-auto">
                       {searchTerm 
                         ? "Try adjusting your search terms to find users" 
                         : "Start managing your team by adding the first user"
@@ -417,12 +417,12 @@ export default function Users() {
                     <Table>
                       <TableHeader>
                         <TableRow className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
-                          <TableHead className="font-semibold text-gray-700">User</TableHead>
-                          <TableHead className="font-semibold text-gray-700">Email</TableHead>
-                          <TableHead className="font-semibold text-gray-700">Role</TableHead>
-                          <TableHead className="font-semibold text-gray-700">Status</TableHead>
-                          <TableHead className="font-semibold text-gray-700">Created</TableHead>
-                          <TableHead className="font-semibold text-gray-700 text-right">Actions</TableHead>
+                          <TableHead className="font-semibold text-gray-700 dark:text-gray-300">User</TableHead>
+                          <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Email</TableHead>
+                          <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Role</TableHead>
+                          <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Status</TableHead>
+                          <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Created</TableHead>
+                          <TableHead className="font-semibold text-gray-700 dark:text-gray-300 text-right">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -440,12 +440,12 @@ export default function Users() {
                                   </div>
                                 </div>
                                 <div>
-                                  <div className="font-semibold text-gray-900">
+                                  <div className="font-semibold text-gray-900 dark:text-gray-100">
                                     {user.firstName && user.lastName 
                                       ? `${user.firstName} ${user.lastName}` 
                                       : user.username || user.email?.split("@")[0] || "User"}
                                   </div>
-                                  <div className="text-sm text-gray-500">
+                                  <div className="text-sm text-gray-500 dark:text-gray-400">
                                     {user.username && `@${user.username}`} • ID: {user.id.substring(0, 8)}...
                                   </div>
                                 </div>
@@ -454,7 +454,7 @@ export default function Users() {
                             <TableCell>
                               <div className="flex items-center space-x-2">
                                 <Mail className="h-4 w-4 text-gray-400" />
-                                <span className="text-gray-900">{user.email}</span>
+                                <span className="text-gray-900 dark:text-gray-100">{user.email}</span>
                               </div>
                             </TableCell>
                             <TableCell>
@@ -494,9 +494,9 @@ export default function Users() {
                                 )}
                               </div>
                             </TableCell>
-                            <TableCell className="text-gray-600">
+                            <TableCell className="text-gray-600 dark:text-gray-400">
                               <div className="flex items-center space-x-2">
-                                <Clock className="h-4 w-4 text-gray-400" />
+                                <Clock className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                                 <span>{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</span>
                               </div>
                             </TableCell>

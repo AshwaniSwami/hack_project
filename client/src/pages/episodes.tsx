@@ -578,7 +578,7 @@ export default function Episodes() {
                   <h3 className="text-xl font-bold text-gray-800 mb-2">
                     {searchQuery || projectFilter !== 'all' ? 'No episodes found' : 'No episodes yet'}
                   </h3>
-                  <p className="text-gray-600 mb-6 max-w-sm mx-auto">
+                  <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-sm mx-auto">
                     {searchQuery || projectFilter !== 'all' ? 'Try adjusting your search filters' : 'Start creating engaging radio content for your audience'}
                   </p>
                   {(!searchQuery && projectFilter === 'all') && (user?.role === 'admin' || user?.role === 'editor') && (
@@ -644,14 +644,14 @@ export default function Episodes() {
                           </h3>
                           
                           {project && (
-                            <div className="flex items-center space-x-2 text-xs text-gray-600">
+                            <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
                               <FolderOpen className="h-3 w-3 text-blue-500" />
                               <span className="truncate">{project.name}</span>
                             </div>
                           )}
 
                           {episode.description && (
-                            <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
                               {episode.description}
                             </p>
                           )}

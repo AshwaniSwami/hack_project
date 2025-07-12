@@ -431,10 +431,10 @@ export default function RadioStations() {
                   <Radio className="h-16 w-16 text-blue-600" />
                 </div>
               </div>
-              <h3 className="text-3xl font-bold text-gray-800 mb-3">
+              <h3 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-3">
                 {searchTerm ? "No stations found" : "No radio stations yet"}
               </h3>
-              <p className="text-gray-600 mb-8 text-xl max-w-md mx-auto">
+              <p className="text-gray-600 dark:text-gray-400 mb-8 text-xl max-w-md mx-auto">
                 {searchTerm 
                   ? "Try adjusting your search terms to find stations" 
                   : "Start building your network by adding your first radio station partner"
@@ -458,13 +458,13 @@ export default function RadioStations() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
-                    <TableHead className="font-semibold text-gray-700">Station</TableHead>
-                    <TableHead className="font-semibold text-gray-700">Contact</TableHead>
-                    <TableHead className="font-semibold text-gray-700">Email</TableHead>
-                    <TableHead className="font-semibold text-gray-700">Phone</TableHead>
-                    <TableHead className="font-semibold text-gray-700">Status</TableHead>
-                    <TableHead className="font-semibold text-gray-700">Created</TableHead>
-                    <TableHead className="font-semibold text-gray-700 text-right">Actions</TableHead>
+                    <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Station</TableHead>
+                    <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Contact</TableHead>
+                    <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Email</TableHead>
+                    <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Phone</TableHead>
+                    <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Status</TableHead>
+                    <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Created</TableHead>
+                    <TableHead className="font-semibold text-gray-700 dark:text-gray-300 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -482,9 +482,9 @@ export default function RadioStations() {
                             </div>
                           </div>
                           <div>
-                            <div className="font-semibold text-gray-900">{station.name}</div>
+                            <div className="font-semibold text-gray-900 dark:text-gray-100">{station.name}</div>
                             {station.address && (
-                              <div className="text-sm text-gray-500 flex items-center mt-1">
+                              <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center mt-1">
                                 <MapPin className="h-3 w-3 mr-1" />
                                 {station.address.length > 30 ? `${station.address.substring(0, 30)}...` : station.address}
                               </div>
@@ -496,26 +496,26 @@ export default function RadioStations() {
                         {station.contactPerson ? (
                           <div className="flex items-center space-x-2">
                             <Antenna className="h-4 w-4 text-blue-600" />
-                            <span className="text-gray-700">{station.contactPerson}</span>
+                            <span className="text-gray-700 dark:text-gray-300">{station.contactPerson}</span>
                           </div>
                         ) : (
-                          <span className="text-gray-400">-</span>
+                          <span className="text-gray-400 dark:text-gray-500">-</span>
                         )}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
                           <Mail className="h-4 w-4 text-emerald-600" />
-                          <span className="text-gray-700">{station.email}</span>
+                          <span className="text-gray-700 dark:text-gray-300">{station.email}</span>
                         </div>
                       </TableCell>
                       <TableCell>
                         {station.phone ? (
                           <div className="flex items-center space-x-2">
                             <Phone className="h-4 w-4 text-purple-600" />
-                            <span className="text-gray-700">{station.phone}</span>
+                            <span className="text-gray-700 dark:text-gray-300">{station.phone}</span>
                           </div>
                         ) : (
-                          <span className="text-gray-400">-</span>
+                          <span className="text-gray-400 dark:text-gray-500">-</span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -540,7 +540,7 @@ export default function RadioStations() {
                       <TableCell>
                         <div className="flex items-center space-x-2">
                           <Clock className="h-3 w-3 text-gray-400" />
-                          <span className="text-sm text-gray-500">
+                          <span className="text-sm text-gray-500 dark:text-gray-400">
                             {new Date(station.createdAt!).toLocaleDateString()}
                           </span>
                         </div>
