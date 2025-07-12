@@ -140,6 +140,10 @@ The application uses a relational database with the following core entities:
 - July 12, 2025: Updated Projects, Episodes, Users, and Radio Stations pages with uniform light blue and red theme
 - July 12, 2025: Standardized search bars with proper dark mode support and sky-blue focus colors
 - July 12, 2025: Enhanced all page cards with consistent backdrop-blur effects and dark mode compatibility
+- July 12, 2025: Removed "select all" functionality from both Episodes and Scripts pages for cleaner interface
+- July 12, 2025: Created centralized color management system in @/lib/colors.ts for consistent theming
+- July 12, 2025: Enhanced color storage and management with helper functions for status colors, gradients, and card styles
+- July 12, 2025: Updated all pages to use the new centralized color system for better maintainability
 - January 12, 2025: Transformed application design to light blue color scheme with whitish transparent navbar for NGO-appropriate branding
 - January 12, 2025: Updated all page headers (Projects, Episodes, Scripts, Users, Radio Stations) with light blue theme and white backgrounds
 - January 12, 2025: Enhanced navbar with whitish transparent background and dark text for better readability

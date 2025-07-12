@@ -62,6 +62,7 @@ import {
 } from "lucide-react";
 import { EpisodeFileUpload } from "@/components/episode-file-upload";
 import { FileList } from "@/components/file-list";
+import { colors, getCardStyle, getGradientStyle } from "@/lib/colors";
 import type { Episode, Project } from "@shared/schema";
 
 const episodeFormSchema = z.object({
@@ -222,11 +223,7 @@ export default function Episodes() {
     );
   };
 
-  const toggleSelectAll = () => {
-    setSelectedEpisodes(
-      selectedEpisodes.length === filteredAndSortedEpisodes.length ? [] : filteredAndSortedEpisodes.map(e => e.id)
-    );
-  };
+
 
   const filteredAndSortedEpisodes = episodes
     .filter((episode) => {
@@ -258,11 +255,11 @@ export default function Episodes() {
     });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-rose-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative">
+    <div className={`min-h-screen ${getGradientStyle('main')} relative`}>
       <div className="floating-bg"></div>
       {/* Enhanced Header */}
-      <div className="relative overflow-hidden bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-lg border-b border-sky-200/30 dark:border-gray-700/50">
-        <div className="absolute inset-0 bg-gradient-to-r from-sky-500/10 via-blue-500/10 to-rose-500/10 dark:from-sky-500/5 dark:via-blue-500/5 dark:to-rose-500/5"></div>
+      <div className={`relative overflow-hidden ${getCardStyle('accent')} backdrop-blur-sm shadow-lg border-b ${colors.border.accent}`}>
+        <div className={`absolute inset-0 ${getGradientStyle('header')}`}></div>
         <div className="relative px-6 py-8">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between">
@@ -274,7 +271,7 @@ export default function Episodes() {
                   </div>
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-slate-800 dark:text-gray-100 mb-1 bg-gradient-to-r from-sky-500 to-red-500 bg-clip-text text-transparent">
+                  <h1 className={`text-2xl font-bold ${colors.text.primary} mb-1 ${colors.gradients.text}`}>
                     Episodes
                   </h1>
                   <p className="text-slate-600 dark:text-gray-400 text-sm">Manage your radio episodes and audio content</p>
@@ -284,7 +281,7 @@ export default function Episodes() {
               {(user?.role === 'admin' || user?.role === 'editor') && (
                 <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button size="lg" className="bg-blue-600 text-white hover:bg-blue-700 shadow-lg transition-all duration-300 hover:scale-105 border-0">
+                    <Button size="lg" className={colors.button.primary}>
                       <Plus className="h-5 w-5 mr-3" />
                       New Episode
                     </Button>
@@ -533,23 +530,12 @@ export default function Episodes() {
                   </div>
                 </div>
                 
-                {/* Results Count & Select All */}
-                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
+                {/* Results Count */}
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
                   <div className="flex items-center gap-4">
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
                       Showing {filteredAndSortedEpisodes.length} of {episodes.length} episodes
                     </div>
-                    {(user?.role === 'admin' || user?.role === 'editor') && filteredAndSortedEpisodes.length > 0 && (
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={selectedEpisodes.length === filteredAndSortedEpisodes.length}
-                          onChange={toggleSelectAll}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-sm text-gray-600">Select all</span>
-                      </div>
-                    )}
                   </div>
                   {(searchQuery || projectFilter !== 'all') && (
                     <Button

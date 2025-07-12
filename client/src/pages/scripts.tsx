@@ -67,6 +67,7 @@ import {
 import { ScriptEditor } from "@/components/script-editor";
 import { ScriptFileUpload } from "@/components/script-file-upload";
 import { FileList } from "@/components/file-list";
+import { colors, getStatusColor, getCardStyle, getGradientStyle } from "@/lib/colors";
 import type { Script, Project } from "@shared/schema";
 
 const scriptFormSchema = z.object({
@@ -79,12 +80,7 @@ const scriptFormSchema = z.object({
 
 type ScriptFormData = z.infer<typeof scriptFormSchema>;
 
-const statusColors = {
-  "Draft": "bg-gray-100 text-gray-700 border-gray-200",
-  "Under Review": "bg-yellow-100 text-yellow-700 border-yellow-200",
-  "Approved": "bg-green-100 text-green-700 border-green-200", 
-  "Published": "bg-blue-100 text-blue-700 border-blue-200"
-};
+
 
 const statusIcons = {
   "Draft": Edit,
@@ -231,11 +227,7 @@ export default function Scripts() {
     );
   };
 
-  const toggleSelectAll = () => {
-    setSelectedScripts(
-      selectedScripts.length === filteredAndSortedScripts.length ? [] : filteredAndSortedScripts.map(s => s.id)
-    );
-  };
+
 
   const filteredAndSortedScripts = scripts
     .filter((script) => {
@@ -268,11 +260,11 @@ export default function Scripts() {
     });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-rose-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative">
+    <div className={`min-h-screen ${getGradientStyle('main')} relative`}>
       <div className="floating-bg"></div>
       {/* Enhanced Header */}
-      <div className="relative overflow-hidden bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-lg border-b border-sky-200/30 dark:border-gray-700/50">
-        <div className="absolute inset-0 bg-gradient-to-r from-sky-500/10 via-blue-500/10 to-rose-500/10 dark:from-sky-500/5 dark:via-blue-500/5 dark:to-rose-500/5"></div>
+      <div className={`relative overflow-hidden ${getCardStyle('accent')} backdrop-blur-sm shadow-lg border-b ${colors.border.accent}`}>
+        <div className={`absolute inset-0 ${getGradientStyle('header')}`}></div>
         <div className="relative px-6 py-8">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between">
@@ -284,7 +276,7 @@ export default function Scripts() {
                   </div>
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-slate-800 dark:text-gray-100 mb-1 bg-gradient-to-r from-sky-500 to-red-500 bg-clip-text text-transparent">
+                  <h1 className={`text-2xl font-bold ${colors.text.primary} mb-1 ${colors.gradients.text}`}>
                     Scripts
                   </h1>
                   <p className="text-slate-600 dark:text-gray-400 text-sm">Create and manage your radio scripts and content</p>
@@ -294,7 +286,7 @@ export default function Scripts() {
               {(user?.role === 'admin' || user?.role === 'editor') && (
                 <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button size="lg" className="bg-blue-600 text-white hover:bg-blue-700 shadow-lg transition-all duration-300 hover:scale-105 border-0">
+                    <Button size="lg" className={colors.button.primary}>
                       <Plus className="h-5 w-5 mr-3" />
                       New Script
                     </Button>
@@ -551,23 +543,12 @@ export default function Scripts() {
                   </div>
                 </div>
                 
-                {/* Results Count & Select All */}
-                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
+                {/* Results Count */}
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
                   <div className="flex items-center gap-4">
                     <div className="text-sm text-gray-600 dark:text-gray-400">
                       Showing {filteredAndSortedScripts.length} of {scripts.length} scripts
                     </div>
-                    {(user?.role === 'admin' || user?.role === 'editor') && filteredAndSortedScripts.length > 0 && (
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={selectedScripts.length === filteredAndSortedScripts.length}
-                          onChange={toggleSelectAll}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Select all</span>
-                      </div>
-                    )}
                   </div>
                   {(searchTerm || statusFilter !== 'all' || projectFilter !== 'all') && (
                     <Button
@@ -647,7 +628,7 @@ export default function Scripts() {
                                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                               />
                             )}
-                            <Badge variant="secondary" className={`text-xs px-2 py-1 ${statusColors[script.status as keyof typeof statusColors]}`}>
+                            <Badge variant="secondary" className={`text-xs px-2 py-1 ${getStatusColor(script.status)}`}>
                               <StatusIcon className="h-3 w-3 mr-1" />
                               {script.status}
                             </Badge>
@@ -735,7 +716,7 @@ export default function Scripts() {
                                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                 />
                               )}
-                              <Badge variant="secondary" className={`text-xs px-2 py-1 shrink-0 ${statusColors[script.status as keyof typeof statusColors]}`}>
+                              <Badge variant="secondary" className={`text-xs px-2 py-1 shrink-0 ${getStatusColor(script.status)}`}>
                                 <StatusIcon className="h-3 w-3 mr-1" />
                                 {script.status}
                               </Badge>
