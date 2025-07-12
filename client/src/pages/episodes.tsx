@@ -575,7 +575,7 @@ export default function Episodes() {
                       <Mic className="h-12 w-12 text-blue-600" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">
+                  <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                     {searchQuery || projectFilter !== 'all' ? 'No episodes found' : 'No episodes yet'}
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-sm mx-auto">
@@ -598,7 +598,7 @@ export default function Episodes() {
                 {filteredAndSortedEpisodes.map((episode) => {
                   const project = projects.find(p => p.id === episode.projectId);
                   return (
-                    <Card key={episode.id} className="group hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm border border-gray-200/50 hover:scale-[1.02] hover:border-blue-300">
+                    <Card key={episode.id} className="group hover:shadow-lg transition-all duration-300 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-600/50 hover:scale-[1.02] hover:border-blue-300 dark:hover:border-blue-500">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex items-center gap-2">
@@ -610,7 +610,7 @@ export default function Episodes() {
                                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                               />
                             )}
-                            <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-1">
+                            <Badge variant="secondary" className="text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 px-2 py-1">
                               #{episode.episodeNumber}
                             </Badge>
                           </div>
@@ -621,7 +621,7 @@ export default function Episodes() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => handleEdit(episode)}
-                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-7 w-7 p-0 hover:bg-blue-50"
+                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-7 w-7 p-0 hover:bg-blue-50 dark:hover:bg-blue-900/30"
                                 >
                                   <Edit className="h-3 w-3 text-blue-600" />
                                 </Button>
@@ -629,7 +629,7 @@ export default function Episodes() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => handleDelete(episode.id)}
-                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-7 w-7 p-0 hover:bg-red-50"
+                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-7 w-7 p-0 hover:bg-red-50 dark:hover:bg-red-900/30"
                                 >
                                   <Trash2 className="h-3 w-3 text-red-500" />
                                 </Button>
@@ -639,7 +639,7 @@ export default function Episodes() {
                         </div>
 
                         <div className="space-y-3">
-                          <h3 className="font-semibold text-sm text-gray-800 line-clamp-2 group-hover:text-blue-700 transition-colors duration-300 leading-tight">
+                          <h3 className="font-semibold text-sm text-gray-800 dark:text-gray-100 line-clamp-2 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors duration-300 leading-tight">
                             {episode.title}
                           </h3>
                           
@@ -656,10 +656,10 @@ export default function Episodes() {
                             </p>
                           )}
 
-                          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                          <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
                             <div className="flex items-center space-x-1">
-                              <Clock className="h-3 w-3 text-gray-400" />
-                              <span className="text-xs text-gray-500">
+                              <Clock className="h-3 w-3 text-gray-400 dark:text-gray-500" />
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
                                 {new Date(episode.createdAt).toLocaleDateString()}
                               </span>
                             </div>
@@ -680,7 +680,7 @@ export default function Episodes() {
                 {filteredAndSortedEpisodes.map((episode) => {
                   const project = projects.find(p => p.id === episode.projectId);
                   return (
-                    <Card key={episode.id} className="group hover:shadow-md transition-all duration-300 bg-white/80 backdrop-blur-sm border border-gray-200/50 hover:border-blue-300">
+                    <Card key={episode.id} className="group hover:shadow-md transition-all duration-300 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-600/50 hover:border-blue-300 dark:hover:border-blue-500">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-4 flex-1">
@@ -693,23 +693,23 @@ export default function Episodes() {
                                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                 />
                               )}
-                              <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-1 shrink-0">
+                              <Badge variant="secondary" className="text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 px-2 py-1 shrink-0">
                                 #{episode.episodeNumber}
                               </Badge>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-sm text-gray-800 truncate group-hover:text-blue-700 transition-colors duration-300">
+                              <h3 className="font-semibold text-sm text-gray-800 dark:text-gray-100 truncate group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors duration-300">
                                 {episode.title}
                               </h3>
                               <div className="flex items-center space-x-4 mt-1">
                                 {project && (
-                                  <div className="flex items-center space-x-1 text-xs text-gray-600">
+                                  <div className="flex items-center space-x-1 text-xs text-gray-600 dark:text-gray-400">
                                     <FolderOpen className="h-3 w-3 text-blue-500" />
                                     <span>{project.name}</span>
                                   </div>
                                 )}
-                                <div className="flex items-center space-x-1 text-xs text-gray-500">
-                                  <Clock className="h-3 w-3 text-gray-400" />
+                                <div className="flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-400">
+                                  <Clock className="h-3 w-3 text-gray-400 dark:text-gray-500" />
                                   <span>{new Date(episode.createdAt).toLocaleDateString()}</span>
                                 </div>
                                 {episode.isPremium && (
@@ -727,7 +727,7 @@ export default function Episodes() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => handleEdit(episode)}
-                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-8 w-8 p-0 hover:bg-blue-50"
+                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-8 w-8 p-0 hover:bg-blue-50 dark:hover:bg-blue-900/30"
                                 >
                                   <Edit className="h-4 w-4 text-blue-600" />
                                 </Button>
@@ -735,7 +735,7 @@ export default function Episodes() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => handleDelete(episode.id)}
-                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-8 w-8 p-0 hover:bg-red-50"
+                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-8 w-8 p-0 hover:bg-red-50 dark:hover:bg-red-900/30"
                                 >
                                   <Trash2 className="h-4 w-4 text-red-500" />
                                 </Button>
@@ -752,9 +752,9 @@ export default function Episodes() {
           </TabsContent>
 
           <TabsContent value="upload">
-            <Card className="bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-2xl">
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-gray-200/50 dark:border-gray-600/50 shadow-2xl">
               <CardHeader className="pb-6">
-                <CardTitle className="flex items-center gap-3 text-xl">
+                <CardTitle className="flex items-center gap-3 text-xl text-gray-900 dark:text-gray-100">
                   <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
                     <FileAudio className="h-6 w-6 text-white" />
                   </div>
@@ -768,9 +768,9 @@ export default function Episodes() {
           </TabsContent>
 
           <TabsContent value="files">
-            <Card className="bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-2xl">
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-gray-200/50 dark:border-gray-600/50 shadow-2xl">
               <CardHeader className="pb-6">
-                <CardTitle className="flex items-center gap-3 text-xl">
+                <CardTitle className="flex items-center gap-3 text-xl text-gray-900 dark:text-gray-100">
                   <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
                     <FolderOpen className="h-6 w-6 text-white" />
                   </div>
@@ -782,9 +782,9 @@ export default function Episodes() {
                   {projects.map((project) => {
                     const projectEpisodes = episodes.filter(ep => ep.projectId === project.id);
                     return (
-                      <Card key={project.id} className="bg-gradient-to-br from-gray-50 to-blue-50/50 border border-gray-200 shadow-lg">
+                      <Card key={project.id} className="bg-gradient-to-br from-gray-50 to-blue-50/50 dark:from-gray-800 dark:to-blue-900/20 border border-gray-200 dark:border-gray-600 shadow-lg">
                         <CardHeader className="pb-4">
-                          <CardTitle className="text-lg flex items-center gap-3">
+                          <CardTitle className="text-lg flex items-center gap-3 text-gray-900 dark:text-gray-100">
                             <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
                               <FolderOpen className="h-5 w-5 text-white" />
                             </div>
@@ -793,8 +793,8 @@ export default function Episodes() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                           <div>
-                            <h5 className="text-sm font-semibold mb-3 text-gray-700 flex items-center gap-3 p-2 bg-blue-50/80 rounded-lg">
-                              <FileAudio className="h-5 w-5 text-blue-600" />
+                            <h5 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300 flex items-center gap-3 p-2 bg-blue-50/80 dark:bg-blue-900/20 rounded-lg">
+                              <FileAudio className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                               Project Episode Files
                             </h5>
                             <FileList 
@@ -805,9 +805,9 @@ export default function Episodes() {
                           </div>
                           
                           {projectEpisodes.map((episode) => (
-                            <div key={episode.id} className="pl-6 border-l-2 border-emerald-200 bg-emerald-50/30 rounded-r-lg">
-                              <h5 className="text-sm font-semibold mb-3 text-gray-700 flex items-center gap-3 p-2">
-                                <Hash className="h-5 w-5 text-emerald-600" />
+                            <div key={episode.id} className="pl-6 border-l-2 border-emerald-200 dark:border-emerald-700 bg-emerald-50/30 dark:bg-emerald-900/20 rounded-r-lg">
+                              <h5 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300 flex items-center gap-3 p-2">
+                                <Hash className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                                 Episode {episode.episodeNumber}: {episode.title}
                               </h5>
                               <FileList 

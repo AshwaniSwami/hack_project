@@ -135,9 +135,9 @@ export function EpisodeFileUpload() {
   }
 
   return (
-    <Card>
+    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
           <Upload className="h-5 w-5" />
           Upload Episode Files
         </CardTitle>
@@ -145,7 +145,7 @@ export function EpisodeFileUpload() {
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="project-select">Project *</Label>
+            <Label htmlFor="project-select" className="text-gray-900 dark:text-gray-100">Project *</Label>
             <Select value={selectedProject} onValueChange={(value) => {
               setSelectedProject(value);
               setSelectedEpisode("none");
@@ -164,7 +164,7 @@ export function EpisodeFileUpload() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="episode-select">Specific Episode (Optional)</Label>
+            <Label htmlFor="episode-select" className="text-gray-900 dark:text-gray-100">Specific Episode (Optional)</Label>
             <Select 
               value={selectedEpisode} 
               onValueChange={setSelectedEpisode}
@@ -186,7 +186,7 @@ export function EpisodeFileUpload() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="file-upload">Select episode file</Label>
+          <Label htmlFor="file-upload" className="text-gray-900 dark:text-gray-100">Select episode file</Label>
           <Input
             id="file-upload"
             type="file"
@@ -194,16 +194,16 @@ export function EpisodeFileUpload() {
             onChange={handleFileChange}
             className="cursor-pointer"
           />
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Supported formats: Audio and video files (MP3, MP4, WAV, M4A, etc.)
           </p>
         </div>
 
         {file && (
-          <div className="flex items-center gap-2 p-2 border rounded bg-muted">
-            <Music className="h-4 w-4" />
-            <span className="text-sm font-medium">{file.name}</span>
-            <span className="text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 p-2 border border-gray-200 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-700">
+            <Music className="h-4 w-4 text-gray-700 dark:text-gray-300" />
+            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{file.name}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">
               ({(file.size / 1024 / 1024).toFixed(2)} MB)
             </span>
           </div>

@@ -208,12 +208,12 @@ export function FileList({ entityType, entityId, title = "Files" }: FileListProp
 
   if (isLoading) {
     return (
-      <Card>
+      <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
         <CardHeader>
-          <CardTitle>{title}</CardTitle>
+          <CardTitle className="text-gray-900 dark:text-gray-100">{title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">Loading files...</p>
+          <p className="text-gray-500 dark:text-gray-400">Loading files...</p>
         </CardContent>
       </Card>
     );
@@ -221,21 +221,21 @@ export function FileList({ entityType, entityId, title = "Files" }: FileListProp
 
   if (!files || files.length === 0) {
     return (
-      <Card>
+      <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
         <CardHeader>
-          <CardTitle>{title}</CardTitle>
+          <CardTitle className="text-gray-900 dark:text-gray-100">{title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">No files uploaded yet.</p>
+          <p className="text-gray-500 dark:text-gray-400">No files uploaded yet.</p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card>
+    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
+        <CardTitle className="flex items-center justify-between text-gray-900 dark:text-gray-100">
           {title}
           <div className="flex items-center space-x-2">
             <Badge variant="secondary">{displayFiles.length} file{displayFiles.length !== 1 ? 's' : ''}</Badge>
@@ -258,7 +258,7 @@ export function FileList({ entityType, entityId, title = "Files" }: FileListProp
                       size="sm"
                       onClick={handleSaveOrder}
                       disabled={reorderMutation.isPending}
-                      className="h-6 px-2 text-xs bg-green-50 hover:bg-green-100"
+                      className="h-6 px-2 text-xs bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30"
                     >
                       Save
                     </Button>
@@ -280,14 +280,16 @@ export function FileList({ entityType, entityId, title = "Files" }: FileListProp
       <CardContent>
         <div className="space-y-3">
           {displayFiles && displayFiles.map((file: FileData, index: number) => (
-            <div key={file.id} className={`flex items-center justify-between p-3 border rounded-lg ${isReordering ? 'bg-blue-50 border-blue-200' : ''}`}>
+            <div key={file.id} className={`flex items-center justify-between p-3 border border-gray-200 dark:border-gray-600 rounded-lg ${isReordering ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : 'bg-gray-50 dark:bg-gray-700/50'}`}>
               <div className="flex items-center space-x-3">
-                {getFileIcon(file.mimeType)}
+                <div className="text-gray-600 dark:text-gray-400">
+                  {getFileIcon(file.mimeType)}
+                </div>
                 <div>
-                  <p className="font-medium text-sm" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+                  <p className="font-medium text-sm text-gray-900 dark:text-gray-100" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
                     {decodeFileName(file.originalName)}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     {formatFileSize(file.fileSize)} • {new Date(file.createdAt).toLocaleDateString()}
                   </p>
                 </div>
