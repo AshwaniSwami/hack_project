@@ -388,18 +388,18 @@ export default function RadioStations() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
-                    <Filter className="h-4 w-4 text-gray-500" />
+                    <Filter className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
-                      className="px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     >
                       <option value="all">All Status</option>
                       <option value="active">Active</option>
                       <option value="inactive">Inactive</option>
                     </select>
                   </div>
-                  <Badge variant="outline" className="bg-gray-50">
+                  <Badge variant="outline" className="bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
                     {filteredStations.length} stations
                   </Badge>
                 </div>
@@ -455,25 +455,25 @@ export default function RadioStations() {
             </CardContent>
           </Card>
         ) : (
-          <Card className="bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-xl overflow-hidden">
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-gray-200/50 dark:border-gray-700/50 shadow-xl overflow-hidden">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
-                    <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Station</TableHead>
-                    <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Contact</TableHead>
-                    <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Email</TableHead>
-                    <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Phone</TableHead>
-                    <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Status</TableHead>
-                    <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Created</TableHead>
-                    <TableHead className="font-semibold text-gray-700 dark:text-gray-300 text-right">Actions</TableHead>
+                  <TableRow className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 border-b-2 border-gray-200 dark:border-gray-600">
+                    <TableHead className="font-semibold text-gray-700 dark:text-gray-200">Station</TableHead>
+                    <TableHead className="font-semibold text-gray-700 dark:text-gray-200">Contact</TableHead>
+                    <TableHead className="font-semibold text-gray-700 dark:text-gray-200">Email</TableHead>
+                    <TableHead className="font-semibold text-gray-700 dark:text-gray-200">Phone</TableHead>
+                    <TableHead className="font-semibold text-gray-700 dark:text-gray-200">Status</TableHead>
+                    <TableHead className="font-semibold text-gray-700 dark:text-gray-200">Created</TableHead>
+                    <TableHead className="font-semibold text-gray-700 dark:text-gray-200 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredStations.map((station) => (
                     <TableRow 
                       key={station.id} 
-                      className="hover:bg-blue-50/50 transition-colors duration-200 border-b border-gray-100"
+                      className="hover:bg-blue-50/50 dark:hover:bg-gray-700/50 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700"
                     >
                       <TableCell className="font-medium">
                         <div className="flex items-center space-x-3">
@@ -497,8 +497,8 @@ export default function RadioStations() {
                       <TableCell>
                         {station.contactPerson ? (
                           <div className="flex items-center space-x-2">
-                            <Antenna className="h-4 w-4 text-blue-600" />
-                            <span className="text-gray-700 dark:text-gray-300">{station.contactPerson}</span>
+                            <Antenna className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            <span className="text-gray-700 dark:text-gray-200">{station.contactPerson}</span>
                           </div>
                         ) : (
                           <span className="text-gray-400 dark:text-gray-500">-</span>
@@ -506,15 +506,15 @@ export default function RadioStations() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
-                          <Mail className="h-4 w-4 text-emerald-600" />
-                          <span className="text-gray-700 dark:text-gray-300">{station.email}</span>
+                          <Mail className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                          <span className="text-gray-700 dark:text-gray-200">{station.email}</span>
                         </div>
                       </TableCell>
                       <TableCell>
                         {station.phone ? (
                           <div className="flex items-center space-x-2">
-                            <Phone className="h-4 w-4 text-purple-600" />
-                            <span className="text-gray-700 dark:text-gray-300">{station.phone}</span>
+                            <Phone className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                            <span className="text-gray-700 dark:text-gray-200">{station.phone}</span>
                           </div>
                         ) : (
                           <span className="text-gray-400 dark:text-gray-500">-</span>
@@ -523,8 +523,8 @@ export default function RadioStations() {
                       <TableCell>
                         <Badge className={`${
                           station.isActive 
-                            ? "bg-green-100 text-green-700 border border-green-200" 
-                            : "bg-gray-100 text-gray-700 border border-gray-200"
+                            ? "bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-200 border border-green-200 dark:border-green-700" 
+                            : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600"
                         }`}>
                           {station.isActive ? (
                             <>
@@ -541,7 +541,7 @@ export default function RadioStations() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
-                          <Clock className="h-3 w-3 text-gray-400" />
+                          <Clock className="h-3 w-3 text-gray-400 dark:text-gray-500" />
                           <span className="text-sm text-gray-500 dark:text-gray-400">
                             {new Date(station.createdAt!).toLocaleDateString()}
                           </span>

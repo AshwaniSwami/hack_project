@@ -126,6 +126,9 @@ The application uses a relational database with the following core entities:
 ## Recent Changes
 
 - July 12, 2025: Successfully completed migration from Replit Agent to Replit environment with full PostgreSQL database setup and database migrations applied
+- July 12, 2025: Fixed dark mode text visibility issues on Users and Radio Stations pages with proper contrast improvements
+- July 12, 2025: Enhanced table headers, badges, and content text with proper dark mode styling across all pages
+- July 12, 2025: Applied consistent dark mode variants to ensure all text elements are properly visible in both light and dark themes
 - July 12, 2025: Fixed dark mode text visibility issues in Users page - enhanced table headers, table cells, badges, and card backgrounds for proper contrast in dark mode
 - July 12, 2025: Completed comprehensive text visibility fixes across all pages (Users, Radio Stations, Episodes, Projects, Scripts)
 - July 12, 2025: Enhanced dark mode text colors with proper contrast (gray-500 → gray-400, gray-600 → gray-400, gray-700 → gray-200)
