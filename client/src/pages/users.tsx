@@ -373,14 +373,14 @@ export default function Users() {
           </TabsList>
 
           <TabsContent value="all">
-            <Card className="bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-xl">
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-gray-200/50 dark:border-gray-700/50 shadow-xl">
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
+                <CardTitle className="flex items-center justify-between text-gray-900 dark:text-gray-100">
                   <div className="flex items-center gap-2">
                     <UsersIcon className="h-5 w-5" />
                     All Users
                   </div>
-                  <Badge variant="outline" className="bg-gray-50">
+                  <Badge variant="outline" className="bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
                     {filteredUsers.length} users
                   </Badge>
                 </CardTitle>
@@ -419,20 +419,20 @@ export default function Users() {
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
-                        <TableRow className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
-                          <TableHead className="font-semibold text-gray-700 dark:text-gray-300">User</TableHead>
-                          <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Email</TableHead>
-                          <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Role</TableHead>
-                          <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Status</TableHead>
-                          <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Created</TableHead>
-                          <TableHead className="font-semibold text-gray-700 dark:text-gray-300 text-right">Actions</TableHead>
+                        <TableRow className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 border-b-2 border-gray-200 dark:border-gray-600">
+                          <TableHead className="font-semibold text-gray-700 dark:text-gray-200">User</TableHead>
+                          <TableHead className="font-semibold text-gray-700 dark:text-gray-200">Email</TableHead>
+                          <TableHead className="font-semibold text-gray-700 dark:text-gray-200">Role</TableHead>
+                          <TableHead className="font-semibold text-gray-700 dark:text-gray-200">Status</TableHead>
+                          <TableHead className="font-semibold text-gray-700 dark:text-gray-200">Created</TableHead>
+                          <TableHead className="font-semibold text-gray-700 dark:text-gray-200 text-right">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {filteredUsers.map((user) => (
                           <TableRow 
                             key={user.id} 
-                            className="hover:bg-blue-50/50 transition-colors duration-200 border-b border-gray-100"
+                            className="hover:bg-blue-50/50 dark:hover:bg-gray-700/50 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700"
                           >
                             <TableCell className="font-medium">
                               <div className="flex items-center space-x-3">
@@ -456,7 +456,7 @@ export default function Users() {
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center space-x-2">
-                                <Mail className="h-4 w-4 text-gray-400" />
+                                <Mail className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                                 <span className="text-gray-900 dark:text-gray-100">{user.email}</span>
                               </div>
                             </TableCell>
@@ -466,7 +466,7 @@ export default function Users() {
                                 className={`
                                   ${user.role === 'admin' ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white' : 
                                     user.role === 'editor' ? 'bg-gradient-to-r from-blue-500 to-emerald-500 text-white' :
-                                    'bg-gray-100 text-gray-700'
+                                    'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                                   } text-xs font-medium px-3 py-1
                                 `}
                               >
@@ -479,12 +479,12 @@ export default function Users() {
                             <TableCell>
                               <div className="flex items-center space-x-2">
                                 {user.isVerified ? (
-                                  <Badge variant="default" className="bg-green-100 text-green-700 hover:bg-green-100">
+                                  <Badge variant="default" className="bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-200 hover:bg-green-100 dark:hover:bg-green-800">
                                     <CheckCircle className="h-3 w-3 mr-1" />
                                     Verified
                                   </Badge>
                                 ) : (
-                                  <Badge variant="secondary" className="bg-orange-100 text-orange-700 hover:bg-orange-100">
+                                  <Badge variant="secondary" className="bg-orange-100 dark:bg-orange-800 text-orange-700 dark:text-orange-200 hover:bg-orange-100 dark:hover:bg-orange-800">
                                     <AlertTriangle className="h-3 w-3 mr-1" />
                                     Pending
                                   </Badge>
@@ -506,7 +506,7 @@ export default function Users() {
                             <TableCell className="text-right">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-blue-50">
+                                  <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-blue-50 dark:hover:bg-gray-700">
                                     <MoreHorizontal className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
@@ -564,14 +564,14 @@ export default function Users() {
           </TabsContent>
 
           <TabsContent value="pending">
-            <Card className="bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-xl">
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-gray-200/50 dark:border-gray-700/50 shadow-xl">
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
+                <CardTitle className="flex items-center justify-between text-gray-900 dark:text-gray-100">
                   <div className="flex items-center gap-2">
                     <Clock className="h-5 w-5" />
                     Pending Verification
                   </div>
-                  <Badge variant="outline" className="bg-orange-50 text-orange-700">
+                  <Badge variant="outline" className="bg-orange-50 dark:bg-orange-900 text-orange-700 dark:text-orange-200">
                     {pendingUsers.length} pending
                   </Badge>
                 </CardTitle>
@@ -596,15 +596,15 @@ export default function Users() {
                         <CheckCircle className="h-16 w-16 text-green-600" />
                       </div>
                     </div>
-                    <h3 className="text-3xl font-bold text-gray-800 mb-3">All Users Verified</h3>
-                    <p className="text-gray-600 mb-8 text-xl max-w-md mx-auto">
+                    <h3 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-3">All Users Verified</h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-8 text-xl max-w-md mx-auto">
                       No users are waiting for verification. All accounts are active and ready to use.
                     </p>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {pendingUsers.map((user) => (
-                      <Card key={user.id} className="border border-orange-200 bg-orange-50/50">
+                      <Card key={user.id} className="border border-orange-200 dark:border-orange-700 bg-orange-50/50 dark:bg-orange-900/20">
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-3">
@@ -615,13 +615,13 @@ export default function Users() {
                                 </div>
                               </div>
                               <div>
-                                <div className="font-semibold text-gray-900">
+                                <div className="font-semibold text-gray-900 dark:text-gray-100">
                                   {user.firstName && user.lastName 
                                     ? `${user.firstName} ${user.lastName}` 
                                     : user.username || user.email?.split("@")[0] || "User"}
                                 </div>
-                                <div className="text-sm text-gray-600">{user.email}</div>
-                                <div className="text-xs text-gray-500">
+                                <div className="text-sm text-gray-600 dark:text-gray-400">{user.email}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-500">
                                   Registered: {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
                                 </div>
                               </div>
