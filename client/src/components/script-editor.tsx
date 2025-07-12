@@ -55,10 +55,10 @@ interface ScriptEditorProps {
 }
 
 const statusColors = {
-  "Draft": "bg-gray-100 text-gray-700 border-gray-200",
-  "Under Review": "bg-yellow-100 text-yellow-700 border-yellow-200",
-  "Approved": "bg-green-100 text-green-700 border-green-200", 
-  "Published": "bg-blue-100 text-blue-700 border-blue-200"
+  "Draft": "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700",
+  "Under Review": "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700",
+  "Approved": "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700", 
+  "Published": "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700"
 };
 
 const statusIcons = {
@@ -212,14 +212,14 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
     return (
       <div className="space-y-6">
         {/* Script Info Header */}
-        <div className="bg-gradient-to-r from-blue-50 to-emerald-50 rounded-lg p-6 border border-blue-100">
+        <div className="bg-gradient-to-r from-blue-50 to-emerald-50 dark:from-blue-900/20 dark:to-emerald-900/20 rounded-lg p-6 border border-blue-100 dark:border-blue-800">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-4">
               <div className="p-3 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
                 <FileText className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-gray-800">{script.title}</h3>
+                <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">{script.title}</h3>
               </div>
             </div>
             <Badge className={`text-sm px-3 py-1 ${statusColors[script.status as keyof typeof statusColors]}`}>
@@ -233,10 +233,10 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
 
           <div className="grid grid-cols-1 gap-4">
             {selectedProjectData && (
-              <div className="p-4 bg-blue-50/80 rounded-lg border border-blue-200">
-                <div className="font-semibold text-blue-800 mb-2">Project: {selectedProjectData.name}</div>
+              <div className="p-4 bg-blue-50/80 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+                <div className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Project: {selectedProjectData.name}</div>
                 {selectedProjectData.description && (
-                  <div className="text-sm text-blue-700 bg-white/60 p-2 rounded">
+                  <div className="text-sm text-blue-700 dark:text-blue-300 bg-white/60 dark:bg-gray-800/60 p-2 rounded">
                     <span className="font-medium">Description: </span>
                     {selectedProjectData.description}
                   </div>
@@ -244,10 +244,10 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
               </div>
             )}
             {selectedEpisodeData && (
-              <div className="p-4 bg-emerald-50/80 rounded-lg border border-emerald-200">
-                <div className="font-semibold text-emerald-800 mb-2">Episode: {selectedEpisodeData.title}</div>
+              <div className="p-4 bg-emerald-50/80 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-700">
+                <div className="font-semibold text-emerald-800 dark:text-emerald-300 mb-2">Episode: {selectedEpisodeData.title}</div>
                 {selectedEpisodeData.description && (
-                  <div className="text-sm text-emerald-700 bg-white/60 p-2 rounded">
+                  <div className="text-sm text-emerald-700 dark:text-emerald-300 bg-white/60 dark:bg-gray-800/60 p-2 rounded">
                     <span className="font-medium">Description: </span>
                     {selectedEpisodeData.description}
                   </div>
@@ -259,10 +259,10 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
 
         {/* Script Content */}
         <div className="space-y-3">
-          <h4 className="text-lg font-semibold text-gray-800">Script Content</h4>
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Script Content</h4>
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
             <div 
-              className="prose prose-sm max-w-none text-gray-700 leading-relaxed"
+              className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 leading-relaxed dark:prose-invert"
               dangerouslySetInnerHTML={{ __html: script.content || "" }}
             />
           </div>
@@ -400,7 +400,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
                     onChange={setContent}
                     modules={quillModules}
                     placeholder="Write your script content here... Use formatting tools to structure your script with headers, lists, and emphasis."
-                    className="bg-white"
+                    className="bg-white dark:bg-gray-800 dark:text-gray-100"
                     style={{ minHeight: "300px" }}
                   />
                 </div>

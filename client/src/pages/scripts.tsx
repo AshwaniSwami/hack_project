@@ -572,11 +572,11 @@ export default function Scripts() {
             {isLoading ? (
               <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" : "space-y-3"}>
                 {[...Array(8)].map((_, i) => (
-                  <Card key={i} className="animate-pulse bg-white/60 backdrop-blur-sm">
+                  <Card key={i} className="animate-pulse bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm">
                     <CardContent className={viewMode === 'grid' ? "p-4" : "p-4"}>
-                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
-                      <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
-                      <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-3"></div>
+                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-2"></div>
+                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
                     </CardContent>
                   </Card>
                 ))}
@@ -616,7 +616,7 @@ export default function Scripts() {
                   const project = projects.find(p => p.id === script.projectId);
                   const StatusIcon = statusIcons[script.status as keyof typeof statusIcons];
                   return (
-                    <Card key={script.id} className="group hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm border border-gray-200/50 hover:scale-[1.02] hover:border-blue-300">
+                    <Card key={script.id} className="group hover:shadow-lg transition-all duration-300 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 hover:scale-[1.02] hover:border-blue-300 dark:hover:border-blue-600">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex items-center gap-2">
@@ -638,7 +638,7 @@ export default function Scripts() {
                               variant="ghost"
                               size="sm"
                               onClick={() => setViewingScript(script)}
-                              className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-7 w-7 p-0 hover:bg-green-50"
+                              className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-7 w-7 p-0 hover:bg-green-50 dark:hover:bg-green-900/30"
                             >
                               <Eye className="h-3 w-3 text-green-600" />
                             </Button>
@@ -648,7 +648,7 @@ export default function Scripts() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => handleEdit(script)}
-                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-7 w-7 p-0 hover:bg-blue-50"
+                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-7 w-7 p-0 hover:bg-blue-50 dark:hover:bg-blue-900/30"
                                 >
                                   <Edit className="h-3 w-3 text-blue-600" />
                                 </Button>
@@ -656,7 +656,7 @@ export default function Scripts() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => handleDelete(script.id)}
-                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-7 w-7 p-0 hover:bg-red-50"
+                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-7 w-7 p-0 hover:bg-red-50 dark:hover:bg-red-900/30"
                                 >
                                   <Trash2 className="h-3 w-3 text-red-500" />
                                 </Button>
@@ -703,7 +703,7 @@ export default function Scripts() {
                   const project = projects.find(p => p.id === script.projectId);
                   const StatusIcon = statusIcons[script.status as keyof typeof statusIcons];
                   return (
-                    <Card key={script.id} className="group hover:shadow-md transition-all duration-300 bg-white/80 backdrop-blur-sm border border-gray-200/50 hover:border-blue-300">
+                    <Card key={script.id} className="group hover:shadow-md transition-all duration-300 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 hover:border-blue-300 dark:hover:border-blue-600">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-4 flex-1">
@@ -744,7 +744,7 @@ export default function Scripts() {
                               variant="ghost"
                               size="sm"
                               onClick={() => setViewingScript(script)}
-                              className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-8 w-8 p-0 hover:bg-green-50"
+                              className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-8 w-8 p-0 hover:bg-green-50 dark:hover:bg-green-900/30"
                             >
                               <Eye className="h-4 w-4 text-green-600" />
                             </Button>
@@ -754,7 +754,7 @@ export default function Scripts() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => handleEdit(script)}
-                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-8 w-8 p-0 hover:bg-blue-50"
+                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-8 w-8 p-0 hover:bg-blue-50 dark:hover:bg-blue-900/30"
                                 >
                                   <Edit className="h-4 w-4 text-blue-600" />
                                 </Button>
@@ -762,7 +762,7 @@ export default function Scripts() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => handleDelete(script.id)}
-                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-8 w-8 p-0 hover:bg-red-50"
+                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-8 w-8 p-0 hover:bg-red-50 dark:hover:bg-red-900/30"
                                 >
                                   <Trash2 className="h-4 w-4 text-red-500" />
                                 </Button>
@@ -779,7 +779,7 @@ export default function Scripts() {
           </TabsContent>
 
           <TabsContent value="upload">
-            <Card className="bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-2xl">
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-gray-200/50 dark:border-gray-700/50 shadow-2xl">
               <CardHeader className="pb-6">
                 <CardTitle className="flex items-center gap-3 text-xl">
                   <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
@@ -795,7 +795,7 @@ export default function Scripts() {
           </TabsContent>
 
           <TabsContent value="files">
-            <Card className="bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-2xl">
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-gray-200/50 dark:border-gray-700/50 shadow-2xl">
               <CardHeader className="pb-6">
                 <CardTitle className="flex items-center gap-3 text-xl">
                   <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">

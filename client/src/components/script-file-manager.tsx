@@ -150,7 +150,7 @@ export function ScriptFileManager({ script }: ScriptFileManagerProps) {
       <CardContent className="space-y-4">
         {/* File Upload Section */}
         {permissions.canUpload ? (
-          <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
+          <div className="space-y-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <div className="space-y-2">
               <Label htmlFor="script-file-upload">Upload Document</Label>
               <Input
@@ -160,16 +160,16 @@ export function ScriptFileManager({ script }: ScriptFileManagerProps) {
                 onChange={handleFileChange}
                 className="cursor-pointer"
               />
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Supported formats: PDF, DOC, DOCX, TXT, RTF
               </p>
             </div>
 
             {file && (
-              <div className="flex items-center gap-2 p-2 border rounded bg-white">
-                <FileText className="h-4 w-4" />
-                <span className="text-sm font-medium">{file.name}</span>
-                <span className="text-xs text-muted-foreground">
+              <div className="flex items-center gap-2 p-2 border rounded bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
+                <FileText className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{file.name}</span>
+                <span className="text-xs text-gray-600 dark:text-gray-400">
                   ({formatFileSize(file.size)})
                 </span>
               </div>
@@ -184,8 +184,8 @@ export function ScriptFileManager({ script }: ScriptFileManagerProps) {
             </Button>
           </div>
         ) : (
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <p className="text-muted-foreground text-center">
+          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <p className="text-gray-600 dark:text-gray-400 text-center">
               You don't have permission to upload files. Only Admin and Editor users can upload files.
             </p>
           </div>
@@ -193,20 +193,20 @@ export function ScriptFileManager({ script }: ScriptFileManagerProps) {
 
         {/* Files List */}
         <div className="space-y-3">
-          <h4 className="font-medium">Uploaded Files</h4>
+          <h4 className="font-medium text-gray-900 dark:text-gray-100">Uploaded Files</h4>
           {scriptFiles.length === 0 ? (
-            <p className="text-sm text-gray-500 text-center py-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
               No files uploaded yet
             </p>
           ) : (
             <div className="space-y-2">
               {scriptFiles.map((file) => (
-                <div key={file.id} className="flex items-center justify-between p-3 border rounded-lg bg-white">
+                <div key={file.id} className="flex items-center justify-between p-3 border rounded-lg bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
                   <div className="flex items-center gap-3">
                     {getFileIcon(file.mimeType)}
                     <div>
-                      <p className="font-medium text-sm">{file.originalName}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="font-medium text-sm text-gray-900 dark:text-gray-100">{file.originalName}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         {formatFileSize(file.fileSize)} • {new Date(file.createdAt).toLocaleDateString()}
                       </p>
                     </div>

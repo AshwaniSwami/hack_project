@@ -141,6 +141,11 @@ The application uses a relational database with the following core entities:
 - July 12, 2025: Updated file-list component with comprehensive dark mode support for all text elements, cards, and file items
 - July 12, 2025: Fixed Episodes page episode cards (both grid and list views) with proper dark mode text colors and backgrounds
 - July 12, 2025: Enhanced Episodes page tabs content with proper dark mode styling for upload and files sections
+- July 12, 2025: Fixed dark mode text visibility issues on Scripts page including script cards, script editor, and script file upload components  
+- July 12, 2025: Enhanced script-editor component with proper dark mode styling for status badges, content areas, and read-only mode
+- July 12, 2025: Updated script-file-upload component with comprehensive dark mode support for file selection and upload areas
+- July 12, 2025: Fixed Scripts page script cards (both grid and list views) with proper dark mode text colors and hover effects
+- July 12, 2025: Enhanced script-file-manager component with proper dark mode styling for file lists and upload sections
 - July 12, 2025: Enhanced dark mode text colors with proper contrast (gray-500 → gray-400, gray-600 → gray-400, gray-700 → gray-200)
 - July 12, 2025: Fixed all table headers, text content, and placeholder text to display properly in dark mode
 - July 12, 2025: Applied consistent dark mode variants to all gray text elements for better readability

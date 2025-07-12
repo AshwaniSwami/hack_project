@@ -139,7 +139,7 @@ export function ScriptFileUpload() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-center py-8">
+          <p className="text-gray-600 dark:text-gray-400 text-center py-8">
             You don't have permission to upload files. Only Admin and Editor users can upload files.
           </p>
         </CardContent>
@@ -229,16 +229,16 @@ export function ScriptFileUpload() {
             onChange={handleFileChange}
             className="cursor-pointer"
           />
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             Supported formats: PDF, DOC, DOCX, TXT, RTF
           </p>
         </div>
 
         {file && (
-          <div className="flex items-center gap-2 p-2 border rounded bg-muted">
-            <FileText className="h-4 w-4" />
-            <span className="text-sm font-medium">{file.name}</span>
-            <span className="text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 p-2 border rounded bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+            <FileText className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{file.name}</span>
+            <span className="text-xs text-gray-600 dark:text-gray-400">
               ({(file.size / 1024 / 1024).toFixed(2)} MB)
             </span>
           </div>
