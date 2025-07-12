@@ -397,7 +397,7 @@ export default function Projects() {
                             <FormControl>
                               <select
                                 {...field}
-                                className="w-full h-10 px-3 border border-gray-200 rounded-md bg-white focus:border-blue-500 focus:ring-blue-500/20"
+                                className="w-full h-10 px-3 border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500/20"
                               >
                                 <option value="">No theme</option>
                                 {themes.map((theme) => (
@@ -535,11 +535,11 @@ export default function Projects() {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[...Array(6)].map((_, i) => (
-              <Card key={i} className="animate-pulse bg-white/60 backdrop-blur-sm">
+              <Card key={i} className="animate-pulse bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-gray-200 dark:border-gray-700">
                 <CardContent className="p-8">
-                  <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                  <div className="h-6 bg-gray-200 dark:bg-gray-600 rounded w-3/4 mb-4"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/2 mb-2"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-2/3"></div>
                 </CardContent>
               </Card>
             ))}
@@ -650,7 +650,7 @@ export default function Projects() {
                     <FormControl>
                       <select
                         {...field}
-                        className="w-full h-10 px-3 border border-gray-200 rounded-md bg-white focus:border-blue-500 focus:ring-blue-500/20"
+                        className="w-full h-10 px-3 border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500/20"
                       >
                         <option value="">No theme</option>
                         {themes.map((theme) => (
@@ -774,22 +774,22 @@ export default function Projects() {
 
             {/* Existing Themes */}
             <div>
-              <h3 className="text-lg font-semibold mb-4">Existing Themes</h3>
+              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Existing Themes</h3>
               <div className="max-h-96 overflow-y-auto pr-2">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {themes.map((theme) => {
                     const projectCount = projects.filter(p => p.themeId === theme.id).length;
                     return (
-                      <Card key={theme.id} className="p-4">
+                      <Card key={theme.id} className="p-4 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div 
-                              className="w-6 h-6 rounded-full border-2 border-gray-300"
+                              className="w-6 h-6 rounded-full border-2 border-gray-300 dark:border-gray-600"
                               style={{ backgroundColor: theme.colorHex }}
                             />
                             <div>
-                              <h4 className="font-medium">{theme.name}</h4>
-                              <p className="text-sm text-gray-500">
+                              <h4 className="font-medium text-gray-900 dark:text-gray-100">{theme.name}</h4>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
                                 {projectCount} project{projectCount !== 1 ? 's' : ''}
                               </p>
                             </div>
