@@ -258,32 +258,33 @@ export default function Episodes() {
     });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
-      {/* Compact Header */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 via-gray-900 to-zinc-900">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-emerald-600/10"></div>
-        <div className="relative px-6 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative">
+      <div className="floating-bg"></div>
+      {/* Enhanced Header */}
+      <div className="relative overflow-hidden glassmorphism">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/70 via-purple-600/70 to-indigo-600/70"></div>
+        <div className="relative px-6 py-10">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-6">
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-xl blur opacity-75"></div>
-                  <div className="relative p-3 bg-white rounded-xl">
-                    <Radio className="h-6 w-6 text-slate-700" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-xl blur opacity-75"></div>
+                  <div className="relative p-4 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Radio className="h-8 w-8 text-white" />
                   </div>
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-white mb-1 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                  <h1 className="text-4xl font-bold text-white mb-2 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
                     Episodes
                   </h1>
-                  <p className="text-gray-300 text-sm">Manage your radio episodes and audio content</p>
+                  <p className="text-blue-100 text-lg">Manage your radio episodes and audio content</p>
                 </div>
               </div>
               
               {(user?.role === 'admin' || user?.role === 'editor') && (
                 <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button size="lg" className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-blue-500/25 border-0">
+                    <Button size="lg" className="bg-white/20 text-white hover:bg-white/30 shadow-lg transition-all duration-300 hover:scale-105 border-0 backdrop-blur-sm">
                       <Plus className="h-5 w-5 mr-3" />
                       New Episode
                     </Button>

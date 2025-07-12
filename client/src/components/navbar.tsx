@@ -40,8 +40,9 @@ export function Navbar() {
   ];
 
   return (
-    <header className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white shadow-2xl sticky top-0 z-50 backdrop-blur-md border-b border-white/10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="glassmorphism text-white shadow-2xl sticky top-0 z-50 border-b border-white/10">
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/80 via-purple-600/80 to-indigo-600/80 backdrop-blur-lg"></div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="flex justify-between items-center h-20">
           <div className="flex items-center space-x-6">
             <Link href="/">
@@ -51,7 +52,7 @@ export function Navbar() {
                   <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
                 <div className="group-hover:scale-105 transition-transform duration-200">
-                  <h1 className="text-xl font-bold bg-gradient-to-r from-white to-green-100 bg-clip-text text-transparent">
+                  <h1 className="text-xl font-bold bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
                     SMART Radio
                   </h1>
                   <p className="text-xs text-white/90 font-medium tracking-wide">NGO Content Hub</p>

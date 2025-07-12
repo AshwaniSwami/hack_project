@@ -147,14 +147,14 @@ export function AdminDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-green-600">Total Projects</p>
-                <p className="text-3xl font-bold text-green-900 dark:text-green-100">{kpis.totalProjects}</p>
-                <div className="flex items-center mt-2 text-sm text-green-700 dark:text-green-300">
+                <p className="text-sm font-medium text-blue-600">Total Projects</p>
+                <p className="text-3xl font-bold text-blue-900 dark:text-blue-100">{kpis.totalProjects}</p>
+                <div className="flex items-center mt-2 text-sm text-blue-700 dark:text-blue-300">
                   <TrendingUp className="h-4 w-4 mr-1" />
                   <span>Active</span>
                 </div>
               </div>
-              <FileText className="h-12 w-12 text-green-600" />
+              <FileText className="h-12 w-12 text-blue-600" />
             </div>
           </CardContent>
         </Card>
@@ -163,14 +163,14 @@ export function AdminDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-emerald-600">Total Episodes</p>
-                <p className="text-3xl font-bold text-emerald-900 dark:text-emerald-100">{kpis.totalEpisodes}</p>
-                <div className="flex items-center mt-2 text-sm text-emerald-700 dark:text-emerald-300">
+                <p className="text-sm font-medium text-purple-600">Total Episodes</p>
+                <p className="text-3xl font-bold text-purple-900 dark:text-purple-100">{kpis.totalEpisodes}</p>
+                <div className="flex items-center mt-2 text-sm text-purple-700 dark:text-purple-300">
                   <Radio className="h-4 w-4 mr-1" />
                   <span>Published</span>
                 </div>
               </div>
-              <Radio className="h-12 w-12 text-emerald-600" />
+              <Radio className="h-12 w-12 text-purple-600" />
             </div>
           </CardContent>
         </Card>
@@ -179,14 +179,14 @@ export function AdminDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-teal-600">Total Scripts</p>
-                <p className="text-3xl font-bold text-teal-900 dark:text-teal-100">{kpis.totalScripts}</p>
-                <div className="flex items-center mt-2 text-sm text-teal-700 dark:text-teal-300">
+                <p className="text-sm font-medium text-indigo-600">Total Scripts</p>
+                <p className="text-3xl font-bold text-indigo-900 dark:text-indigo-100">{kpis.totalScripts}</p>
+                <div className="flex items-center mt-2 text-sm text-indigo-700 dark:text-indigo-300">
                   <FileText className="h-4 w-4 mr-1" />
                   <span>Created</span>
                 </div>
               </div>
-              <FileText className="h-12 w-12 text-teal-600" />
+              <FileText className="h-12 w-12 text-indigo-600" />
             </div>
           </CardContent>
         </Card>
@@ -195,18 +195,18 @@ export function AdminDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-cyan-600">Total Users</p>
-                <p className="text-3xl font-bold text-cyan-900 dark:text-cyan-100">{kpis.totalUsers}</p>
-                <div className="flex items-center mt-2 text-sm text-cyan-700 dark:text-cyan-300">
+                <p className="text-sm font-medium text-pink-600">Total Users</p>
+                <p className="text-3xl font-bold text-pink-900 dark:text-pink-100">{kpis.totalUsers}</p>
+                <div className="flex items-center mt-2 text-sm text-pink-700 dark:text-pink-300">
                   <TrendingUp className="h-4 w-4 mr-1" />
                   <span>+{adminMetrics.growthRate}% this month</span>
                 </div>
               </div>
-              <Users className="h-12 w-12 text-cyan-600" />
+              <Users className="h-12 w-12 text-pink-600" />
             </div>
             <div className="mt-4">
               <Progress value={(kpis.activeUsers / kpis.totalUsers) * 100} className="h-2" />
-              <p className="text-xs text-cyan-600 mt-1">{kpis.activeUsers} active users</p>
+              <p className="text-xs text-pink-600 mt-1">{kpis.activeUsers} active users</p>
             </div>
           </CardContent>
         </Card>
