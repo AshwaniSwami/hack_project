@@ -47,7 +47,10 @@ import {
   Hash,
   FolderOpen,
   Sparkles,
-  Radio
+  Radio,
+  Grid3X3,
+  List,
+  Search
 } from "lucide-react";
 import { EpisodeFileUpload } from "@/components/episode-file-upload";
 import { FileList } from "@/components/file-list";
@@ -67,6 +70,8 @@ type EpisodeFormData = z.infer<typeof episodeFormSchema>;
 export default function Episodes() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingEpisode, setEditingEpisode] = useState<Episode | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -190,6 +195,18 @@ export default function Episodes() {
       deleteMutation.mutate(id);
     }
   };
+
+  // Filter episodes based on search query
+  const filteredEpisodes = episodes.filter(episode => {
+    const project = projects.find(p => p.id === episode.projectId);
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      episode.title.toLowerCase().includes(searchLower) ||
+      episode.description?.toLowerCase().includes(searchLower) ||
+      project?.name.toLowerCase().includes(searchLower) ||
+      episode.episodeNumber.toString().includes(searchLower)
+    );
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
@@ -369,122 +386,204 @@ export default function Episodes() {
           </TabsList>
 
           <TabsContent value="episodes" className="space-y-6">
+            {/* Search and View Controls */}
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Search episodes..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600 mr-2">View:</span>
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className={viewMode === 'grid' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+                >
+                  <Grid3X3 className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className={viewMode === 'list' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
+              <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" : "space-y-3"}>
+                {[...Array(8)].map((_, i) => (
                   <Card key={i} className="animate-pulse bg-white/60 backdrop-blur-sm">
-                    <CardContent className="p-6">
-                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+                    <CardContent className={viewMode === 'grid' ? "p-4" : "p-4"}>
+                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
                       <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
                       <div className="h-3 bg-gray-200 rounded w-2/3"></div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
-            ) : episodes.length === 0 ? (
-              <Card className="bg-white/80 backdrop-blur-md border-0 shadow-2xl">
-                <CardContent className="text-center py-20">
-                  <div className="relative mb-8">
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full blur-lg opacity-25 w-32 h-32 mx-auto"></div>
-                    <div className="relative p-6 bg-gradient-to-br from-blue-50 to-emerald-50 rounded-full w-32 h-32 mx-auto flex items-center justify-center border border-blue-100">
-                      <Mic className="h-16 w-16 text-blue-600" />
+            ) : filteredEpisodes.length === 0 ? (
+              <Card className="bg-white/80 backdrop-blur-md border-0 shadow-xl">
+                <CardContent className="text-center py-16">
+                  <div className="relative mb-6">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full blur-lg opacity-25 w-24 h-24 mx-auto"></div>
+                    <div className="relative p-4 bg-gradient-to-br from-blue-50 to-emerald-50 rounded-full w-24 h-24 mx-auto flex items-center justify-center border border-blue-100">
+                      <Mic className="h-12 w-12 text-blue-600" />
                     </div>
                   </div>
-                  <h3 className="text-3xl font-bold text-gray-800 mb-3">No episodes yet</h3>
-                  <p className="text-gray-600 mb-8 text-xl max-w-md mx-auto">Start creating engaging radio content for your audience</p>
-                  <Button 
-                    onClick={() => setIsCreateDialogOpen(true)}
-                    size="lg"
-                    className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 hover:scale-105 px-8 py-3"
-                  >
-                    <Plus className="h-6 w-6 mr-3" />
-                    Create Your First Episode
-                  </Button>
+                  <h3 className="text-xl font-bold text-gray-800 mb-2">
+                    {searchQuery ? 'No episodes found' : 'No episodes yet'}
+                  </h3>
+                  <p className="text-gray-600 mb-6 max-w-sm mx-auto">
+                    {searchQuery ? 'Try adjusting your search terms' : 'Start creating engaging radio content for your audience'}
+                  </p>
+                  {!searchQuery && (user?.role === 'admin' || user?.role === 'editor') && (
+                    <Button 
+                      onClick={() => setIsCreateDialogOpen(true)}
+                      size="lg"
+                      className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-xl hover:shadow-blue-500/25 transition-all duration-300 hover:scale-105"
+                    >
+                      <Plus className="h-5 w-5 mr-2" />
+                      Create Your First Episode
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {episodes.map((episode) => {
+            ) : viewMode === 'grid' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {filteredEpisodes.map((episode) => {
                   const project = projects.find(p => p.id === episode.projectId);
                   return (
-                    <Card key={episode.id} className="group hover:shadow-2xl transition-all duration-500 bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-xl hover:scale-[1.02] hover:shadow-blue-500/10">
-                      <CardContent className="p-8">
-                        <div className="flex items-start justify-between mb-6">
-                          <div className="flex items-center space-x-4">
-                            <div className="relative">
-                              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-xl blur opacity-50"></div>
-                              <div className="relative p-3 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-xl">
-                                <Hash className="h-5 w-5 text-white" />
-                              </div>
-                            </div>
-                            <div>
-                              <Badge variant="secondary" className="text-sm bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1">
-                                Episode {episode.episodeNumber}
-                              </Badge>
-                            </div>
-                          </div>
-                          <div className="flex space-x-2">
+                    <Card key={episode.id} className="group hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm border border-gray-200/50 hover:scale-[1.02] hover:border-blue-300">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between mb-3">
+                          <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-1">
+                            #{episode.episodeNumber}
+                          </Badge>
+                          <div className="flex space-x-1">
                             {(user?.role === 'admin' || user?.role === 'editor') && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleEdit(episode)}
-                                className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-blue-50 hover:scale-110"
-                              >
-                                <Edit className="h-5 w-5 text-blue-600" />
-                              </Button>
-                            )}
-                            {(user?.role === 'admin' || user?.role === 'editor') && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDelete(episode.id)}
-                                className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-50 hover:scale-110"
-                              >
-                                <Trash2 className="h-5 w-5 text-red-500" />
-                              </Button>
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEdit(episode)}
+                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-7 w-7 p-0 hover:bg-blue-50"
+                                >
+                                  <Edit className="h-3 w-3 text-blue-600" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDelete(episode.id)}
+                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-7 w-7 p-0 hover:bg-red-50"
+                                >
+                                  <Trash2 className="h-3 w-3 text-red-500" />
+                                </Button>
+                              </>
                             )}
                           </div>
                         </div>
 
-                        <div className="space-y-4">
-                          <h3 className="font-bold text-xl text-gray-800 line-clamp-2 group-hover:text-blue-700 transition-colors duration-300">
+                        <div className="space-y-3">
+                          <h3 className="font-semibold text-sm text-gray-800 line-clamp-2 group-hover:text-blue-700 transition-colors duration-300 leading-tight">
                             {episode.title}
                           </h3>
                           
                           {project && (
-                            <div className="flex items-center space-x-3 p-3 bg-gray-50/80 rounded-lg">
-                              <FolderOpen className="h-5 w-5 text-blue-600" />
-                              <span className="text-sm text-gray-700 font-semibold">{project.name}</span>
+                            <div className="flex items-center space-x-2 text-xs text-gray-600">
+                              <FolderOpen className="h-3 w-3 text-blue-500" />
+                              <span className="truncate">{project.name}</span>
                             </div>
                           )}
 
                           {episode.description && (
-                            <p className="text-gray-600 line-clamp-3 leading-relaxed">
+                            <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
                               {episode.description}
                             </p>
                           )}
 
-                          {episode.broadcastDate && (
-                            <div className="flex items-center space-x-3 p-2 bg-emerald-50/80 rounded-lg">
-                              <Calendar className="h-5 w-5 text-emerald-600" />
-                              <span className="text-sm text-emerald-700 font-medium">
-                                {new Date(episode.broadcastDate).toLocaleDateString()}
-                              </span>
-                            </div>
-                          )}
-
-                          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                            <div className="flex items-center space-x-2">
-                              <Clock className="h-4 w-4 text-gray-400" />
-                              <span className="text-sm text-gray-500">
+                          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                            <div className="flex items-center space-x-1">
+                              <Clock className="h-3 w-3 text-gray-400" />
+                              <span className="text-xs text-gray-500">
                                 {new Date(episode.createdAt).toLocaleDateString()}
                               </span>
                             </div>
                             {episode.isPremium && (
-                              <Badge className="bg-gradient-to-r from-amber-400 to-orange-500 text-white border-0 px-3 py-1 shadow-lg">
+                              <Badge className="bg-gradient-to-r from-amber-400 to-orange-500 text-white border-0 px-2 py-0 text-xs">
                                 Premium
                               </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {filteredEpisodes.map((episode) => {
+                  const project = projects.find(p => p.id === episode.projectId);
+                  return (
+                    <Card key={episode.id} className="group hover:shadow-md transition-all duration-300 bg-white/80 backdrop-blur-sm border border-gray-200/50 hover:border-blue-300">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4 flex-1">
+                            <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-1 shrink-0">
+                              #{episode.episodeNumber}
+                            </Badge>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-sm text-gray-800 truncate group-hover:text-blue-700 transition-colors duration-300">
+                                {episode.title}
+                              </h3>
+                              <div className="flex items-center space-x-4 mt-1">
+                                {project && (
+                                  <div className="flex items-center space-x-1 text-xs text-gray-600">
+                                    <FolderOpen className="h-3 w-3 text-blue-500" />
+                                    <span>{project.name}</span>
+                                  </div>
+                                )}
+                                <div className="flex items-center space-x-1 text-xs text-gray-500">
+                                  <Clock className="h-3 w-3 text-gray-400" />
+                                  <span>{new Date(episode.createdAt).toLocaleDateString()}</span>
+                                </div>
+                                {episode.isPremium && (
+                                  <Badge className="bg-gradient-to-r from-amber-400 to-orange-500 text-white border-0 px-2 py-0 text-xs">
+                                    Premium
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex space-x-1 shrink-0">
+                            {(user?.role === 'admin' || user?.role === 'editor') && (
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEdit(episode)}
+                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-8 w-8 p-0 hover:bg-blue-50"
+                                >
+                                  <Edit className="h-4 w-4 text-blue-600" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDelete(episode.id)}
+                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-8 w-8 p-0 hover:bg-red-50"
+                                >
+                                  <Trash2 className="h-4 w-4 text-red-500" />
+                                </Button>
+                              </>
                             )}
                           </div>
                         </div>
