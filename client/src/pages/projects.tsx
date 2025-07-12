@@ -314,26 +314,26 @@ export default function Projects() {
   const projectFiles = allFiles?.files || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-sky-50 to-cyan-50 relative">
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-rose-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative">
       <div className="floating-bg"></div>
       {/* Enhanced Header */}
-      <div className="relative overflow-hidden bg-white shadow-lg border-b border-blue-100">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-sky-500/10 to-cyan-500/10"></div>
-        <div className="relative px-6 py-12">
+      <div className="relative overflow-hidden bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-lg border-b border-sky-200/30 dark:border-gray-700/50">
+        <div className="absolute inset-0 bg-gradient-to-r from-sky-500/10 via-blue-500/10 to-rose-500/10 dark:from-sky-500/5 dark:via-blue-500/5 dark:to-rose-500/5"></div>
+        <div className="relative px-6 py-8">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-4">
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-sky-400 rounded-xl blur opacity-30"></div>
-                  <div className="relative p-4 bg-blue-50 backdrop-blur-sm rounded-xl border border-blue-200">
-                    <FolderOpen className="h-8 w-8 text-blue-600" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-sky-400 to-rose-400 rounded-xl blur opacity-20"></div>
+                  <div className="relative p-3 bg-sky-50 dark:bg-gray-700 backdrop-blur-sm rounded-xl border border-sky-200/50 dark:border-gray-600/50">
+                    <FolderOpen className="h-6 w-6 text-sky-600 dark:text-sky-400" />
                   </div>
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-slate-800 mb-2 bg-gradient-to-r from-sky-500 to-red-500 bg-clip-text text-transparent">
+                  <h1 className="text-2xl font-bold text-slate-800 dark:text-gray-100 mb-1 bg-gradient-to-r from-sky-500 to-red-500 bg-clip-text text-transparent">
                     Projects
                   </h1>
-                  <p className="text-slate-600 text-sm">Manage your radio projects and content</p>
+                  <p className="text-slate-600 dark:text-gray-400 text-sm">Manage your radio projects and content</p>
                 </div>
               </div>
               

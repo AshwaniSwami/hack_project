@@ -40,7 +40,7 @@ export function Navbar() {
   ];
 
   return (
-    <header className="bg-sky-100/80 backdrop-blur-md text-slate-800 shadow-xl sticky top-0 z-50 border-b border-sky-200/30">
+    <header className="bg-sky-100/80 dark:bg-gray-800/90 backdrop-blur-md text-slate-800 dark:text-gray-100 shadow-xl sticky top-0 z-50 border-b border-sky-200/30 dark:border-gray-700/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="flex justify-between items-center h-20">
           <div className="flex items-center space-x-6">
@@ -54,7 +54,7 @@ export function Navbar() {
                   <h1 className="text-xl font-bold bg-gradient-to-r from-sky-600 to-rose-500 bg-clip-text text-transparent">
                     SMART Radio
                   </h1>
-                  <p className="text-xs text-sky-700 font-medium tracking-wide">NGO Content Hub</p>
+                  <p className="text-xs text-sky-700 dark:text-gray-300 font-medium tracking-wide">NGO Content Hub</p>
                 </div>
               </div>
             </Link>
@@ -69,8 +69,8 @@ export function Navbar() {
                       variant="ghost"
                       size="sm"
                       className={cn(
-                        "relative flex items-center space-x-2 px-4 py-2 rounded-xl text-slate-700 hover:text-sky-800 hover:bg-sky-50 transition-all duration-300 group",
-                        isActive && "bg-gradient-to-r from-sky-100 to-rose-100 text-sky-800 font-semibold shadow-lg backdrop-blur-sm"
+                        "relative flex items-center space-x-2 px-4 py-2 rounded-xl text-slate-700 dark:text-gray-300 hover:text-sky-800 dark:hover:text-sky-200 hover:bg-sky-50 dark:hover:bg-gray-700/50 transition-all duration-300 group",
+                        isActive && "bg-gradient-to-r from-sky-100 to-rose-100 dark:from-gray-700 dark:to-gray-600 text-sky-800 dark:text-sky-200 font-semibold shadow-lg backdrop-blur-sm"
                       )}
                     >
                       <Icon className={cn(
