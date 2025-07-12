@@ -50,7 +50,9 @@ import {
   Upload,
   FolderOpen,
   Calendar,
-  Zap
+  Zap,
+  Grid3X3,
+  List
 } from "lucide-react";
 import { ScriptEditor } from "@/components/script-editor";
 import { ScriptFileUpload } from "@/components/script-file-upload";
@@ -87,6 +89,7 @@ export default function Scripts() {
   const [viewingScript, setViewingScript] = useState<Script | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -201,8 +204,11 @@ export default function Scripts() {
   };
 
   const filteredScripts = scripts.filter((script) => {
-    const matchesSearch = script.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (script.description && script.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    const project = projects.find(p => p.id === script.projectId);
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch = script.title.toLowerCase().includes(searchLower) ||
+      (script.description && script.description.toLowerCase().includes(searchLower)) ||
+      (project?.name.toLowerCase().includes(searchLower));
     const matchesStatus = statusFilter === "all" || script.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -379,167 +385,242 @@ export default function Scripts() {
           </TabsList>
 
           <TabsContent value="scripts" className="space-y-6">
-            {/* Search and Filter Bar */}
-            <Card className="bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-xl">
-              <CardContent className="p-6">
-                <div className="flex flex-col md:flex-row gap-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400" />
-                    <Input
-                      placeholder="Search scripts by title or description..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-12 h-12 text-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
-                    />
-                  </div>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-full md:w-48 h-12">
-                      <SelectValue placeholder="Filter by status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="Draft">Draft</SelectItem>
-                      <SelectItem value="Under Review">Under Review</SelectItem>
-                      <SelectItem value="Approved">Approved</SelectItem>
-                      <SelectItem value="Published">Published</SelectItem>
-                    </SelectContent>
-                  </Select>
+            {/* Search and View Controls */}
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+              <div className="flex flex-col sm:flex-row gap-4 flex-1">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Search scripts..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 bg-white/80 backdrop-blur-sm border-gray-200 focus:border-blue-500"
+                  />
                 </div>
-              </CardContent>
-            </Card>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="Draft">Draft</SelectItem>
+                    <SelectItem value="Under Review">Under Review</SelectItem>
+                    <SelectItem value="Approved">Approved</SelectItem>
+                    <SelectItem value="Published">Published</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600 mr-2">View:</span>
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className={viewMode === 'grid' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+                >
+                  <Grid3X3 className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className={viewMode === 'list' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
 
             {/* Scripts List */}
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {[...Array(6)].map((_, i) => (
+              <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" : "space-y-3"}>
+                {[...Array(8)].map((_, i) => (
                   <Card key={i} className="animate-pulse bg-white/60 backdrop-blur-sm">
-                    <CardContent className="p-8">
-                      <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
-                      <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-                      <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                    <CardContent className={viewMode === 'grid' ? "p-4" : "p-4"}>
+                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-2/3"></div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
             ) : filteredScripts.length === 0 ? (
-              <Card className="bg-white/80 backdrop-blur-md border-0 shadow-2xl">
-                <CardContent className="text-center py-20">
-                  <div className="relative mb-8">
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full blur-lg opacity-25 w-32 h-32 mx-auto"></div>
-                    <div className="relative p-6 bg-gradient-to-br from-blue-50 to-emerald-50 rounded-full w-32 h-32 mx-auto flex items-center justify-center border border-blue-100">
-                      <FileText className="h-16 w-16 text-blue-600" />
+              <Card className="bg-white/80 backdrop-blur-md border-0 shadow-xl">
+                <CardContent className="text-center py-16">
+                  <div className="relative mb-6">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full blur-lg opacity-25 w-24 h-24 mx-auto"></div>
+                    <div className="relative p-4 bg-gradient-to-br from-blue-50 to-emerald-50 rounded-full w-24 h-24 mx-auto flex items-center justify-center border border-blue-100">
+                      <FileText className="h-12 w-12 text-blue-600" />
                     </div>
                   </div>
-                  <h3 className="text-3xl font-bold text-gray-800 mb-3">
-                    {searchTerm || statusFilter !== "all" ? "No scripts found" : "No scripts yet"}
+                  <h3 className="text-xl font-bold text-gray-800 mb-2">
+                    {searchTerm || statusFilter !== "all" ? 'No scripts found' : 'No scripts yet'}
                   </h3>
-                  <p className="text-gray-600 mb-8 text-xl max-w-md mx-auto">
-                    {searchTerm || statusFilter !== "all"
-                      ? "Try adjusting your search or filter criteria" 
-                      : "Start creating your radio scripts and content"
-                    }
+                  <p className="text-gray-600 mb-6 max-w-sm mx-auto">
+                    {searchTerm || statusFilter !== "all" 
+                      ? "Try adjusting your search filters" 
+                      : "Start creating your first radio script"}
                   </p>
-                  {!searchTerm && statusFilter === "all" && (user?.role === 'admin' || user?.role === 'editor') && (
+                  {(!searchTerm && statusFilter === "all") && (user?.role === 'admin' || user?.role === 'editor') && (
                     <Button 
                       onClick={() => setIsCreateDialogOpen(true)}
                       size="lg"
-                      className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 hover:scale-105 px-8 py-3"
+                      className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-xl hover:shadow-blue-500/25 transition-all duration-300 hover:scale-105"
                     >
-                      <Plus className="h-6 w-6 mr-3" />
+                      <Plus className="h-5 w-5 mr-2" />
                       Create Your First Script
                     </Button>
                   )}
                 </CardContent>
               </Card>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            ) : viewMode === 'grid' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {filteredScripts.map((script) => {
                   const project = projects.find(p => p.id === script.projectId);
-                  const StatusIcon = statusIcons[script.status as keyof typeof statusIcons] || FileText;
-
+                  const StatusIcon = statusIcons[script.status as keyof typeof statusIcons];
                   return (
-                    <Card key={script.id} className="group hover:shadow-2xl transition-all duration-500 bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-xl hover:scale-[1.02] hover:shadow-blue-500/10">
-                      <CardContent className="p-8">
-                        <div className="flex items-start justify-between mb-6">
-                          <div className="flex items-center space-x-4">
-                            <div className="relative">
-                              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-xl blur opacity-50"></div>
-                              <div className="relative p-3 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-xl">
-                                <FileText className="h-6 w-6 text-white" />
-                              </div>
-                            </div>
-                            <div>
-                              <Badge className={`text-sm px-3 py-1 ${statusColors[script.status as keyof typeof statusColors]}`}>
-                                <StatusIcon className="h-3 w-3 mr-1" />
-                                {script.status}
-                              </Badge>
-                            </div>
-                          </div>
-                          <div className="flex space-x-2">
-                            <Button 
-                              variant="ghost" 
+                    <Card key={script.id} className="group hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm border border-gray-200/50 hover:scale-[1.02] hover:border-blue-300">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between mb-3">
+                          <Badge variant="secondary" className={`text-xs px-2 py-1 ${statusColors[script.status as keyof typeof statusColors]}`}>
+                            <StatusIcon className="h-3 w-3 mr-1" />
+                            {script.status}
+                          </Badge>
+                          <div className="flex space-x-1">
+                            <Button
+                              variant="ghost"
                               size="sm"
                               onClick={() => setViewingScript(script)}
-                              className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-emerald-50 hover:scale-110"
+                              className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-7 w-7 p-0 hover:bg-green-50"
                             >
-                              <Eye className="h-5 w-5 text-emerald-600" />
+                              <Eye className="h-3 w-3 text-green-600" />
                             </Button>
                             {(user?.role === 'admin' || user?.role === 'editor') && (
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                onClick={() => handleEdit(script)}
-                                className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-blue-50 hover:scale-110"
-                              >
-                                <Edit className="h-5 w-5 text-blue-600" />
-                              </Button>
-                            )}
-                            {(user?.role === 'admin' || user?.role === 'editor') && (
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                onClick={() => handleDelete(script.id)}
-                                className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-50 hover:scale-110"
-                              >
-                                <Trash2 className="h-5 w-5 text-red-500" />
-                              </Button>
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEdit(script)}
+                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-7 w-7 p-0 hover:bg-blue-50"
+                                >
+                                  <Edit className="h-3 w-3 text-blue-600" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDelete(script.id)}
+                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-7 w-7 p-0 hover:bg-red-50"
+                                >
+                                  <Trash2 className="h-3 w-3 text-red-500" />
+                                </Button>
+                              </>
                             )}
                           </div>
                         </div>
 
-                        <div className="space-y-4">
-                          <h3 className="text-2xl font-bold text-gray-800 line-clamp-2 group-hover:text-blue-700 transition-colors duration-300">
+                        <div className="space-y-3">
+                          <h3 className="font-semibold text-sm text-gray-800 line-clamp-2 group-hover:text-blue-700 transition-colors duration-300 leading-tight">
                             {script.title}
                           </h3>
-
+                          
                           {project && (
-                            <div className="flex items-center space-x-3 p-3 bg-gray-50/80 rounded-lg">
-                              <FolderOpen className="h-5 w-5 text-blue-600" />
-                              <span className="text-sm text-gray-700 font-semibold">{project.name}</span>
+                            <div className="flex items-center space-x-2 text-xs text-gray-600">
+                              <FolderOpen className="h-3 w-3 text-blue-500" />
+                              <span className="truncate">{project.name}</span>
                             </div>
                           )}
 
                           {script.description && (
-                            <p className="text-gray-600 line-clamp-3 leading-relaxed">
+                            <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
                               {script.description}
                             </p>
                           )}
 
-                          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                            <div className="flex items-center space-x-2">
-                              <Clock className="h-4 w-4 text-gray-400" />
-                              <span className="text-sm text-gray-500">
+                          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                            <div className="flex items-center space-x-1">
+                              <Clock className="h-3 w-3 text-gray-400" />
+                              <span className="text-xs text-gray-500">
                                 {new Date(script.createdAt).toLocaleDateString()}
                               </span>
                             </div>
-                            <Button 
-                              onClick={() => setViewingScript(script)}
+                            <div className="flex items-center space-x-1">
+                              <User className="h-3 w-3 text-gray-400" />
+                              <span className="text-xs text-gray-500 truncate max-w-[60px]">
+                                {script.authorId}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {filteredScripts.map((script) => {
+                  const project = projects.find(p => p.id === script.projectId);
+                  const StatusIcon = statusIcons[script.status as keyof typeof statusIcons];
+                  return (
+                    <Card key={script.id} className="group hover:shadow-md transition-all duration-300 bg-white/80 backdrop-blur-sm border border-gray-200/50 hover:border-blue-300">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4 flex-1">
+                            <Badge variant="secondary" className={`text-xs px-2 py-1 shrink-0 ${statusColors[script.status as keyof typeof statusColors]}`}>
+                              <StatusIcon className="h-3 w-3 mr-1" />
+                              {script.status}
+                            </Badge>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-sm text-gray-800 truncate group-hover:text-blue-700 transition-colors duration-300">
+                                {script.title}
+                              </h3>
+                              <div className="flex items-center space-x-4 mt-1">
+                                {project && (
+                                  <div className="flex items-center space-x-1 text-xs text-gray-600">
+                                    <FolderOpen className="h-3 w-3 text-blue-500" />
+                                    <span>{project.name}</span>
+                                  </div>
+                                )}
+                                <div className="flex items-center space-x-1 text-xs text-gray-500">
+                                  <Clock className="h-3 w-3 text-gray-400" />
+                                  <span>{new Date(script.createdAt).toLocaleDateString()}</span>
+                                </div>
+                                <div className="flex items-center space-x-1 text-xs text-gray-500">
+                                  <User className="h-3 w-3 text-gray-400" />
+                                  <span className="truncate max-w-[100px]">{script.authorId}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex space-x-1 shrink-0">
+                            <Button
+                              variant="ghost"
                               size="sm"
-                              variant="outline"
-                              className="opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-emerald-50 hover:border-blue-300"
+                              onClick={() => setViewingScript(script)}
+                              className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-8 w-8 p-0 hover:bg-green-50"
                             >
-                              View Script
+                              <Eye className="h-4 w-4 text-green-600" />
                             </Button>
+                            {(user?.role === 'admin' || user?.role === 'editor') && (
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEdit(script)}
+                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-8 w-8 p-0 hover:bg-blue-50"
+                                >
+                                  <Edit className="h-4 w-4 text-blue-600" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDelete(script.id)}
+                                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-8 w-8 p-0 hover:bg-red-50"
+                                >
+                                  <Trash2 className="h-4 w-4 text-red-500" />
+                                </Button>
+                              </>
+                            )}
                           </div>
                         </div>
                       </CardContent>
