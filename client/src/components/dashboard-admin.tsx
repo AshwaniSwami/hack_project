@@ -14,7 +14,11 @@ import {
   Sparkles,
   Globe,
   Heart,
-  ArrowRight
+  ArrowRight,
+  Clock,
+  Shield,
+  Database,
+  Server
 } from "lucide-react";
 import type { Script, Project, Episode, User } from "@shared/schema";
 import { useAuth } from "@/hooks/useAuth";
