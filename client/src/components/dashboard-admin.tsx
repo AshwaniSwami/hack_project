@@ -202,37 +202,76 @@ export function AdminDashboard() {
             
             <div className="space-y-4">
               <div className="flex items-center space-x-2 mb-3">
-                <div className="h-3 w-3 rounded-full bg-orange-500"></div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">User Management</h3>
+                <div className="h-3 w-3 rounded-full bg-purple-500"></div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Activity Overview</h3>
               </div>
-              <div className="space-y-3">
-                <div className="p-6 rounded-xl bg-gradient-to-br from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 border border-orange-200/50 dark:border-orange-700/50">
+              <div className="p-6 rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200/50 dark:border-purple-700/50">
+                <div className="space-y-4">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-3">
-                      <Users className="h-6 w-6 text-orange-600" />
-                      <span className="font-medium text-gray-700 dark:text-gray-300">Total Users</span>
+                    <div className="flex items-center space-x-2">
+                      <BarChart3 className="h-5 w-5 text-purple-600" />
+                      <span className="font-medium text-gray-700 dark:text-gray-300">Content Distribution</span>
                     </div>
-                    <span className="text-3xl font-bold text-orange-600 dark:text-orange-400">{stats.totalUsers}</span>
                   </div>
-                  <div className="flex items-center space-x-2 mb-2">
-                    <div className="flex-1 bg-orange-200 dark:bg-orange-700 rounded-full h-3">
-                      <div 
-                        className="h-3 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full transition-all duration-500"
-                        style={{ width: `${stats.totalUsers > 0 ? (stats.activeUsers / stats.totalUsers) * 100 : 0}%` }}
-                      ></div>
+                  
+                  {/* Mini Chart Visualization */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 rounded bg-blue-500"></div>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Projects</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                          <div 
+                            className="h-2 bg-blue-500 rounded-full transition-all duration-500"
+                            style={{ width: `${stats.totalProjects > 0 ? Math.min((stats.totalProjects / Math.max(stats.totalProjects, stats.totalEpisodes, stats.totalScripts, 1)) * 100, 100) : 0}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white w-6">{stats.totalProjects}</span>
+                      </div>
                     </div>
-                    <span className="text-sm font-medium text-orange-600 dark:text-orange-400">
-                      {stats.totalUsers > 0 ? Math.round((stats.activeUsers / stats.totalUsers) * 100) : 0}%
-                    </span>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 rounded bg-emerald-500"></div>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Episodes</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                          <div 
+                            className="h-2 bg-emerald-500 rounded-full transition-all duration-500"
+                            style={{ width: `${stats.totalEpisodes > 0 ? Math.min((stats.totalEpisodes / Math.max(stats.totalProjects, stats.totalEpisodes, stats.totalScripts, 1)) * 100, 100) : 0}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white w-6">{stats.totalEpisodes}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 rounded bg-purple-500"></div>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Scripts</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                          <div 
+                            className="h-2 bg-purple-500 rounded-full transition-all duration-500"
+                            style={{ width: `${stats.totalScripts > 0 ? Math.min((stats.totalScripts / Math.max(stats.totalProjects, stats.totalEpisodes, stats.totalScripts, 1)) * 100, 100) : 0}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white w-6">{stats.totalScripts}</span>
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{stats.activeUsers} active users</p>
-                </div>
-                
-                <div className="p-4 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-200/50 dark:border-indigo-700/50">
-                  <div className="text-center">
-                    <Calendar className="h-8 w-8 text-indigo-600 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Last Login</p>
-                    <p className="font-semibold text-indigo-600 dark:text-indigo-400">Today</p>
+                  
+                  <div className="pt-3 border-t border-purple-200 dark:border-purple-700">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Total Content</span>
+                      <span className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                        {stats.totalProjects + stats.totalEpisodes + stats.totalScripts}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
