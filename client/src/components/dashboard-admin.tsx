@@ -2,22 +2,19 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { 
   Users, 
   FileText, 
   Radio, 
-  Download, 
   TrendingUp, 
-  Activity, 
-  AlertCircle, 
-  CheckCircle,
+  Activity,
   BarChart3,
   Calendar,
-  Database,
-  HardDrive,
-  Clock
+  Plus,
+  Sparkles,
+  Globe,
+  Heart,
+  ArrowRight
 } from "lucide-react";
 import type { Script, Project, Episode, User } from "@shared/schema";
 
@@ -38,386 +35,221 @@ export function AdminDashboard() {
     queryKey: ["/api/users"],
   });
 
-  const { data: downloadStats } = useQuery({
-    queryKey: ["/api/analytics/downloads/overview"],
-    enabled: false, // Disable for now to prevent 403 errors
-  });
-
-  // Calculate platform health KPIs
-  const kpis = {
+  // Calculate simple metrics
+  const stats = {
     totalProjects: projects.length,
     totalEpisodes: episodes.length,
     totalScripts: scripts.length,
     totalUsers: users.length,
-    totalDownloads: 0, // Mock data for now
-    activeUsers: users.filter(user => user.status === 'verified').length,
-    pendingReviews: scripts.filter(script => script.status === 'Under Review').length,
-    overdueItems: scripts.filter(script => script.status === 'Needs Revision').length
-  };
-
-  // User role breakdown
-  const roleBreakdown = {
-    admin: users.filter(user => user.role === 'admin').length,
-    editor: users.filter(user => user.role === 'editor').length,
-    member: users.filter(user => user.role === 'member').length,
-    pending: users.filter(user => user.status === 'pending').length
-  };
-
-  // Recent activity feed
-  const recentActivity = [
-    ...scripts.slice(0, 3).map(script => ({
-      type: 'script',
-      title: script.title,
-      action: `Script created by ${script.authorId}`,
-      time: script.createdAt,
-      status: script.status
-    })),
-    ...episodes.slice(0, 2).map(episode => ({
-      type: 'episode',
-      title: episode.title,
-      action: 'Episode published',
-      time: episode.createdAt,
-      status: episode.status
-    }))
-  ].sort((a, b) => new Date(b.time || '').getTime() - new Date(a.time || '').getTime()).slice(0, 5);
-
-  // Advanced admin metrics
-  const adminMetrics = {
-    growthRate: users.length > 0 ? Math.round(((users.filter(u => {
-      if (!u.createdAt) return false;
-      const monthAgo = new Date();
-      monthAgo.setMonth(monthAgo.getMonth() - 1);
-      return new Date(u.createdAt) >= monthAgo;
-    }).length / users.length) * 100)) : 0,
-    contentVelocity: scripts.filter(script => {
-      if (!script.createdAt) return false;
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      return new Date(script.createdAt) >= weekAgo;
-    }).length,
-    systemHealth: 98.5, // Mock system health percentage
-    engagementScore: Math.round((kpis.totalDownloads / Math.max(kpis.totalUsers, 1)) * 10)
+    activeUsers: users.filter(user => user.status === 'verified').length
   };
 
   return (
     <div className="space-y-8">
-      {/* Enhanced Header with Real-time Metrics */}
-      <div className="gradient-primary rounded-2xl p-8 text-white ngo-shadow">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Welcome, Admin! NGO Impact Dashboard</h1>
-            <p className="text-white/80 text-lg mb-4">Empowering communities through radio content management</p>
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center space-x-2">
-                <TrendingUp className="h-4 w-4" />
-                <span className="text-sm">{adminMetrics.growthRate}% user growth this month</span>
+      {/* Enhanced Welcome Card with Fresh Modern Design */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-8 text-white shadow-2xl">
+        {/* Background decorative elements */}
+        <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-white/10 backdrop-blur-3xl"></div>
+        <div className="absolute -bottom-16 -left-16 h-32 w-32 rounded-full bg-white/5 backdrop-blur-3xl"></div>
+        <div className="absolute top-8 right-8 h-16 w-16 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 opacity-20"></div>
+        
+        <div className="relative z-10">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+            <div className="mb-6 lg:mb-0">
+              <div className="mb-3 flex items-center space-x-2">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+                  <Sparkles className="h-5 w-5" />
+                </div>
+                <span className="text-sm font-medium uppercase tracking-wider text-blue-200">Admin Dashboard</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <Activity className="h-4 w-4" />
-                <span className="text-sm">{adminMetrics.contentVelocity} new scripts this week</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Database className="h-4 w-4" />
-                <span className="text-sm">{adminMetrics.systemHealth}% system health</span>
+              <h1 className="mb-3 text-4xl font-bold leading-tight">
+                Welcome back to 
+                <span className="block bg-gradient-to-r from-cyan-300 to-white bg-clip-text text-transparent">
+                  SMART Radio Hub
+                </span>
+              </h1>
+              <p className="text-xl text-blue-100 opacity-90">
+                Empowering communities through innovative radio content management
+              </p>
+            </div>
+            
+            <div className="flex flex-col space-y-4 lg:flex-row lg:space-x-4 lg:space-y-0">
+              <Link href="/analytics">
+                <Button 
+                  size="lg"
+                  className="group bg-white/10 text-white backdrop-blur-sm hover:bg-white/20 transition-all duration-300 hover:scale-105 border border-white/20"
+                >
+                  <BarChart3 className="h-5 w-5 mr-2 group-hover:rotate-12 transition-transform" />
+                  View Analytics
+                  <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+              
+              <div className="flex items-center space-x-2 rounded-xl bg-white/10 px-4 py-2 backdrop-blur-sm">
+                <Heart className="h-4 w-4 text-pink-300" />
+                <span className="text-sm font-medium">Making Impact</span>
               </div>
             </div>
-          </div>
-          <div className="hidden lg:flex space-x-4">
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center">
-              <p className="text-sm text-white/80">Engagement Score</p>
-              <p className="text-2xl font-bold">{adminMetrics.engagementScore}/10</p>
-              <p className="text-xs text-white/70">Platform activity</p>
-            </div>
-            <Link href="/analytics">
-              <Button 
-                size="lg"
-                className="bg-white/20 text-white hover:bg-white/30 transition-all duration-300"
-              >
-                <BarChart3 className="h-5 w-5 mr-2" />
-                Analytics Hub
-              </Button>
-            </Link>
           </div>
         </div>
       </div>
 
-      {/* Enhanced Platform Health & KPIs */}
+      {/* Clean Stats Cards without hover effects */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="gradient-card hover:shadow-lg transition-all duration-300 hover:scale-105 border-0 shadow-md ngo-shadow">
+        <Card className="border-0 bg-white/70 backdrop-blur-sm shadow-lg dark:bg-gray-800/70">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-600">Total Projects</p>
-                <p className="text-3xl font-bold text-blue-800 dark:text-blue-200">{kpis.totalProjects}</p>
-                <div className="flex items-center mt-2 text-sm text-blue-700 dark:text-blue-300">
-                  <TrendingUp className="h-4 w-4 mr-1" />
-                  <span>Active</span>
-                </div>
+                <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Projects</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalProjects}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Active content</p>
               </div>
-              <FileText className="h-12 w-12 text-blue-500" />
+              <div className="rounded-2xl bg-blue-100 p-3 dark:bg-blue-900/30">
+                <FileText className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="gradient-card hover:shadow-lg transition-all duration-300 hover:scale-105 border-0 shadow-md ngo-shadow">
+        <Card className="border-0 bg-white/70 backdrop-blur-sm shadow-lg dark:bg-gray-800/70">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-sky-600">Total Episodes</p>
-                <p className="text-3xl font-bold text-sky-800 dark:text-sky-200">{kpis.totalEpisodes}</p>
-                <div className="flex items-center mt-2 text-sm text-sky-700 dark:text-sky-300">
-                  <Radio className="h-4 w-4 mr-1" />
-                  <span>Published</span>
-                </div>
+                <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">Episodes</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalEpisodes}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Published</p>
               </div>
-              <Radio className="h-12 w-12 text-sky-500" />
+              <div className="rounded-2xl bg-emerald-100 p-3 dark:bg-emerald-900/30">
+                <Radio className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="gradient-card hover:shadow-lg transition-all duration-300 hover:scale-105 border-0 shadow-md ngo-shadow">
+        <Card className="border-0 bg-white/70 backdrop-blur-sm shadow-lg dark:bg-gray-800/70">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-cyan-600">Total Scripts</p>
-                <p className="text-3xl font-bold text-cyan-800 dark:text-cyan-200">{kpis.totalScripts}</p>
-                <div className="flex items-center mt-2 text-sm text-cyan-700 dark:text-cyan-300">
-                  <FileText className="h-4 w-4 mr-1" />
-                  <span>Created</span>
-                </div>
+                <p className="text-sm font-medium text-purple-600 dark:text-purple-400">Scripts</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalScripts}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Created</p>
               </div>
-              <FileText className="h-12 w-12 text-cyan-500" />
+              <div className="rounded-2xl bg-purple-100 p-3 dark:bg-purple-900/30">
+                <FileText className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="gradient-card hover:shadow-lg transition-all duration-300 hover:scale-105 border-0 shadow-md ngo-shadow">
+        <Card className="border-0 bg-white/70 backdrop-blur-sm shadow-lg dark:bg-gray-800/70">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-blue-600">Total Users</p>
-                <p className="text-3xl font-bold text-blue-800 dark:text-blue-200">{kpis.totalUsers}</p>
-                <div className="flex items-center mt-2 text-sm text-blue-700 dark:text-blue-300">
-                  <TrendingUp className="h-4 w-4 mr-1" />
-                  <span>+{adminMetrics.growthRate}% this month</span>
-                </div>
+                <p className="text-sm font-medium text-orange-600 dark:text-orange-400">Users</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalUsers}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{stats.activeUsers} verified</p>
               </div>
-              <Users className="h-12 w-12 text-blue-500" />
-            </div>
-            <div className="mt-4">
-              <Progress value={(kpis.activeUsers / kpis.totalUsers) * 100} className="h-2" />
-              <p className="text-xs text-blue-600 mt-1">{kpis.activeUsers} active users</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* System-Wide Urgent Items & User Roles */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <AlertCircle className="h-5 w-5 mr-2 text-red-500" />
-              System-Wide Urgent Items
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {kpis.pendingReviews > 0 && (
-              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-                <div className="flex items-center">
-                  <Clock className="h-4 w-4 text-yellow-600 mr-2" />
-                  <span className="text-sm font-medium">Scripts Awaiting Review</span>
-                </div>
-                <Badge variant="secondary">{kpis.pendingReviews}</Badge>
-              </div>
-            )}
-            {kpis.overdueItems > 0 && (
-              <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
-                <div className="flex items-center">
-                  <AlertCircle className="h-4 w-4 text-red-600 mr-2" />
-                  <span className="text-sm font-medium">Items Needing Revision</span>
-                </div>
-                <Badge variant="destructive">{kpis.overdueItems}</Badge>
-              </div>
-            )}
-            {roleBreakdown.pending > 0 && (
-              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                <div className="flex items-center">
-                  <Users className="h-4 w-4 text-blue-600 mr-2" />
-                  <span className="text-sm font-medium">Users Pending Approval</span>
-                </div>
-                <Badge variant="outline">{roleBreakdown.pending}</Badge>
-              </div>
-            )}
-            {kpis.pendingReviews === 0 && kpis.overdueItems === 0 && roleBreakdown.pending === 0 && (
-              <div className="flex items-center p-3 bg-green-50 rounded-lg">
-                <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
-                <span className="text-sm font-medium text-green-800">All systems running smoothly</span>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Users className="h-5 w-5 mr-2 text-blue-500" />
-              User Roles Summary
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Administrators</span>
-                <div className="flex items-center space-x-2">
-                  <Progress value={(roleBreakdown.admin / kpis.totalUsers) * 100} className="w-20 h-2" />
-                  <span className="text-sm font-bold">{roleBreakdown.admin}</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Editors</span>
-                <div className="flex items-center space-x-2">
-                  <Progress value={(roleBreakdown.editor / kpis.totalUsers) * 100} className="w-20 h-2" />
-                  <span className="text-sm font-bold">{roleBreakdown.editor}</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Members</span>
-                <div className="flex items-center space-x-2">
-                  <Progress value={(roleBreakdown.member / kpis.totalUsers) * 100} className="w-20 h-2" />
-                  <span className="text-sm font-bold">{roleBreakdown.member}</span>
-                </div>
+              <div className="rounded-2xl bg-orange-100 p-3 dark:bg-orange-900/30">
+                <Users className="h-8 w-8 text-orange-600 dark:text-orange-400" />
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Content Creation Trend & User Engagement */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <BarChart3 className="h-5 w-5 mr-2 text-indigo-500" />
-              Content Creation Trend
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+      {/* Quick Actions */}
+      <Card className="border-0 bg-white/70 backdrop-blur-sm shadow-lg dark:bg-gray-800/70">
+        <CardHeader>
+          <CardTitle className="flex items-center text-gray-900 dark:text-white">
+            <Plus className="h-5 w-5 mr-2 text-blue-600" />
+            Quick Actions
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Link href="/projects">
+              <Button 
+                variant="outline" 
+                className="w-full h-20 flex-col space-y-2 border-blue-200 hover:border-blue-400 hover:bg-blue-50 dark:border-blue-700 dark:hover:bg-blue-900/20"
+              >
+                <FileText className="h-6 w-6 text-blue-600" />
+                <span>Manage Projects</span>
+              </Button>
+            </Link>
+            
+            <Link href="/users">
+              <Button 
+                variant="outline" 
+                className="w-full h-20 flex-col space-y-2 border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 dark:border-emerald-700 dark:hover:bg-emerald-900/20"
+              >
+                <Users className="h-6 w-6 text-emerald-600" />
+                <span>User Management</span>
+              </Button>
+            </Link>
+            
+            <Link href="/analytics">
+              <Button 
+                variant="outline" 
+                className="w-full h-20 flex-col space-y-2 border-purple-200 hover:border-purple-400 hover:bg-purple-50 dark:border-purple-700 dark:hover:bg-purple-900/20"
+              >
+                <BarChart3 className="h-6 w-6 text-purple-600" />
+                <span>View Analytics</span>
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Recent Activity */}
+      <Card className="border-0 bg-white/70 backdrop-blur-sm shadow-lg dark:bg-gray-800/70">
+        <CardHeader>
+          <CardTitle className="flex items-center text-gray-900 dark:text-white">
+            <Activity className="h-5 w-5 mr-2 text-green-600" />
+            Platform Overview
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">This Week</span>
-                <div className="flex items-center space-x-2">
-                  <div className="w-20 bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-indigo-600 h-2 rounded-full" 
-                      style={{ width: `${Math.min((adminMetrics.contentVelocity / 10) * 100, 100)}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-sm font-medium">{adminMetrics.contentVelocity}</span>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Content Distribution</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Projects</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{stats.totalProjects}</span>
                 </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Episodes</span>
-                <div className="flex items-center space-x-2">
-                  <div className="w-20 bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-green-600 h-2 rounded-full" 
-                      style={{ width: `${Math.min((kpis.totalEpisodes / 20) * 100, 100)}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-sm font-medium">{kpis.totalEpisodes}</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Episodes</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{stats.totalEpisodes}</span>
                 </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Projects</span>
-                <div className="flex items-center space-x-2">
-                  <div className="w-20 bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-blue-600 h-2 rounded-full" 
-                      style={{ width: `${Math.min((kpis.totalProjects / 15) * 100, 100)}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-sm font-medium">{kpis.totalProjects}</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Scripts</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{stats.totalScripts}</span>
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      
-      {/* Recent Global Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Activity className="h-5 w-5 mr-2 text-green-500" />
-              Recent Global Activity Feed
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center">
-                    {activity.type === 'script' ? (
-                      <FileText className="h-4 w-4 text-purple-500 mr-3" />
-                    ) : (
-                      <Radio className="h-4 w-4 text-green-500 mr-3" />
-                    )}
-                    <div>
-                      <p className="text-sm font-medium">{activity.title}</p>
-                      <p className="text-xs text-gray-500">{activity.action}</p>
-                    </div>
-                  </div>
-                  <Badge variant="outline" className="text-xs">
-                    {activity.status}
-                  </Badge>
+            
+            <div className="space-y-4">
+              <h3 className="font-semibold text-gray-900 dark:text-white">User Engagement</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Total Users</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{stats.totalUsers}</span>
                 </div>
-              ))}
-              {recentActivity.length === 0 && (
-                <p className="text-sm text-gray-500 text-center py-4">No recent activity</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center">
-                <BarChart3 className="h-5 w-5 mr-2 text-blue-500" />
-                Platform Health Indicators
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Active Users</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{stats.activeUsers}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Engagement Rate</span>
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    {stats.totalUsers > 0 ? Math.round((stats.activeUsers / stats.totalUsers) * 100) : 0}%
+                  </span>
+                </div>
               </div>
-              <Link href="/analytics">
-                <Button variant="outline" size="sm">
-                  Go to Analytics Dashboard
-                </Button>
-              </Link>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-              <div className="flex items-center">
-                <Database className="h-4 w-4 text-green-600 mr-2" />
-                <span className="text-sm font-medium">Database Connection</span>
-              </div>
-              <Badge className="bg-green-100 text-green-800">OK</Badge>
             </div>
-            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-              <div className="flex items-center">
-                <HardDrive className="h-4 w-4 text-blue-600 mr-2" />
-                <span className="text-sm font-medium">Storage Status</span>
-              </div>
-              <Badge className="bg-blue-100 text-blue-800">Healthy</Badge>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
-              <div className="flex items-center">
-                <Download className="h-4 w-4 text-purple-600 mr-2" />
-                <span className="text-sm font-medium">Total Downloads</span>
-              </div>
-              <Badge className="bg-purple-100 text-purple-800">{kpis.totalDownloads}</Badge>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
