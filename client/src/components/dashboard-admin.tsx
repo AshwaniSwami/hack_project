@@ -51,27 +51,18 @@ export function AdminDashboard() {
     activeUsers: users.filter(user => user.status === 'verified').length
   };
 
-  // Member status data - only real user data
-  const memberStatusData = [
-    { name: 'Active Members', value: stats.activeUsers, color: '#10b981' },
-    { name: 'Pending Members', value: stats.totalUsers - stats.activeUsers, color: '#f59e0b' },
-  ];
-
-  // Member distribution by role
-  const memberRoleData = users.reduce((acc, user) => {
+  // Optimized member role distribution - prevents separate blocks
+  const roleCount = users.reduce((acc, user) => {
     const role = user.role || 'member';
-    const existing = acc.find(item => item.name === role);
-    if (existing) {
-      existing.value += 1;
-    } else {
-      acc.push({ 
-        name: role.charAt(0).toUpperCase() + role.slice(1), 
-        value: 1, 
-        color: role === 'admin' ? '#ef4444' : role === 'editor' ? '#3b82f6' : '#10b981' 
-      });
-    }
+    acc[role] = (acc[role] || 0) + 1;
     return acc;
-  }, [] as Array<{name: string; value: number; color: string}>);
+  }, {} as Record<string, number>);
+
+  const memberRoleData = [
+    { name: 'Admin', value: roleCount.admin || 0, color: '#ef4444' },
+    { name: 'Editor', value: roleCount.editor || 0, color: '#3b82f6' },
+    { name: 'Member', value: roleCount.member || 0, color: '#10b981' },
+  ].filter(item => item.value > 0); // Only show roles that exist
 
   return (
     <div className="space-y-6">
@@ -228,69 +219,31 @@ export function AdminDashboard() {
             <div className="space-y-4">
               <div className="flex items-center space-x-2 mb-3">
                 <div className="h-3 w-3 rounded-full bg-orange-500"></div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Member Analytics</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Team Roles</h3>
               </div>
               
-              {/* Member Status Distribution */}
-              <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 border border-emerald-200/50 dark:border-emerald-700/50">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">Member Status</h4>
-                  <Users className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <div className="flex items-center space-x-4">
-                  <div className="flex-1">
-                    <ResponsiveContainer width="100%" height={100}>
-                      <PieChart>
-                        <Pie
-                          data={memberStatusData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={25}
-                          outerRadius={45}
-                          dataKey="value"
-                        >
-                          {memberStatusData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                            border: 'none', 
-                            borderRadius: '8px',
-                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                          }}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <div className="flex-1 space-y-2">
-                    {memberStatusData.map((item, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
-                        <span className="text-xs text-gray-600 dark:text-gray-400">{item.name}: {item.value}</span>
-                      </div>
-                    ))}
+              {/* Optimized Role Distribution Chart */}
+              <div className="p-6 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200/50 dark:border-blue-700/50">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white">Role Distribution</h4>
+                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                    <Users className="h-4 w-4" />
+                    <span>{stats.totalUsers} Total</span>
                   </div>
                 </div>
-              </div>
-
-              {/* Member Roles Distribution */}
-              <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200/50 dark:border-blue-700/50">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">Role Distribution</h4>
-                  <BarChart3 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div className="flex items-center space-x-4">
-                  <div className="flex-1">
-                    <ResponsiveContainer width="100%" height={100}>
+                
+                <div className="flex items-center justify-center space-x-8">
+                  {/* Enhanced Pie Chart */}
+                  <div className="flex-shrink-0">
+                    <ResponsiveContainer width={180} height={180}>
                       <PieChart>
                         <Pie
                           data={memberRoleData}
                           cx="50%"
                           cy="50%"
-                          innerRadius={25}
-                          outerRadius={45}
+                          innerRadius={40}
+                          outerRadius={80}
+                          paddingAngle={2}
                           dataKey="value"
                         >
                           {memberRoleData.map((entry, index) => (
@@ -301,38 +254,31 @@ export function AdminDashboard() {
                           contentStyle={{ 
                             backgroundColor: 'rgba(255, 255, 255, 0.95)', 
                             border: 'none', 
-                            borderRadius: '8px',
-                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                            borderRadius: '12px',
+                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                            fontSize: '14px'
                           }}
                         />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
-                  <div className="flex-1 space-y-2">
+                  
+                  {/* Enhanced Legend */}
+                  <div className="flex flex-col space-y-4">
                     {memberRoleData.map((item, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
-                        <span className="text-xs text-gray-600 dark:text-gray-400">{item.name}: {item.value}</span>
+                      <div key={index} className="flex items-center space-x-3">
+                        <div 
+                          className="w-4 h-4 rounded-full shadow-sm" 
+                          style={{ backgroundColor: item.color }}
+                        ></div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">{item.name}</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            {item.value} member{item.value !== 1 ? 's' : ''} ({Math.round((item.value / stats.totalUsers) * 100)}%)
+                          </span>
+                        </div>
                       </div>
                     ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Member Summary Stats */}
-              <div className="p-4 rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200/50 dark:border-purple-700/50">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">Quick Stats</h4>
-                  <Activity className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-purple-600 dark:text-purple-400">{stats.totalUsers}</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Total Members</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{stats.activeUsers}</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Active Members</div>
                   </div>
                 </div>
               </div>
