@@ -151,146 +151,86 @@ export function AdminDashboard() {
         </Card>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Quick Actions - Left Side Compact */}
-        <div className="lg:col-span-1">
-          <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-md dark:bg-gray-800/80">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center text-gray-900 dark:text-white text-base">
-                <Plus className="h-4 w-4 mr-2 text-blue-600" />
-                Quick Actions
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Link href="/projects">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start h-12 border-blue-200 hover:border-blue-400 hover:bg-blue-50 dark:border-blue-700 dark:hover:bg-blue-900/20"
-                >
-                  <FileText className="h-4 w-4 mr-3 text-blue-600" />
-                  Projects
-                </Button>
-              </Link>
-              
-              <Link href="/users">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start h-12 border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 dark:border-emerald-700 dark:hover:bg-emerald-900/20"
-                >
-                  <Users className="h-4 w-4 mr-3 text-emerald-600" />
-                  Users
-                </Button>
-              </Link>
-              
-              <Link href="/episodes">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start h-12 border-purple-200 hover:border-purple-400 hover:bg-purple-50 dark:border-purple-700 dark:hover:bg-purple-900/20"
-                >
-                  <Radio className="h-4 w-4 mr-3 text-purple-600" />
-                  Episodes
-                </Button>
-              </Link>
-
-              <Link href="/scripts">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start h-12 border-orange-200 hover:border-orange-400 hover:bg-orange-50 dark:border-orange-700 dark:hover:bg-orange-900/20"
-                >
-                  <FileText className="h-4 w-4 mr-3 text-orange-600" />
-                  Scripts
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Enhanced Platform Overview - Right Side */}
-        <div className="lg:col-span-2">
-          <Card className="border-0 bg-gradient-to-br from-white/90 to-blue-50/50 backdrop-blur-sm shadow-lg dark:from-gray-800/90 dark:to-gray-700/50">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center text-gray-900 dark:text-white text-xl">
-                <Activity className="h-6 w-6 mr-3 text-green-600" />
-                Platform Insights
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-2 mb-3">
-                    <div className="h-3 w-3 rounded-full bg-blue-500"></div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">Content Portfolio</h3>
+      {/* Optimized Platform Overview - Full Width */}
+      <Card className="border-0 bg-gradient-to-br from-white/90 to-blue-50/50 backdrop-blur-sm shadow-lg dark:from-gray-800/90 dark:to-gray-700/50">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center text-gray-900 dark:text-white text-xl">
+            <Activity className="h-6 w-6 mr-3 text-green-600" />
+            Platform Overview
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2 mb-3">
+                <div className="h-3 w-3 rounded-full bg-blue-500"></div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Content Library</h3>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200/50 dark:border-blue-700/50">
+                  <div className="flex items-center space-x-3">
+                    <FileText className="h-6 w-6 text-blue-600" />
+                    <span className="font-medium text-gray-700 dark:text-gray-300">Projects</span>
                   </div>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200/50 dark:border-blue-700/50">
-                      <div className="flex items-center space-x-3">
-                        <FileText className="h-5 w-5 text-blue-600" />
-                        <span className="font-medium text-gray-700 dark:text-gray-300">Projects</span>
-                      </div>
-                      <span className="text-xl font-bold text-blue-600 dark:text-blue-400">{stats.totalProjects}</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 border border-emerald-200/50 dark:border-emerald-700/50">
-                      <div className="flex items-center space-x-3">
-                        <Radio className="h-5 w-5 text-emerald-600" />
-                        <span className="font-medium text-gray-700 dark:text-gray-300">Episodes</span>
-                      </div>
-                      <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{stats.totalEpisodes}</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border border-purple-200/50 dark:border-purple-700/50">
-                      <div className="flex items-center space-x-3">
-                        <FileText className="h-5 w-5 text-purple-600" />
-                        <span className="font-medium text-gray-700 dark:text-gray-300">Scripts</span>
-                      </div>
-                      <span className="text-xl font-bold text-purple-600 dark:text-purple-400">{stats.totalScripts}</span>
-                    </div>
+                  <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.totalProjects}</span>
+                </div>
+                <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 border border-emerald-200/50 dark:border-emerald-700/50">
+                  <div className="flex items-center space-x-3">
+                    <Radio className="h-6 w-6 text-emerald-600" />
+                    <span className="font-medium text-gray-700 dark:text-gray-300">Episodes</span>
                   </div>
+                  <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{stats.totalEpisodes}</span>
+                </div>
+                <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border border-purple-200/50 dark:border-purple-700/50">
+                  <div className="flex items-center space-x-3">
+                    <FileText className="h-6 w-6 text-purple-600" />
+                    <span className="font-medium text-gray-700 dark:text-gray-300">Scripts</span>
+                  </div>
+                  <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">{stats.totalScripts}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2 mb-3">
+                <div className="h-3 w-3 rounded-full bg-orange-500"></div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">User Management</h3>
+              </div>
+              <div className="space-y-3">
+                <div className="p-6 rounded-xl bg-gradient-to-br from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 border border-orange-200/50 dark:border-orange-700/50">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <Users className="h-6 w-6 text-orange-600" />
+                      <span className="font-medium text-gray-700 dark:text-gray-300">Total Users</span>
+                    </div>
+                    <span className="text-3xl font-bold text-orange-600 dark:text-orange-400">{stats.totalUsers}</span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <div className="flex-1 bg-orange-200 dark:bg-orange-700 rounded-full h-3">
+                      <div 
+                        className="h-3 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full transition-all duration-500"
+                        style={{ width: `${stats.totalUsers > 0 ? (stats.activeUsers / stats.totalUsers) * 100 : 0}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-sm font-medium text-orange-600 dark:text-orange-400">
+                      {stats.totalUsers > 0 ? Math.round((stats.activeUsers / stats.totalUsers) * 100) : 0}%
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{stats.activeUsers} active users</p>
                 </div>
                 
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-2 mb-3">
-                    <div className="h-3 w-3 rounded-full bg-emerald-500"></div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">Community Growth</h3>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="p-4 rounded-xl bg-gradient-to-br from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 border border-orange-200/50 dark:border-orange-700/50">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-gray-700 dark:text-gray-300">Total Members</span>
-                        <span className="text-2xl font-bold text-orange-600 dark:text-orange-400">{stats.totalUsers}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <div className="flex-1 bg-orange-200 dark:bg-orange-700 rounded-full h-2">
-                          <div 
-                            className="h-2 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full transition-all duration-500"
-                            style={{ width: `${stats.totalUsers > 0 ? (stats.activeUsers / stats.totalUsers) * 100 : 0}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-sm font-medium text-orange-600 dark:text-orange-400">
-                          {stats.totalUsers > 0 ? Math.round((stats.activeUsers / stats.totalUsers) * 100) : 0}%
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">{stats.activeUsers} active members</p>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="text-center p-3 rounded-lg bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20">
-                        <TrendingUp className="h-6 w-6 text-blue-600 mx-auto mb-1" />
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Growth</p>
-                        <p className="font-bold text-blue-600 dark:text-blue-400">+12%</p>
-                      </div>
-                      <div className="text-center p-3 rounded-lg bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
-                        <Heart className="h-6 w-6 text-green-600 mx-auto mb-1" />
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Impact</p>
-                        <p className="font-bold text-green-600 dark:text-green-400">High</p>
-                      </div>
-                    </div>
+                <div className="p-4 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-600/50 border border-gray-200/50 dark:border-gray-600/50">
+                  <div className="text-center">
+                    <Calendar className="h-8 w-8 text-gray-600 dark:text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Platform Status</p>
+                    <p className="font-semibold text-gray-900 dark:text-white">Active & Running</p>
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
