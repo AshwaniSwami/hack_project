@@ -65,15 +65,29 @@ export function AdminDashboard() {
                 </div>
                 <span className="text-xs font-medium uppercase tracking-wider text-blue-200">Admin Dashboard</span>
               </div>
-              <h1 className="mb-2 text-3xl font-bold leading-tight">
+              <h1 className="mb-3 text-3xl font-bold leading-tight">
                 Welcome back, 
                 <span className="bg-gradient-to-r from-cyan-200 to-white bg-clip-text text-transparent">
                   {user?.firstName || user?.email?.split('@')[0] || 'Admin'}
                 </span>
               </h1>
-              <p className="text-lg text-blue-100/90 font-medium">
+              <p className="text-lg text-blue-100/90 font-medium mb-3">
                 Transform communities through powerful radio content
               </p>
+              <div className="flex flex-wrap gap-4 text-sm">
+                <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2">
+                  <FileText className="h-4 w-4 text-cyan-300" />
+                  <span>{stats.totalProjects + stats.totalEpisodes + stats.totalScripts} Total Content</span>
+                </div>
+                <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2">
+                  <Users className="h-4 w-4 text-green-300" />
+                  <span>{stats.activeUsers} Active Members</span>
+                </div>
+                <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2">
+                  <Activity className="h-4 w-4 text-yellow-300" />
+                  <span>Platform Admin</span>
+                </div>
+              </div>
             </div>
             
             <div className="flex space-x-3">
@@ -170,21 +184,30 @@ export function AdminDashboard() {
                 <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200/50 dark:border-blue-700/50">
                   <div className="flex items-center space-x-3">
                     <FileText className="h-6 w-6 text-blue-600" />
-                    <span className="font-medium text-gray-700 dark:text-gray-300">Projects</span>
+                    <div>
+                      <span className="font-medium text-gray-700 dark:text-gray-300 block">Projects</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Content containers</span>
+                    </div>
                   </div>
                   <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.totalProjects}</span>
                 </div>
                 <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 border border-emerald-200/50 dark:border-emerald-700/50">
                   <div className="flex items-center space-x-3">
                     <Radio className="h-6 w-6 text-emerald-600" />
-                    <span className="font-medium text-gray-700 dark:text-gray-300">Episodes</span>
+                    <div>
+                      <span className="font-medium text-gray-700 dark:text-gray-300 block">Episodes</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Audio content</span>
+                    </div>
                   </div>
                   <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{stats.totalEpisodes}</span>
                 </div>
                 <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border border-purple-200/50 dark:border-purple-700/50">
                   <div className="flex items-center space-x-3">
                     <FileText className="h-6 w-6 text-purple-600" />
-                    <span className="font-medium text-gray-700 dark:text-gray-300">Scripts</span>
+                    <div>
+                      <span className="font-medium text-gray-700 dark:text-gray-300 block">Scripts</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Written content</span>
+                    </div>
                   </div>
                   <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">{stats.totalScripts}</span>
                 </div>
@@ -219,11 +242,20 @@ export function AdminDashboard() {
                   <p className="text-sm text-gray-600 dark:text-gray-400">{stats.activeUsers} active users</p>
                 </div>
                 
-                <div className="p-4 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-600/50 border border-gray-200/50 dark:border-gray-600/50">
-                  <div className="text-center">
-                    <Calendar className="h-8 w-8 text-gray-600 dark:text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Platform Status</p>
-                    <p className="font-semibold text-gray-900 dark:text-white">Active & Running</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200/50 dark:border-blue-700/50">
+                    <div className="text-center">
+                      <Radio className="h-6 w-6 text-blue-600 mx-auto mb-1" />
+                      <p className="text-xs text-gray-600 dark:text-gray-400">Content Types</p>
+                      <p className="font-bold text-blue-600 dark:text-blue-400">{stats.totalProjects > 0 || stats.totalEpisodes > 0 || stats.totalScripts > 0 ? '3' : '0'}</p>
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200/50 dark:border-green-700/50">
+                    <div className="text-center">
+                      <Globe className="h-6 w-6 text-green-600 mx-auto mb-1" />
+                      <p className="text-xs text-gray-600 dark:text-gray-400">Reach</p>
+                      <p className="font-bold text-green-600 dark:text-green-400">Global</p>
+                    </div>
                   </div>
                 </div>
               </div>
