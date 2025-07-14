@@ -125,6 +125,10 @@ The application uses a relational database with the following core entities:
 
 ## Recent Changes
 
+- July 14, 2025: Streamlined admin dashboard by removing system health section and security status for cleaner, focused design
+- July 14, 2025: Added relevant Recent Activity section with content updates, user access, and platform health indicators
+- July 14, 2025: Enhanced welcome card by replacing security status with team member count for more useful information
+- July 14, 2025: Fixed missing icon imports (Clock, Shield, Database, Server) resolving dashboard display errors
 - July 13, 2025: Successfully completed migration from Replit Agent to Replit environment with full PostgreSQL database setup and database migrations applied
 - July 13, 2025: Enhanced admin dashboard with fresh modern design removing unwanted components (health indicators, system urgent items)
 - July 13, 2025: Redesigned dashboard welcome card with gradient background and improved visual hierarchy

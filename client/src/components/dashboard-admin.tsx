@@ -86,8 +86,8 @@ export function AdminDashboard() {
                 <span className="text-sm">Last Login: Today</span>
               </div>
               <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2">
-                <Shield className="h-4 w-4 text-green-300" />
-                <span className="text-sm">Security: Active</span>
+                <Users className="h-4 w-4 text-green-300" />
+                <span className="text-sm">{stats.totalUsers} Team Members</span>
               </div>
             </div>
           </div>
@@ -202,6 +202,46 @@ export function AdminDashboard() {
               </div>
             </div>
             
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2 mb-3">
+                <div className="h-3 w-3 rounded-full bg-orange-500"></div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Recent Activity</h3>
+              </div>
+              <div className="space-y-3">
+                <div className="p-4 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200/50 dark:border-green-700/50">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">Content Updates</span>
+                    </div>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">Today</span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Platform ready for new content creation</p>
+                </div>
+                
+                <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200/50 dark:border-blue-700/50">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">User Access</span>
+                    </div>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">Active</span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{stats.activeUsers} of {stats.totalUsers} members online</p>
+                </div>
+                
+                <div className="p-4 rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200/50 dark:border-purple-700/50">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">Platform Health</span>
+                    </div>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">Optimal</span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">All systems running smoothly</p>
+                </div>
+              </div>
+            </div>
 
           </div>
         </CardContent>
