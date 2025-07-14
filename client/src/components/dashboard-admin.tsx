@@ -76,17 +76,15 @@ export function AdminDashboard() {
               </p>
             </div>
             
-            <div className="flex space-x-3">
-              <Link href="/analytics">
-                <Button 
-                  size="default"
-                  className="group bg-white/10 text-white backdrop-blur-sm hover:bg-white/20 transition-all duration-300 border border-white/20"
-                >
-                  <BarChart3 className="h-4 w-4 mr-2 group-hover:rotate-12 transition-transform" />
-                  Analytics
-                  <ArrowRight className="h-3 w-3 ml-2 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2">
+                <Clock className="h-4 w-4 text-cyan-300" />
+                <span className="text-sm">Last Login: Today</span>
+              </div>
+              <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2">
+                <Shield className="h-4 w-4 text-green-300" />
+                <span className="text-sm">Security: Active</span>
+              </div>
             </div>
           </div>
         </div>
@@ -202,64 +200,61 @@ export function AdminDashboard() {
             
             <div className="space-y-4">
               <div className="flex items-center space-x-2 mb-3">
-                <div className="h-3 w-3 rounded-full bg-indigo-500"></div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Quick Actions</h3>
+                <div className="h-3 w-3 rounded-full bg-purple-500"></div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">System Health</h3>
               </div>
               <div className="space-y-3">
-                <div className="p-4 rounded-xl bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 border border-indigo-200/50 dark:border-indigo-700/50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-800">
-                        <BarChart3 className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                      </div>
-                      <div>
-                        <span className="font-medium text-gray-900 dark:text-white block">Analytics</span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">View detailed insights</span>
-                      </div>
-                    </div>
-                    <Link href="/analytics">
-                      <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white">
-                        View
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-                
                 <div className="p-4 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200/50 dark:border-green-700/50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="p-2 rounded-lg bg-green-100 dark:bg-green-800">
-                        <Users className="h-5 w-5 text-green-600 dark:text-green-400" />
+                        <Database className="h-5 w-5 text-green-600 dark:text-green-400" />
                       </div>
                       <div>
-                        <span className="font-medium text-gray-900 dark:text-white block">User Management</span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">Manage team access</span>
+                        <span className="font-medium text-gray-900 dark:text-white block">Database</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">PostgreSQL connected</span>
                       </div>
                     </div>
-                    <Link href="/users">
-                      <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
-                        Manage
-                      </Button>
-                    </Link>
+                    <div className="flex items-center space-x-1">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm font-medium text-green-600 dark:text-green-400">Online</span>
+                    </div>
                   </div>
                 </div>
                 
-                <div className="p-4 rounded-xl bg-gradient-to-br from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 border border-orange-200/50 dark:border-orange-700/50">
+                <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200/50 dark:border-blue-700/50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-800">
-                        <Radio className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                      <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-800">
+                        <Server className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                       </div>
                       <div>
-                        <span className="font-medium text-gray-900 dark:text-white block">Radio Stations</span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">Station partnerships</span>
+                        <span className="font-medium text-gray-900 dark:text-white block">Server Status</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">Running on port 5000</span>
                       </div>
                     </div>
-                    <Link href="/radio-stations">
-                      <Button size="sm" className="bg-orange-600 hover:bg-orange-700 text-white">
-                        Access
-                      </Button>
-                    </Link>
+                    <div className="flex items-center space-x-1">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <span className="text-sm font-medium text-blue-600 dark:text-blue-400">Active</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="p-4 rounded-xl bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border border-purple-200/50 dark:border-purple-700/50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-800">
+                        <Globe className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-900 dark:text-white block">Platform Version</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">Radio Hub v2.0</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                      <span className="text-sm font-medium text-purple-600 dark:text-purple-400">Latest</span>
+                    </div>
                   </div>
                 </div>
               </div>
