@@ -71,23 +71,9 @@ export function AdminDashboard() {
                   {user?.firstName || user?.email?.split('@')[0] || 'Admin'}
                 </span>
               </h1>
-              <p className="text-lg text-blue-100/90 font-medium mb-3">
+              <p className="text-lg text-blue-100/90 font-medium">
                 Transform communities through powerful radio content
               </p>
-              <div className="flex flex-wrap gap-4 text-sm">
-                <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2">
-                  <FileText className="h-4 w-4 text-cyan-300" />
-                  <span>{stats.totalProjects + stats.totalEpisodes + stats.totalScripts} Total Content</span>
-                </div>
-                <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2">
-                  <Users className="h-4 w-4 text-green-300" />
-                  <span>{stats.activeUsers} Active Members</span>
-                </div>
-                <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2">
-                  <Activity className="h-4 w-4 text-yellow-300" />
-                  <span>Platform Admin</span>
-                </div>
-              </div>
             </div>
             
             <div className="flex space-x-3">
@@ -242,20 +228,11 @@ export function AdminDashboard() {
                   <p className="text-sm text-gray-600 dark:text-gray-400">{stats.activeUsers} active users</p>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200/50 dark:border-blue-700/50">
-                    <div className="text-center">
-                      <Radio className="h-6 w-6 text-blue-600 mx-auto mb-1" />
-                      <p className="text-xs text-gray-600 dark:text-gray-400">Content Types</p>
-                      <p className="font-bold text-blue-600 dark:text-blue-400">{stats.totalProjects > 0 || stats.totalEpisodes > 0 || stats.totalScripts > 0 ? '3' : '0'}</p>
-                    </div>
-                  </div>
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200/50 dark:border-green-700/50">
-                    <div className="text-center">
-                      <Globe className="h-6 w-6 text-green-600 mx-auto mb-1" />
-                      <p className="text-xs text-gray-600 dark:text-gray-400">Reach</p>
-                      <p className="font-bold text-green-600 dark:text-green-400">Global</p>
-                    </div>
+                <div className="p-4 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-200/50 dark:border-indigo-700/50">
+                  <div className="text-center">
+                    <Calendar className="h-8 w-8 text-indigo-600 mx-auto mb-2" />
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Last Login</p>
+                    <p className="font-semibold text-indigo-600 dark:text-indigo-400">Today</p>
                   </div>
                 </div>
               </div>
