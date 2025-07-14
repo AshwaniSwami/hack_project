@@ -202,67 +202,7 @@ export function AdminDashboard() {
               </div>
             </div>
             
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2 mb-3">
-                <div className="h-3 w-3 rounded-full bg-purple-500"></div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">System Health</h3>
-              </div>
-              <div className="space-y-3">
-                <div className="p-4 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200/50 dark:border-green-700/50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 rounded-lg bg-green-100 dark:bg-green-800">
-                        <Database className="h-5 w-5 text-green-600 dark:text-green-400" />
-                      </div>
-                      <div>
-                        <span className="font-medium text-gray-900 dark:text-white block">Database</span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">PostgreSQL connected</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-green-600 dark:text-green-400">Online</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200/50 dark:border-blue-700/50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-800">
-                        <Server className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                      </div>
-                      <div>
-                        <span className="font-medium text-gray-900 dark:text-white block">Server Status</span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">Running on port 5000</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-blue-600 dark:text-blue-400">Active</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="p-4 rounded-xl bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border border-purple-200/50 dark:border-purple-700/50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-800">
-                        <Globe className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                      </div>
-                      <div>
-                        <span className="font-medium text-gray-900 dark:text-white block">Platform Version</span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">Radio Hub v2.0</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-purple-600 dark:text-purple-400">Latest</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+
           </div>
         </CardContent>
       </Card>
