@@ -51,27 +51,27 @@ export function AdminDashboard() {
     activeUsers: users.filter(user => user.status === 'verified').length
   };
 
-  // Generate user engagement data for charts
-  const weeklyEngagementData = [
-    { day: 'Mon', members: Math.max(1, Math.floor(stats.totalUsers * 0.6)), sessions: Math.max(1, Math.floor(stats.totalUsers * 0.4)) },
-    { day: 'Tue', members: Math.max(1, Math.floor(stats.totalUsers * 0.7)), sessions: Math.max(1, Math.floor(stats.totalUsers * 0.5)) },
-    { day: 'Wed', members: Math.max(1, Math.floor(stats.totalUsers * 0.8)), sessions: Math.max(1, Math.floor(stats.totalUsers * 0.6)) },
-    { day: 'Thu', members: Math.max(1, Math.floor(stats.totalUsers * 0.9)), sessions: Math.max(1, Math.floor(stats.totalUsers * 0.7)) },
-    { day: 'Fri', members: Math.max(1, Math.floor(stats.totalUsers * 0.85)), sessions: Math.max(1, Math.floor(stats.totalUsers * 0.65)) },
-    { day: 'Sat', members: Math.max(1, Math.floor(stats.totalUsers * 0.5)), sessions: Math.max(1, Math.floor(stats.totalUsers * 0.3)) },
-    { day: 'Sun', members: Math.max(1, Math.floor(stats.totalUsers * 0.4)), sessions: Math.max(1, Math.floor(stats.totalUsers * 0.25)) },
-  ];
-
-  const memberActivityData = [
+  // Member status data - only real user data
+  const memberStatusData = [
     { name: 'Active Members', value: stats.activeUsers, color: '#10b981' },
-    { name: 'Inactive Members', value: stats.totalUsers - stats.activeUsers, color: '#6b7280' },
+    { name: 'Pending Members', value: stats.totalUsers - stats.activeUsers, color: '#f59e0b' },
   ];
 
-  const contentEngagementData = [
-    { month: 'Jan', projects: Math.max(1, Math.floor(stats.totalProjects * 0.7)), episodes: Math.max(1, Math.floor(stats.totalEpisodes * 0.8)), scripts: Math.max(1, Math.floor(stats.totalScripts * 0.6)) },
-    { month: 'Feb', projects: Math.max(1, Math.floor(stats.totalProjects * 0.8)), episodes: Math.max(1, Math.floor(stats.totalEpisodes * 0.9)), scripts: Math.max(1, Math.floor(stats.totalScripts * 0.7)) },
-    { month: 'Mar', projects: stats.totalProjects, episodes: stats.totalEpisodes, scripts: stats.totalScripts },
-  ];
+  // Member distribution by role
+  const memberRoleData = users.reduce((acc, user) => {
+    const role = user.role || 'member';
+    const existing = acc.find(item => item.name === role);
+    if (existing) {
+      existing.value += 1;
+    } else {
+      acc.push({ 
+        name: role.charAt(0).toUpperCase() + role.slice(1), 
+        value: 1, 
+        color: role === 'admin' ? '#ef4444' : role === 'editor' ? '#3b82f6' : '#10b981' 
+      });
+    }
+    return acc;
+  }, [] as Array<{name: string; value: number; color: string}>);
 
   return (
     <div className="space-y-6">
@@ -228,45 +228,10 @@ export function AdminDashboard() {
             <div className="space-y-4">
               <div className="flex items-center space-x-2 mb-3">
                 <div className="h-3 w-3 rounded-full bg-orange-500"></div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Member Engagement</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Member Analytics</h3>
               </div>
               
-              {/* Weekly Activity Chart */}
-              <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200/50 dark:border-blue-700/50">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">Weekly Activity</h4>
-                  <TrendingUp className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                </div>
-                <ResponsiveContainer width="100%" height={120}>
-                  <AreaChart data={weeklyEngagementData}>
-                    <defs>
-                      <linearGradient id="memberGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} />
-                    <YAxis hide />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                        border: 'none', 
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                      }}
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="members" 
-                      stroke="#3b82f6" 
-                      strokeWidth={2}
-                      fill="url(#memberGradient)" 
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-
-              {/* Member Status Pie Chart */}
+              {/* Member Status Distribution */}
               <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 border border-emerald-200/50 dark:border-emerald-700/50">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="text-sm font-medium text-gray-900 dark:text-white">Member Status</h4>
@@ -274,58 +239,102 @@ export function AdminDashboard() {
                 </div>
                 <div className="flex items-center space-x-4">
                   <div className="flex-1">
-                    <ResponsiveContainer width="100%" height={80}>
+                    <ResponsiveContainer width="100%" height={100}>
                       <PieChart>
                         <Pie
-                          data={memberActivityData}
+                          data={memberStatusData}
                           cx="50%"
                           cy="50%"
-                          innerRadius={20}
-                          outerRadius={35}
+                          innerRadius={25}
+                          outerRadius={45}
                           dataKey="value"
                         >
-                          {memberActivityData.map((entry, index) => (
+                          {memberStatusData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                            border: 'none', 
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                          }}
+                        />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
                   <div className="flex-1 space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                      <span className="text-xs text-gray-600 dark:text-gray-400">Active: {stats.activeUsers}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-3 h-3 rounded-full bg-gray-400"></div>
-                      <span className="text-xs text-gray-600 dark:text-gray-400">Inactive: {stats.totalUsers - stats.activeUsers}</span>
-                    </div>
+                    {memberStatusData.map((item, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
+                        <span className="text-xs text-gray-600 dark:text-gray-400">{item.name}: {item.value}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
 
-              {/* Content Engagement Trend */}
+              {/* Member Roles Distribution */}
+              <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200/50 dark:border-blue-700/50">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">Role Distribution</h4>
+                  <BarChart3 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="flex items-center space-x-4">
+                  <div className="flex-1">
+                    <ResponsiveContainer width="100%" height={100}>
+                      <PieChart>
+                        <Pie
+                          data={memberRoleData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={25}
+                          outerRadius={45}
+                          dataKey="value"
+                        >
+                          {memberRoleData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                            border: 'none', 
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                          }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    {memberRoleData.map((item, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
+                        <span className="text-xs text-gray-600 dark:text-gray-400">{item.name}: {item.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Member Summary Stats */}
               <div className="p-4 rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200/50 dark:border-purple-700/50">
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">Content Growth</h4>
-                  <BarChart3 className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">Quick Stats</h4>
+                  <Activity className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                 </div>
-                <ResponsiveContainer width="100%" height={100}>
-                  <LineChart data={contentEngagementData}>
-                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} />
-                    <YAxis hide />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                        border: 'none', 
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                      }}
-                    />
-                    <Line type="monotone" dataKey="projects" stroke="#8b5cf6" strokeWidth={2} dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 3 }} />
-                    <Line type="monotone" dataKey="episodes" stroke="#10b981" strokeWidth={2} dot={{ fill: '#10b981', strokeWidth: 2, r: 3 }} />
-                  </LineChart>
-                </ResponsiveContainer>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-purple-600 dark:text-purple-400">{stats.totalUsers}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Total Members</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{stats.activeUsers}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Active Members</div>
+                  </div>
+                </div>
               </div>
             </div>
 
