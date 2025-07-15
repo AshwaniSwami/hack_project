@@ -136,6 +136,7 @@ export default function UserOnboardingForm() {
         });
         return;
       }
+      setCurrentStep(currentStep + 1);
     } else if (formConfig && currentStep > 0 && currentStep <= formConfig.questions.length) {
       // Validate current question
       const currentQuestion = formConfig.questions[currentStep - 1];
@@ -150,11 +151,14 @@ export default function UserOnboardingForm() {
           return;
         }
       }
-    }
-    
-    // Move to next step (including beyond the last question to show submit button)
-    if (formConfig && currentStep < formConfig.questions.length) {
-      setCurrentStep(currentStep + 1);
+      
+      // If this is the last question, submit the form directly
+      if (currentStep === formConfig.questions.length) {
+        const formData = form.getValues();
+        await handleSubmit(formData);
+      } else {
+        setCurrentStep(currentStep + 1);
+      }
     }
   };
 
@@ -225,7 +229,7 @@ export default function UserOnboardingForm() {
 
   const totalSteps = formConfig.questions.length + 1; // +1 for location step
   const currentQuestion = currentStep > 0 ? formConfig.questions[currentStep - 1] : null;
-  const isLastStep = currentStep === formConfig.questions.length; // After all questions, show submit button
+  const isLastQuestion = currentStep === formConfig.questions.length; // Last question, show submit button
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 to-rose-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
@@ -251,16 +255,12 @@ export default function UserOnboardingForm() {
         <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-gray-200/50 dark:border-gray-700/50 shadow-xl">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold bg-gradient-to-r from-sky-500 to-rose-500 bg-clip-text text-transparent">
-              {currentStep === 0 ? "Welcome! Let's get started" : 
-               isLastStep ? "Almost Done!" : 
-               `Question ${currentStep}`}
+              {currentStep === 0 ? "Welcome! Let's get started" : `Question ${currentStep}`}
             </CardTitle>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
               {currentStep === 0 
                 ? "Please provide your location information to get started"
-                : isLastStep 
-                  ? "Please review your responses and submit your onboarding form"
-                  : currentQuestion?.label
+                : currentQuestion?.label
               }
             </p>
           </CardHeader>
@@ -414,39 +414,7 @@ export default function UserOnboardingForm() {
                   </div>
                 )}
 
-                {isLastStep && (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 mb-4">
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                      <span className="font-medium text-gray-700 dark:text-gray-300">Review & Submit</span>
-                    </div>
-                    
-                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-3">
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        Please review your responses before submitting:
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="font-medium">Location:</span>
-                          <span>{form.watch('location.country')}, {form.watch('location.city')}</span>
-                        </div>
-                        
-                        {formConfig.questions.map((question, index) => {
-                          const value = form.watch(question.id);
-                          return (
-                            <div key={question.id} className="flex justify-between">
-                              <span className="font-medium">{question.label}:</span>
-                              <span className="text-right max-w-48 truncate">
-                                {Array.isArray(value) ? value.join(', ') : value || 'Not answered'}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                )}
+
 
                 <div className="flex justify-between pt-6">
                   <Button
@@ -458,33 +426,26 @@ export default function UserOnboardingForm() {
                     Previous
                   </Button>
 
-                  {!isLastStep ? (
-                    <Button 
-                      type="button" 
-                      onClick={handleNext}
-                      disabled={submitMutation.isPending}
-                    >
-                      Next
-                    </Button>
-                  ) : (
-                    <Button
-                      type="submit"
-                      disabled={submitMutation.isPending}
-                      className="bg-gradient-to-r from-sky-500 to-rose-500"
-                    >
-                      {submitMutation.isPending ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          Submitting...
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                          Complete Onboarding
-                        </>
-                      )}
-                    </Button>
-                  )}
+                  <Button 
+                    type="button" 
+                    onClick={handleNext}
+                    disabled={submitMutation.isPending}
+                    className={isLastQuestion ? "bg-gradient-to-r from-sky-500 to-rose-500" : ""}
+                  >
+                    {submitMutation.isPending ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Submitting...
+                      </>
+                    ) : isLastQuestion ? (
+                      <>
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Complete Onboarding
+                      </>
+                    ) : (
+                      "Next"
+                    )}
+                  </Button>
                 </div>
               </form>
             </Form>
