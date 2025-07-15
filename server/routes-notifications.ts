@@ -116,7 +116,16 @@ export async function createAdminNotification(
         metadata: relatedUserId ? { relatedUserId, relatedUserEmail, relatedUserName } : undefined,
       };
 
-      await storage.createNotification(notification);
+      const createdNotification = await storage.createNotification(notification);
+      
+      // Broadcast real-time notification to connected admin users
+      if (typeof (global as any).broadcastNotificationToAdmins === 'function') {
+        (global as any).broadcastNotificationToAdmins({
+          ...createdNotification,
+          type: 'new_notification',
+          showPopup: true
+        });
+      }
     }
   } catch (error) {
     console.error("Error creating admin notifications:", error);

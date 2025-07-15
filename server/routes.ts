@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { WebSocketServer, WebSocket } from "ws";
 import multer from "multer";
 import { storage } from "./storage";
 import { registerProjectFileRoutes } from "./routes-projects-files";
@@ -1150,5 +1151,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/me", getCurrentUser);
 
   const httpServer = createServer(app);
+  
+  // Create WebSocket server for real-time notifications
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  
+  // Store admin WebSocket connections
+  const adminConnections = new Map<string, WebSocket>();
+  
+  wss.on('connection', (ws: WebSocket, req) => {
+    console.log('WebSocket connection established');
+    
+    // Handle authentication for WebSocket connections
+    ws.on('message', async (message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        
+        if (data.type === 'authenticate') {
+          const { userId, userRole } = data;
+          
+          // Only allow admin users to connect for notifications
+          if (userRole === 'admin') {
+            adminConnections.set(userId, ws);
+            console.log(`Admin user ${userId} connected to WebSocket`);
+            
+            ws.send(JSON.stringify({
+              type: 'authenticated',
+              message: 'Successfully authenticated for notifications'
+            }));
+          } else {
+            ws.send(JSON.stringify({
+              type: 'error',
+              message: 'Only admin users can receive notifications'
+            }));
+            ws.close();
+          }
+        }
+      } catch (error) {
+        console.error('Error processing WebSocket message:', error);
+        ws.send(JSON.stringify({
+          type: 'error',
+          message: 'Invalid message format'
+        }));
+      }
+    });
+    
+    ws.on('close', () => {
+      // Remove connection from admin connections when closed
+      for (const [userId, connection] of adminConnections.entries()) {
+        if (connection === ws) {
+          adminConnections.delete(userId);
+          console.log(`Admin user ${userId} disconnected from WebSocket`);
+          break;
+        }
+      }
+    });
+    
+    ws.on('error', (error) => {
+      console.error('WebSocket error:', error);
+    });
+  });
+  
+  // Export function to broadcast notifications to all connected admins
+  (global as any).broadcastNotificationToAdmins = (notification: any) => {
+    const message = JSON.stringify({
+      type: 'notification',
+      data: notification
+    });
+    
+    adminConnections.forEach((ws, userId) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(message);
+        console.log(`Notification sent to admin user ${userId}`);
+      }
+    });
+  };
+  
   return httpServer;
 }

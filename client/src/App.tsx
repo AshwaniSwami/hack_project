@@ -5,7 +5,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Navbar } from "@/components/navbar";
 import { FloatingActionButton } from "@/components/floating-action-button";
+import { NotificationPopup } from "@/components/NotificationPopup";
 import { useAuth } from "@/hooks/useAuth";
+import { useWebSocket } from "@/hooks/useWebSocket";
 import Dashboard from "@/pages/dashboard";
 import Projects from "@/pages/projects";
 import Episodes from "@/pages/episodes";
@@ -19,11 +21,18 @@ import NotFound from "@/pages/not-found";
 function Router() {
   const { isAuthenticated, isLoading, isAdmin, user } = useAuth();
   const canAccessAdvancedFeatures = user?.role === 'admin' || user?.role === 'editor' || user?.role === 'contributor';
+  const { notifications, dismissNotification } = useWebSocket();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       {isAuthenticated && <Navbar />}
       {isAuthenticated && <FloatingActionButton />}
+      {isAuthenticated && user?.role === 'admin' && (
+        <NotificationPopup 
+          notifications={notifications} 
+          onDismiss={dismissNotification} 
+        />
+      )}
       <main>
         <Switch>
           {isLoading ? (

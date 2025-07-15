@@ -38,7 +38,7 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
   // Fetch unread notifications
   const { data: unreadData, isLoading } = useQuery({
     queryKey: ['/api/notifications/unread'],
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 5000, // Refresh every 5 seconds for real-time updates
   });
 
   // Fetch all notifications when popover is open
