@@ -31,20 +31,22 @@ async function setupDatabase() {
     await pool.query(`
       CREATE TABLE "users" (
         "id" varchar PRIMARY KEY,
-        "email" varchar UNIQUE NOT NULL,
-        "password" varchar NOT NULL,
-        "firstName" varchar,
-        "lastName" varchar,
+        "email" varchar UNIQUE,
+        "first_name" varchar,
+        "last_name" varchar,
+        "profile_image_url" varchar,
+        "username" varchar UNIQUE,
+        "password" varchar,
         "role" varchar DEFAULT 'member',
-        "isActive" boolean DEFAULT true,
-        "isVerified" boolean DEFAULT false,
-        "createdAt" timestamp DEFAULT now(),
-        "updatedAt" timestamp DEFAULT now(),
-        "hasCompletedOnboarding" boolean DEFAULT false,
-        "country" varchar,
-        "city" varchar,
-        "latitude" numeric,
-        "longitude" numeric
+        "is_active" boolean DEFAULT true,
+        "is_verified" boolean DEFAULT false,
+        "login_count" integer DEFAULT 0,
+        "last_login_at" timestamp,
+        "first_login_completed" boolean DEFAULT false,
+        "location" jsonb,
+        "onboarding_responses" jsonb,
+        "created_at" timestamp DEFAULT now(),
+        "updated_at" timestamp DEFAULT now()
       );
     `);
 
