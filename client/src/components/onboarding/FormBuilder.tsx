@@ -251,88 +251,104 @@ export default function FormBuilder() {
       </div>
 
       <Dialog open={isQuestionDialogOpen} onOpenChange={setIsQuestionDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 shadow-2xl">
+          <DialogHeader className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-6">
+            <DialogTitle className="text-xl font-bold bg-gradient-to-r from-sky-500 to-rose-500 bg-clip-text text-transparent">
               {editingQuestion ? "Edit Question" : "Add New Question"}
             </DialogTitle>
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSaveQuestion)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Question ID</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., purpose, interests" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <form onSubmit={form.handleSubmit(handleSaveQuestion)} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Question ID</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="e.g., purpose, interests" 
+                          {...field} 
+                          className="h-11 border-2 border-gray-200 dark:border-gray-600 focus:border-sky-500 dark:focus:border-sky-400"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Question Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="h-11 border-2 border-gray-200 dark:border-gray-600 focus:border-sky-500 dark:focus:border-sky-400">
+                            <SelectValue placeholder="Select question type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="z-50">
+                          <SelectItem value="radio">Single Choice (Radio)</SelectItem>
+                          <SelectItem value="checkbox">Multiple Choice (Checkbox)</SelectItem>
+                          <SelectItem value="text">Text Input</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <FormField
                 control={form.control}
                 name="label"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Question Label</FormLabel>
+                    <FormLabel className="text-sm font-semibold text-gray-700 dark:text-gray-300">Question Label</FormLabel>
                     <FormControl>
-                      <Input placeholder="What brings you to our platform?" {...field} />
+                      <Input 
+                        placeholder="What brings you to our platform?" 
+                        {...field} 
+                        className="h-11 border-2 border-gray-200 dark:border-gray-600 focus:border-sky-500 dark:focus:border-sky-400"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Question Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select question type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="radio">Single Choice (Radio)</SelectItem>
-                        <SelectItem value="checkbox">Multiple Choice (Checkbox)</SelectItem>
-                        <SelectItem value="text">Text Input</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               {(watchedType === "radio" || watchedType === "checkbox") && (
-                <div className="space-y-4">
-                  <Label>Options</Label>
+                <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Options</Label>
                   <div className="flex gap-2">
                     <Input
                       placeholder="Enter option"
                       value={newOption}
                       onChange={(e) => setNewOption(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddOption())}
+                      className="h-10 border-2 border-gray-200 dark:border-gray-600 focus:border-sky-500 dark:focus:border-sky-400"
                     />
-                    <Button type="button" onClick={handleAddOption}>
+                    <Button 
+                      type="button" 
+                      onClick={handleAddOption}
+                      className="h-10 px-4 bg-gradient-to-r from-sky-500 to-rose-500 hover:from-sky-600 hover:to-rose-600 text-white border-0"
+                    >
                       <Plus className="h-4 w-4" />
                     </Button>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
                     {watchedOptions.map((option, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded">
-                        <span className="text-sm text-gray-700 dark:text-gray-300">{option}</span>
+                      <div key={index} className="flex items-center justify-between p-3 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600">
+                        <span className="text-sm text-gray-700 dark:text-gray-300 flex-1 mr-2">{option}</span>
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
                           onClick={() => handleRemoveOption(index)}
+                          className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900 hover:text-red-600 dark:hover:text-red-400"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -346,10 +362,10 @@ export default function FormBuilder() {
                 control={form.control}
                 name="compulsory"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">Required Question</FormLabel>
-                      <div className="text-sm text-gray-500">
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border-2 border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-800">
+                    <div className="space-y-1">
+                      <FormLabel className="text-base font-semibold text-gray-700 dark:text-gray-300">Required Question</FormLabel>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
                         Users must answer this question to proceed
                       </div>
                     </div>
@@ -357,21 +373,26 @@ export default function FormBuilder() {
                       <Switch
                         checked={field.value}
                         onCheckedChange={field.onChange}
+                        className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-sky-500 data-[state=checked]:to-rose-500"
                       />
                     </FormControl>
                   </FormItem>
                 )}
               />
 
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setIsQuestionDialogOpen(false)}
+                  className="h-11 px-6 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   Cancel
                 </Button>
-                <Button type="submit">
+                <Button 
+                  type="submit"
+                  className="h-11 px-6 bg-gradient-to-r from-sky-500 to-rose-500 hover:from-sky-600 hover:to-rose-600 text-white border-0"
+                >
                   {editingQuestion ? "Update Question" : "Add Question"}
                 </Button>
               </div>
