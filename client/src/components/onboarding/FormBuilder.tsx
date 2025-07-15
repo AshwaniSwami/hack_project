@@ -100,15 +100,31 @@ export default function FormBuilder() {
         options: q.options?.map(opt => typeof opt === 'string' ? opt : opt.label) || []
       }));
       setQuestions(convertedQuestions);
+      setHasUnsavedChanges(false); // Reset unsaved changes flag when loading fresh data
     }
   }, [formConfig]);
+
+  // Track changes to questions to set unsaved changes flag
+  useEffect(() => {
+    if (formConfig && questions.length >= 0) {
+      const originalQuestions = formConfig.questions.map(q => ({
+        ...q,
+        compulsory: q.required || q.compulsory || false,
+        options: q.options?.map(opt => typeof opt === 'string' ? opt : opt.label) || []
+      }));
+      const hasChanges = JSON.stringify(questions) !== JSON.stringify(originalQuestions);
+      setHasUnsavedChanges(hasChanges);
+    }
+  }, [questions, formConfig]);
 
   const saveFormMutation = useMutation({
     mutationFn: async (config: FormConfigData) => {
       return apiRequest("PUT", "/api/onboarding/form-config", config);
     },
     onSuccess: () => {
+      // Force refetch to get the latest data from the server
       queryClient.invalidateQueries({ queryKey: ["/api/onboarding/form-config"] });
+      queryClient.refetchQueries({ queryKey: ["/api/onboarding/form-config"] });
       setHasUnsavedChanges(false);
       toast({
         title: "Success",
@@ -151,18 +167,28 @@ export default function FormBuilder() {
     if (!questionToDelete) return;
     
     const updatedQuestions = questions.filter(q => q.id !== questionToDelete.id);
-    setQuestions(updatedQuestions);
     
-    // Auto-save after deletion
-    saveFormMutation.mutate({ questions: updatedQuestions });
-    
-    toast({
-      title: "Question Deleted",
-      description: "Question has been removed and changes saved automatically",
+    // Auto-save after deletion with proper state management
+    saveFormMutation.mutate({ questions: updatedQuestions }, {
+      onSuccess: () => {
+        // Update local state only after successful save
+        setQuestions(updatedQuestions);
+        toast({
+          title: "Question Deleted",
+          description: "Question has been removed and changes saved automatically",
+        });
+        setDeleteDialogOpen(false);
+        setQuestionToDelete(null);
+      },
+      onError: () => {
+        // Don't update local state if save failed
+        toast({
+          title: "Error",
+          description: "Failed to delete question. Please try again.",
+          variant: "destructive",
+        });
+      }
     });
-    
-    setDeleteDialogOpen(false);
-    setQuestionToDelete(null);
   };
 
   const handleSaveQuestion = (data: QuestionData) => {
@@ -190,31 +216,37 @@ export default function FormBuilder() {
     
     if (editingQuestion) {
       updatedQuestions = questions.map(q => q.id === editingQuestion.id ? data : q);
-      setQuestions(updatedQuestions);
-      toast({
-        title: "Success",
-        description: "Question updated successfully",
-      });
     } else {
       updatedQuestions = [...questions, data];
-      setQuestions(updatedQuestions);
-      toast({
-        title: "Success",
-        description: "Question added successfully",
-      });
     }
     
-    // Auto-save after adding or editing
-    saveFormMutation.mutate({ questions: updatedQuestions });
-    
-    setIsQuestionDialogOpen(false);
-    setEditingQuestion(null);
-    form.reset({
-      id: "",
-      type: "radio",
-      label: "",
-      options: [],
-      compulsory: false,
+    // Auto-save after adding or editing with proper state management
+    saveFormMutation.mutate({ questions: updatedQuestions }, {
+      onSuccess: () => {
+        // Update local state only after successful save
+        setQuestions(updatedQuestions);
+        toast({
+          title: "Success",
+          description: editingQuestion ? "Question updated successfully" : "Question added successfully",
+        });
+        setIsQuestionDialogOpen(false);
+        setEditingQuestion(null);
+        form.reset({
+          id: "",
+          type: "radio",
+          label: "",
+          options: [],
+          compulsory: false,
+        });
+      },
+      onError: () => {
+        // Don't update local state if save failed
+        toast({
+          title: "Error",
+          description: "Failed to save question. Please try again.",
+          variant: "destructive",
+        });
+      }
     });
   };
 
