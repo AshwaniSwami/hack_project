@@ -90,14 +90,20 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
   // Clear all notifications mutation
   const clearAllMutation = useMutation({
     mutationFn: async () => {
-      // Get current notifications and delete them all
-      const currentNotifications = allNotifications || [];
-      console.log('Clearing notifications:', currentNotifications.length);
+      console.log('Starting clear all operation');
       
-      // Delete all notifications sequentially to avoid race conditions
+      // First fetch all notifications to get the IDs
+      const allNotificationsResponse = await apiRequest('/api/notifications', { method: 'GET' });
+      const currentNotifications = allNotificationsResponse || [];
+      console.log('Fetched notifications to clear:', currentNotifications.length);
+      
+      // Delete all notifications sequentially
       for (const notification of currentNotifications) {
+        console.log('Deleting notification:', notification.id);
         await apiRequest(`/api/notifications/${notification.id}`, { method: 'DELETE' });
       }
+      
+      console.log('All notifications deleted successfully');
     },
     onSuccess: () => {
       console.log('Clear all completed successfully');
@@ -108,8 +114,10 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
       // Force immediate refetch with a delay
       setTimeout(() => {
         queryClient.refetchQueries({ queryKey: ['/api/notifications/unread'] });
-        queryClient.refetchQueries({ queryKey: ['/api/notifications'] });
-      }, 200);
+        if (open) {
+          queryClient.refetchQueries({ queryKey: ['/api/notifications'] });
+        }
+      }, 300);
       
       setOpen(false); // Close the popover
     },
@@ -118,12 +126,13 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
     },
   });
 
-  const handleClearAll = () => {
+  const handleClearAll = async () => {
     console.log('Clear all button clicked');
     if (clearAllMutation.isPending) {
       console.log('Clear all already in progress');
       return;
     }
+    console.log('Starting clear all mutation');
     clearAllMutation.mutate();
   };
 
