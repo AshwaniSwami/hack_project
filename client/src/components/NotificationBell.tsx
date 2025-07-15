@@ -58,6 +58,10 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
       queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread'] });
+      // Force refresh to update the UI immediately
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ['/api/notifications/unread'] });
+      }, 100);
     },
   });
 
@@ -71,6 +75,10 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
       queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
       queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread'] });
       setOpen(false); // Close the popover after marking all as read
+      // Force refresh to update the UI immediately
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ['/api/notifications/unread'] });
+      }, 100);
     },
   });
 
@@ -83,6 +91,10 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
       queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread'] });
+      // Force refresh to update the UI immediately
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ['/api/notifications/unread'] });
+      }, 100);
     },
   });
 

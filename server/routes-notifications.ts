@@ -31,16 +31,7 @@ export function registerNotificationRoutes(app: Express) {
     try {
       const notificationId = req.params.id;
       
-      // Verify the notification belongs to the current user
-      const notification = await storage.getNotification(notificationId);
-      if (!notification) {
-        return res.status(404).json({ message: "Notification not found" });
-      }
-      
-      if (notification.userId !== req.user!.id) {
-        return res.status(403).json({ message: "Access denied" });
-      }
-
+      // Admin users can mark any notification as read
       const updatedNotification = await storage.markNotificationAsRead(notificationId);
       res.json(updatedNotification);
     } catch (error) {
@@ -52,6 +43,7 @@ export function registerNotificationRoutes(app: Express) {
   // Mark all notifications as read
   app.patch("/api/notifications/mark-all-read", isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res: Response) => {
     try {
+      // Mark all notifications for the current admin user as read
       await storage.markAllNotificationsAsRead(req.user!.id);
       res.json({ message: "All notifications marked as read" });
     } catch (error) {
@@ -65,16 +57,7 @@ export function registerNotificationRoutes(app: Express) {
     try {
       const notificationId = req.params.id;
       
-      // Verify the notification belongs to the current user
-      const notification = await storage.getNotification(notificationId);
-      if (!notification) {
-        return res.status(404).json({ message: "Notification not found" });
-      }
-      
-      if (notification.userId !== req.user!.id) {
-        return res.status(403).json({ message: "Access denied" });
-      }
-
+      // Admin users can delete any notification
       await storage.deleteNotification(notificationId);
       res.json({ message: "Notification deleted" });
     } catch (error) {
