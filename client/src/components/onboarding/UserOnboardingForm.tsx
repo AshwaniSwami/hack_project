@@ -24,10 +24,12 @@ import { MapPin, User, CheckCircle, Sparkles } from "lucide-react";
 
 interface Question {
   id: string;
-  type: "radio" | "checkbox" | "text";
+  type: "radio" | "checkbox" | "text" | "select";
   label: string;
-  options?: string[];
-  compulsory: boolean;
+  options?: Array<{ value: string; label: string }> | string[];
+  required?: boolean;
+  compulsory?: boolean;
+  placeholder?: string;
 }
 
 interface FormConfig {
@@ -50,16 +52,18 @@ export default function UserOnboardingForm() {
     const schemaObject: any = {};
     
     questions.forEach(question => {
+      const isRequired = question.required || question.compulsory;
+      
       if (question.type === "checkbox") {
         schemaObject[question.id] = z.array(z.string()).optional();
       } else if (question.type === "text") {
-        if (question.compulsory) {
+        if (isRequired) {
           schemaObject[question.id] = z.string().min(1, `${question.label} is required`);
         } else {
           schemaObject[question.id] = z.string().optional();
         }
-      } else if (question.type === "radio") {
-        if (question.compulsory) {
+      } else if (question.type === "radio" || question.type === "select") {
+        if (isRequired) {
           schemaObject[question.id] = z.string().min(1, `${question.label} is required`);
         } else {
           schemaObject[question.id] = z.string().optional();
@@ -135,7 +139,7 @@ export default function UserOnboardingForm() {
     } else if (formConfig && currentStep > 0 && currentStep <= formConfig.questions.length) {
       // Validate current question
       const currentQuestion = formConfig.questions[currentStep - 1];
-      if (currentQuestion && currentQuestion.compulsory) {
+      if (currentQuestion && (currentQuestion.required || currentQuestion.compulsory)) {
         const isValid = await form.trigger([currentQuestion.id]);
         if (!isValid) {
           toast({
@@ -302,11 +306,11 @@ export default function UserOnboardingForm() {
                       <User className="h-5 w-5 text-sky-500" />
                       <span className="font-medium text-gray-700 dark:text-gray-300">
                         {currentQuestion.label}
-                        {currentQuestion.compulsory && <span className="text-red-500 ml-1">*</span>}
+                        {(currentQuestion.required || currentQuestion.compulsory) && <span className="text-red-500 ml-1">*</span>}
                       </span>
                     </div>
 
-                    {currentQuestion.type === "radio" && (
+                    {(currentQuestion.type === "radio" || currentQuestion.type === "select") && (
                       <FormField
                         control={form.control}
                         name={currentQuestion.id}
@@ -318,14 +322,18 @@ export default function UserOnboardingForm() {
                                 defaultValue={field.value}
                                 className="flex flex-col space-y-2"
                               >
-                                {currentQuestion.options?.map((option) => (
-                                  <div key={option} className="flex items-center space-x-2">
-                                    <RadioGroupItem value={option.toLowerCase()} id={option} />
-                                    <Label htmlFor={option} className="text-sm font-normal cursor-pointer">
-                                      {option}
-                                    </Label>
-                                  </div>
-                                ))}
+                                {currentQuestion.options?.map((option) => {
+                                  const optionValue = typeof option === 'string' ? option : option.value;
+                                  const optionLabel = typeof option === 'string' ? option : option.label;
+                                  return (
+                                    <div key={optionValue} className="flex items-center space-x-2">
+                                      <RadioGroupItem value={optionValue} id={optionValue} />
+                                      <Label htmlFor={optionValue} className="text-sm font-normal cursor-pointer">
+                                        {optionLabel}
+                                      </Label>
+                                    </div>
+                                  );
+                                })}
                               </RadioGroup>
                             </FormControl>
                             <FormMessage />
@@ -390,7 +398,7 @@ export default function UserOnboardingForm() {
                           <FormItem>
                             <FormControl>
                               <Input
-                                placeholder={`Enter your ${currentQuestion.label.toLowerCase()}`}
+                                placeholder={currentQuestion.placeholder || `Enter your ${currentQuestion.label.toLowerCase()}`}
                                 {...field}
                               />
                             </FormControl>
