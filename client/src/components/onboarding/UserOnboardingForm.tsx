@@ -132,9 +132,8 @@ export default function UserOnboardingForm() {
         });
         return;
       }
-    }
-    
-    if (formConfig && currentStep < formConfig.questions.length) {
+    } else if (formConfig && currentStep > 0 && currentStep <= formConfig.questions.length) {
+      // Validate current question
       const currentQuestion = formConfig.questions[currentStep - 1];
       if (currentQuestion && currentQuestion.compulsory) {
         const isValid = await form.trigger([currentQuestion.id]);
@@ -147,6 +146,9 @@ export default function UserOnboardingForm() {
           return;
         }
       }
+    }
+    
+    if (formConfig && currentStep < formConfig.questions.length) {
       setCurrentStep(currentStep + 1);
     }
   };

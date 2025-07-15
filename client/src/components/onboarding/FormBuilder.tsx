@@ -123,21 +123,49 @@ export default function FormBuilder() {
   };
 
   const handleSaveQuestion = (data: QuestionData) => {
+    // Validate options for radio and checkbox questions
+    if ((data.type === "radio" || data.type === "checkbox") && (!data.options || data.options.length === 0)) {
+      toast({
+        title: "Error",
+        description: `${data.type === "radio" ? "Single choice" : "Multiple choice"} questions must have at least one option`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check for duplicate ID only when creating new question
+    if (!editingQuestion && questions.some(q => q.id === data.id)) {
+      toast({
+        title: "Error",
+        description: "Question ID already exists",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (editingQuestion) {
       setQuestions(questions.map(q => q.id === editingQuestion.id ? data : q));
+      toast({
+        title: "Success",
+        description: "Question updated successfully",
+      });
     } else {
-      if (questions.some(q => q.id === data.id)) {
-        toast({
-          title: "Error",
-          description: "Question ID already exists",
-          variant: "destructive",
-        });
-        return;
-      }
       setQuestions([...questions, data]);
+      toast({
+        title: "Success",
+        description: "Question added successfully",
+      });
     }
+    
     setIsQuestionDialogOpen(false);
     setEditingQuestion(null);
+    form.reset({
+      id: "",
+      type: "radio",
+      label: "",
+      options: [],
+      compulsory: false,
+    });
   };
 
   const handleAddOption = () => {
@@ -154,6 +182,30 @@ export default function FormBuilder() {
   };
 
   const handleSaveForm = () => {
+    // Validate form before saving
+    if (questions.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please add at least one question before saving",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check for questions with missing options
+    const invalidQuestions = questions.filter(q => 
+      (q.type === "radio" || q.type === "checkbox") && (!q.options || q.options.length === 0)
+    );
+
+    if (invalidQuestions.length > 0) {
+      toast({
+        title: "Error",
+        description: `Some questions are missing options: ${invalidQuestions.map(q => q.label).join(", ")}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     saveFormMutation.mutate({ questions });
   };
 
@@ -251,11 +303,14 @@ export default function FormBuilder() {
       </div>
 
       <Dialog open={isQuestionDialogOpen} onOpenChange={setIsQuestionDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 shadow-2xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 shadow-2xl" aria-describedby="question-dialog-description">
           <DialogHeader className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-6">
             <DialogTitle className="text-xl font-bold bg-gradient-to-r from-sky-500 to-rose-500 bg-clip-text text-transparent">
               {editingQuestion ? "Edit Question" : "Add New Question"}
             </DialogTitle>
+            <div id="question-dialog-description" className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+              {editingQuestion ? "Modify the question details below" : "Create a new question for your onboarding form"}
+            </div>
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSaveQuestion)} className="space-y-6">
@@ -323,38 +378,52 @@ export default function FormBuilder() {
               {(watchedType === "radio" || watchedType === "checkbox") && (
                 <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                   <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Options</Label>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <Input
                       placeholder="Enter option"
                       value={newOption}
                       onChange={(e) => setNewOption(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddOption())}
-                      className="h-10 border-2 border-gray-200 dark:border-gray-600 focus:border-sky-500 dark:focus:border-sky-400"
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddOption();
+                        }
+                      }}
+                      className="h-10 border-2 border-gray-200 dark:border-gray-600 focus:border-sky-500 dark:focus:border-sky-400 flex-1"
                     />
                     <Button 
                       type="button" 
                       onClick={handleAddOption}
-                      className="h-10 px-4 bg-gradient-to-r from-sky-500 to-rose-500 hover:from-sky-600 hover:to-rose-600 text-white border-0"
+                      disabled={!newOption.trim()}
+                      className="h-10 px-4 bg-gradient-to-r from-sky-500 to-rose-500 hover:from-sky-600 hover:to-rose-600 text-white border-0 sm:w-auto w-full"
                     >
-                      <Plus className="h-4 w-4" />
+                      <Plus className="h-4 w-4 mr-2 sm:mr-0" />
+                      <span className="sm:hidden">Add Option</span>
                     </Button>
                   </div>
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {watchedOptions.map((option, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600">
-                        <span className="text-sm text-gray-700 dark:text-gray-300 flex-1 mr-2">{option}</span>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRemoveOption(index)}
-                          className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900 hover:text-red-600 dark:hover:text-red-400"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
+                  {watchedOptions.length > 0 && (
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {watchedOptions.map((option, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600">
+                          <span className="text-sm text-gray-700 dark:text-gray-300 flex-1 mr-2 break-words">{option}</span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveOption(index)}
+                            className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900 hover:text-red-600 dark:hover:text-red-400 flex-shrink-0"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {watchedOptions.length === 0 && (
+                    <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
+                      No options added yet. Add at least one option for {watchedType} questions.
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -380,18 +449,22 @@ export default function FormBuilder() {
                 )}
               />
 
-              <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setIsQuestionDialogOpen(false)}
-                  className="h-11 px-6 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  onClick={() => {
+                    setIsQuestionDialogOpen(false);
+                    setEditingQuestion(null);
+                    form.reset();
+                  }}
+                  className="h-11 px-6 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 w-full sm:w-auto"
                 >
                   Cancel
                 </Button>
                 <Button 
                   type="submit"
-                  className="h-11 px-6 bg-gradient-to-r from-sky-500 to-rose-500 hover:from-sky-600 hover:to-rose-600 text-white border-0"
+                  className="h-11 px-6 bg-gradient-to-r from-sky-500 to-rose-500 hover:from-sky-600 hover:to-rose-600 text-white border-0 w-full sm:w-auto"
                 >
                   {editingQuestion ? "Update Question" : "Add Question"}
                 </Button>

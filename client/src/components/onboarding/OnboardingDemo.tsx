@@ -73,6 +73,35 @@ export default function OnboardingDemo() {
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="text-xs">✓</Badge>
+              <span className="text-sm">Dynamic question types</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-xs">✓</Badge>
+              <span className="text-sm">Progress tracking</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0">
+              <Badge variant="outline" className="text-xs bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200">
+                Note
+              </Badge>
+            </div>
+            <div className="text-sm text-amber-800 dark:text-amber-200">
+              This demo uses the current form configuration. Any changes made in the Form Builder will be reflected here.
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-xs">✓</Badge>
               <span className="text-sm">Custom question types</span>
             </div>
             <div className="flex items-center gap-2">
