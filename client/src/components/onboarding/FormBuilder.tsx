@@ -17,6 +17,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -57,6 +67,9 @@ export default function FormBuilder() {
   const [editingQuestion, setEditingQuestion] = useState<QuestionData | null>(null);
   const [questions, setQuestions] = useState<QuestionData[]>([]);
   const [newOption, setNewOption] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [questionToDelete, setQuestionToDelete] = useState<QuestionData | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -96,6 +109,7 @@ export default function FormBuilder() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/onboarding/form-config"] });
+      setHasUnsavedChanges(false);
       toast({
         title: "Success",
         description: "Form configuration saved successfully",
@@ -128,8 +142,27 @@ export default function FormBuilder() {
     setIsQuestionDialogOpen(true);
   };
 
-  const handleDeleteQuestion = (questionId: string) => {
-    setQuestions(questions.filter(q => q.id !== questionId));
+  const handleDeleteQuestion = (question: QuestionData) => {
+    setQuestionToDelete(question);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteQuestion = () => {
+    if (!questionToDelete) return;
+    
+    const updatedQuestions = questions.filter(q => q.id !== questionToDelete.id);
+    setQuestions(updatedQuestions);
+    
+    // Auto-save after deletion
+    saveFormMutation.mutate({ questions: updatedQuestions });
+    
+    toast({
+      title: "Question Deleted",
+      description: "Question has been removed and changes saved automatically",
+    });
+    
+    setDeleteDialogOpen(false);
+    setQuestionToDelete(null);
   };
 
   const handleSaveQuestion = (data: QuestionData) => {
@@ -153,19 +186,26 @@ export default function FormBuilder() {
       return;
     }
 
+    let updatedQuestions: QuestionData[];
+    
     if (editingQuestion) {
-      setQuestions(questions.map(q => q.id === editingQuestion.id ? data : q));
+      updatedQuestions = questions.map(q => q.id === editingQuestion.id ? data : q);
+      setQuestions(updatedQuestions);
       toast({
         title: "Success",
         description: "Question updated successfully",
       });
     } else {
-      setQuestions([...questions, data]);
+      updatedQuestions = [...questions, data];
+      setQuestions(updatedQuestions);
       toast({
         title: "Success",
         description: "Question added successfully",
       });
     }
+    
+    // Auto-save after adding or editing
+    saveFormMutation.mutate({ questions: updatedQuestions });
     
     setIsQuestionDialogOpen(false);
     setEditingQuestion(null);
@@ -254,9 +294,13 @@ export default function FormBuilder() {
             <Plus className="h-4 w-4 mr-2" />
             Add Question
           </Button>
-          <Button onClick={handleSaveForm} disabled={saveFormMutation.isPending}>
+          <Button 
+            onClick={handleSaveForm} 
+            disabled={saveFormMutation.isPending || questions.length === 0}
+            className={hasUnsavedChanges ? "bg-yellow-500 hover:bg-yellow-600" : ""}
+          >
             <Save className="h-4 w-4 mr-2" />
-            {saveFormMutation.isPending ? "Saving..." : "Save & Publish"}
+            {saveFormMutation.isPending ? "Saving..." : hasUnsavedChanges ? "Save Changes" : "Save & Publish"}
           </Button>
         </div>
       </div>
@@ -287,7 +331,7 @@ export default function FormBuilder() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleDeleteQuestion(question.id)}
+                    onClick={() => handleDeleteQuestion(question)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -486,6 +530,34 @@ export default function FormBuilder() {
           </Form>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              Delete Question
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-600 dark:text-gray-400">
+              Are you sure you want to delete "{questionToDelete?.label}"? This action cannot be undone and will remove the question from your form configuration.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex gap-2">
+            <AlertDialogCancel 
+              onClick={() => setDeleteDialogOpen(false)}
+              className="border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDeleteQuestion}
+              className="bg-red-500 hover:bg-red-600 text-white border-0"
+            >
+              Delete Question
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -130,6 +130,7 @@ The application uses a relational database with the following core entities:
 
 ## Recent Changes
 
+- July 15, 2025: ✅ OPTIMIZED FORM BUILDER - Fixed persistent question deletion issue and enhanced user experience with auto-save functionality
 - July 15, 2025: ✅ STREAMLINED ONBOARDING FORM - Removed review step and implemented direct submission on last question click
 - July 15, 2025: ✅ COMPLETED DATABASE MIGRATION - Successfully fixed PostgreSQL database connection and authentication system integration
 - July 15, 2025: Fixed all database column name mismatches and recreated database schema with proper Drizzle ORM compatibility
