@@ -100,17 +100,3 @@ export default function OnboardingDemo() {
     </div>
   );
 }
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">✓</Badge>
-              <span className="text-sm">Custom question types</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">✓</Badge>
-              <span className="text-sm">Progress tracking</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
