@@ -71,31 +71,35 @@ export default function OnboardingAnalytics() {
   } = analyticsData || {};
 
   // Prepare chart data with safe access
-  const countryData = locationStats?.countries ? Object.entries(locationStats.countries)
-    .map(([country, count]) => ({ country, count }))
+  const safeLocationStats = locationStats || { countries: {}, cities: {} };
+  const safeCountries = safeLocationStats.countries || {};
+  const safeCities = safeLocationStats.cities || {};
+  
+  const countryData = Object.entries(safeCountries)
+    .map(([country, count]) => ({ country, count: count || 0 }))
     .sort((a, b) => b.count - a.count)
-    .slice(0, 8) : [];
+    .slice(0, 8);
 
-  const cityData = locationStats?.cities ? Object.entries(locationStats.cities)
-    .map(([city, count]) => ({ city, count }))
+  const cityData = Object.entries(safeCities)
+    .map(([city, count]) => ({ city, count: count || 0 }))
     .sort((a, b) => b.count - a.count)
-    .slice(0, 8) : [];
+    .slice(0, 8);
 
   // World map placeholder with hotspots
   const getHotspotSize = (count: number) => {
-    const maxCount = locationStats?.countries ? Math.max(...Object.values(locationStats.countries)) : 1;
+    const maxCount = Object.keys(safeCountries).length > 0 ? Math.max(...Object.values(safeCountries)) : 1;
     return Math.max(10, (count / maxCount) * 30);
   };
 
   const worldHotspots = [
-    { country: "USA", x: 25, y: 35, count: locationStats?.countries?.["USA"] || 0 },
-    { country: "India", x: 70, y: 45, count: locationStats?.countries?.["India"] || 0 },
-    { country: "Brazil", x: 35, y: 65, count: locationStats?.countries?.["Brazil"] || 0 },
-    { country: "Kenya", x: 60, y: 55, count: locationStats?.countries?.["Kenya"] || 0 },
-    { country: "Canada", x: 25, y: 25, count: locationStats?.countries?.["Canada"] || 0 },
-    { country: "Australia", x: 80, y: 75, count: locationStats?.countries?.["Australia"] || 0 },
-    { country: "Egypt", x: 58, y: 40, count: locationStats?.countries?.["Egypt"] || 0 },
-    { country: "Singapore", x: 78, y: 52, count: locationStats?.countries?.["Singapore"] || 0 },
+    { country: "USA", x: 25, y: 35, count: safeCountries["USA"] || 0 },
+    { country: "India", x: 70, y: 45, count: safeCountries["India"] || 0 },
+    { country: "Brazil", x: 35, y: 65, count: safeCountries["Brazil"] || 0 },
+    { country: "Kenya", x: 60, y: 55, count: safeCountries["Kenya"] || 0 },
+    { country: "Canada", x: 25, y: 25, count: safeCountries["Canada"] || 0 },
+    { country: "Australia", x: 80, y: 75, count: safeCountries["Australia"] || 0 },
+    { country: "Egypt", x: 58, y: 40, count: safeCountries["Egypt"] || 0 },
+    { country: "Singapore", x: 78, y: 52, count: safeCountries["Singapore"] || 0 },
   ];
 
   return (
@@ -265,58 +269,82 @@ export default function OnboardingAnalytics() {
         <TabsContent value="responses" className="space-y-6">
           {/* Form Response Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {formConfig?.questions?.map((question, index) => {
-              const questionStats = responseStats?.[question.id];
-              if (!questionStats) return null;
+            {formConfig && formConfig.questions && formConfig.questions.length > 0 ? (
+              formConfig.questions.map((question, index) => {
+                const questionStats = responseStats?.[question.id] || {};
+                const chartData = Object.entries(questionStats)
+                  .map(([key, value]) => ({ name: key, value: value || 0 }))
+                  .filter(item => item.value > 0);
 
-              const chartData = Object.entries(questionStats)
-                .map(([key, value]) => ({ name: key, value }))
-                .filter(item => item.value > 0);
+                if (chartData.length === 0) {
+                  return (
+                    <Card key={question.id || index}>
+                      <CardHeader>
+                        <CardTitle className="flex items-center justify-between">
+                          <span className="text-sm">{question.label || 'Unknown Question'}</span>
+                          {question.compulsory && (
+                            <Badge variant="destructive" className="text-xs">Required</Badge>
+                          )}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-8 text-gray-500">
+                          No responses yet
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                }
 
-              return (
-                <Card key={question.id}>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span className="text-sm">{question.label}</span>
-                      {question.compulsory && (
-                        <Badge variant="destructive" className="text-xs">Required</Badge>
-                      )}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={250}>
-                      {question.type === 'radio' ? (
-                        <PieChart>
-                          <Pie
-                            data={chartData}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                            outerRadius={80}
-                            fill="#8884d8"
-                            dataKey="value"
-                          >
-                            {chartData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip />
-                        </PieChart>
-                      ) : (
-                        <BarChart data={chartData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" />
-                          <YAxis />
-                          <Tooltip />
-                          <Bar dataKey="value" fill={COLORS[index % COLORS.length]} />
-                        </BarChart>
-                      )}
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                return (
+                  <Card key={question.id || index}>
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        <span className="text-sm">{question.label || 'Unknown Question'}</span>
+                        {question.compulsory && (
+                          <Badge variant="destructive" className="text-xs">Required</Badge>
+                        )}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={250}>
+                        {question.type === 'radio' ? (
+                          <PieChart>
+                            <Pie
+                              data={chartData}
+                              cx="50%"
+                              cy="50%"
+                              labelLine={false}
+                              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                              outerRadius={80}
+                              fill="#8884d8"
+                              dataKey="value"
+                            >
+                              {chartData.map((entry, chartIndex) => (
+                                <Cell key={`cell-${chartIndex}`} fill={COLORS[chartIndex % COLORS.length]} />
+                              ))}
+                            </Pie>
+                            <Tooltip />
+                          </PieChart>
+                        ) : (
+                          <BarChart data={chartData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="name" />
+                            <YAxis />
+                            <Tooltip />
+                            <Bar dataKey="value" fill={COLORS[index % COLORS.length]} />
+                          </BarChart>
+                        )}
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                );
+              })
+            ) : (
+              <div className="col-span-2 text-center py-8 text-gray-500">
+                No form configuration found
+              </div>
+            )}
           </div>
         </TabsContent>
 
@@ -328,22 +356,32 @@ export default function OnboardingAnalytics() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {users.map((user, index) => (
-                    <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-gray-100">{user.name}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {user.location?.city || 'Unknown'}, {user.location?.country || 'Unknown'}
-                        </p>
+                  {users && users.length > 0 ? users.map((user, index) => {
+                    const userLocation = user.location || {};
+                    const userCity = userLocation.city || 'Unknown';
+                    const userCountry = userLocation.country || 'Unknown';
+                    
+                    return (
+                      <div key={user.id || index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-gray-100">{user.name || 'Unknown User'}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {userCity}, {userCountry}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={user.firstLoginCompleted ? "default" : "secondary"}>
+                            {user.firstLoginCompleted ? "Completed" : "Pending"}
+                          </Badge>
+                          <MapPin className="h-4 w-4 text-gray-400" />
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={user.firstLoginCompleted ? "default" : "secondary"}>
-                          {user.firstLoginCompleted ? "Completed" : "Pending"}
-                        </Badge>
-                        <MapPin className="h-4 w-4 text-gray-400" />
-                      </div>
+                    );
+                  }) : (
+                    <div className="text-center py-8 text-gray-500">
+                      No users found
                     </div>
-                  ))}
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -354,27 +392,34 @@ export default function OnboardingAnalytics() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {responseStats && Object.entries(responseStats).map(([questionId, stats]) => {
-                    const question = formConfig?.questions?.find(q => q.id === questionId);
-                    if (!question) return null;
+                  {responseStats && Object.keys(responseStats).length > 0 ? (
+                    Object.entries(responseStats).map(([questionId, stats]) => {
+                      const question = formConfig?.questions?.find(q => q.id === questionId);
+                      if (!question) return null;
 
-                    const totalResponses = Object.values(stats || {}).reduce((sum, count) => sum + count, 0);
-                    const topResponse = Object.entries(stats || {}).reduce((max, [key, value]) => 
-                      value > max.value ? { key, value } : max
-                    , { key: '', value: 0 });
+                      const safeStats = stats || {};
+                      const totalResponses = Object.values(safeStats).reduce((sum, count) => sum + (count || 0), 0);
+                      const topResponse = Object.entries(safeStats).reduce((max, [key, value]) => 
+                        (value || 0) > max.value ? { key, value: value || 0 } : max
+                      , { key: 'None', value: 0 });
 
-                    return (
-                      <div key={questionId} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium text-gray-900 dark:text-gray-100">{question.label}</h4>
-                          <Badge variant="outline">{totalResponses} responses</Badge>
+                      return (
+                        <div key={questionId} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-medium text-gray-900 dark:text-gray-100">{question.label || 'Unknown Question'}</h4>
+                            <Badge variant="outline">{totalResponses} responses</Badge>
+                          </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Most popular: <span className="font-medium">{topResponse.key}</span> ({topResponse.value} users)
+                          </p>
                         </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          Most popular: <span className="font-medium">{topResponse.key}</span> ({topResponse.value} users)
-                        </p>
-                      </div>
-                    );
-                  })}
+                      );
+                    })
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      No response data available yet
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
