@@ -93,7 +93,7 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
       console.log('Starting clear all operation');
       
       // First fetch all notifications to get the IDs
-      const allNotificationsResponse = await apiRequest('/api/notifications', { method: 'GET' });
+      const allNotificationsResponse = await apiRequest('/api/notifications');
       const currentNotifications = allNotificationsResponse || [];
       console.log('Fetched notifications to clear:', currentNotifications.length);
       
