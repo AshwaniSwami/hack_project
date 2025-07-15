@@ -1,16 +1,47 @@
 // src/server/routes-onboarding.ts
 import { eq, sql } from "drizzle-orm";
-import { db } from "./db";
-import { onboardingFormResponses, users } from "../shared/schema";
 import { isDatabaseAvailable } from "./db";
+import { storage } from "./storage";
+import { onboardingFormResponses, users } from "../shared/schema";
 
 export async function getCurrentFormConfig(req: any, res: any) {
   try {
-    // Placeholder for fetching current form configuration logic
+    // Enhanced form configuration with proper structure for the onboarding wizard
     const formConfig = {
-      fields: [
-        { id: "name", label: "Name", type: "text" },
-        { id: "location", label: "Location", type: "text" }
+      questions: [
+        { 
+          id: "name", 
+          label: "What's your name?", 
+          type: "text",
+          required: true,
+          placeholder: "Enter your full name"
+        },
+        { 
+          id: "experience", 
+          label: "What's your experience level with radio content?", 
+          type: "select",
+          required: true,
+          options: [
+            { value: "beginner", label: "Beginner - New to radio content" },
+            { value: "intermediate", label: "Intermediate - Some experience" },
+            { value: "advanced", label: "Advanced - Experienced professional" },
+            { value: "expert", label: "Expert - Industry veteran" }
+          ]
+        },
+        { 
+          id: "role", 
+          label: "What's your primary role?", 
+          type: "select",
+          required: true,
+          options: [
+            { value: "host", label: "Radio Host" },
+            { value: "producer", label: "Producer" },
+            { value: "editor", label: "Content Editor" },
+            { value: "manager", label: "Station Manager" },
+            { value: "volunteer", label: "Volunteer" },
+            { value: "other", label: "Other" }
+          ]
+        }
       ]
     };
     res.json(formConfig);
@@ -34,35 +65,25 @@ export async function updateFormConfig(req: any, res: any) {
 
 export async function submitOnboardingForm(req: any, res: any) {
   try {
-    const { questionId, response } = req.body;
+    const formData = req.body;
 
     if (!req.user) {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    if (!isDatabaseAvailable()) {
-      return res.status(500).json({ error: "Database not available" });
-    }
+    // Extract common fields and form responses
+    const { name, experience, role, location } = formData;
 
-    // Insert the onboarding form response into the database
-    await db.insert(onboardingFormResponses).values({
-      userId: req.user.id,
-      questionId: questionId,
-      response: response
+    // Update user with onboarding information
+    await storage.updateUser(req.user.id, {
+      firstName: name,
+      location: location ? (typeof location === 'string' ? { country: location } : location) : null,
+      firstLoginCompleted: true,
+      onboardingResponses: formData
     });
 
-    console.log(`User ${req.user.id} submitted response for question ${questionId}:`, response);
-    res.json({ message: "Onboarding form submitted successfully" });
-
-    // Update user's onboarding completion status if all required questions are answered
-    const allQuestionsAnswered = true; // Replace with actual logic
-    if (allQuestionsAnswered) {
-      await db.update(users)
-        .set({ firstLoginCompleted: true })
-        .where(eq(users.id, req.user.id));
-
-      console.log(`User ${req.user.id} completed onboarding`);
-    }
+    console.log(`User ${req.user.id} completed onboarding:`, formData);
+    res.json({ message: "Onboarding completed successfully" });
   } catch (error) {
     console.error("Error submitting onboarding form:", error);
     res.status(500).json({ error: "Failed to submit onboarding form" });
@@ -86,11 +107,10 @@ export async function getOnboardingAnalytics(req: any, res: any) {
     }
 
     try {
-      const [responses, usersList, totalUsersResult] = await Promise.all([
-        db.select().from(onboardingFormResponses).catch(() => []),
-        db.select().from(users).where(eq(users.firstLoginCompleted, true)).catch(() => []),
-        db.select({ count: sql<number>`count(*)` }).from(users).catch(() => [{ count: 0 }])
-      ]);
+      // Get completed users from storage
+      const allUsers = await storage.getAllUsers();
+      const usersList = allUsers.filter(user => user.firstLoginCompleted);
+      const responses: any[] = []; // Placeholder for form responses
 
       console.log("Raw responses:", responses);
       console.log("Completed users:", usersList);
@@ -116,9 +136,8 @@ export async function getOnboardingAnalytics(req: any, res: any) {
         }
       });
 
-      const totalUsers = totalUsersResult?.[0]?.count || 0;
       const completedUsers = usersList?.length || 0;
-      const completionRate = totalUsers > 0 ? (completedUsers / totalUsers) * 100 : 0;
+      const completionRate = allUsers.length > 0 ? (completedUsers / allUsers.length) * 100 : 0;
 
       const analytics = {
         totalResponses: responses?.length || 0,
@@ -154,22 +173,20 @@ export async function checkOnboardingStatus(req: any, res: any) {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    if (!isDatabaseAvailable()) {
-      return res.json({ completed: false });
-    }
-
-    const user = await db.select()
-      .from(users)
-      .where(eq(users.id, req.user.id))
-      .limit(1);
-
-    if (user.length === 0) {
+    // Get user information from storage
+    const user = await storage.getUser(req.user.id);
+    
+    if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
+    // Check if user needs onboarding (first login not completed)
+    const needsOnboarding = !user.firstLoginCompleted;
+
     res.json({ 
-      completed: user[0].firstLoginCompleted || false,
-      location: user[0].location 
+      needsOnboarding,
+      completed: user.firstLoginCompleted || false,
+      location: user.location 
     });
   } catch (error) {
     console.error("Error checking onboarding status:", error);
