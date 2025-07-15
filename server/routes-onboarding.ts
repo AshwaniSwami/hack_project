@@ -343,11 +343,13 @@ export const submitOnboardingForm = async (req: AuthenticatedRequest, res: Respo
       .where(eq(users.id, req.user.id));
 
     // Save individual responses for analytics
+    const { nanoid } = await import("nanoid");
     const responses = [];
     for (const question of formConfig.questions as FormQuestion[]) {
       const response = submissionData[question.id];
       if (response !== undefined) {
         responses.push({
+          id: nanoid(),
           userId: req.user.id,
           formConfigId: formConfig.id,
           questionId: question.id,
@@ -503,6 +505,7 @@ export const getOnboardingAnalytics = async (req: AuthenticatedRequest, res: Res
       const formConfig = migrationFormConfig[0];
       
       // Migrate existing user responses
+      const { nanoid } = await import("nanoid");
       const migrationResponses = [];
       for (const user of completedUsers) {
         if (user.onboardingResponses) {
@@ -511,6 +514,7 @@ export const getOnboardingAnalytics = async (req: AuthenticatedRequest, res: Res
             const response = userResponses[question.id];
             if (response !== undefined) {
               migrationResponses.push({
+                id: nanoid(),
                 userId: user.id,
                 formConfigId: formConfig.id,
                 questionId: question.id,
