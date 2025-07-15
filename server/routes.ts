@@ -240,7 +240,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/users/:id", async (req, res) => {
     try {
+      // Get user info before deletion for broadcasting
+      const userToDelete = await storage.getUser(req.params.id);
+      
       await storage.deleteUser(req.params.id);
+      
+      // Broadcast real-time update to all connected admin users
+      if (typeof (global as any).broadcastNotificationToAdmins === 'function') {
+        (global as any).broadcastNotificationToAdmins({
+          type: 'user_action',
+          action: 'deleted',
+          userId: req.params.id,
+          userEmail: userToDelete?.email || 'Unknown',
+          timestamp: new Date().toISOString()
+        });
+      }
+      
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -262,6 +277,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/admin/users/:id/verify", isAuthenticated, isAdmin, async (req, res) => {
     try {
       const user = await storage.verifyUser(req.params.id);
+      
+      // Broadcast real-time update to all connected admin users
+      if (typeof (global as any).broadcastNotificationToAdmins === 'function') {
+        (global as any).broadcastNotificationToAdmins({
+          type: 'user_action',
+          action: 'verified',
+          userId: user.id,
+          userEmail: user.email,
+          timestamp: new Date().toISOString()
+        });
+      }
+      
       res.json({ message: "User verified successfully", user });
     } catch (error) {
       console.error("Error verifying user:", error);

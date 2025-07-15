@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -51,6 +51,7 @@ import {
 } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useWebSocket } from "@/hooks/useWebSocket";
 import { apiRequest } from "@/lib/queryClient";
 import { colors, getCardStyle, getGradientStyle } from "@/lib/colors";
 import { 
@@ -92,6 +93,8 @@ export default function Users() {
   const [activeTab, setActiveTab] = useState("all");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const { notifications } = useWebSocket();
 
   const { data: users = [], isLoading } = useQuery<UserType[]>({
     queryKey: ["/api/users"],
@@ -100,6 +103,20 @@ export default function Users() {
   const { data: pendingUsers = [], isLoading: isPendingLoading } = useQuery<UserType[]>({
     queryKey: ["/api/admin/users/pending"],
   });
+
+  // Listen for WebSocket notifications and refresh data
+  useEffect(() => {
+    const userNotifications = notifications.filter(notification => 
+      notification.type === 'user_verification_request' || 
+      notification.type === 'user_registered'
+    );
+    
+    if (userNotifications.length > 0) {
+      // Refresh both users and pending users when we receive relevant notifications
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users/pending"] });
+    }
+  }, [notifications, queryClient]);
 
   const form = useForm<UserFormData>({
     resolver: zodResolver(userFormSchema),
@@ -173,8 +190,14 @@ export default function Users() {
       return response.status === 204 ? {} : response.json();
     },
     onSuccess: () => {
+      // Force immediate refresh of both queries
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users/pending"] });
+      
+      // Also refresh notifications to update counts
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread"] });
+      
       toast({
         title: "Success",
         description: "User deleted successfully",
@@ -203,8 +226,14 @@ export default function Users() {
       return response.json();
     },
     onSuccess: () => {
+      // Force immediate refresh of both queries
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users/pending"] });
+      
+      // Also refresh notifications to update counts
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread"] });
+      
       toast({
         title: "Success",
         description: "User verified successfully",

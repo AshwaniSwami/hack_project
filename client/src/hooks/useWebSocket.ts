@@ -83,11 +83,26 @@ export function useWebSocket() {
                 queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread'] });
                 queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
                 
+                // For user management notifications, also refresh user-related queries
+                if (notification.type === 'user_verification_request' || notification.type === 'user_registered') {
+                  queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+                  queryClient.invalidateQueries({ queryKey: ['/api/admin/users/pending'] });
+                }
+                
                 // Auto-remove notification after 5 seconds
                 setTimeout(() => {
                   setNotifications(prev => prev.filter(n => n.id !== notification.id));
                 }, 5000);
               }
+              break;
+              
+            case 'user_action':
+              // Handle real-time user actions (verify, delete, etc.)
+              console.log('User action received:', message.data);
+              queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/admin/users/pending'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread'] });
               break;
               
             case 'error':
