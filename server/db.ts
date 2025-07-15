@@ -9,6 +9,13 @@ let db: any = null;
 let pool: Pool | null = null;
 let initialized = false;
 
+// Force re-initialization for debugging
+export function resetDbConnection() {
+  initialized = false;
+  db = null;
+  pool = null;
+}
+
 // Initialize database connection lazily
 function initializeDatabase() {
   if (initialized) return;

@@ -7,15 +7,29 @@ import { registerProjectFileRoutes } from "./routes-projects-files";
 import { registerEpisodeFileRoutes } from "./routes-episodes-files";
 import { registerScriptFileRoutes } from "./routes-scripts-files";
 import { registerNotificationRoutes } from "./routes-notifications";
-import { isDatabaseAvailable } from "./db";
+import { isDatabaseAvailable, resetDbConnection } from "./db";
 // Import both auth modules
 import * as realAuth from "./auth";
 import * as tempAuth from "./tempAuth";
 import { getFilePermissions, requireFilePermission } from "./filePermissions";
 
-// Use temp auth when database is not available, real auth when database is ready
-const authModule = isDatabaseAvailable() ? realAuth : tempAuth;
-const { isAuthenticated, isAdmin, login, register, logout, getCurrentUser } = authModule;
+// Dynamically choose auth module based on database availability
+function getAuthModule() {
+  // Force a fresh database check
+  resetDbConnection();
+  const dbAvailable = isDatabaseAvailable();
+  console.log("Database availability check:", dbAvailable ? "✅ Available" : "❌ Not available");
+  console.log("DATABASE_URL exists:", !!process.env.DATABASE_URL);
+  return dbAvailable ? realAuth : tempAuth;
+}
+
+// Dynamic auth handlers that check database availability at runtime
+const isAuthenticated = (req: any, res: any, next: any) => getAuthModule().isAuthenticated(req, res, next);
+const isAdmin = (req: any, res: any, next: any) => getAuthModule().isAdmin(req, res, next);
+const login = (req: any, res: any) => getAuthModule().login(req, res);
+const register = (req: any, res: any) => getAuthModule().register(req, res);
+const logout = (req: any, res: any) => getAuthModule().logout(req, res);
+const getCurrentUser = (req: any, res: any) => getAuthModule().getCurrentUser(req, res);
 import bcrypt from "bcryptjs";
 import {
   insertUserSchema,

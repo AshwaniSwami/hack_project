@@ -142,10 +142,23 @@ export class FallbackStorage implements IStorage {
     this.throwDatabaseError();
   }
 
-  async getAllUsers(): Promise<User[]> {
+  async getAllUsers(limit?: number, offset?: number): Promise<User[]> {
     this.throwDatabaseError();
   }
 }
 
-// Use database storage if available, otherwise use fallback
-export const storage = isDatabaseAvailable() ? new DatabaseStorage() : new FallbackStorage();
+// Create storage instance - force use of database storage since we know DB is available
+function createStorage(): IStorage {
+  console.log("Creating storage instance...");
+  
+  // Test database availability
+  if (process.env.DATABASE_URL) {
+    console.log("✅ DATABASE_URL found, using DatabaseStorage");
+    return new DatabaseStorage();
+  } else {
+    console.log("⚠️ DATABASE_URL not found, using FallbackStorage");
+    return new FallbackStorage();
+  }
+}
+
+export const storage = createStorage();
