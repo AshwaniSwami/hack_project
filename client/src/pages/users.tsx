@@ -161,10 +161,20 @@ export default function Users() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      return apiRequest("DELETE", `/api/users/${id}`);
+      const response = await fetch(`/api/users/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to delete user: ${response.statusText}`);
+      }
+      
+      return response.status === 204 ? {} : response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users/pending"] });
       toast({
         title: "Success",
         description: "User deleted successfully",
@@ -181,7 +191,16 @@ export default function Users() {
 
   const verifyUserMutation = useMutation({
     mutationFn: async (id: string) => {
-      return apiRequest("PATCH", `/api/admin/users/${id}/verify`);
+      const response = await fetch(`/api/admin/users/${id}/verify`, {
+        method: 'PATCH',
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to verify user: ${response.statusText}`);
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
@@ -202,7 +221,16 @@ export default function Users() {
 
   const suspendUserMutation = useMutation({
     mutationFn: async (id: string) => {
-      return apiRequest("PATCH", `/api/admin/users/${id}/suspend`);
+      const response = await fetch(`/api/admin/users/${id}/suspend`, {
+        method: 'PATCH',
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to suspend user: ${response.statusText}`);
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
@@ -222,7 +250,16 @@ export default function Users() {
 
   const activateUserMutation = useMutation({
     mutationFn: async (id: string) => {
-      return apiRequest("PATCH", `/api/admin/users/${id}/activate`);
+      const response = await fetch(`/api/admin/users/${id}/activate`, {
+        method: 'PATCH',
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to activate user: ${response.statusText}`);
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
