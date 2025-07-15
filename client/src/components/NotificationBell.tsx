@@ -72,10 +72,18 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
 
   // Delete notification mutation
   const deleteNotificationMutation = useMutation({
-    mutationFn: (notificationId: string) => 
-      apiRequest(`/api/notifications/${notificationId}`, {
+    mutationFn: async (notificationId: string) => {
+      const response = await fetch(`/api/notifications/${notificationId}`, {
         method: 'DELETE',
-      }),
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to delete notification: ${response.statusText}`);
+      }
+      
+      return response.status === 204 ? {} : response.json();
+    },
     onSuccess: () => {
       // Remove all queries and refetch fresh data
       queryClient.removeQueries({ queryKey: ['/api/notifications'] });
@@ -197,6 +205,7 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
 
   const handleDeleteNotification = (e: React.MouseEvent, notificationId: string) => {
     e.stopPropagation();
+    console.log('Deleting individual notification:', notificationId);
     deleteNotificationMutation.mutate(notificationId);
   };
 
