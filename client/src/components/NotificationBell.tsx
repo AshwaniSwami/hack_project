@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, X, Check, User, UserCheck, UserPlus, ExternalLink } from 'lucide-react';
+import { Bell, X, Check, User, UserCheck, UserPlus, ExternalLink, Trash2 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -56,12 +56,15 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
         method: 'PATCH',
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread'] });
-      // Force refresh to update the UI immediately
-      setTimeout(() => {
-        queryClient.refetchQueries({ queryKey: ['/api/notifications/unread'] });
-      }, 100);
+      // Remove all queries and refetch fresh data
+      queryClient.removeQueries({ queryKey: ['/api/notifications'] });
+      queryClient.removeQueries({ queryKey: ['/api/notifications/unread'] });
+      
+      // Force immediate refetch
+      queryClient.refetchQueries({ queryKey: ['/api/notifications/unread'] });
+      if (open) {
+        queryClient.refetchQueries({ queryKey: ['/api/notifications'] });
+      }
     },
   });
 
@@ -72,13 +75,15 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
         method: 'PATCH',
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread'] });
+      // Remove all queries and refetch fresh data
+      queryClient.removeQueries({ queryKey: ['/api/notifications'] });
+      queryClient.removeQueries({ queryKey: ['/api/notifications/unread'] });
+      
+      // Force immediate refetch
+      queryClient.refetchQueries({ queryKey: ['/api/notifications/unread'] });
+      queryClient.refetchQueries({ queryKey: ['/api/notifications'] });
+      
       setOpen(false); // Close the popover after marking all as read
-      // Force refresh to update the UI immediately
-      setTimeout(() => {
-        queryClient.refetchQueries({ queryKey: ['/api/notifications/unread'] });
-      }, 100);
     },
   });
 
@@ -89,14 +94,43 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
         method: 'DELETE',
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread'] });
-      // Force refresh to update the UI immediately
-      setTimeout(() => {
-        queryClient.refetchQueries({ queryKey: ['/api/notifications/unread'] });
-      }, 100);
+      // Remove all queries and refetch fresh data
+      queryClient.removeQueries({ queryKey: ['/api/notifications'] });
+      queryClient.removeQueries({ queryKey: ['/api/notifications/unread'] });
+      
+      // Force immediate refetch
+      queryClient.refetchQueries({ queryKey: ['/api/notifications/unread'] });
+      queryClient.refetchQueries({ queryKey: ['/api/notifications'] });
     },
   });
+
+  // Clear all notifications mutation
+  const clearAllMutation = useMutation({
+    mutationFn: async () => {
+      // Delete all notifications one by one
+      const allNotificationIds = (allNotifications || []).map(n => n.id);
+      await Promise.all(
+        allNotificationIds.map(id => 
+          apiRequest(`/api/notifications/${id}`, { method: 'DELETE' })
+        )
+      );
+    },
+    onSuccess: () => {
+      // Remove all queries and refetch fresh data
+      queryClient.removeQueries({ queryKey: ['/api/notifications'] });
+      queryClient.removeQueries({ queryKey: ['/api/notifications/unread'] });
+      
+      // Force immediate refetch
+      queryClient.refetchQueries({ queryKey: ['/api/notifications/unread'] });
+      queryClient.refetchQueries({ queryKey: ['/api/notifications'] });
+      
+      setOpen(false); // Close the popover
+    },
+  });
+
+  const handleClearAll = () => {
+    clearAllMutation.mutate();
+  };
 
   const unreadCount = unreadData?.count || 0;
   const notifications = (allNotifications || []).sort((a: Notification, b: Notification) => {
@@ -115,10 +149,15 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
   });
 
   const handleNotificationClick = (notification: Notification) => {
-    // Always mark as read and close the panel first
+    // Always mark as read and delete the notification immediately
     if (!notification.isRead) {
       markAsReadMutation.mutate(notification.id);
     }
+    
+    // Delete the notification after clicking
+    setTimeout(() => {
+      deleteNotificationMutation.mutate(notification.id);
+    }, 200);
     
     setOpen(false); // Close the notification panel immediately
     
@@ -196,22 +235,40 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
               <CardTitle className="text-sm font-medium text-gray-900 dark:text-gray-100">
                 Notifications {unreadCount > 0 && <Badge variant="destructive" className="ml-2">{unreadCount}</Badge>}
               </CardTitle>
-              {unreadCount > 0 && (
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => markAllAsReadMutation.mutate()}
-                  disabled={markAllAsReadMutation.isPending || deleteNotificationMutation.isPending}
-                  className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
-                >
-                  {markAllAsReadMutation.isPending ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-1" />
-                  ) : (
-                    <Check className="h-4 w-4 mr-1" />
-                  )}
-                  Mark all read
-                </Button>
-              )}
+              <div className="flex space-x-2">
+                {unreadCount > 0 && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => markAllAsReadMutation.mutate()}
+                    disabled={markAllAsReadMutation.isPending || deleteNotificationMutation.isPending}
+                    className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
+                  >
+                    {markAllAsReadMutation.isPending ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-1" />
+                    ) : (
+                      <Check className="h-4 w-4 mr-1" />
+                    )}
+                    Mark all read
+                  </Button>
+                )}
+                {notifications.length > 0 && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => handleClearAll()}
+                    disabled={clearAllMutation.isPending}
+                    className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200"
+                  >
+                    {clearAllMutation.isPending ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500 mr-1" />
+                    ) : (
+                      <Trash2 className="h-4 w-4 mr-1" />
+                    )}
+                    Clear all
+                  </Button>
+                )}
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
