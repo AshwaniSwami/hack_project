@@ -1,0 +1,80 @@
+Please create a React.js application on Replit that demonstrates the core functionality of a dynamic user onboarding form builder for admins, the dynamic user onboarding form itself, and an analytics page primarily focused on location data and custom form responses for an NGO's e-library platform.
+
+**Overall Goal:** Showcase the UI/UX for Admins to create questions, Users to answer them, and Admins to analyze the responses with a focus on geographical insights.
+
+**Technology Stack:**
+* **Frontend:** React.js, HTML, CSS (e.g., Tailwind CSS or simple custom CSS for styling).
+* **Charting:** Chart.js (or a similar lightweight library if Chart.js is not feasible directly in Replit's default setup).
+
+**Core Components to Implement:**
+
+**1. Mock Data Setup (`src/data/mockData.js`):**
+   * Create a JS file that exports the following mock data:
+      * `mockUsers`: An array of user objects. Each user should have:
+          * `id`
+          * `name`
+          * `location`: An object with `country` (string), `city` (string), `latitude` (number), `longitude` (number). Ensure a variety of locations (e.g., India, USA, Kenya, Brazil, etc.) to showcase geographical data.
+          * `firstLoginCompleted`: boolean (initially `false` for some, `true` for others).
+          * `customFormResponses`: An object where keys are question IDs (from `mockFormConfig`) and values are user's answers.
+      * `mockFormConfig`: An object representing the admin-defined form. It should have:
+          * `questions`: An array of question objects. Each question object should have:
+              * `id`: unique string
+              * `type`: 'radio' | 'checkbox' | 'text' (only implement 'radio' and 'checkbox' for simplicity if 'text' is too complex for charting).
+              * `label`: The question text (e.g., "What brings you to our platform?").
+              * `options`: An array of strings for 'radio' or 'checkbox' types.
+              * `compulsory`: boolean (true for primary purpose, false for others).
+
+**2. User Role Management (Conceptual):**
+   * Create a simple way to switch between "Admin" and "User" view (e.g., a button on a conceptual login page, or a global state variable) to demonstrate different dashboards.
+
+**3. Admin Dashboard (`src/components/AdminDashboard.js`):**
+   * **Main Navigation:** Simple links for "Form Builder" and "Analytics."
+   * **"Form Builder" Section (`src/components/FormBuilder.js`):**
+      * Display the `mockFormConfig` in an editable format.
+      * Allow conceptual "add new question" (just render a placeholder for now).
+      * For each existing question:
+          * Display `label` and `type`.
+          * Show `options` for radio/checkbox.
+          * Allow toggling `compulsory` (visually).
+      * Include a "Save & Publish Form" button (conceptual, just logs action).
+   * **"Analytics" Section (`src/components/AnalyticsPage.js`):**
+      * **Overview:** Simple display of "Total Users," "Users who completed form."
+      * **Geographical Distribution (Location Charts):**
+          * **World Map Visualization:** Use a simple SVG map of the world or a placeholder image of a map. Overlay conceptual "hotspots" (colored circles proportional to user density) on a few key countries/regions based on `mockUsers` locations. This doesn't need to be interactive with real map data, just visually represent user distribution.
+          * **Top Countries Bar Chart:** A Chart.js bar chart showing the top 5-10 countries by `user count` from `mockUsers`.
+          * **Top Cities Bar Chart:** Another Chart.js bar chart for top 5-10 cities.
+          * **Conceptual Filters:** Add mock dropdowns/buttons to filter charts by "Purpose," "Interests," etc. (based on `mockFormConfig` and `mockUsers.customFormResponses`). When a filter is selected, log to console what *would* happen (e.g., "Filtering map by 'Research' purpose").
+      * **Custom Form Response Analytics:**
+          * For each question in `mockFormConfig` that has 'radio' or 'checkbox' type:
+              * Display a Chart.js **Pie Chart** or **Bar Chart** showing the distribution of responses from `mockUsers.customFormResponses`.
+              * Label the chart with the question `label`.
+              * Example: "What brings you to our platform?" Pie chart showing % for Research, Learning, etc.
+
+**4. User Onboarding Form (`src/components/UserOnboardingForm.js`):**
+   * This component should conceptually render when a `mockUser` has `firstLoginCompleted: false`.
+   * **Dynamic Rendering:** Use the `mockFormConfig` to dynamically render the questions (radio buttons for single choice, checkboxes for multiple choice).
+   * **Compulsory Enforcement:** Visually indicate compulsory questions (e.g., with an asterisk). Prevent submission if compulsory questions are not answered.
+   * **Submission:** A "Submit & Go to Dashboard" button. On click, conceptually update the `mockUser.customFormResponses` and set `firstLoginCompleted` to `true` (just log these actions).
+
+**5. Application Structure (`src/App.js`):**
+   * Implement basic routing (e.g., using `react-router-dom` or simple conditional rendering) to switch between:
+      * A conceptual "Login Screen" (with buttons for "Login as Admin" and "Login as User").
+      * `AdminDashboard`
+      * `UserOnboardingForm` (rendered conditionally for new users).
+      * `UserDashboard` (simple placeholder for normal users after onboarding).
+
+**6. Styling (`src/index.css` or `App.css`):**
+   * Apply clean, modern CSS for good UI/UX. Use a simple color palette. Ensure responsiveness (basic media queries).
+
+**Key Deliverables for Replit:**
+* A working React app structure.
+* Mock data that fuels the demo.
+* A simplified, visual Admin Form Builder.
+* A dynamically rendered User Onboarding Form.
+* An Analytics Page with:
+    * Conceptual world map with hotspots.
+    * Chart.js bar charts for top locations.
+    * Chart.js pie/bar charts for custom form responses.
+    * Conceptual filtering on location charts by custom form data.
+
+This prompt focuses on demonstrating the dynamic UI and data visualization concepts within Replit's environment, acknowledging the backend would be more complex in a real application.
