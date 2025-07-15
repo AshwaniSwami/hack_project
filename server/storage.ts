@@ -37,6 +37,7 @@ import {
   type InsertNotification,
 } from "@shared/schema";
 import { db as getDb, isDatabaseAvailable, requireDatabase } from "./db";
+import { Pool } from '@neondatabase/serverless';
 import { eq, desc, and, sql, like, or, asc } from "drizzle-orm";
 
 export interface IStorage {
@@ -810,11 +811,16 @@ export async function initializeStorage() {
     const dbInstance = getDb();
     if (dbInstance) {
       try {
-        const testQuery = await dbInstance.select().from(users).limit(1);
+        // Test with a simple query first
+        const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+        await pool.query('SELECT 1');
+        await pool.end();
+        
         console.log("✅ Database connection verified");
         storage = new DatabaseStorage();
       } catch (error) {
         console.log("⚠️  Database connection failed - using fallback storage");
+        console.log("Error:", error instanceof Error ? error.message : String(error));
         storage = new FallbackStorage();
       }
     } else {

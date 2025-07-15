@@ -62,16 +62,11 @@ export async function checkDatabaseAvailability(): Promise<boolean> {
   console.log("Checking DATABASE_URL: ✅ Found");
 
   try {
-    // Test the connection with a simple query
-    const client = postgres(process.env.DATABASE_URL, { 
-      max: 1,
-      connect_timeout: 10,
-      idle_timeout: 5,
-    });
-
-    await client`SELECT 1`;
+    // Test the connection with a simple query using pool
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    await pool.query('SELECT 1');
     console.log("✅ Database connected successfully");
-    await client.end();
+    await pool.end();
     return true;
   } catch (error) {
     console.log("❌ Database connection failed:", error);
