@@ -170,7 +170,9 @@ export const getCurrentFormConfig = async (req: Request, res: Response) => {
       return res.json(mockFormConfig);
     }
 
-    res.json(activeConfig[0].questions);
+    res.json({
+      questions: activeConfig[0].questions
+    });
   } catch (error) {
     console.error("Error fetching form config:", error);
     res.status(500).json({ error: "Failed to fetch form configuration" });
@@ -288,11 +290,16 @@ export const submitOnboardingForm = async (req: AuthenticatedRequest, res: Respo
       .orderBy(desc(onboardingFormConfig.version))
       .limit(1);
 
+    let formConfig;
     if (activeConfig.length === 0) {
-      return res.status(400).json({ error: "No active form configuration found" });
+      // Use default form config if none exists in database
+      formConfig = {
+        id: 'default-config',
+        questions: mockFormConfig.questions
+      };
+    } else {
+      formConfig = activeConfig[0];
     }
-
-    const formConfig = activeConfig[0];
 
     // Update user's location and onboarding status
     await db
@@ -304,25 +311,27 @@ export const submitOnboardingForm = async (req: AuthenticatedRequest, res: Respo
       })
       .where(eq(users.id, req.user.id));
 
-    // Save individual responses for analytics
-    const responses = [];
-    for (const question of formConfig.questions as FormQuestion[]) {
-      const response = submissionData[question.id];
-      if (response !== undefined) {
-        responses.push({
-          userId: req.user.id,
-          formConfigId: formConfig.id,
-          questionId: question.id,
-          questionType: question.type,
-          questionLabel: question.label,
-          response: response,
-          isCompulsory: question.compulsory,
-        });
+    // Save individual responses for analytics (only if we have a real form config from database)
+    if (activeConfig.length > 0) {
+      const responses = [];
+      for (const question of formConfig.questions as FormQuestion[]) {
+        const response = submissionData[question.id];
+        if (response !== undefined) {
+          responses.push({
+            userId: req.user.id,
+            formConfigId: formConfig.id,
+            questionId: question.id,
+            questionType: question.type,
+            questionLabel: question.label,
+            response: response,
+            isCompulsory: question.compulsory,
+          });
+        }
       }
-    }
 
-    if (responses.length > 0) {
-      await db.insert(onboardingFormResponses).values(responses);
+      if (responses.length > 0) {
+        await db.insert(onboardingFormResponses).values(responses);
+      }
     }
 
     res.json({ success: true, message: "Onboarding completed successfully" });
