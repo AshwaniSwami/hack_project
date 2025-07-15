@@ -108,19 +108,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerDownloadTrackingRoutes(app);
   
   // Register onboarding routes
-  const { 
-    getCurrentFormConfig, 
-    updateFormConfig, 
-    submitOnboardingForm, 
-    getOnboardingAnalytics, 
-    checkOnboardingStatus 
-  } = await import("./routes-onboarding");
+  const onboardingRoutes = await import("./routes-onboarding");
   
-  app.get("/api/onboarding/form-config", getCurrentFormConfig);
-  app.put("/api/onboarding/form-config", isAuthenticated, isAdmin, updateFormConfig);
-  app.post("/api/onboarding/submit", isAuthenticated, submitOnboardingForm);
-  app.get("/api/onboarding/analytics", isAuthenticated, getOnboardingAnalytics);
-  app.get("/api/onboarding/status", isAuthenticated, checkOnboardingStatus);
+  app.get("/api/onboarding/form-config", onboardingRoutes.getCurrentFormConfig);
+  app.put("/api/onboarding/form-config", isAuthenticated, isAdmin, onboardingRoutes.updateFormConfig);
+  app.post("/api/onboarding/submit", isAuthenticated, onboardingRoutes.submitOnboardingForm);
+  app.get("/api/onboarding/analytics", isAuthenticated, onboardingRoutes.getOnboardingAnalytics);
+  app.get("/api/onboarding/status", isAuthenticated, onboardingRoutes.checkOnboardingStatus);
   registerProjectAnalyticsRoutes(app);
   registerScriptAnalyticsRoutes(app);
   registerEpisodeAnalyticsRoutes(app);
