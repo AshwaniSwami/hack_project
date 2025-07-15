@@ -166,8 +166,22 @@ export const getCurrentFormConfig = async (req: Request, res: Response) => {
       .limit(1);
 
     if (activeConfig.length === 0) {
-      // Return mock data if no config exists
-      return res.json(mockFormConfig);
+      // Create default form configuration if none exists
+      console.log("No active form config found, creating default...");
+      const defaultConfig = {
+        questions: [
+          { id: "name", type: "text", label: "What is your name?", compulsory: true },
+          { id: "role", type: "radio", label: "What is your role?", options: ["Beginner", "Intermediate", "Advanced", "Expert"], compulsory: true },
+          { id: "experience", type: "radio", label: "How would you describe your experience level?", options: ["Beginner", "Intermediate", "Advanced", "Expert"], compulsory: true }
+        ] as FormQuestion[],
+        createdBy: "system",
+        version: 1,
+        isActive: true,
+      };
+      
+      const [newConfig] = await db.insert(onboardingFormConfig).values(defaultConfig).returning();
+      console.log("Created default form config:", newConfig);
+      return res.json(newConfig.questions);
     }
 
     res.json(activeConfig[0].questions);
@@ -288,11 +302,28 @@ export const submitOnboardingForm = async (req: AuthenticatedRequest, res: Respo
       .orderBy(desc(onboardingFormConfig.version))
       .limit(1);
 
+    let formConfig;
+    
     if (activeConfig.length === 0) {
-      return res.status(400).json({ error: "No active form configuration found" });
+      // Create default form configuration if none exists
+      console.log("No active form config found, creating default...");
+      const defaultConfig = {
+        questions: [
+          { id: "name", type: "text", label: "What is your name?", compulsory: true },
+          { id: "role", type: "radio", label: "What is your role?", options: ["Beginner", "Intermediate", "Advanced", "Expert"], compulsory: true },
+          { id: "experience", type: "radio", label: "How would you describe your experience level?", options: ["Beginner", "Intermediate", "Advanced", "Expert"], compulsory: true }
+        ] as FormQuestion[],
+        createdBy: req.user.id,
+        version: 1,
+        isActive: true,
+      };
+      
+      const [newConfig] = await db.insert(onboardingFormConfig).values(defaultConfig).returning();
+      formConfig = newConfig;
+      console.log("Created default form config:", formConfig);
+    } else {
+      formConfig = activeConfig[0];
     }
-
-    const formConfig = activeConfig[0];
 
     // Update user's location and onboarding status
     await db
@@ -433,6 +464,111 @@ export const getOnboardingAnalytics = async (req: AuthenticatedRequest, res: Res
     console.log("Getting onboarding analytics...");
     console.log("Raw responses:", responses);
     console.log("Completed users:", completedUsers.map(u => ({ id: u.id, email: u.email, firstName: u.firstName, lastName: u.lastName, location: u.location, onboardingResponses: u.onboardingResponses })));
+    
+    // If no individual responses exist but we have completed users, migrate their data
+    if (responses.length === 0 && completedUsers.length > 0) {
+      console.log("Migrating existing user responses to analytics table...");
+      
+      // Get or create form config
+      let migrationFormConfig = await db
+        .select()
+        .from(onboardingFormConfig)
+        .where(eq(onboardingFormConfig.isActive, true))
+        .limit(1);
+      
+      if (migrationFormConfig.length === 0) {
+        // Create default form configuration for migration
+        const defaultConfig = {
+          questions: [
+            { id: "name", type: "text", label: "What is your name?", compulsory: true },
+            { id: "role", type: "radio", label: "What is your role?", options: ["Beginner", "Intermediate", "Advanced", "Expert"], compulsory: true },
+            { id: "experience", type: "radio", label: "How would you describe your experience level?", options: ["Beginner", "Intermediate", "Advanced", "Expert"], compulsory: true }
+          ] as FormQuestion[],
+          createdBy: "system",
+          version: 1,
+          isActive: true,
+        };
+        
+        const [newConfig] = await db.insert(onboardingFormConfig).values(defaultConfig).returning();
+        migrationFormConfig = [newConfig];
+      }
+      
+      const formConfig = migrationFormConfig[0];
+      
+      // Migrate existing user responses
+      const migrationResponses = [];
+      for (const user of completedUsers) {
+        if (user.onboardingResponses) {
+          const userResponses = user.onboardingResponses as any;
+          for (const question of formConfig.questions as FormQuestion[]) {
+            const response = userResponses[question.id];
+            if (response !== undefined) {
+              migrationResponses.push({
+                userId: user.id,
+                formConfigId: formConfig.id,
+                questionId: question.id,
+                questionType: question.type,
+                questionLabel: question.label,
+                response: response,
+                isCompulsory: question.compulsory,
+              });
+            }
+          }
+        }
+      }
+      
+      if (migrationResponses.length > 0) {
+        await db.insert(onboardingFormResponses).values(migrationResponses);
+        console.log(`Migrated ${migrationResponses.length} responses to analytics table`);
+        
+        // Re-fetch responses after migration
+        const newResponses = await db.select().from(onboardingFormResponses);
+        
+        // Recalculate response statistics
+        const newResponseStats = {};
+        newResponses.forEach(response => {
+          if (!newResponseStats[response.questionId]) {
+            newResponseStats[response.questionId] = {};
+          }
+          
+          const responseValue = response.response;
+          if (Array.isArray(responseValue)) {
+            responseValue.forEach(value => {
+              newResponseStats[response.questionId][value] = 
+                (newResponseStats[response.questionId][value] || 0) + 1;
+            });
+          } else {
+            newResponseStats[response.questionId][responseValue] = 
+              (newResponseStats[response.questionId][responseValue] || 0) + 1;
+          }
+        });
+        
+        const finalAnalytics = {
+          totalResponses: newResponses.length,
+          responsesByQuestion: newResponseStats,
+          completionRate: allUsers.length > 0 ? Math.round((completedUsers.length / allUsers.length) * 100) : 0,
+          demographics: {
+            byLocation: locationStats.countries,
+            totalUsers: allUsers.length,
+          },
+          totalUsers: allUsers.length,
+          completedUsers: completedUsers.length,
+          locationStats,
+          users: allUsers.map(user => ({
+            id: user.id,
+            name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+            email: user.email,
+            location: user.location,
+            firstLoginCompleted: user.firstLoginCompleted,
+            customFormResponses: user.onboardingResponses,
+          })),
+          formConfig,
+        };
+        
+        console.log("Final analytics after migration:", finalAnalytics);
+        return res.json(finalAnalytics);
+      }
+    }
     
     const finalAnalytics = {
       totalResponses: responses.length,
