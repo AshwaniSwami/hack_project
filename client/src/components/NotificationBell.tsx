@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, X, Check, User, UserCheck, UserPlus, ExternalLink, Trash2 } from 'lucide-react';
+import { Bell, X, User, UserCheck, UserPlus, ExternalLink, Trash2 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -68,24 +68,7 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
     },
   });
 
-  // Mark all as read mutation  
-  const markAllAsReadMutation = useMutation({
-    mutationFn: () => 
-      apiRequest('/api/notifications/mark-all-read', {
-        method: 'PATCH',
-      }),
-    onSuccess: () => {
-      // Remove all queries and refetch fresh data
-      queryClient.removeQueries({ queryKey: ['/api/notifications'] });
-      queryClient.removeQueries({ queryKey: ['/api/notifications/unread'] });
-      
-      // Force immediate refetch
-      queryClient.refetchQueries({ queryKey: ['/api/notifications/unread'] });
-      queryClient.refetchQueries({ queryKey: ['/api/notifications'] });
-      
-      setOpen(false); // Close the popover after marking all as read
-    },
-  });
+
 
   // Delete notification mutation
   const deleteNotificationMutation = useMutation({
@@ -107,28 +90,40 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
   // Clear all notifications mutation
   const clearAllMutation = useMutation({
     mutationFn: async () => {
-      // Delete all notifications one by one
-      const allNotificationIds = (allNotifications || []).map(n => n.id);
-      await Promise.all(
-        allNotificationIds.map(id => 
-          apiRequest(`/api/notifications/${id}`, { method: 'DELETE' })
-        )
-      );
+      // Get current notifications and delete them all
+      const currentNotifications = allNotifications || [];
+      console.log('Clearing notifications:', currentNotifications.length);
+      
+      // Delete all notifications sequentially to avoid race conditions
+      for (const notification of currentNotifications) {
+        await apiRequest(`/api/notifications/${notification.id}`, { method: 'DELETE' });
+      }
     },
     onSuccess: () => {
+      console.log('Clear all completed successfully');
       // Remove all queries and refetch fresh data
       queryClient.removeQueries({ queryKey: ['/api/notifications'] });
       queryClient.removeQueries({ queryKey: ['/api/notifications/unread'] });
       
-      // Force immediate refetch
-      queryClient.refetchQueries({ queryKey: ['/api/notifications/unread'] });
-      queryClient.refetchQueries({ queryKey: ['/api/notifications'] });
+      // Force immediate refetch with a delay
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ['/api/notifications/unread'] });
+        queryClient.refetchQueries({ queryKey: ['/api/notifications'] });
+      }, 200);
       
       setOpen(false); // Close the popover
+    },
+    onError: (error) => {
+      console.error('Error clearing all notifications:', error);
     },
   });
 
   const handleClearAll = () => {
+    console.log('Clear all button clicked');
+    if (clearAllMutation.isPending) {
+      console.log('Clear all already in progress');
+      return;
+    }
     clearAllMutation.mutate();
   };
 
@@ -235,40 +230,22 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
               <CardTitle className="text-sm font-medium text-gray-900 dark:text-gray-100">
                 Notifications {unreadCount > 0 && <Badge variant="destructive" className="ml-2">{unreadCount}</Badge>}
               </CardTitle>
-              <div className="flex space-x-2">
-                {unreadCount > 0 && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => markAllAsReadMutation.mutate()}
-                    disabled={markAllAsReadMutation.isPending || deleteNotificationMutation.isPending}
-                    className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
-                  >
-                    {markAllAsReadMutation.isPending ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-1" />
-                    ) : (
-                      <Check className="h-4 w-4 mr-1" />
-                    )}
-                    Mark all read
-                  </Button>
-                )}
-                {notifications.length > 0 && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => handleClearAll()}
-                    disabled={clearAllMutation.isPending}
-                    className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200"
-                  >
-                    {clearAllMutation.isPending ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500 mr-1" />
-                    ) : (
-                      <Trash2 className="h-4 w-4 mr-1" />
-                    )}
-                    Clear all
-                  </Button>
-                )}
-              </div>
+              {notifications.length > 0 && (
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={handleClearAll}
+                  disabled={clearAllMutation.isPending}
+                  className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200"
+                >
+                  {clearAllMutation.isPending ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500 mr-1" />
+                  ) : (
+                    <Trash2 className="h-4 w-4 mr-1" />
+                  )}
+                  Clear all
+                </Button>
+              )}
             </div>
           </CardHeader>
           <CardContent className="p-0">
