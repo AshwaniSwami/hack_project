@@ -1,7 +1,7 @@
 // src/server/routes-onboarding.ts
 import { eq, sql } from "drizzle-orm";
 import { db } from "./db";
-import { onboardingFormResponses, users } from "./db/schema";
+import { onboardingFormResponses, users } from "../shared/schema";
 import { isDatabaseAvailable } from "./db";
 
 export async function getCurrentFormConfig(req: any, res: any) {
@@ -58,7 +58,7 @@ export async function submitOnboardingForm(req: any, res: any) {
     const allQuestionsAnswered = true; // Replace with actual logic
     if (allQuestionsAnswered) {
       await db.update(users)
-        .set({ onboardingCompleted: true })
+        .set({ firstLoginCompleted: true })
         .where(eq(users.id, req.user.id));
 
       console.log(`User ${req.user.id} completed onboarding`);
@@ -88,7 +88,7 @@ export async function getOnboardingAnalytics(req: any, res: any) {
     try {
       const [responses, usersList, totalUsersResult] = await Promise.all([
         db.select().from(onboardingFormResponses).catch(() => []),
-        db.select().from(users).where(eq(users.onboardingCompleted, true)).catch(() => []),
+        db.select().from(users).where(eq(users.firstLoginCompleted, true)).catch(() => []),
         db.select({ count: sql<number>`count(*)` }).from(users).catch(() => [{ count: 0 }])
       ]);
 
@@ -168,7 +168,7 @@ export async function checkOnboardingStatus(req: any, res: any) {
     }
 
     res.json({ 
-      completed: user[0].onboardingCompleted || false,
+      completed: user[0].firstLoginCompleted || false,
       location: user[0].location 
     });
   } catch (error) {
