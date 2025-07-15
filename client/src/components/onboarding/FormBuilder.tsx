@@ -37,10 +37,12 @@ import { Plus, Edit, Trash2, Save, Settings } from "lucide-react";
 
 const questionSchema = z.object({
   id: z.string().min(1, "Question ID is required"),
-  type: z.enum(["radio", "checkbox", "text"]),
+  type: z.enum(["radio", "checkbox", "text", "select"]),
   label: z.string().min(1, "Question label is required"),
-  options: z.array(z.string()).optional(),
+  options: z.array(z.union([z.string(), z.object({ value: z.string(), label: z.string() })])).optional(),
+  required: z.boolean().optional(),
   compulsory: z.boolean().default(false),
+  placeholder: z.string().optional(),
 });
 
 const formConfigSchema = z.object({
@@ -76,7 +78,15 @@ export default function FormBuilder() {
 
   useEffect(() => {
     if (formConfig) {
-      setQuestions(formConfig.questions);
+      // Convert backend structure to frontend structure if needed
+      const convertedQuestions = formConfig.questions.map(q => ({
+        ...q,
+        // Ensure we have the required fields for frontend compatibility
+        compulsory: q.required || q.compulsory || false,
+        // Convert object options to strings for the form builder interface
+        options: q.options?.map(opt => typeof opt === 'string' ? opt : opt.label) || []
+      }));
+      setQuestions(convertedQuestions);
     }
   }, [formConfig]);
 
@@ -289,11 +299,14 @@ export default function FormBuilder() {
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Options:</Label>
                   <div className="flex flex-wrap gap-2">
-                    {question.options.map((option, optionIndex) => (
-                      <Badge key={optionIndex} variant="secondary" className="text-xs">
-                        {option}
-                      </Badge>
-                    ))}
+                    {question.options.map((option, optionIndex) => {
+                      const optionText = typeof option === 'string' ? option : option.label || option.value;
+                      return (
+                        <Badge key={optionIndex} variant="secondary" className="text-xs">
+                          {optionText}
+                        </Badge>
+                      );
+                    })}
                   </div>
                 </div>
               )}
