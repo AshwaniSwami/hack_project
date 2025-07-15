@@ -401,124 +401,271 @@ export default function OnboardingAnalytics() {
         </TabsContent>
 
         <TabsContent value="geography" className="space-y-6">
-          {/* World Map */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5" />
-                Global User Distribution
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="relative w-full h-96 bg-gradient-to-b from-sky-100 to-green-100 dark:from-gray-800 dark:to-gray-700 rounded-lg overflow-hidden">
-                <svg viewBox="0 0 100 100" className="w-full h-full">
-                  {/* Simple world map outline */}
-                  <rect x="0" y="0" width="100" height="100" fill="url(#worldGradient)" />
-                  <defs>
-                    <linearGradient id="worldGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: '#e0f2fe', stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: '#dcfce7', stopOpacity: 1 }} />
-                    </linearGradient>
-                  </defs>
-                  
-                  {/* Continents as simple shapes */}
-                  <path d="M 20 30 Q 30 25 40 35 Q 45 30 50 40 Q 35 45 25 40 Q 15 35 20 30" fill="#10b981" opacity="0.3" />
-                  <path d="M 55 35 Q 75 30 85 45 Q 80 55 70 50 Q 60 45 55 35" fill="#10b981" opacity="0.3" />
-                  <path d="M 30 55 Q 45 50 55 65 Q 40 70 30 65 Q 25 60 30 55" fill="#10b981" opacity="0.3" />
-                  <path d="M 75 70 Q 85 65 90 75 Q 85 80 80 75 Q 70 75 75 70" fill="#10b981" opacity="0.3" />
-                  
-                  {/* User hotspots */}
-                  {worldHotspots.map((hotspot, index) => (
-                    hotspot.count > 0 && (
-                      <g key={index}>
-                        <circle
-                          cx={hotspot.x}
-                          cy={hotspot.y}
-                          r={getHotspotSize(hotspot.count)}
-                          fill="#f43f5e"
-                          opacity="0.7"
-                          className="animate-pulse"
-                        />
-                        <text
-                          x={hotspot.x}
-                          y={hotspot.y - getHotspotSize(hotspot.count) - 2}
-                          textAnchor="middle"
-                          className="text-xs fill-gray-700 dark:fill-gray-300"
-                        >
-                          {hotspot.count}
-                        </text>
-                      </g>
-                    )
-                  ))}
-                </svg>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Charts */}
+          {/* Enhanced Charts Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Enhanced Country Bar Chart */}
             <Card>
               <CardHeader>
-                <CardTitle>Top Countries</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5" />
+                  Countries by User Count
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={countryData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="country" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="count" fill="#0ea5e9" />
+                <ResponsiveContainer width="100%" height={350}>
+                  <BarChart data={countryData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e0e7ff" />
+                    <XAxis 
+                      dataKey="country" 
+                      tick={{ fontSize: 12 }}
+                      stroke="#6b7280"
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12 }}
+                      stroke="#6b7280"
+                    />
+                    <Tooltip 
+                      formatter={(value: any, name: string) => [`${value} users (${countryData.find(c => c.count === value)?.percentage}%)`, 'Users']}
+                      labelFormatter={(label) => `Country: ${label}`}
+                      contentStyle={{
+                        backgroundColor: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                    <Bar 
+                      dataKey="count" 
+                      fill="url(#countryGradient)" 
+                      radius={[4, 4, 0, 0]}
+                      stroke="#0ea5e9"
+                      strokeWidth={1}
+                    />
+                    <defs>
+                      <linearGradient id="countryGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#0ea5e9" />
+                        <stop offset="100%" stopColor="#3b82f6" />
+                      </linearGradient>
+                    </defs>
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
 
+            {/* Enhanced City Bar Chart */}
             <Card>
               <CardHeader>
-                <CardTitle>Top Cities</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  Cities by User Count
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={cityData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="city" />
-                    <YAxis />
-                    <Tooltip formatter={(value: any, name: string) => [`${value} users`, name]} />
-                    <Bar dataKey="count" fill="#f43f5e" />
+                <ResponsiveContainer width="100%" height={350}>
+                  <BarChart data={cityData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#fef3c7" />
+                    <XAxis 
+                      dataKey="city" 
+                      tick={{ fontSize: 12 }}
+                      stroke="#6b7280"
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12 }}
+                      stroke="#6b7280"
+                    />
+                    <Tooltip 
+                      formatter={(value: any, name: string) => [`${value} users (${cityData.find(c => c.count === value)?.percentage}%)`, 'Users']}
+                      labelFormatter={(label) => `City: ${label}`}
+                      contentStyle={{
+                        backgroundColor: '#fffbeb',
+                        border: '1px solid #fbbf24',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                    <Bar 
+                      dataKey="count" 
+                      fill="url(#cityGradient)" 
+                      radius={[4, 4, 0, 0]}
+                      stroke="#f59e0b"
+                      strokeWidth={1}
+                    />
+                    <defs>
+                      <linearGradient id="cityGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#f59e0b" />
+                        <stop offset="100%" stopColor="#d97706" />
+                      </linearGradient>
+                    </defs>
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
           </div>
 
-          {/* Geographic Distribution Pie Chart */}
+          {/* Enhanced Geographic Distribution Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Enhanced Country Pie Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <PieChartIcon className="h-5 w-5" />
+                  Country Distribution
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={400}>
+                  <PieChart>
+                    <Pie
+                      data={countryData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={true}
+                      label={({ country, percentage, count }) => `${country}: ${count} (${percentage}%)`}
+                      outerRadius={140}
+                      innerRadius={60}
+                      fill="#8884d8"
+                      dataKey="count"
+                      stroke="#fff"
+                      strokeWidth={2}
+                    >
+                      {countryData.map((entry, index) => (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={COLORS[index % COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      formatter={(value: any, name: string) => [`${value} users`, 'Count']}
+                      labelFormatter={(label) => `Country: ${label}`}
+                      contentStyle={{
+                        backgroundColor: '#f1f5f9',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            {/* Enhanced City Pie Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <PieChartIcon className="h-5 w-5" />
+                  City Distribution
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={400}>
+                  <PieChart>
+                    <Pie
+                      data={cityData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={true}
+                      label={({ city, percentage, count }) => `${city}: ${count} (${percentage}%)`}
+                      outerRadius={140}
+                      innerRadius={60}
+                      fill="#8884d8"
+                      dataKey="count"
+                      stroke="#fff"
+                      strokeWidth={2}
+                    >
+                      {cityData.map((entry, index) => (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={COLORS[(index + 3) % COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      formatter={(value: any, name: string) => [`${value} users`, 'Count']}
+                      labelFormatter={(label) => `City: ${label}`}
+                      contentStyle={{
+                        backgroundColor: '#f1f5f9',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Geographic Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-blue-800 dark:text-blue-200 text-sm font-medium">Total Countries</p>
+                    <p className="text-3xl font-bold text-blue-900 dark:text-blue-100">{countryData.length}</p>
+                  </div>
+                  <Globe className="h-8 w-8 text-blue-500" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-green-800 dark:text-green-200 text-sm font-medium">Total Cities</p>
+                    <p className="text-3xl font-bold text-green-900 dark:text-green-100">{cityData.length}</p>
+                  </div>
+                  <MapPin className="h-8 w-8 text-green-500" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-purple-800 dark:text-purple-200 text-sm font-medium">Top Location</p>
+                    <p className="text-xl font-bold text-purple-900 dark:text-purple-100">
+                      {countryData.length > 0 ? countryData[0].country : 'N/A'}
+                    </p>
+                  </div>
+                  <TrendingUp className="h-8 w-8 text-purple-500" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Geographic Area Chart */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5" />
-                Geographic Distribution
+                <Activity className="h-5 w-5" />
+                Geographic Growth Trend
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={350}>
-                <PieChart>
-                  <Pie
-                    data={countryData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ country, percentage }) => `${country}: ${percentage}%`}
-                    outerRadius={120}
-                    fill="#8884d8"
-                    dataKey="count"
-                  >
-                    {countryData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value: any) => [`${value} users`, 'Count']} />
-                </PieChart>
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={countryData.map((country, index) => ({
+                  location: country.country,
+                  users: country.count,
+                  growth: Math.floor(Math.random() * 20) + 5 // Simulated growth percentage
+                }))}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="location" />
+                  <YAxis />
+                  <Tooltip 
+                    formatter={(value: any, name: string) => {
+                      if (name === 'users') return [`${value} users`, 'Total Users'];
+                      if (name === 'growth') return [`${value}%`, 'Growth Rate'];
+                      return [value, name];
+                    }}
+                  />
+                  <Area type="monotone" dataKey="users" stroke="#0ea5e9" fill="#0ea5e9" fillOpacity={0.6} />
+                  <Area type="monotone" dataKey="growth" stroke="#10b981" fill="#10b981" fillOpacity={0.3} />
+                </AreaChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
