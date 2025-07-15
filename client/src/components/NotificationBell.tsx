@@ -59,7 +59,7 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
       // Remove all queries and refetch fresh data
       queryClient.removeQueries({ queryKey: ['/api/notifications'] });
       queryClient.removeQueries({ queryKey: ['/api/notifications/unread'] });
-      
+
       // Force immediate refetch
       queryClient.refetchQueries({ queryKey: ['/api/notifications/unread'] });
       if (open) {
@@ -77,18 +77,18 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
         method: 'DELETE',
         credentials: 'include',
       });
-      
+
       if (!response.ok) {
         throw new Error(`Failed to delete notification: ${response.statusText}`);
       }
-      
+
       return response.status === 204 ? {} : response.json();
     },
     onSuccess: () => {
       // Remove all queries and refetch fresh data
       queryClient.removeQueries({ queryKey: ['/api/notifications'] });
       queryClient.removeQueries({ queryKey: ['/api/notifications/unread'] });
-      
+
       // Force immediate refetch
       queryClient.refetchQueries({ queryKey: ['/api/notifications/unread'] });
       queryClient.refetchQueries({ queryKey: ['/api/notifications'] });
@@ -99,20 +99,20 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
   const clearAllMutation = useMutation({
     mutationFn: async () => {
       console.log('Starting clear all operation');
-      
+
       // First fetch all notifications to get the IDs
       const response = await fetch('/api/notifications', {
         method: 'GET',
         credentials: 'include',
       });
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch notifications: ${response.statusText}`);
       }
-      
+
       const currentNotifications = await response.json() || [];
       console.log('Fetched notifications to clear:', currentNotifications.length);
-      
+
       // Delete all notifications sequentially
       for (const notification of currentNotifications) {
         console.log('Deleting notification:', notification.id);
@@ -120,12 +120,12 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
           method: 'DELETE',
           credentials: 'include',
         });
-        
+
         if (!deleteResponse.ok) {
           throw new Error(`Failed to delete notification ${notification.id}`);
         }
       }
-      
+
       console.log('All notifications deleted successfully');
     },
     onSuccess: () => {
@@ -133,7 +133,7 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
       // Remove all queries and refetch fresh data
       queryClient.removeQueries({ queryKey: ['/api/notifications'] });
       queryClient.removeQueries({ queryKey: ['/api/notifications/unread'] });
-      
+
       // Force immediate refetch with a delay
       setTimeout(() => {
         queryClient.refetchQueries({ queryKey: ['/api/notifications/unread'] });
@@ -141,7 +141,7 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
           queryClient.refetchQueries({ queryKey: ['/api/notifications'] });
         }
       }, 300);
-      
+
       setOpen(false); // Close the popover
     },
     onError: (error) => {
@@ -165,12 +165,12 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
     if (a.isRead !== b.isRead) {
       return a.isRead ? 1 : -1;
     }
-    
+
     // Priority ranking: urgent > high > normal > low
     const priorityOrder = { urgent: 4, high: 3, normal: 2, low: 1 };
     const priorityDiff = (priorityOrder[b.priority] || 2) - (priorityOrder[a.priority] || 2);
     if (priorityDiff !== 0) return priorityDiff;
-    
+
     // Sort by date (newest first)
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
@@ -180,20 +180,20 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
     if (!notification.isRead) {
       markAsReadMutation.mutate(notification.id);
     }
-    
+
     // Delete the notification after clicking
     setTimeout(() => {
       deleteNotificationMutation.mutate(notification.id);
     }, 200);
-    
+
     setOpen(false); // Close the notification panel immediately
-    
+
     // Small delay to ensure smooth transition, then navigate
     setTimeout(() => {
       if (notification.actionUrl) {
         navigate(notification.actionUrl);
       } else if (notification.type === 'user_verification_request') {
-        navigate('/users');
+        navigate('/users?tab=pending');
       }
     }, 100);
   };
@@ -234,7 +234,7 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
     const date = new Date(dateString);
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-    
+
     if (diffInMinutes < 1) return 'Just now';
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
