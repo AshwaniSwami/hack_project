@@ -150,16 +150,26 @@ export class FallbackStorage implements IStorage {
 // Storage will be initialized after database check
 let storage: DatabaseStorage | FallbackStorage;
 
-export async function initializeStorage(): Promise<void> {
-  const { checkDatabaseAvailability } = await import("./db");
-  const isDbAvailable = await checkDatabaseAvailability();
+export async function initializeStorage() {
+  try {
+    console.log("🔄 Initializing storage...");
 
-  if (isDbAvailable) {
-    console.log("🗄️ Using DatabaseStorage");
-    storage = new DatabaseStorage();
-  } else {
-    console.log("🗄️ Using FallbackStorage (demo mode)");
-    storage = new FallbackStorage();
+    // Create tables if they don't exist
+    await createTables();
+    console.log("✅ Tables created/verified");
+
+    // Verify database connection
+    const testUser = await db.select().from(users).limit(1);
+    console.log("✅ Database connection verified");
+
+    // Initialize temp data if needed
+    await initializeTempData();
+    console.log("✅ Storage initialization complete");
+
+  } catch (error) {
+    console.error("❌ Failed to initialize storage:", error);
+    console.error("Error details:", error);
+    throw error;
   }
 }
 
