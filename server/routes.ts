@@ -5,6 +5,7 @@ import { storage } from "./storage";
 import { registerProjectFileRoutes } from "./routes-projects-files";
 import { registerEpisodeFileRoutes } from "./routes-episodes-files";
 import { registerScriptFileRoutes } from "./routes-scripts-files";
+import { registerNotificationRoutes } from "./routes-notifications";
 import { isDatabaseAvailable } from "./db";
 // Import both auth modules
 import * as realAuth from "./auth";
@@ -59,6 +60,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerProjectFileRoutes(app);
   registerEpisodeFileRoutes(app);
   registerScriptFileRoutes(app);
+
+  // Register notification routes
+  registerNotificationRoutes(app);
 
   // Register analytics and download tracking routes
   const { registerAnalyticsRoutes } = await import("./routes-analytics");

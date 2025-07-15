@@ -228,12 +228,38 @@ export const downloadLogs = pgTable("download_logs", {
   index("idx_downloads_status").on(table.downloadStatus),
 ]);
 
+// Notifications table for admin notifications
+export const notifications = pgTable("notifications", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull(), // Admin user who receives the notification
+  type: varchar("type", { length: 50 }).notNull(), // 'user_verification_request', 'user_registered', etc.
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  relatedUserId: varchar("related_user_id"), // User who triggered the notification
+  relatedUserEmail: varchar("related_user_email"), // Email of user who triggered the notification
+  relatedUserName: varchar("related_user_name"), // Name of user who triggered the notification
+  isRead: boolean("is_read").default(false),
+  isArchived: boolean("is_archived").default(false),
+  priority: varchar("priority", { length: 20 }).default("normal"), // low, normal, high, urgent
+  actionUrl: varchar("action_url", { length: 500 }), // URL to take action on the notification
+  metadata: jsonb("metadata"), // Additional data related to the notification
+  createdAt: timestamp("created_at").defaultNow(),
+  readAt: timestamp("read_at"),
+}, (table) => [
+  index("idx_notifications_user").on(table.userId),
+  index("idx_notifications_type").on(table.type),
+  index("idx_notifications_read").on(table.isRead),
+  index("idx_notifications_created").on(table.createdAt),
+  index("idx_notifications_priority").on(table.priority),
+]);
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   scripts: many(scripts),
   radioStations: many(radioStations),
   grantedAccess: many(freeProjectAccess),
   otpVerifications: many(otpVerifications),
+  notifications: many(notifications),
 }));
 
 export const otpVerificationsRelations = relations(otpVerifications, ({ one }) => ({
@@ -350,6 +376,18 @@ export const downloadLogsRelations = relations(downloadLogs, ({ one }) => ({
   }),
 }));
 
+// Notifications Relations
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+  relatedUser: one(users, {
+    fields: [notifications.relatedUserId],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
@@ -423,6 +461,12 @@ export const insertDownloadLogSchema = createInsertSchema(downloadLogs).omit({
   downloadedAt: true,
 });
 
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+  readAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof insertUserSchema._type;
@@ -460,3 +504,6 @@ export type InsertOtpVerification = typeof insertOtpVerificationSchema._type;
 
 export type DownloadLog = typeof downloadLogs.$inferSelect;
 export type InsertDownloadLog = typeof insertDownloadLogSchema._type;
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof insertNotificationSchema._type;

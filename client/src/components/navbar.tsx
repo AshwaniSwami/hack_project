@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { NotificationBell } from "@/components/NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 
@@ -93,18 +94,7 @@ export function Navbar() {
             <ThemeToggle />
 
             {/* Notification Bell - Only for Admins */}
-            {isAdmin && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="relative p-3 text-white/90 hover:text-white hover:bg-white/15 transition-all duration-300 rounded-xl group"
-              >
-                <Bell className="h-5 w-5 group-hover:scale-105 transition-transform duration-200" />
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 bg-red-500 hover:bg-red-500 text-xs flex items-center justify-center border-2 border-white/20">
-                  3
-                </Badge>
-              </Button>
-            )}
+            <NotificationBell userRole={user?.role || ''} />
 
             <ProfileDropdown />
 

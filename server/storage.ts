@@ -10,6 +10,7 @@ import {
   freeProjectAccess,
   files,
   fileFolders,
+  notifications,
   type User,
   type InsertUser,
   type UpsertUser,
@@ -31,6 +32,8 @@ import {
   type InsertFile,
   type FileFolder,
   type InsertFileFolder,
+  type Notification,
+  type InsertNotification,
 } from "@shared/schema";
 import { db, isDatabaseAvailable, requireDatabase } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
@@ -126,6 +129,17 @@ export interface IStorage {
   suspendUser(userId: string): Promise<User>;
   activateUser(userId: string): Promise<User>;
   getUsersPendingVerification(): Promise<User[]>;
+
+  // Notifications
+  getNotification(id: string): Promise<Notification | undefined>;
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  updateNotification(id: string, notification: Partial<InsertNotification>): Promise<Notification>;
+  deleteNotification(id: string): Promise<void>;
+  getUserNotifications(userId: string): Promise<Notification[]>;
+  getUnreadNotifications(userId: string): Promise<Notification[]>;
+  markNotificationAsRead(id: string): Promise<Notification>;
+  markAllNotificationsAsRead(userId: string): Promise<void>;
+  getAdminUsers(): Promise<User[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -676,6 +690,78 @@ export class DatabaseStorage implements IStorage {
   async getUsersPendingVerification(): Promise<User[]> {
     return await db.select().from(users).where(eq(users.isVerified, false));
   }
+
+  // Notification Methods
+  async getNotification(id: string): Promise<Notification | undefined> {
+    const [notification] = await db.select().from(notifications).where(eq(notifications.id, id));
+    return notification || undefined;
+  }
+
+  async createNotification(insertNotification: InsertNotification): Promise<Notification> {
+    const [notification] = await db.insert(notifications).values(insertNotification).returning();
+    return notification;
+  }
+
+  async updateNotification(id: string, updateData: Partial<InsertNotification>): Promise<Notification> {
+    const [notification] = await db
+      .update(notifications)
+      .set(updateData)
+      .where(eq(notifications.id, id))
+      .returning();
+    return notification;
+  }
+
+  async deleteNotification(id: string): Promise<void> {
+    await db.delete(notifications).where(eq(notifications.id, id));
+  }
+
+  async getUserNotifications(userId: string): Promise<Notification[]> {
+    return await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt));
+  }
+
+  async getUnreadNotifications(userId: string): Promise<Notification[]> {
+    return await db
+      .select()
+      .from(notifications)
+      .where(and(
+        eq(notifications.userId, userId),
+        eq(notifications.isRead, false)
+      ))
+      .orderBy(desc(notifications.createdAt));
+  }
+
+  async markNotificationAsRead(id: string): Promise<Notification> {
+    const [notification] = await db
+      .update(notifications)
+      .set({ 
+        isRead: true, 
+        readAt: new Date() 
+      })
+      .where(eq(notifications.id, id))
+      .returning();
+    return notification;
+  }
+
+  async markAllNotificationsAsRead(userId: string): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ 
+        isRead: true, 
+        readAt: new Date() 
+      })
+      .where(and(
+        eq(notifications.userId, userId),
+        eq(notifications.isRead, false)
+      ));
+  }
+
+  async getAdminUsers(): Promise<User[]> {
+    return await db.select().from(users).where(eq(users.role, "admin"));
+  }
 }
 
 // Fallback storage class for when database is not available
@@ -774,6 +860,17 @@ export class FallbackStorage implements IStorage {
   async suspendUser(userId: string): Promise<User> { return this.throwDatabaseError(); }
   async activateUser(userId: string): Promise<User> { return this.throwDatabaseError(); }
   async getUsersPendingVerification(): Promise<User[]> { return this.throwDatabaseError(); }
+
+  // Notifications
+  async getNotification(id: string): Promise<Notification | undefined> { return this.throwDatabaseError(); }
+  async createNotification(notification: InsertNotification): Promise<Notification> { return this.throwDatabaseError(); }
+  async updateNotification(id: string, notification: Partial<InsertNotification>): Promise<Notification> { return this.throwDatabaseError(); }
+  async deleteNotification(id: string): Promise<void> { return this.throwDatabaseError(); }
+  async getUserNotifications(userId: string): Promise<Notification[]> { return this.throwDatabaseError(); }
+  async getUnreadNotifications(userId: string): Promise<Notification[]> { return this.throwDatabaseError(); }
+  async markNotificationAsRead(id: string): Promise<Notification> { return this.throwDatabaseError(); }
+  async markAllNotificationsAsRead(userId: string): Promise<void> { return this.throwDatabaseError(); }
+  async getAdminUsers(): Promise<User[]> { return this.throwDatabaseError(); }
 }
 
 // Use appropriate storage based on database availability

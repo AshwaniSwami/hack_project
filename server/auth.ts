@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import { storage } from "./storage";
 import { nanoid } from "nanoid";
+import { createAdminNotification } from "./routes-notifications";
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -169,6 +170,18 @@ export const register = async (req: Request, res: Response) => {
     // Only log in admin users immediately, others need verification
     if (isFirstUser) {
       (req.session as any).userId = newUser.id;
+    } else {
+      // Create notification for admin users about new user registration
+      await createAdminNotification(
+        "user_verification_request",
+        "New User Registration",
+        `A new user "${firstName} ${lastName}" (${email}) has registered and is awaiting account verification.`,
+        newUser.id,
+        newUser.email,
+        `${firstName} ${lastName}`,
+        "/users",
+        "normal"
+      );
     }
     
     res.json({
