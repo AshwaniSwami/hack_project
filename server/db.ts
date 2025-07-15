@@ -49,7 +49,7 @@ function getPool() {
   return pool;
 }
 
-export { getPool as pool, getDb as db };
+export { getPool as pool, getDb as db, getDb };
 
 let dbAvailable: boolean | null = null;
 
