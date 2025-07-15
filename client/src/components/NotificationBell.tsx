@@ -108,7 +108,20 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
     // Navigate to action URL if provided
     if (notification.actionUrl) {
       window.location.href = notification.actionUrl;
+    } else if (notification.type === 'user_verification_request') {
+      // Navigate to users page for user verification
+      window.location.href = '/users';
     }
+  };
+
+  const handleMarkAsRead = (e: React.MouseEvent, notificationId: string) => {
+    e.stopPropagation();
+    markAsReadMutation.mutate(notificationId);
+  };
+
+  const handleDeleteNotification = (e: React.MouseEvent, notificationId: string) => {
+    e.stopPropagation();
+    deleteNotificationMutation.mutate(notificationId);
   };
 
   const getPriorityColor = (priority: string) => {
@@ -168,9 +181,13 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
                   variant="ghost" 
                   size="sm"
                   onClick={() => markAllAsReadMutation.mutate()}
-                  disabled={markAllAsReadMutation.isPending}
+                  disabled={markAllAsReadMutation.isPending || deleteNotificationMutation.isPending}
                 >
-                  <Check className="h-4 w-4 mr-1" />
+                  {markAllAsReadMutation.isPending ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500 mr-1" />
+                  ) : (
+                    <Check className="h-4 w-4 mr-1" />
+                  )}
                   Mark all read
                 </Button>
               )}
@@ -188,8 +205,8 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
                   {notifications.map((notification: Notification) => (
                     <div
                       key={notification.id}
-                      className={`p-3 border-l-4 ${getPriorityColor(notification.priority)} cursor-pointer hover:bg-muted/50 transition-colors ${
-                        !notification.isRead ? 'bg-muted/30' : 'opacity-75'
+                      className={`p-3 border-l-4 ${getPriorityColor(notification.priority)} cursor-pointer hover:bg-muted/50 transition-all duration-200 ${
+                        !notification.isRead ? 'bg-muted/30 shadow-sm' : 'opacity-75'
                       }`}
                       onClick={() => handleNotificationClick(notification)}
                     >
@@ -207,18 +224,38 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
                                 <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
                               )}
                             </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 w-6 p-0 hover:bg-red-100 dark:hover:bg-red-900"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                deleteNotificationMutation.mutate(notification.id);
-                              }}
-                              title="Delete notification"
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
+                            <div className="flex items-center space-x-1">
+                              {!notification.isRead && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0 hover:bg-blue-100 dark:hover:bg-blue-900"
+                                  onClick={(e) => handleMarkAsRead(e, notification.id)}
+                                  disabled={markAsReadMutation.isPending}
+                                  title="Mark as read"
+                                >
+                                  {markAsReadMutation.isPending ? (
+                                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-500" />
+                                  ) : (
+                                    <Check className="h-3 w-3 text-blue-500" />
+                                  )}
+                                </Button>
+                              )}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0 hover:bg-red-100 dark:hover:bg-red-900"
+                                onClick={(e) => handleDeleteNotification(e, notification.id)}
+                                disabled={deleteNotificationMutation.isPending}
+                                title="Delete notification"
+                              >
+                                {deleteNotificationMutation.isPending ? (
+                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-red-500" />
+                                ) : (
+                                  <X className="h-3 w-3 text-red-500" />
+                                )}
+                              </Button>
+                            </div>
                           </div>
                           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                             {notification.message}

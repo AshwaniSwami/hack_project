@@ -48,7 +48,16 @@ export function NotificationPopup({ notifications, onDismiss }: NotificationPopu
     // Navigate to action URL if provided
     if (notification.actionUrl) {
       window.location.href = notification.actionUrl;
+    } else if (notification.type === 'user_verification_request') {
+      // Navigate to users page for user verification
+      window.location.href = '/users';
     }
+  };
+
+  // Handle dismiss only (without marking as read)
+  const handleDismiss = (e: React.MouseEvent, notificationId: string) => {
+    e.stopPropagation();
+    onDismiss(notificationId);
   };
 
   const getNotificationIcon = (type: string) => {
@@ -146,10 +155,7 @@ export function NotificationPopup({ notifications, onDismiss }: NotificationPopu
                       variant="ghost"
                       size="sm"
                       className="h-6 w-6 p-0 -mt-1 hover:bg-red-100 dark:hover:bg-red-900"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDismiss(notification.id);
-                      }}
+                      onClick={(e) => handleDismiss(e, notification.id)}
                       title="Dismiss"
                     >
                       <X className="h-3 w-3" />
