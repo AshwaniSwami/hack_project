@@ -25,9 +25,22 @@ function initializeDatabase() {
   console.log("Checking DATABASE_URL:", process.env.DATABASE_URL ? "✅ Found" : "❌ Not found");
   if (process.env.DATABASE_URL) {
     try {
-      pool = new Pool({ connectionString: process.env.DATABASE_URL });
+      const connectionString = process.env.DATABASE_URL;
+      
+      // Enhanced connection configuration for production
+      const poolConfig = {
+        connectionString,
+        ssl: connectionString.includes('sslmode=require') || connectionString.includes('neon.tech') ? { rejectUnauthorized: false } : false,
+        max: 20,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 10000,
+        statement_timeout: 30000,
+        query_timeout: 30000,
+      };
+      
+      pool = new Pool(poolConfig);
       db = drizzle({ client: pool, schema });
-      console.log("✅ Database connected successfully");
+      console.log("✅ Database connected successfully with enhanced config");
     } catch (error) {
       console.error("❌ Database connection failed:", error);
       db = null;
@@ -63,10 +76,17 @@ export async function checkDatabaseAvailability(): Promise<boolean> {
 
   try {
     // Test the connection with a simple query using pool
-    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-    await pool.query('SELECT 1');
+    const connectionString = process.env.DATABASE_URL;
+    const testPool = new Pool({ 
+      connectionString,
+      ssl: connectionString.includes('sslmode=require') || connectionString.includes('neon.tech') ? { rejectUnauthorized: false } : false,
+      max: 1,
+      connectionTimeoutMillis: 10000,
+    });
+    
+    await testPool.query('SELECT 1');
     console.log("✅ Database connected successfully");
-    await pool.end();
+    await testPool.end();
     return true;
   } catch (error) {
     console.log("❌ Database connection failed:", error);
