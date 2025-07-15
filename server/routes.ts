@@ -15,13 +15,19 @@ import { getFilePermissions, requireFilePermission } from "./filePermissions";
 
 // Dynamically choose auth module based on database availability
 async function getAuthModule() {
-  // Force a fresh database check
-  resetDbConnection();
-  const { checkDatabaseAvailability } = await import("./db");
-  const dbAvailable = await checkDatabaseAvailability();
-  console.log("Database availability check:", dbAvailable ? "✅ Available" : "❌ Not available");
-  console.log("DATABASE_URL exists:", !!process.env.DATABASE_URL);
-  return dbAvailable ? realAuth : tempAuth;
+  try {
+    // Force a fresh database check
+    resetDbConnection();
+    const { checkDatabaseAvailability } = await import("./db");
+    const dbAvailable = await checkDatabaseAvailability();
+    console.log("Database availability check:", dbAvailable ? "✅ Available" : "❌ Not available");
+    console.log("DATABASE_URL exists:", !!process.env.DATABASE_URL);
+    return dbAvailable ? realAuth : tempAuth;
+  } catch (error) {
+    console.error("Error checking database availability:", error);
+    console.log("Falling back to temporary authentication");
+    return tempAuth;
+  }
 }
 
 // Dynamic auth handlers that check database availability at runtime

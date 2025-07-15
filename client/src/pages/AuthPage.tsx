@@ -68,7 +68,22 @@ export default function AuthPage() {
     setIsLoading(true);
     setError("");
 
+    // Basic validation
+    if (!registerData.email || !registerData.password) {
+      setError("Email and password are required");
+      setIsLoading(false);
+      return;
+    }
+
+    if (registerData.password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      setIsLoading(false);
+      return;
+    }
+
     try {
+      console.log("Attempting registration for:", registerData.email);
+      
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -76,19 +91,31 @@ export default function AuthPage() {
       });
 
       const data = await response.json();
+      console.log("Registration response:", response.status, data);
 
       if (response.ok) {
         // Invalidate and refetch auth data
         queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-        // Small delay to ensure query updates
-        setTimeout(() => {
-          setLocation("/dashboard");
-        }, 100);
+        
+        // Show success message if user needs verification
+        if (data.message && data.message.includes("verification")) {
+          setError(""); // Clear any previous errors
+          // You might want to show a success message instead of an error
+          alert(data.message);
+        } else {
+          // Admin user - redirect to dashboard
+          setTimeout(() => {
+            setLocation("/dashboard");
+          }, 100);
+        }
       } else {
-        setError(data.message || "Registration failed");
+        const errorMessage = data.message || "Registration failed";
+        setError(errorMessage);
+        console.error("Registration failed:", errorMessage);
       }
     } catch (err) {
-      setError("Network error. Please try again.");
+      console.error("Network error during registration:", err);
+      setError("Network error. Please check your connection and try again.");
     } finally {
       setIsLoading(false);
     }

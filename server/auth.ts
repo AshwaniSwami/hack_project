@@ -217,75 +217,98 @@ export const register = async (req: Request, res: Response) => {
   try {
     const { email, password, firstName, lastName } = req.body;
     
+    console.log("Registration attempt for:", email);
+    
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password are required" });
     }
 
-    // Check if user already exists
-    const users = await storage.getAllUsers();
-    const existingUser = users.find(u => u.email === email);
-    
-    if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+    // Check if database is available
+    if (!isDatabaseAvailable()) {
+      console.log("Database not available, using temporary authentication");
+      return res.status(400).json({ 
+        message: "Registration disabled in demo mode. Use admin@example.com / password to login" 
+      });
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-    
-    // Determine role - first user is admin, rest are members
-    const isFirstUser = users.length === 0;
-    const role = isFirstUser ? 'admin' : 'member';
-    
-    // First user (admin) is auto-verified, others need verification
-    const isVerified = isFirstUser;
+    try {
+      // Check if user already exists
+      const users = await storage.getAllUsers();
+      const existingUser = users.find(u => u.email === email);
+      
+      if (existingUser) {
+        return res.status(400).json({ message: "User already exists" });
+      }
 
-    // Create user
-    const newUser = await storage.createUser({
-      id: nanoid(),
-      email,
-      password: hashedPassword,
-      firstName,
-      lastName,
-      role,
-      isActive: isFirstUser, // Only admin is active by default
-      isVerified,
-      loginCount: isFirstUser ? 1 : 0,
-      lastLoginAt: isFirstUser ? new Date() : undefined,
-    });
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 10);
+      
+      // Determine role - first user is admin, rest are members
+      const isFirstUser = users.length === 0;
+      const role = isFirstUser ? 'admin' : 'member';
+      
+      // First user (admin) is auto-verified, others need verification
+      const isVerified = isFirstUser;
 
-    // Only log in admin users immediately, others need verification
-    if (isFirstUser) {
-      (req.session as any).userId = newUser.id;
-    } else {
-      // Create notification for admin users about new user registration
-      await createAdminNotification(
-        "user_verification_request",
-        "User Verification Required",
-        `${email} needs approval to access the platform`,
-        newUser.id,
-        newUser.email,
-        `${firstName} ${lastName}`,
-        "/users",
-        "high"
-      );
+      // Create user
+      const newUser = await storage.createUser({
+        id: nanoid(),
+        email,
+        password: hashedPassword,
+        firstName,
+        lastName,
+        role,
+        isActive: isFirstUser, // Only admin is active by default
+        isVerified,
+        loginCount: isFirstUser ? 1 : 0,
+        lastLoginAt: isFirstUser ? new Date() : undefined,
+      });
+
+      console.log("User created successfully:", newUser.email);
+
+      // Only log in admin users immediately, others need verification
+      if (isFirstUser) {
+        (req.session as any).userId = newUser.id;
+        console.log("Admin user logged in automatically");
+      } else {
+        // Create notification for admin users about new user registration
+        try {
+          await createAdminNotification(
+            "user_verification_request",
+            "User Verification Required",
+            `${email} needs approval to access the platform`,
+            newUser.id,
+            newUser.email,
+            `${firstName} ${lastName}`,
+            "/users",
+            "high"
+          );
+        } catch (notificationError) {
+          console.error("Failed to create admin notification:", notificationError);
+          // Don't fail registration if notification fails
+        }
+      }
+      
+      res.json({
+        success: true,
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          firstName: newUser.firstName,
+          lastName: newUser.lastName,
+          role: newUser.role,
+        },
+        message: isFirstUser 
+          ? "Welcome! Your admin account has been created successfully." 
+          : "Account created successfully! Please wait for admin verification before you can log in."
+      });
+    } catch (storageError) {
+      console.error("Storage error during registration:", storageError);
+      res.status(500).json({ message: "Database error during registration. Please try again." });
     }
-    
-    res.json({
-      success: true,
-      user: {
-        id: newUser.id,
-        email: newUser.email,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        role: newUser.role,
-      },
-      message: isFirstUser 
-        ? "Welcome! Your admin account has been created successfully." 
-        : "Account created successfully! Please wait for admin verification before you can log in."
-    });
   } catch (error) {
     console.error("Registration error:", error);
-    res.status(500).json({ message: "Registration failed" });
+    res.status(500).json({ message: "Registration failed. Please check your input and try again." });
   }
 };
 
