@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 import { eq, desc, and } from "drizzle-orm";
-import { db } from "./db";
+import { getDb, isDatabaseAvailable } from "./db";
 import { onboardingFormConfig, onboardingFormResponses, users } from "@shared/schema";
 import { AuthenticatedRequest, isAuthenticated, isAdmin } from "./auth";
 import { insertOnboardingFormConfigSchema, insertOnboardingFormResponseSchema } from "@shared/schema";
@@ -152,11 +152,12 @@ interface OnboardingSubmission {
 // Get current form configuration
 export const getCurrentFormConfig = async (req: Request, res: Response) => {
   try {
-    if (!db) {
+    if (!isDatabaseAvailable()) {
       // Return mock data when database is not available
       return res.json(mockFormConfig);
     }
 
+    const db = getDb();
     const activeConfig = await db
       .select()
       .from(onboardingFormConfig)
@@ -188,11 +189,12 @@ export const updateFormConfig = async (req: AuthenticatedRequest, res: Response)
       createdBy: req.user.id,
     });
 
-    if (!db) {
+    if (!isDatabaseAvailable()) {
       console.log("Form config would be saved:", configData);
       return res.json({ success: true, message: "Form configuration saved (mock mode)" });
     }
 
+    const db = getDb();
     // Deactivate all previous configurations
     await db
       .update(onboardingFormConfig)
@@ -255,7 +257,7 @@ export const submitOnboardingForm = async (req: AuthenticatedRequest, res: Respo
     const submissionData: OnboardingSubmission = req.body;
     console.log("Onboarding submission received:", { userId: req.user.id, data: submissionData });
 
-    if (!db) {
+    if (!isDatabaseAvailable()) {
       // In mock mode, we'll simulate the success but log the data
       console.log("Onboarding submission (mock mode):", {
         userId: req.user.id,
@@ -277,6 +279,7 @@ export const submitOnboardingForm = async (req: AuthenticatedRequest, res: Respo
       });
     }
 
+    const db = getDb();
     // Get current form configuration
     const activeConfig = await db
       .select()
@@ -353,7 +356,7 @@ export const getOnboardingAnalytics = async (req: AuthenticatedRequest, res: Res
       return res.status(403).json({ error: "Admin access required" });
     }
 
-    if (!db) {
+    if (!isDatabaseAvailable()) {
       // Return mock analytics data
       const locationStats = getUserStatsByLocation();
       const responseStats = getResponseStatistics();
@@ -370,6 +373,7 @@ export const getOnboardingAnalytics = async (req: AuthenticatedRequest, res: Res
       });
     }
 
+    const db = getDb();
     // Get all users with their onboarding status
     const allUsers = await db.select().from(users);
     const completedUsers = allUsers.filter(user => user.firstLoginCompleted);
@@ -469,12 +473,13 @@ export const checkOnboardingStatus = async (req: AuthenticatedRequest, res: Resp
       return res.status(401).json({ error: "Authentication required" });
     }
 
-    if (!db) {
+    if (!isDatabaseAvailable()) {
       // In mock mode, check if user is new (for demo purposes)
       const isNewUser = !req.user.firstName || req.user.email === "temp-admin-001@example.com";
       return res.json({ needsOnboarding: isNewUser });
     }
 
+    const db = getDb();
     const user = await db
       .select({ firstLoginCompleted: users.firstLoginCompleted })
       .from(users)
