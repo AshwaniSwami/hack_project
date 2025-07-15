@@ -130,6 +130,10 @@ The application uses a relational database with the following core entities:
 
 ## Recent Changes
 
+- July 15, 2025: ✅ FIXED ONBOARDING FORM BUILDER - Resolved persistent question deletion issue by switching from hardcoded configuration to database-backed system
+- July 15, 2025: ✅ CORRECTED ROUTE CONFIGURATION - Fixed routes to use dynamic onboarding system instead of static configuration file
+- July 15, 2025: ✅ ENHANCED FORM PERSISTENCE - Questions now properly save to database and persist across page refreshes
+- July 15, 2025: ✅ IMPROVED STATE MANAGEMENT - Enhanced mutation callbacks and cache invalidation for real-time form updates
 - July 15, 2025: ✅ COMPLETED PROJECT MIGRATION - Successfully migrated from Replit Agent to Replit environment with full PostgreSQL database setup
 - July 15, 2025: ✅ DATABASE INTEGRATION - Connected to PostgreSQL database and applied all necessary schema migrations
 - July 15, 2025: ✅ ADMIN USER SETUP - Created default admin user (admin@example.com / admin123) for initial access

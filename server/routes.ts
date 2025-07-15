@@ -114,7 +114,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     submitOnboardingForm, 
     getOnboardingAnalytics, 
     checkOnboardingStatus 
-  } = await import("./routes-onboarding-fixed");
+  } = await import("./routes-onboarding");
   
   app.get("/api/onboarding/form-config", getCurrentFormConfig);
   app.put("/api/onboarding/form-config", isAuthenticated, isAdmin, updateFormConfig);
