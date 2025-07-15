@@ -92,12 +92,12 @@ async function setupDatabase() {
       CREATE TABLE "projects" (
         "id" varchar PRIMARY KEY,
         "name" varchar NOT NULL,
-        "themeId" varchar,
-        "targetAudience" varchar,
+        "theme_id" varchar,
+        "target_audience" varchar,
         "status" varchar DEFAULT 'active',
-        "createdAt" timestamp DEFAULT now(),
-        "updatedAt" timestamp DEFAULT now(),
-        FOREIGN KEY ("themeId") REFERENCES "themes"("id") ON DELETE SET NULL
+        "created_at" timestamp DEFAULT now(),
+        "updated_at" timestamp DEFAULT now(),
+        FOREIGN KEY ("theme_id") REFERENCES "themes"("id") ON DELETE SET NULL
       );
     `);
 
@@ -108,13 +108,13 @@ async function setupDatabase() {
         "title" varchar NOT NULL,
         "description" text,
         "duration" integer,
-        "airDate" timestamp,
+        "air_date" timestamp,
         "status" varchar DEFAULT 'draft',
-        "projectId" varchar NOT NULL,
-        "isPremium" boolean DEFAULT false,
-        "createdAt" timestamp DEFAULT now(),
-        "updatedAt" timestamp DEFAULT now(),
-        FOREIGN KEY ("projectId") REFERENCES "projects"("id") ON DELETE CASCADE
+        "project_id" varchar NOT NULL,
+        "is_premium" boolean DEFAULT false,
+        "created_at" timestamp DEFAULT now(),
+        "updated_at" timestamp DEFAULT now(),
+        FOREIGN KEY ("project_id") REFERENCES "projects"("id") ON DELETE CASCADE
       );
     `);
 
@@ -125,14 +125,14 @@ async function setupDatabase() {
         "title" varchar NOT NULL,
         "content" text,
         "status" varchar DEFAULT 'draft',
-        "projectId" varchar NOT NULL,
-        "episodeId" varchar,
-        "authorId" varchar NOT NULL,
-        "createdAt" timestamp DEFAULT now(),
-        "updatedAt" timestamp DEFAULT now(),
-        FOREIGN KEY ("projectId") REFERENCES "projects"("id") ON DELETE CASCADE,
-        FOREIGN KEY ("episodeId") REFERENCES "episodes"("id") ON DELETE SET NULL,
-        FOREIGN KEY ("authorId") REFERENCES "users"("id") ON DELETE CASCADE
+        "project_id" varchar NOT NULL,
+        "episode_id" varchar,
+        "author_id" varchar NOT NULL,
+        "created_at" timestamp DEFAULT now(),
+        "updated_at" timestamp DEFAULT now(),
+        FOREIGN KEY ("project_id") REFERENCES "projects"("id") ON DELETE CASCADE,
+        FOREIGN KEY ("episode_id") REFERENCES "episodes"("id") ON DELETE SET NULL,
+        FOREIGN KEY ("author_id") REFERENCES "users"("id") ON DELETE CASCADE
       );
     `);
 
@@ -141,11 +141,11 @@ async function setupDatabase() {
       CREATE TABLE "file_folders" (
         "id" varchar PRIMARY KEY,
         "name" varchar NOT NULL,
-        "parentId" varchar,
-        "entityType" varchar NOT NULL,
-        "entityId" varchar NOT NULL,
-        "createdAt" timestamp DEFAULT now(),
-        FOREIGN KEY ("parentId") REFERENCES "file_folders"("id") ON DELETE CASCADE
+        "parent_id" varchar,
+        "entity_type" varchar NOT NULL,
+        "entity_id" varchar NOT NULL,
+        "created_at" timestamp DEFAULT now(),
+        FOREIGN KEY ("parent_id") REFERENCES "file_folders"("id") ON DELETE CASCADE
       );
     `);
 
@@ -154,25 +154,25 @@ async function setupDatabase() {
       CREATE TABLE "files" (
         "id" varchar PRIMARY KEY,
         "name" varchar NOT NULL,
-        "originalName" varchar NOT NULL,
+        "original_name" varchar NOT NULL,
         "size" integer NOT NULL,
         "type" varchar NOT NULL,
         "data" text NOT NULL,
-        "folderId" varchar,
-        "entityType" varchar NOT NULL,
-        "entityId" varchar NOT NULL,
+        "folder_id" varchar,
+        "entity_type" varchar NOT NULL,
+        "entity_id" varchar NOT NULL,
         "description" text,
         "tags" text[],
         "version" integer DEFAULT 1,
         "checksum" varchar,
-        "uploadedBy" varchar NOT NULL,
-        "uploadedAt" timestamp DEFAULT now(),
-        "lastModified" timestamp DEFAULT now(),
-        "downloadCount" integer DEFAULT 0,
-        "isPublic" boolean DEFAULT false,
-        "accessLevel" varchar DEFAULT 'private',
-        FOREIGN KEY ("folderId") REFERENCES "file_folders"("id") ON DELETE SET NULL,
-        FOREIGN KEY ("uploadedBy") REFERENCES "users"("id") ON DELETE CASCADE
+        "uploaded_by" varchar NOT NULL,
+        "uploaded_at" timestamp DEFAULT now(),
+        "last_modified" timestamp DEFAULT now(),
+        "download_count" integer DEFAULT 0,
+        "is_public" boolean DEFAULT false,
+        "access_level" varchar DEFAULT 'private',
+        FOREIGN KEY ("folder_id") REFERENCES "file_folders"("id") ON DELETE SET NULL,
+        FOREIGN KEY ("uploaded_by") REFERENCES "users"("id") ON DELETE CASCADE
       );
     `);
 
@@ -194,15 +194,15 @@ async function setupDatabase() {
     await pool.query(`
       CREATE TABLE "notifications" (
         "id" varchar PRIMARY KEY,
-        "userId" varchar NOT NULL,
+        "user_id" varchar NOT NULL,
         "type" varchar NOT NULL,
         "title" varchar NOT NULL,
         "message" text NOT NULL,
         "priority" varchar DEFAULT 'medium',
-        "isRead" boolean DEFAULT false,
-        "createdAt" timestamp DEFAULT now(),
+        "is_read" boolean DEFAULT false,
+        "created_at" timestamp DEFAULT now(),
         "data" jsonb,
-        FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE
+        FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE
       );
     `);
 
@@ -210,18 +210,18 @@ async function setupDatabase() {
     await pool.query(`
       CREATE TABLE "download_logs" (
         "id" varchar PRIMARY KEY,
-        "fileId" varchar NOT NULL,
-        "userId" varchar NOT NULL,
-        "ipAddress" varchar,
-        "userAgent" text,
-        "downloadedAt" timestamptz DEFAULT now(),
-        "downloadDuration" integer,
+        "file_id" varchar NOT NULL,
+        "user_id" varchar NOT NULL,
+        "ip_address" varchar,
+        "user_agent" text,
+        "downloaded_at" timestamptz DEFAULT now(),
+        "download_duration" integer,
         "status" varchar DEFAULT 'success',
-        "entityType" varchar NOT NULL,
-        "entityId" varchar NOT NULL,
-        "projectId" varchar,
-        FOREIGN KEY ("fileId") REFERENCES "files"("id") ON DELETE CASCADE,
-        FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE
+        "entity_type" varchar NOT NULL,
+        "entity_id" varchar NOT NULL,
+        "project_id" varchar,
+        FOREIGN KEY ("file_id") REFERENCES "files"("id") ON DELETE CASCADE,
+        FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE
       );
     `);
 
@@ -231,10 +231,10 @@ async function setupDatabase() {
         "id" varchar PRIMARY KEY,
         "version" integer NOT NULL,
         "config" jsonb NOT NULL,
-        "isActive" boolean DEFAULT true,
-        "createdAt" timestamp DEFAULT now(),
-        "createdBy" varchar NOT NULL,
-        FOREIGN KEY ("createdBy") REFERENCES "users"("id") ON DELETE CASCADE
+        "is_active" boolean DEFAULT true,
+        "created_at" timestamp DEFAULT now(),
+        "created_by" varchar NOT NULL,
+        FOREIGN KEY ("created_by") REFERENCES "users"("id") ON DELETE CASCADE
       );
     `);
 
@@ -242,13 +242,13 @@ async function setupDatabase() {
     await pool.query(`
       CREATE TABLE "onboarding_form_responses" (
         "id" varchar PRIMARY KEY,
-        "userId" varchar NOT NULL,
-        "formVersion" integer NOT NULL,
+        "user_id" varchar NOT NULL,
+        "form_version" integer NOT NULL,
         "responses" jsonb NOT NULL,
-        "submittedAt" timestamp DEFAULT now(),
-        "ipAddress" varchar,
-        "userAgent" text,
-        FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE
+        "submitted_at" timestamp DEFAULT now(),
+        "ip_address" varchar,
+        "user_agent" text,
+        FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE
       );
     `);
 
@@ -256,16 +256,16 @@ async function setupDatabase() {
     await pool.query(`
       CREATE INDEX IF NOT EXISTS "idx_users_email" ON "users"("email");
       CREATE INDEX IF NOT EXISTS "idx_users_role" ON "users"("role");
-      CREATE INDEX IF NOT EXISTS "idx_projects_theme" ON "projects"("themeId");
-      CREATE INDEX IF NOT EXISTS "idx_episodes_project" ON "episodes"("projectId");
-      CREATE INDEX IF NOT EXISTS "idx_scripts_project" ON "scripts"("projectId");
-      CREATE INDEX IF NOT EXISTS "idx_scripts_author" ON "scripts"("authorId");
-      CREATE INDEX IF NOT EXISTS "idx_files_entity" ON "files"("entityType", "entityId");
-      CREATE INDEX IF NOT EXISTS "idx_files_uploaded_by" ON "files"("uploadedBy");
-      CREATE INDEX IF NOT EXISTS "idx_notifications_user" ON "notifications"("userId");
-      CREATE INDEX IF NOT EXISTS "idx_download_logs_file" ON "download_logs"("fileId");
-      CREATE INDEX IF NOT EXISTS "idx_download_logs_user" ON "download_logs"("userId");
-      CREATE INDEX IF NOT EXISTS "idx_onboarding_responses_user" ON "onboarding_form_responses"("userId");
+      CREATE INDEX IF NOT EXISTS "idx_projects_theme" ON "projects"("theme_id");
+      CREATE INDEX IF NOT EXISTS "idx_episodes_project" ON "episodes"("project_id");
+      CREATE INDEX IF NOT EXISTS "idx_scripts_project" ON "scripts"("project_id");
+      CREATE INDEX IF NOT EXISTS "idx_scripts_author" ON "scripts"("author_id");
+      CREATE INDEX IF NOT EXISTS "idx_files_entity" ON "files"("entity_type", "entity_id");
+      CREATE INDEX IF NOT EXISTS "idx_files_uploaded_by" ON "files"("uploaded_by");
+      CREATE INDEX IF NOT EXISTS "idx_notifications_user" ON "notifications"("user_id");
+      CREATE INDEX IF NOT EXISTS "idx_download_logs_file" ON "download_logs"("file_id");
+      CREATE INDEX IF NOT EXISTS "idx_download_logs_user" ON "download_logs"("user_id");
+      CREATE INDEX IF NOT EXISTS "idx_onboarding_responses_user" ON "onboarding_form_responses"("user_id");
     `);
 
     console.log('✅ Database schema created successfully!');
