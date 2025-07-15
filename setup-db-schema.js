@@ -92,6 +92,7 @@ async function setupDatabase() {
       CREATE TABLE "projects" (
         "id" varchar PRIMARY KEY,
         "name" varchar NOT NULL,
+        "description" text,
         "theme_id" varchar,
         "target_audience" varchar,
         "status" varchar DEFAULT 'active',
@@ -128,6 +129,9 @@ async function setupDatabase() {
         "project_id" varchar NOT NULL,
         "episode_id" varchar,
         "author_id" varchar NOT NULL,
+        "review_comments" text,
+        "reviewed_by" varchar,
+        "reviewed_at" timestamp,
         "created_at" timestamp DEFAULT now(),
         "updated_at" timestamp DEFAULT now(),
         FOREIGN KEY ("project_id") REFERENCES "projects"("id") ON DELETE CASCADE,
@@ -198,10 +202,16 @@ async function setupDatabase() {
         "type" varchar NOT NULL,
         "title" varchar NOT NULL,
         "message" text NOT NULL,
-        "priority" varchar DEFAULT 'medium',
+        "related_user_id" varchar,
+        "related_user_email" varchar,
+        "related_user_name" varchar,
         "is_read" boolean DEFAULT false,
+        "is_archived" boolean DEFAULT false,
+        "priority" varchar DEFAULT 'normal',
+        "action_url" varchar,
+        "metadata" jsonb,
         "created_at" timestamp DEFAULT now(),
-        "data" jsonb,
+        "read_at" timestamp,
         FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE
       );
     `);
@@ -229,11 +239,12 @@ async function setupDatabase() {
     await pool.query(`
       CREATE TABLE "onboarding_form_config" (
         "id" varchar PRIMARY KEY,
-        "version" integer NOT NULL,
-        "config" jsonb NOT NULL,
+        "version" integer DEFAULT 1,
         "is_active" boolean DEFAULT true,
-        "created_at" timestamp DEFAULT now(),
+        "questions" jsonb NOT NULL,
         "created_by" varchar NOT NULL,
+        "created_at" timestamp DEFAULT now(),
+        "updated_at" timestamp DEFAULT now(),
         FOREIGN KEY ("created_by") REFERENCES "users"("id") ON DELETE CASCADE
       );
     `);
@@ -243,11 +254,13 @@ async function setupDatabase() {
       CREATE TABLE "onboarding_form_responses" (
         "id" varchar PRIMARY KEY,
         "user_id" varchar NOT NULL,
-        "form_version" integer NOT NULL,
-        "responses" jsonb NOT NULL,
+        "form_config_id" varchar NOT NULL,
+        "question_id" varchar NOT NULL,
+        "question_type" varchar NOT NULL,
+        "question_label" text NOT NULL,
+        "response" jsonb NOT NULL,
+        "is_compulsory" boolean DEFAULT false,
         "submitted_at" timestamp DEFAULT now(),
-        "ip_address" varchar,
-        "user_agent" text,
         FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE
       );
     `);
