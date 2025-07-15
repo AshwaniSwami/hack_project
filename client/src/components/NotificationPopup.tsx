@@ -1,9 +1,11 @@
-import React from 'react';
-import { X, User, UserCheck, Bell, AlertCircle, Info, CheckCircle } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { X, User, UserCheck, Bell, AlertCircle, Info, CheckCircle, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
 
 interface NotificationData {
   id: string;
@@ -24,6 +26,31 @@ interface NotificationPopupProps {
 }
 
 export function NotificationPopup({ notifications, onDismiss }: NotificationPopupProps) {
+  const queryClient = useQueryClient();
+
+  // Mark notification as read mutation
+  const markAsReadMutation = useMutation({
+    mutationFn: (notificationId: string) => 
+      apiRequest(`/api/notifications/${notificationId}/read`, {
+        method: 'PATCH',
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread'] });
+    },
+  });
+
+  // Handle notification click - mark as read and dismiss popup
+  const handleNotificationClick = (notification: NotificationData) => {
+    markAsReadMutation.mutate(notification.id);
+    onDismiss(notification.id);
+    
+    // Navigate to action URL if provided
+    if (notification.actionUrl) {
+      window.location.href = notification.actionUrl;
+    }
+  };
+
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'user_verification_request':
@@ -81,9 +108,10 @@ export function NotificationPopup({ notifications, onDismiss }: NotificationPopu
         <Card 
           key={notification.id}
           className={cn(
-            "border-l-4 shadow-lg animate-in slide-in-from-right duration-300",
+            "border-l-4 shadow-lg animate-in slide-in-from-right duration-300 cursor-pointer hover:shadow-xl transition-all",
             getPriorityColor(notification.priority)
           )}
+          onClick={() => handleNotificationClick(notification)}
         >
           <CardContent className="p-4">
             <div className="flex items-start space-x-3">
@@ -101,14 +129,32 @@ export function NotificationPopup({ notifications, onDismiss }: NotificationPopu
                       {notification.priority}
                     </Badge>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 p-0 -mt-1"
-                    onClick={() => onDismiss(notification.id)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center space-x-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 -mt-1 hover:bg-blue-100 dark:hover:bg-blue-900"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleNotificationClick(notification);
+                      }}
+                      title="Mark as read"
+                    >
+                      <Eye className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 -mt-1 hover:bg-red-100 dark:hover:bg-red-900"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDismiss(notification.id);
+                      }}
+                      title="Dismiss"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
                 
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-2 line-clamp-2">
@@ -116,9 +162,12 @@ export function NotificationPopup({ notifications, onDismiss }: NotificationPopu
                 </p>
                 
                 {notification.relatedUserEmail && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                    User: {notification.relatedUserEmail}
-                  </p>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-2 bg-gray-50 dark:bg-gray-800 rounded px-2 py-1">
+                    <span className="font-medium">User:</span> {notification.relatedUserEmail}
+                    {notification.relatedUserName && (
+                      <span> ({notification.relatedUserName})</span>
+                    )}
+                  </div>
                 )}
                 
                 <div className="flex items-center justify-between">
@@ -128,6 +177,7 @@ export function NotificationPopup({ notifications, onDismiss }: NotificationPopu
                   
                   <div className="flex items-center space-x-1">
                     {getPriorityIcon(notification.priority)}
+                    <span className="text-xs text-gray-400">Click to mark as read</span>
                   </div>
                 </div>
               </div>

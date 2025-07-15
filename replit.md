@@ -125,6 +125,12 @@ The application uses a relational database with the following core entities:
 
 ## Recent Changes
 
+- July 15, 2025: Implemented comprehensive real-time notification system with WebSocket integration for admin users
+- July 15, 2025: Added notification popup component with auto-dismiss functionality and priority-based visual indicators
+- July 15, 2025: Enhanced notification bell with organized sorting (unread first, then by priority and date)
+- July 15, 2025: Implemented mark-as-read functionality for both individual notifications and bulk operations
+- July 15, 2025: Added WebSocket server with admin-only connection management for instant notification delivery
+- July 15, 2025: Created notification management system with improved visual design and user interaction
 - July 14, 2025: Streamlined admin dashboard by removing system health section and security status for cleaner, focused design
 - July 14, 2025: Added relevant Recent Activity section with content updates, user access, and platform health indicators
 - July 14, 2025: Enhanced welcome card by replacing security status with team member count for more useful information

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from './useAuth';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface WebSocketMessage {
   type: string;
@@ -22,6 +23,7 @@ interface NotificationData {
 
 export function useWebSocket() {
   const { user, isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
   const wsRef = useRef<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
@@ -76,6 +78,10 @@ export function useWebSocket() {
                 };
                 
                 setNotifications(prev => [...prev, notification]);
+                
+                // Refresh notification queries to update the bell count
+                queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread'] });
+                queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
                 
                 // Auto-remove notification after 5 seconds
                 setTimeout(() => {

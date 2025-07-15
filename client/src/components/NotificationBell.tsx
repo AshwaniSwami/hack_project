@@ -59,7 +59,7 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
     },
   });
 
-  // Mark all as read mutation
+  // Mark all as read mutation  
   const markAllAsReadMutation = useMutation({
     mutationFn: () => 
       apiRequest('/api/notifications/mark-all-read', {
@@ -68,6 +68,7 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
       queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread'] });
+      setOpen(false); // Close the popover after marking all as read
     },
   });
 
@@ -84,7 +85,20 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
   });
 
   const unreadCount = unreadData?.count || 0;
-  const notifications = allNotifications || [];
+  const notifications = (allNotifications || []).sort((a: Notification, b: Notification) => {
+    // Sort by read status first (unread first), then by priority, then by date
+    if (a.isRead !== b.isRead) {
+      return a.isRead ? 1 : -1;
+    }
+    
+    // Priority ranking: urgent > high > normal > low
+    const priorityOrder = { urgent: 4, high: 3, normal: 2, low: 1 };
+    const priorityDiff = (priorityOrder[b.priority] || 2) - (priorityOrder[a.priority] || 2);
+    if (priorityDiff !== 0) return priorityDiff;
+    
+    // Sort by date (newest first)
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 
   const handleNotificationClick = (notification: Notification) => {
     if (!notification.isRead) {
@@ -166,6 +180,7 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
             <ScrollArea className="h-80">
               {notifications.length === 0 ? (
                 <div className="p-4 text-center text-sm text-muted-foreground">
+                  <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   No notifications yet
                 </div>
               ) : (
@@ -174,7 +189,7 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
                     <div
                       key={notification.id}
                       className={`p-3 border-l-4 ${getPriorityColor(notification.priority)} cursor-pointer hover:bg-muted/50 transition-colors ${
-                        !notification.isRead ? 'bg-muted/30' : ''
+                        !notification.isRead ? 'bg-muted/30' : 'opacity-75'
                       }`}
                       onClick={() => handleNotificationClick(notification)}
                     >
@@ -184,17 +199,23 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
-                            <p className="text-sm font-medium truncate">
-                              {notification.title}
-                            </p>
+                            <div className="flex items-center space-x-2">
+                              <p className={`text-sm font-medium truncate ${!notification.isRead ? 'font-semibold' : ''}`}>
+                                {notification.title}
+                              </p>
+                              {!notification.isRead && (
+                                <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
+                              )}
+                            </div>
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-6 w-6 p-0"
+                              className="h-6 w-6 p-0 hover:bg-red-100 dark:hover:bg-red-900"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 deleteNotificationMutation.mutate(notification.id);
                               }}
+                              title="Delete notification"
                             >
                               <X className="h-3 w-3" />
                             </Button>
@@ -202,13 +223,23 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
                           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                             {notification.message}
                           </p>
+                          {notification.relatedUserEmail && (
+                            <div className="text-xs text-muted-foreground mt-1 bg-muted/50 rounded px-2 py-1">
+                              <span className="font-medium">User:</span> {notification.relatedUserEmail}
+                            </div>
+                          )}
                           <div className="flex items-center justify-between mt-2">
                             <span className="text-xs text-muted-foreground">
                               {formatTimeAgo(notification.createdAt)}
                             </span>
-                            {!notification.isRead && (
-                              <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
-                            )}
+                            <div className="flex items-center space-x-1">
+                              <Badge variant="outline" className="text-xs">
+                                {notification.priority}
+                              </Badge>
+                              {notification.isRead && (
+                                <span className="text-xs text-muted-foreground">Read</span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
