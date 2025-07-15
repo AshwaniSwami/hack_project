@@ -99,17 +99,29 @@ export async function createAdminNotification(
     // Get all admin users
     const adminUsers = await storage.getAdminUsers();
     
+    // Create concise, relevant messages based on notification type
+    let finalTitle = title;
+    let finalMessage = message;
+    
+    if (type === 'user_verification_request') {
+      finalTitle = '🔍 User Verification Required';
+      finalMessage = `${relatedUserEmail} has registered and needs approval to access the platform.`;
+    } else if (type === 'user_registered') {
+      finalTitle = '👤 New User Registration';
+      finalMessage = `${relatedUserEmail} has successfully registered and been approved.`;
+    }
+    
     // Create notification for each admin user
     for (const admin of adminUsers) {
       const notification: InsertNotification = {
         userId: admin.id,
         type,
-        title,
-        message,
+        title: finalTitle,
+        message: finalMessage,
         relatedUserId,
         relatedUserEmail,
         relatedUserName,
-        actionUrl,
+        actionUrl: actionUrl || (type === 'user_verification_request' ? '/users' : undefined),
         priority,
         isRead: false,
         isArchived: false,
@@ -117,6 +129,8 @@ export async function createAdminNotification(
       };
 
       const createdNotification = await storage.createNotification(notification);
+      
+      console.log(`Notification sent to admin user ${admin.id}`);
       
       // Broadcast real-time notification to connected admin users
       if (typeof (global as any).broadcastNotificationToAdmins === 'function') {

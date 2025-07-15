@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, X, Check, User, UserCheck } from 'lucide-react';
+import { Bell, X, Check, User, UserCheck, UserPlus, ExternalLink } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { apiRequest } from '@/lib/queryClient';
+import { useLocation } from 'wouter';
 
 interface Notification {
   id: string;
@@ -29,6 +30,7 @@ interface NotificationBellProps {
 export function NotificationBell({ userRole }: NotificationBellProps) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [location, navigate] = useLocation();
 
   // Only show for admin users
   if (userRole !== 'admin') {
@@ -105,12 +107,14 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
       markAsReadMutation.mutate(notification.id);
     }
     
+    setOpen(false); // Close the notification panel
+    
     // Navigate to action URL if provided
     if (notification.actionUrl) {
-      window.location.href = notification.actionUrl;
+      navigate(notification.actionUrl);
     } else if (notification.type === 'user_verification_request') {
       // Navigate to users page for user verification
-      window.location.href = '/users';
+      navigate('/users');
     }
   };
 
@@ -126,11 +130,11 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'urgent': return 'bg-red-500';
-      case 'high': return 'bg-orange-500';
-      case 'normal': return 'bg-blue-500';
-      case 'low': return 'bg-gray-500';
-      default: return 'bg-blue-500';
+      case 'urgent': return 'border-l-red-500 bg-red-50 dark:bg-red-900/20';
+      case 'high': return 'border-l-orange-500 bg-orange-50 dark:bg-orange-900/20';
+      case 'normal': return 'border-l-blue-500 bg-blue-50 dark:bg-blue-900/20';
+      case 'low': return 'border-l-gray-500 bg-gray-50 dark:bg-gray-900/20';
+      default: return 'border-l-blue-500 bg-blue-50 dark:bg-blue-900/20';
     }
   };
 
@@ -139,9 +143,9 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
       case 'user_verification_request':
         return <UserCheck className="h-4 w-4 text-blue-500" />;
       case 'user_registered':
-        return <User className="h-4 w-4 text-green-500" />;
+        return <UserPlus className="h-4 w-4 text-green-500" />;
       default:
-        return <Bell className="h-4 w-4 text-gray-500" />;
+        return <Bell className="h-4 w-4 text-gray-500 dark:text-gray-400" />;
     }
   };
 
@@ -171,20 +175,23 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" side="bottom" align="end">
+      <PopoverContent className="w-96 p-0" side="bottom" align="end">
         <Card className="border-0 shadow-lg">
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium">Notifications</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                Notifications {unreadCount > 0 && <Badge variant="destructive" className="ml-2">{unreadCount}</Badge>}
+              </CardTitle>
               {unreadCount > 0 && (
                 <Button 
                   variant="ghost" 
                   size="sm"
                   onClick={() => markAllAsReadMutation.mutate()}
                   disabled={markAllAsReadMutation.isPending || deleteNotificationMutation.isPending}
+                  className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
                 >
                   {markAllAsReadMutation.isPending ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500 mr-1" />
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-1" />
                   ) : (
                     <Check className="h-4 w-4 mr-1" />
                   )}
@@ -196,18 +203,18 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
           <CardContent className="p-0">
             <ScrollArea className="h-80">
               {notifications.length === 0 ? (
-                <div className="p-4 text-center text-sm text-muted-foreground">
+                <div className="p-6 text-center text-sm text-muted-foreground">
                   <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  No notifications yet
+                  <p className="text-gray-600 dark:text-gray-400">No notifications yet</p>
                 </div>
               ) : (
-                <div className="space-y-1">
+                <div className="space-y-0">
                   {notifications.map((notification: Notification) => (
                     <div
                       key={notification.id}
-                      className={`p-3 border-l-4 ${getPriorityColor(notification.priority)} cursor-pointer hover:bg-muted/50 transition-all duration-200 ${
-                        !notification.isRead ? 'bg-muted/30 shadow-sm' : 'opacity-75'
-                      }`}
+                      className={`p-4 border-l-4 cursor-pointer hover:bg-muted/50 transition-all duration-200 border-b border-gray-100 dark:border-gray-700 ${
+                        getPriorityColor(notification.priority)
+                      } ${!notification.isRead ? 'shadow-sm' : 'opacity-75'}`}
                       onClick={() => handleNotificationClick(notification)}
                     >
                       <div className="flex items-start space-x-3">
@@ -215,16 +222,30 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
                           {getNotificationIcon(notification.type)}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                              <p className={`text-sm font-medium truncate ${!notification.isRead ? 'font-semibold' : ''}`}>
-                                {notification.title}
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <h4 className={`text-sm font-medium text-gray-900 dark:text-gray-100 ${!notification.isRead ? 'font-semibold' : ''}`}>
+                                  {notification.title}
+                                </h4>
+                                {!notification.isRead && (
+                                  <div className="h-2 w-2 bg-blue-500 rounded-full animate-pulse"></div>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+                                {notification.message}
                               </p>
-                              {!notification.isRead && (
-                                <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
+                              {notification.relatedUserEmail && (
+                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-2 bg-gray-100 dark:bg-gray-800 rounded px-2 py-1 inline-block">
+                                  <User className="h-3 w-3 inline mr-1" />
+                                  <span className="font-medium">{notification.relatedUserEmail}</span>
+                                </div>
                               )}
                             </div>
-                            <div className="flex items-center space-x-1">
+                            <div className="flex items-center space-x-1 ml-2">
+                              {notification.type === 'user_verification_request' && (
+                                <ExternalLink className="h-3 w-3 text-blue-500" />
+                              )}
                               {!notification.isRead && (
                                 <Button
                                   variant="ghost"
@@ -257,24 +278,21 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
                               </Button>
                             </div>
                           </div>
-                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                            {notification.message}
-                          </p>
-                          {notification.relatedUserEmail && (
-                            <div className="text-xs text-muted-foreground mt-1 bg-muted/50 rounded px-2 py-1">
-                              <span className="font-medium">User:</span> {notification.relatedUserEmail}
-                            </div>
-                          )}
-                          <div className="flex items-center justify-between mt-2">
-                            <span className="text-xs text-muted-foreground">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
                               {formatTimeAgo(notification.createdAt)}
                             </span>
-                            <div className="flex items-center space-x-1">
-                              <Badge variant="outline" className="text-xs">
+                            <div className="flex items-center space-x-2">
+                              <Badge 
+                                variant="outline" 
+                                className={`text-xs ${notification.priority === 'urgent' ? 'border-red-500 text-red-600 dark:text-red-400' : 
+                                  notification.priority === 'high' ? 'border-orange-500 text-orange-600 dark:text-orange-400' : 
+                                  'border-blue-500 text-blue-600 dark:text-blue-400'}`}
+                              >
                                 {notification.priority}
                               </Badge>
                               {notification.isRead && (
-                                <span className="text-xs text-muted-foreground">Read</span>
+                                <span className="text-xs text-gray-400 dark:text-gray-500">Read</span>
                               )}
                             </div>
                           </div>

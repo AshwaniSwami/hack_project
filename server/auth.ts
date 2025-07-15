@@ -174,13 +174,13 @@ export const register = async (req: Request, res: Response) => {
       // Create notification for admin users about new user registration
       await createAdminNotification(
         "user_verification_request",
-        "New User Registration",
-        `A new user "${firstName} ${lastName}" (${email}) has registered and is awaiting account verification.`,
+        "User Verification Required",
+        `${email} needs approval to access the platform`,
         newUser.id,
         newUser.email,
         `${firstName} ${lastName}`,
         "/users",
-        "normal"
+        "high"
       );
     }
     

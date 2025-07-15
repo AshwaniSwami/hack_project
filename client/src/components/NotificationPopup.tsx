@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
-import { X, User, UserCheck, Bell, AlertCircle, Info, CheckCircle, Eye } from 'lucide-react';
+import { X, User, UserCheck, Bell, AlertCircle, Info, CheckCircle, UserPlus, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
+import { useLocation } from 'wouter';
 
 interface NotificationData {
   id: string;
@@ -27,6 +28,7 @@ interface NotificationPopupProps {
 
 export function NotificationPopup({ notifications, onDismiss }: NotificationPopupProps) {
   const queryClient = useQueryClient();
+  const [location, navigate] = useLocation();
 
   // Mark notification as read mutation
   const markAsReadMutation = useMutation({
@@ -47,10 +49,10 @@ export function NotificationPopup({ notifications, onDismiss }: NotificationPopu
     
     // Navigate to action URL if provided
     if (notification.actionUrl) {
-      window.location.href = notification.actionUrl;
+      navigate(notification.actionUrl);
     } else if (notification.type === 'user_verification_request') {
       // Navigate to users page for user verification
-      window.location.href = '/users';
+      navigate('/users');
     }
   };
 
@@ -65,9 +67,9 @@ export function NotificationPopup({ notifications, onDismiss }: NotificationPopu
       case 'user_verification_request':
         return <UserCheck className="h-5 w-5 text-blue-500" />;
       case 'user_registered':
-        return <User className="h-5 w-5 text-green-500" />;
+        return <UserPlus className="h-5 w-5 text-green-500" />;
       default:
-        return <Bell className="h-5 w-5 text-gray-500" />;
+        return <Bell className="h-5 w-5 text-gray-500 dark:text-gray-400" />;
     }
   };
 
@@ -112,12 +114,12 @@ export function NotificationPopup({ notifications, onDismiss }: NotificationPopu
   }
 
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2 max-w-sm w-full">
+    <div className="fixed top-4 right-4 z-50 space-y-3 max-w-sm w-full">
       {notifications.map((notification) => (
         <Card 
           key={notification.id}
           className={cn(
-            "border-l-4 shadow-lg animate-in slide-in-from-right duration-300 cursor-pointer hover:shadow-xl transition-all",
+            "border-l-4 shadow-xl animate-in slide-in-from-right duration-300 cursor-pointer hover:shadow-2xl transition-all backdrop-blur-sm",
             getPriorityColor(notification.priority)
           )}
           onClick={() => handleNotificationClick(notification)}
@@ -129,61 +131,65 @@ export function NotificationPopup({ notifications, onDismiss }: NotificationPopu
               </div>
               
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center space-x-2">
-                    <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
-                      {notification.title}
-                    </h4>
-                    <Badge variant="secondary" className="text-xs">
-                      {notification.priority}
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                        {notification.title}
+                      </h4>
+                      <div className="h-2 w-2 bg-blue-500 rounded-full animate-pulse"></div>
+                    </div>
+                    <Badge 
+                      variant="secondary" 
+                      className={`text-xs mb-2 ${
+                        notification.priority === 'urgent' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
+                        notification.priority === 'high' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300' :
+                        'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                      }`}
+                    >
+                      {notification.priority} priority
                     </Badge>
                   </div>
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center space-x-1 ml-2">
+                    {notification.type === 'user_verification_request' && (
+                      <ExternalLink className="h-3 w-3 text-blue-500" />
+                    )}
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-6 w-6 p-0 -mt-1 hover:bg-blue-100 dark:hover:bg-blue-900"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleNotificationClick(notification);
-                      }}
-                      title="Mark as read"
-                    >
-                      <Eye className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-6 p-0 -mt-1 hover:bg-red-100 dark:hover:bg-red-900"
+                      className="h-6 w-6 p-0 hover:bg-red-100 dark:hover:bg-red-900"
                       onClick={(e) => handleDismiss(e, notification.id)}
                       title="Dismiss"
                     >
-                      <X className="h-3 w-3" />
+                      <X className="h-3 w-3 text-red-500" />
                     </Button>
                   </div>
                 </div>
                 
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-2 line-clamp-2">
+                <p className="text-sm text-gray-700 dark:text-gray-300 mb-3 leading-relaxed">
                   {notification.message}
                 </p>
                 
                 {notification.relatedUserEmail && (
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-2 bg-gray-50 dark:bg-gray-800 rounded px-2 py-1">
-                    <span className="font-medium">User:</span> {notification.relatedUserEmail}
+                  <div className="text-xs text-gray-600 dark:text-gray-400 mb-3 bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2 border">
+                    <User className="h-3 w-3 inline mr-2" />
+                    <span className="font-medium">{notification.relatedUserEmail}</span>
                     {notification.relatedUserName && (
-                      <span> ({notification.relatedUserName})</span>
+                      <span className="text-gray-500 dark:text-gray-500"> ({notification.relatedUserName})</span>
                     )}
                   </div>
                 )}
                 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
                   <span className="text-xs text-gray-500 dark:text-gray-400">
                     {formatTimeAgo(notification.createdAt)}
                   </span>
                   
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center space-x-2">
                     {getPriorityIcon(notification.priority)}
-                    <span className="text-xs text-gray-400">Click to mark as read</span>
+                    <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                      Click to view
+                    </span>
                   </div>
                 </div>
               </div>
