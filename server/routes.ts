@@ -14,22 +14,41 @@ import * as tempAuth from "./tempAuth";
 import { getFilePermissions, requireFilePermission } from "./filePermissions";
 
 // Dynamically choose auth module based on database availability
-function getAuthModule() {
+async function getAuthModule() {
   // Force a fresh database check
   resetDbConnection();
-  const dbAvailable = isDatabaseAvailable();
+  const { checkDatabaseAvailability } = await import("./db");
+  const dbAvailable = await checkDatabaseAvailability();
   console.log("Database availability check:", dbAvailable ? "✅ Available" : "❌ Not available");
   console.log("DATABASE_URL exists:", !!process.env.DATABASE_URL);
   return dbAvailable ? realAuth : tempAuth;
 }
 
 // Dynamic auth handlers that check database availability at runtime
-const isAuthenticated = (req: any, res: any, next: any) => getAuthModule().isAuthenticated(req, res, next);
-const isAdmin = (req: any, res: any, next: any) => getAuthModule().isAdmin(req, res, next);
-const login = (req: any, res: any) => getAuthModule().login(req, res);
-const register = (req: any, res: any) => getAuthModule().register(req, res);
-const logout = (req: any, res: any) => getAuthModule().logout(req, res);
-const getCurrentUser = (req: any, res: any) => getAuthModule().getCurrentUser(req, res);
+const isAuthenticated = async (req: any, res: any, next: any) => {
+  const authModule = await getAuthModule();
+  return authModule.isAuthenticated(req, res, next);
+};
+const isAdmin = async (req: any, res: any, next: any) => {
+  const authModule = await getAuthModule();
+  return authModule.isAdmin(req, res, next);
+};
+const login = async (req: any, res: any) => {
+  const authModule = await getAuthModule();
+  return authModule.login(req, res);
+};
+const register = async (req: any, res: any) => {
+  const authModule = await getAuthModule();
+  return authModule.register(req, res);
+};
+const logout = async (req: any, res: any) => {
+  const authModule = await getAuthModule();
+  return authModule.logout(req, res);
+};
+const getCurrentUser = async (req: any, res: any) => {
+  const authModule = await getAuthModule();
+  return authModule.getCurrentUser(req, res);
+};
 import bcrypt from "bcryptjs";
 import {
   insertUserSchema,
