@@ -47,13 +47,14 @@ export function NotificationPopup({ notifications, onDismiss }: NotificationPopu
     markAsReadMutation.mutate(notification.id);
     onDismiss(notification.id);
     
-    // Navigate to action URL if provided
-    if (notification.actionUrl) {
-      navigate(notification.actionUrl);
-    } else if (notification.type === 'user_verification_request') {
-      // Navigate to users page for user verification
-      navigate('/users');
-    }
+    // Small delay to ensure smooth transition, then navigate
+    setTimeout(() => {
+      if (notification.actionUrl) {
+        navigate(notification.actionUrl);
+      } else if (notification.type === 'user_verification_request') {
+        navigate('/users');
+      }
+    }, 100);
   };
 
   // Handle dismiss only (without marking as read)
@@ -135,25 +136,13 @@ export function NotificationPopup({ notifications, onDismiss }: NotificationPopu
                   <div className="flex-1">
                     <div className="flex items-center space-x-2 mb-1">
                       <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                        {notification.title}
+                        {notification.title.replace(/🔍\s*/, '').replace(/👤\s*/, '')}
                       </h4>
                       <div className="h-2 w-2 bg-blue-500 rounded-full animate-pulse"></div>
                     </div>
-                    <Badge 
-                      variant="secondary" 
-                      className={`text-xs mb-2 ${
-                        notification.priority === 'urgent' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
-                        notification.priority === 'high' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300' :
-                        'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                      }`}
-                    >
-                      {notification.priority} priority
-                    </Badge>
+
                   </div>
                   <div className="flex items-center space-x-1 ml-2">
-                    {notification.type === 'user_verification_request' && (
-                      <ExternalLink className="h-3 w-3 text-blue-500" />
-                    )}
                     <Button
                       variant="ghost"
                       size="sm"
@@ -185,11 +174,13 @@ export function NotificationPopup({ notifications, onDismiss }: NotificationPopu
                     {formatTimeAgo(notification.createdAt)}
                   </span>
                   
-                  <div className="flex items-center space-x-2">
-                    {getPriorityIcon(notification.priority)}
+                  <div className="flex items-center space-x-1">
                     <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
                       Click to view
                     </span>
+                    {notification.type === 'user_verification_request' && (
+                      <ExternalLink className="h-3 w-3 text-blue-500" />
+                    )}
                   </div>
                 </div>
               </div>

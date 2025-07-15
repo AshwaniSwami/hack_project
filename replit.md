@@ -125,6 +125,12 @@ The application uses a relational database with the following core entities:
 
 ## Recent Changes
 
+- July 15, 2025: Enhanced notification system with improved user experience and optimized interface design
+- July 15, 2025: Removed irrelevant text (priority badges, emoji icons) and simplified notification display for cleaner appearance
+- July 15, 2025: Optimized notification click behavior to automatically mark as read and redirect to Users page for verification
+- July 15, 2025: Improved dark mode visibility across all notification components with better contrast and readability
+- July 15, 2025: Streamlined notification actions - removed redundant buttons and kept only essential delete functionality
+- July 15, 2025: Enhanced notification messages to be concise and actionable without unnecessary details
 - July 15, 2025: Implemented comprehensive real-time notification system with WebSocket integration for admin users
 - July 15, 2025: Added notification popup component with auto-dismiss functionality and priority-based visual indicators
 - July 15, 2025: Enhanced notification bell with organized sorting (unread first, then by priority and date)

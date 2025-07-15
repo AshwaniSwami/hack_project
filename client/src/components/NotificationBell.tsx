@@ -103,19 +103,21 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
   });
 
   const handleNotificationClick = (notification: Notification) => {
+    // Always mark as read and close the panel first
     if (!notification.isRead) {
       markAsReadMutation.mutate(notification.id);
     }
     
-    setOpen(false); // Close the notification panel
+    setOpen(false); // Close the notification panel immediately
     
-    // Navigate to action URL if provided
-    if (notification.actionUrl) {
-      navigate(notification.actionUrl);
-    } else if (notification.type === 'user_verification_request') {
-      // Navigate to users page for user verification
-      navigate('/users');
-    }
+    // Small delay to ensure smooth transition, then navigate
+    setTimeout(() => {
+      if (notification.actionUrl) {
+        navigate(notification.actionUrl);
+      } else if (notification.type === 'user_verification_request') {
+        navigate('/users');
+      }
+    }, 100);
   };
 
   const handleMarkAsRead = (e: React.MouseEvent, notificationId: string) => {
@@ -226,7 +228,7 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
                             <div className="flex-1">
                               <div className="flex items-center space-x-2 mb-1">
                                 <h4 className={`text-sm font-medium text-gray-900 dark:text-gray-100 ${!notification.isRead ? 'font-semibold' : ''}`}>
-                                  {notification.title}
+                                  {notification.title.replace(/🔍\s*/, '').replace(/👤\s*/, '')}
                                 </h4>
                                 {!notification.isRead && (
                                   <div className="h-2 w-2 bg-blue-500 rounded-full animate-pulse"></div>
@@ -243,25 +245,6 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
                               )}
                             </div>
                             <div className="flex items-center space-x-1 ml-2">
-                              {notification.type === 'user_verification_request' && (
-                                <ExternalLink className="h-3 w-3 text-blue-500" />
-                              )}
-                              {!notification.isRead && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-6 w-6 p-0 hover:bg-blue-100 dark:hover:bg-blue-900"
-                                  onClick={(e) => handleMarkAsRead(e, notification.id)}
-                                  disabled={markAsReadMutation.isPending}
-                                  title="Mark as read"
-                                >
-                                  {markAsReadMutation.isPending ? (
-                                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-500" />
-                                  ) : (
-                                    <Check className="h-3 w-3 text-blue-500" />
-                                  )}
-                                </Button>
-                              )}
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -283,14 +266,6 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
                               {formatTimeAgo(notification.createdAt)}
                             </span>
                             <div className="flex items-center space-x-2">
-                              <Badge 
-                                variant="outline" 
-                                className={`text-xs ${notification.priority === 'urgent' ? 'border-red-500 text-red-600 dark:text-red-400' : 
-                                  notification.priority === 'high' ? 'border-orange-500 text-orange-600 dark:text-orange-400' : 
-                                  'border-blue-500 text-blue-600 dark:text-blue-400'}`}
-                              >
-                                {notification.priority}
-                              </Badge>
                               {notification.isRead && (
                                 <span className="text-xs text-gray-400 dark:text-gray-500">Read</span>
                               )}

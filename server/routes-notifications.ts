@@ -104,11 +104,11 @@ export async function createAdminNotification(
     let finalMessage = message;
     
     if (type === 'user_verification_request') {
-      finalTitle = '🔍 User Verification Required';
-      finalMessage = `${relatedUserEmail} has registered and needs approval to access the platform.`;
+      finalTitle = 'User Verification Required';
+      finalMessage = `${relatedUserEmail} needs approval to access the platform`;
     } else if (type === 'user_registered') {
-      finalTitle = '👤 New User Registration';
-      finalMessage = `${relatedUserEmail} has successfully registered and been approved.`;
+      finalTitle = 'New User Registration';
+      finalMessage = `${relatedUserEmail} has been approved and can now access the platform`;
     }
     
     // Create notification for each admin user
