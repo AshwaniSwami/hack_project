@@ -93,14 +93,29 @@ export function NotificationBell({ userRole }: NotificationBellProps) {
       console.log('Starting clear all operation');
       
       // First fetch all notifications to get the IDs
-      const allNotificationsResponse = await apiRequest('/api/notifications');
-      const currentNotifications = allNotificationsResponse || [];
+      const response = await fetch('/api/notifications', {
+        method: 'GET',
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch notifications: ${response.statusText}`);
+      }
+      
+      const currentNotifications = await response.json() || [];
       console.log('Fetched notifications to clear:', currentNotifications.length);
       
       // Delete all notifications sequentially
       for (const notification of currentNotifications) {
         console.log('Deleting notification:', notification.id);
-        await apiRequest(`/api/notifications/${notification.id}`, { method: 'DELETE' });
+        const deleteResponse = await fetch(`/api/notifications/${notification.id}`, {
+          method: 'DELETE',
+          credentials: 'include',
+        });
+        
+        if (!deleteResponse.ok) {
+          throw new Error(`Failed to delete notification ${notification.id}`);
+        }
       }
       
       console.log('All notifications deleted successfully');
