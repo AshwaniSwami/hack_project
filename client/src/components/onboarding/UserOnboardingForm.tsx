@@ -32,17 +32,13 @@ interface Question {
   placeholder?: string;
 }
 
-interface FormConfig {
-  questions: Question[];
-}
-
 export default function UserOnboardingForm() {
   const [currentStep, setCurrentStep] = useState(0);
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: formConfig, isLoading, error } = useQuery<FormConfig>({
+  const { data: formConfig, isLoading, error } = useQuery<Question[]>({
     queryKey: ["/api/onboarding/form-config"],
     enabled: true,
   });
@@ -83,7 +79,7 @@ export default function UserOnboardingForm() {
   };
 
   const form = useForm({
-    resolver: formConfig ? zodResolver(createFormSchema(formConfig.questions)) : undefined,
+    resolver: formConfig ? zodResolver(createFormSchema(formConfig)) : undefined,
     defaultValues: {
       location: {
         country: "",
@@ -137,9 +133,9 @@ export default function UserOnboardingForm() {
         return;
       }
       setCurrentStep(currentStep + 1);
-    } else if (formConfig && currentStep > 0 && currentStep <= formConfig.questions.length) {
+    } else if (formConfig && currentStep > 0 && currentStep <= formConfig.length) {
       // Validate current question
-      const currentQuestion = formConfig.questions[currentStep - 1];
+      const currentQuestion = formConfig[currentStep - 1];
       if (currentQuestion && (currentQuestion.required || currentQuestion.compulsory)) {
         const isValid = await form.trigger([currentQuestion.id]);
         if (!isValid) {
@@ -153,7 +149,7 @@ export default function UserOnboardingForm() {
       }
       
       // If this is the last question, submit the form directly
-      if (currentStep === formConfig.questions.length) {
+      if (currentStep === formConfig.length) {
         const formData = form.getValues();
         await handleSubmit(formData);
       } else {
@@ -227,9 +223,9 @@ export default function UserOnboardingForm() {
     );
   }
 
-  const totalSteps = formConfig.questions.length + 1; // +1 for location step
-  const currentQuestion = currentStep > 0 ? formConfig.questions[currentStep - 1] : null;
-  const isLastQuestion = currentStep === formConfig.questions.length; // Last question, show submit button
+  const totalSteps = formConfig.length + 1; // +1 for location step
+  const currentQuestion = currentStep > 0 ? formConfig[currentStep - 1] : null;
+  const isLastQuestion = currentStep === formConfig.length; // Last question, show submit button
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 to-rose-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
