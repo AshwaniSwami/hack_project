@@ -179,7 +179,7 @@ export const getCurrentFormConfig = async (req: Request, res: Response) => {
           { id: "station_type", type: "radio", label: "What type of radio station are you affiliated with?", options: ["Community Radio", "Commercial Radio", "Public Radio", "Internet Radio", "Podcast Network", "Independent"], compulsory: true },
           { id: "goals", type: "text", label: "What are your main goals for using this platform?", compulsory: false }
         ] as FormQuestion[],
-        createdBy: "system",
+        createdBy: "1CsOEJFXS4MSwk2nRWDm9", // Use the admin user ID
         version: 1,
         isActive: true,
       };
@@ -491,7 +491,7 @@ export const getOnboardingAnalytics = async (req: AuthenticatedRequest, res: Res
             { id: "role", type: "radio", label: "What is your role?", options: ["Beginner", "Intermediate", "Advanced", "Expert"], compulsory: true },
             { id: "experience", type: "radio", label: "How would you describe your experience level?", options: ["Beginner", "Intermediate", "Advanced", "Expert"], compulsory: true }
           ] as FormQuestion[],
-          createdBy: "system",
+          createdBy: "1CsOEJFXS4MSwk2nRWDm9", // Use the admin user ID  
           version: 1,
           isActive: true,
         };
