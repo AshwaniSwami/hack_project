@@ -150,6 +150,9 @@ export class FallbackStorage implements IStorage {
 // Storage will be initialized after database check
 let storage: DatabaseStorage | FallbackStorage;
 
+// Create storage instance
+export const db = getDb();
+
 export async function initializeStorage() {
   try {
     console.log("🔄 Initializing storage...");
