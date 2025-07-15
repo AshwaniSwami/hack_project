@@ -168,11 +168,16 @@ export const getCurrentFormConfig = async (req: Request, res: Response) => {
     if (activeConfig.length === 0) {
       // Create default form configuration if none exists
       console.log("No active form config found, creating default...");
+      const { nanoid } = await import("nanoid");
       const defaultConfig = {
+        id: nanoid(),
         questions: [
           { id: "name", type: "text", label: "What is your name?", compulsory: true },
-          { id: "role", type: "radio", label: "What is your role?", options: ["Beginner", "Intermediate", "Advanced", "Expert"], compulsory: true },
-          { id: "experience", type: "radio", label: "How would you describe your experience level?", options: ["Beginner", "Intermediate", "Advanced", "Expert"], compulsory: true }
+          { id: "role", type: "radio", label: "What is your primary role?", options: ["Radio Host", "Producer", "Script Writer", "Content Manager", "Technical Director"], compulsory: true },
+          { id: "experience", type: "radio", label: "How many years of radio experience do you have?", options: ["Less than 1 year", "1-3 years", "3-5 years", "5-10 years", "More than 10 years"], compulsory: true },
+          { id: "interests", type: "checkbox", label: "What type of content are you most interested in? (Select all that apply)", options: ["News & Current Affairs", "Music Shows", "Talk Shows", "Educational Content", "Community Programs", "Sports Commentary"], compulsory: false },
+          { id: "station_type", type: "radio", label: "What type of radio station are you affiliated with?", options: ["Community Radio", "Commercial Radio", "Public Radio", "Internet Radio", "Podcast Network", "Independent"], compulsory: true },
+          { id: "goals", type: "text", label: "What are your main goals for using this platform?", compulsory: false }
         ] as FormQuestion[],
         createdBy: "system",
         version: 1,
@@ -225,7 +230,9 @@ export const updateFormConfig = async (req: AuthenticatedRequest, res: Response)
     const nextVersion = latestVersion.length > 0 ? latestVersion[0].version + 1 : 1;
 
     // Insert new configuration
+    const { nanoid } = await import("nanoid");
     await db.insert(onboardingFormConfig).values({
+      id: nanoid(),
       ...configData,
       version: nextVersion,
       isActive: true,
