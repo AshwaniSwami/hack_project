@@ -13,7 +13,8 @@ import {
   FileText,
   RadioTower,
   Users,
-  TrendingUp
+  TrendingUp,
+  FormInput
 } from "lucide-react";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -38,6 +39,7 @@ export function Navbar() {
     { href: "/radio-stations", label: "Stations", icon: RadioTower },
     ...(isAdmin ? [{ href: "/users", label: "Users", icon: Users }] : []),
     ...(isAdmin ? [{ href: "/analytics", label: "Analytics", icon: TrendingUp }] : []),
+    ...(isAdmin ? [{ href: "/onboarding", label: "Onboarding", icon: FormInput }] : []),
   ];
 
   return (

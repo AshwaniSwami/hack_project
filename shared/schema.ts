@@ -41,6 +41,10 @@ export const users = pgTable("users", {
   isVerified: boolean("is_verified").default(false), // Email verification status
   loginCount: integer("login_count").default(0),
   lastLoginAt: timestamp("last_login_at"),
+  // Onboarding form fields
+  firstLoginCompleted: boolean("first_login_completed").default(false),
+  location: jsonb("location"), // { country, city, latitude, longitude }
+  onboardingResponses: jsonb("onboarding_responses"), // Store form responses
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -253,6 +257,39 @@ export const notifications = pgTable("notifications", {
   index("idx_notifications_priority").on(table.priority),
 ]);
 
+// Onboarding Form Configuration table
+export const onboardingFormConfig = pgTable("onboarding_form_config", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  version: integer("version").default(1),
+  isActive: boolean("is_active").default(true),
+  questions: jsonb("questions").notNull(), // Array of question objects
+  createdBy: varchar("created_by").notNull(), // Admin who created the form
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_onboarding_form_version").on(table.version),
+  index("idx_onboarding_form_active").on(table.isActive),
+  index("idx_onboarding_form_created").on(table.createdAt),
+]);
+
+// Onboarding Form Responses table (for detailed analytics)
+export const onboardingFormResponses = pgTable("onboarding_form_responses", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull(),
+  formConfigId: uuid("form_config_id").notNull(),
+  questionId: varchar("question_id").notNull(),
+  questionType: varchar("question_type", { length: 20 }).notNull(), // radio, checkbox, text
+  questionLabel: text("question_label").notNull(),
+  response: jsonb("response").notNull(), // Single value or array for multiple choice
+  isCompulsory: boolean("is_compulsory").default(false),
+  submittedAt: timestamp("submitted_at").defaultNow(),
+}, (table) => [
+  index("idx_onboarding_responses_user").on(table.userId),
+  index("idx_onboarding_responses_form").on(table.formConfigId),
+  index("idx_onboarding_responses_question").on(table.questionId),
+  index("idx_onboarding_responses_submitted").on(table.submittedAt),
+]);
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   scripts: many(scripts),
@@ -260,6 +297,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   grantedAccess: many(freeProjectAccess),
   otpVerifications: many(otpVerifications),
   notifications: many(notifications),
+  onboardingResponses: many(onboardingFormResponses),
 }));
 
 export const otpVerificationsRelations = relations(otpVerifications, ({ one }) => ({
@@ -388,6 +426,27 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
   }),
 }));
 
+// Onboarding Form Config Relations
+export const onboardingFormConfigRelations = relations(onboardingFormConfig, ({ one, many }) => ({
+  creator: one(users, {
+    fields: [onboardingFormConfig.createdBy],
+    references: [users.id],
+  }),
+  responses: many(onboardingFormResponses),
+}));
+
+// Onboarding Form Responses Relations
+export const onboardingFormResponsesRelations = relations(onboardingFormResponses, ({ one }) => ({
+  user: one(users, {
+    fields: [onboardingFormResponses.userId],
+    references: [users.id],
+  }),
+  formConfig: one(onboardingFormConfig, {
+    fields: [onboardingFormResponses.formConfigId],
+    references: [onboardingFormConfig.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
@@ -465,6 +524,17 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
   id: true,
   createdAt: true,
   readAt: true,
+});
+
+export const insertOnboardingFormConfigSchema = createInsertSchema(onboardingFormConfig).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertOnboardingFormResponseSchema = createInsertSchema(onboardingFormResponses).omit({
+  id: true,
+  submittedAt: true,
 });
 
 // Types

@@ -2,7 +2,7 @@
 
 ## Overview
 
-SMART Radio Content Hub is a comprehensive content management system designed for radio broadcasting. It provides a centralized platform for managing radio projects, episodes, scripts, and radio station access. The application supports file uploads, user management, and content organization with a focus on radio production workflows.
+SMART Radio Content Hub is a comprehensive content management system designed for radio broadcasting with integrated dynamic user onboarding capabilities. It provides a centralized platform for managing radio projects, episodes, scripts, and radio station access, while also featuring an advanced form builder for creating customized user registration experiences. The application supports file uploads, user management, content organization, and dynamic onboarding forms with analytics, all focused on radio production workflows.
 
 ## System Architecture
 
@@ -35,7 +35,7 @@ SMART Radio Content Hub is a comprehensive content management system designed fo
 
 ### Database Schema
 The application uses a relational database with the following core entities:
-- **Users**: User authentication and profile management with role-based access control
+- **Users**: User authentication and profile management with role-based access control, onboarding status, and location tracking
 - **Projects**: Project organization with theme categorization
 - **Episodes**: Individual radio episodes linked to projects with premium content support
 - **Scripts**: Content scripts with rich text support, workflow status, and topic associations
@@ -45,6 +45,8 @@ The application uses a relational database with the following core entities:
 - **File Folders**: Hierarchical folder structure for organizing files within entities
 - **Free Project Access**: Access control system for radio stations to specific projects
 - **Themes**: Visual theme system for project categorization and organization
+- **Onboarding Form Config**: Dynamic form configuration with versioning and question management
+- **Onboarding Form Responses**: Individual user responses for analytics and tracking
 
 ### File Management System
 - **Enhanced File Organization**: Hierarchical folder structure with nested folders support
@@ -63,6 +65,9 @@ The application uses a relational database with the following core entities:
 - Tabbed interfaces for detailed content management
 - Modal dialogs for content creation and editing
 - File upload components with drag-and-drop support
+- Dynamic onboarding form builder with drag-and-drop interface
+- Multi-step onboarding wizard with location collection
+- Analytics dashboard with interactive charts and geographic visualization
 
 ## Data Flow
 
@@ -125,6 +130,12 @@ The application uses a relational database with the following core entities:
 
 ## Recent Changes
 
+- July 15, 2025: Added comprehensive onboarding form builder functionality with drag-and-drop interface for creating dynamic user registration forms
+- July 15, 2025: Implemented onboarding analytics dashboard with geographic distribution, response statistics, and interactive charts
+- July 15, 2025: Created user onboarding form component with multi-step wizard, location collection, and custom question types
+- July 15, 2025: Extended database schema with onboarding form configuration, form responses, and user location tracking
+- July 15, 2025: Integrated form builder with existing radio content management system for seamless user experience
+- July 15, 2025: Added admin-only onboarding management page accessible through main navigation
 - July 15, 2025: Fixed notification clearing functionality - notifications now properly mark as read and delete in real-time
 - July 15, 2025: Enhanced mark-all-read functionality to work correctly for admin users
 - July 15, 2025: Simplified notification permissions - admin users can now manage all notifications seamlessly
