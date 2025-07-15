@@ -73,7 +73,7 @@ export default function FormBuilder() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: formConfig, isLoading, error } = useQuery<FormConfigData>({
+  const { data: formConfig, isLoading, error } = useQuery<QuestionData[]>({
     queryKey: ["/api/onboarding/form-config"],
     enabled: true,
   });
@@ -90,9 +90,9 @@ export default function FormBuilder() {
   });
 
   useEffect(() => {
-    if (formConfig) {
+    if (formConfig && Array.isArray(formConfig)) {
       // Convert backend structure to frontend structure if needed
-      const convertedQuestions = formConfig.questions.map(q => ({
+      const convertedQuestions = formConfig.map(q => ({
         ...q,
         // Ensure we have the required fields for frontend compatibility
         compulsory: q.required || q.compulsory || false,
@@ -106,8 +106,8 @@ export default function FormBuilder() {
 
   // Track changes to questions to set unsaved changes flag
   useEffect(() => {
-    if (formConfig && questions.length >= 0) {
-      const originalQuestions = formConfig.questions.map(q => ({
+    if (formConfig && Array.isArray(formConfig) && questions.length >= 0) {
+      const originalQuestions = formConfig.map(q => ({
         ...q,
         compulsory: q.required || q.compulsory || false,
         options: q.options?.map(opt => typeof opt === 'string' ? opt : opt.label) || []
