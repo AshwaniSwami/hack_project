@@ -430,12 +430,21 @@ export const getOnboardingAnalytics = async (req: AuthenticatedRequest, res: Res
 
     const formConfig = activeConfig.length > 0 ? activeConfig[0].questions : { questions: [] };
 
-    res.json({
+    console.log("Getting onboarding analytics...");
+    console.log("Raw responses:", responses);
+    console.log("Completed users:", completedUsers.map(u => ({ id: u.id, email: u.email, firstName: u.firstName, lastName: u.lastName, location: u.location, onboardingResponses: u.onboardingResponses })));
+    
+    const finalAnalytics = {
+      totalResponses: responses.length,
+      responsesByQuestion: responseStats,
+      completionRate: allUsers.length > 0 ? Math.round((completedUsers.length / allUsers.length) * 100) : 0,
+      demographics: {
+        byLocation: locationStats.countries,
+        totalUsers: allUsers.length,
+      },
       totalUsers: allUsers.length,
       completedUsers: completedUsers.length,
-      completionRate: allUsers.length > 0 ? Math.round((completedUsers.length / allUsers.length) * 100) : 0,
       locationStats,
-      responseStats,
       users: allUsers.map(user => ({
         id: user.id,
         name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
@@ -445,7 +454,11 @@ export const getOnboardingAnalytics = async (req: AuthenticatedRequest, res: Res
         customFormResponses: user.onboardingResponses,
       })),
       formConfig,
-    });
+    };
+    
+    console.log("Final analytics:", finalAnalytics);
+    
+    res.json(finalAnalytics);
   } catch (error) {
     console.error("Error fetching onboarding analytics:", error);
     res.status(500).json({ error: "Failed to fetch onboarding analytics" });
