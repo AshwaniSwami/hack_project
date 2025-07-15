@@ -473,8 +473,13 @@ export const checkOnboardingStatus = async (req: AuthenticatedRequest, res: Resp
       return res.status(401).json({ error: "Authentication required" });
     }
 
+    // Admin users should skip onboarding
+    if (req.user.role === "admin") {
+      return res.json({ needsOnboarding: false });
+    }
+
     if (!isDatabaseAvailable()) {
-      // In mock mode, check if user is new (for demo purposes)
+      // In mock mode, non-admin users need onboarding
       const isNewUser = !req.user.firstName || req.user.email === "temp-admin-001@example.com";
       return res.json({ needsOnboarding: isNewUser });
     }

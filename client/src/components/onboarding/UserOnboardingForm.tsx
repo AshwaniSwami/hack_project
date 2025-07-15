@@ -148,6 +148,7 @@ export default function UserOnboardingForm() {
       }
     }
     
+    // Only move to next step if we're not at the last step
     if (formConfig && currentStep < formConfig.questions.length) {
       setCurrentStep(currentStep + 1);
     }
@@ -159,8 +160,20 @@ export default function UserOnboardingForm() {
     }
   };
 
-  const handleSubmit = (data: any) => {
+  const handleSubmit = async (data: any) => {
     console.log("Submitting onboarding data:", data);
+    
+    // Validate all required fields before submission
+    const isValid = await form.trigger();
+    if (!isValid) {
+      toast({
+        title: "Please complete all required fields",
+        description: "Some required information is missing",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     submitMutation.mutate(data);
   };
 
@@ -208,6 +221,7 @@ export default function UserOnboardingForm() {
 
   const totalSteps = formConfig.questions.length + 1; // +1 for location step
   const currentQuestion = currentStep > 0 ? formConfig.questions[currentStep - 1] : null;
+  const isLastStep = currentStep === totalSteps - 1;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 to-rose-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
@@ -244,7 +258,7 @@ export default function UserOnboardingForm() {
           </CardHeader>
           <CardContent className="p-6">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6" noValidate>
                 {currentStep === 0 && (
                   <div className="space-y-4">
                     <div className="flex items-center gap-2 mb-4">
@@ -398,8 +412,12 @@ export default function UserOnboardingForm() {
                     Previous
                   </Button>
 
-                  {currentStep < totalSteps - 1 ? (
-                    <Button type="button" onClick={handleNext}>
+                  {!isLastStep ? (
+                    <Button 
+                      type="button" 
+                      onClick={handleNext}
+                      disabled={submitMutation.isPending}
+                    >
                       Next
                     </Button>
                   ) : (
