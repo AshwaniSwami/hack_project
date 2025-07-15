@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { storage } from "./storage";
 import { nanoid } from "nanoid";
 import { createAdminNotification } from "./routes-notifications";
+import { isDatabaseAvailable } from "./db";
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -14,10 +15,52 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
+// Temporary hardcoded admin user for testing when database is not available
+const TEMP_ADMIN = {
+  id: "temp-admin-001",
+  email: "admin@example.com",
+  password: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", // password: "password"
+  firstName: "Admin",
+  lastName: "User",
+  role: "admin",
+  isActive: true,
+  loginCount: 0,
+  lastLoginAt: new Date(),
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
 // Middleware to check if user is authenticated
 export const isAuthenticated = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  console.log("isAuthenticated middleware - session:", req.session);
+  console.log("isAuthenticated middleware - sessionId:", req.sessionID);
+  console.log("isAuthenticated middleware - userId:", (req.session as any)?.userId);
+  
   if (req.session && (req.session as any).userId) {
     try {
+      // Check if database is available
+      if (!isDatabaseAvailable()) {
+        // Use temporary authentication when database is not available
+        const userId = (req.session as any).userId;
+        console.log("Temp auth - checking userId:", userId, "against", TEMP_ADMIN.id);
+        if (userId === TEMP_ADMIN.id) {
+          req.user = {
+            id: TEMP_ADMIN.id,
+            email: TEMP_ADMIN.email,
+            role: TEMP_ADMIN.role,
+            firstName: TEMP_ADMIN.firstName,
+            lastName: TEMP_ADMIN.lastName,
+          };
+          console.log("Temp auth - user set:", req.user);
+          next();
+        } else {
+          console.log("Temp auth - user not found");
+          res.status(401).json({ message: "User not found" });
+        }
+        return;
+      }
+
+      // Use database authentication when available
       const user = await storage.getUser((req.session as any).userId);
       if (user) {
         req.user = {
@@ -36,7 +79,8 @@ export const isAuthenticated = async (req: AuthenticatedRequest, res: Response, 
       res.status(500).json({ message: "Authentication failed" });
     }
   } else {
-    res.status(401).json({ message: "Unauthorized" });
+    console.log("No session or userId found");
+    res.status(401).json({ message: "Not authenticated" });
   }
 };
 
@@ -44,6 +88,26 @@ export const isAuthenticated = async (req: AuthenticatedRequest, res: Response, 
 export const isAdmin = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   if (req.session && (req.session as any).userId) {
     try {
+      // Check if database is available
+      if (!isDatabaseAvailable()) {
+        // Use temporary authentication when database is not available
+        const userId = (req.session as any).userId;
+        if (userId === TEMP_ADMIN.id) {
+          req.user = {
+            id: TEMP_ADMIN.id,
+            email: TEMP_ADMIN.email,
+            role: TEMP_ADMIN.role,
+            firstName: TEMP_ADMIN.firstName,
+            lastName: TEMP_ADMIN.lastName,
+          };
+          next();
+        } else {
+          res.status(403).json({ message: "Admin access required" });
+        }
+        return;
+      }
+
+      // Use database authentication when available
       const user = await storage.getUser((req.session as any).userId);
       if (user && user.role === 'admin') {
         req.user = {
@@ -73,6 +137,28 @@ export const login = async (req: Request, res: Response) => {
     
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    // Check if database is available
+    if (!isDatabaseAvailable()) {
+      // Use temporary authentication when database is not available
+      if (email === TEMP_ADMIN.email) {
+        const isValid = await bcrypt.compare(password, TEMP_ADMIN.password);
+        if (isValid) {
+          (req.session as any).userId = TEMP_ADMIN.id;
+          return res.json({
+            message: "Login successful",
+            user: {
+              id: TEMP_ADMIN.id,
+              email: TEMP_ADMIN.email,
+              role: TEMP_ADMIN.role,
+              firstName: TEMP_ADMIN.firstName,
+              lastName: TEMP_ADMIN.lastName,
+            }
+          });
+        }
+      }
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
     // Get all users and find by email (since we don't have email-specific query)
@@ -224,6 +310,25 @@ export const getCurrentUser = async (req: AuthenticatedRequest, res: Response) =
       return res.status(401).json({ message: "Not authenticated" });
     }
 
+    // Check if database is available
+    if (!isDatabaseAvailable()) {
+      // Use temporary authentication when database is not available
+      if (userId === TEMP_ADMIN.id) {
+        console.log("Successfully retrieved temp admin user");
+        return res.json({
+          id: TEMP_ADMIN.id,
+          email: TEMP_ADMIN.email,
+          firstName: TEMP_ADMIN.firstName,
+          lastName: TEMP_ADMIN.lastName,
+          role: TEMP_ADMIN.role,
+        });
+      } else {
+        console.log("User not found for userId:", userId);
+        return res.status(404).json({ message: "User not found" });
+      }
+    }
+
+    // Use database authentication when available
     const user = await storage.getUser(userId);
     if (!user) {
       console.log("User not found for userId:", userId);
