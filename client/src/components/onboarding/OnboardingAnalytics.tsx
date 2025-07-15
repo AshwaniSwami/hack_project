@@ -64,6 +64,12 @@ export default function OnboardingAnalytics() {
   // Since we don't have city data separately, we'll just use country data
   const cityData = countryData;
 
+  // Create locationStats object in the format expected by the component
+  const locationStats = {
+    countries: byLocation,
+    cities: byLocation
+  };
+
   // World map placeholder with hotspots
   const getHotspotSize = (count: number) => {
     const maxCount = Math.max(...Object.values(byLocation));
@@ -248,45 +254,22 @@ export default function OnboardingAnalytics() {
         <TabsContent value="responses" className="space-y-6">
           {/* Form Response Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {formConfig.questions.map((question, index) => {
-              const questionStats = responseStats[question.id];
-              if (!questionStats) return null;
+            {responsesByQuestion && Object.keys(responsesByQuestion).length > 0 ? (
+              Object.entries(responsesByQuestion).map(([questionId, questionStats], index) => {
+                const chartData = Object.entries(questionStats)
+                  .map(([key, value]) => ({ name: key, value }))
+                  .filter(item => item.value > 0);
 
-              const chartData = Object.entries(questionStats)
-                .map(([key, value]) => ({ name: key, value }))
-                .filter(item => item.value > 0);
-
-              return (
-                <Card key={question.id}>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span className="text-sm">{question.label}</span>
-                      {question.compulsory && (
-                        <Badge variant="destructive" className="text-xs">Required</Badge>
-                      )}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={250}>
-                      {question.type === 'radio' ? (
-                        <PieChart>
-                          <Pie
-                            data={chartData}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                            outerRadius={80}
-                            fill="#8884d8"
-                            dataKey="value"
-                          >
-                            {chartData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip />
-                        </PieChart>
-                      ) : (
+                return (
+                  <Card key={questionId}>
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        <span className="text-sm">{questionId}</span>
+                        <Badge variant="outline" className="text-xs">Response</Badge>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={250}>
                         <BarChart data={chartData}>
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="name" />
@@ -294,12 +277,16 @@ export default function OnboardingAnalytics() {
                           <Tooltip />
                           <Bar dataKey="value" fill={COLORS[index % COLORS.length]} />
                         </BarChart>
-                      )}
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                );
+              })
+            ) : (
+              <div className="col-span-2 text-center py-8">
+                <p className="text-gray-500">No form responses available yet</p>
+              </div>
+            )}
           </div>
         </TabsContent>
 
@@ -311,20 +298,26 @@ export default function OnboardingAnalytics() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {users.map((user, index) => (
-                    <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-gray-100">{user.name}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{user.location.city}, {user.location.country}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={user.firstLoginCompleted ? "default" : "secondary"}>
-                          {user.firstLoginCompleted ? "Completed" : "Pending"}
-                        </Badge>
-                        <MapPin className="h-4 w-4 text-gray-400" />
+                  {totalUsers > 0 ? (
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-gray-100">Total Users</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">System users</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="default">
+                            {totalUsers} users
+                          </Badge>
+                          <Users className="h-4 w-4 text-gray-400" />
+                        </div>
                       </div>
                     </div>
-                  ))}
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">No users found</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -335,27 +328,30 @@ export default function OnboardingAnalytics() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {Object.entries(responseStats).map(([questionId, stats]) => {
-                    const question = formConfig.questions.find(q => q.id === questionId);
-                    if (!question) return null;
+                  {responsesByQuestion && Object.keys(responsesByQuestion).length > 0 ? (
+                    Object.entries(responsesByQuestion).map(([questionId, stats]) => {
+                      const totalResponses = Object.values(stats).reduce((sum, count) => sum + count, 0);
+                      const topResponse = Object.entries(stats).reduce((max, [key, value]) => 
+                        value > max.value ? { key, value } : max
+                      , { key: '', value: 0 });
 
-                    const totalResponses = Object.values(stats).reduce((sum, count) => sum + count, 0);
-                    const topResponse = Object.entries(stats).reduce((max, [key, value]) => 
-                      value > max.value ? { key, value } : max
-                    , { key: '', value: 0 });
-
-                    return (
-                      <div key={questionId} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium text-gray-900 dark:text-gray-100">{question.label}</h4>
-                          <Badge variant="outline">{totalResponses} responses</Badge>
+                      return (
+                        <div key={questionId} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-medium text-gray-900 dark:text-gray-100">{questionId}</h4>
+                            <Badge variant="outline">{totalResponses} responses</Badge>
+                          </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Most popular: <span className="font-medium">{topResponse.key}</span> ({topResponse.value} users)
+                          </p>
                         </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          Most popular: <span className="font-medium">{topResponse.key}</span> ({topResponse.value} users)
-                        </p>
-                      </div>
-                    );
-                  })}
+                      );
+                    })
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">No response data available</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
