@@ -22,10 +22,11 @@ export default function OnboardingAnalytics() {
   const [selectedQuestion, setSelectedQuestion] = useState<string>("all");
 
   // Real API call for analytics data
-  const { data: analyticsData, isLoading } = useQuery({
+  const { data: analyticsData, isLoading, error } = useQuery({
     queryKey: ["/api/onboarding/analytics"],
     enabled: true,
     refetchInterval: 30000, // Refetch every 30 seconds
+    retry: false, // Don't retry on failure
   });
 
   if (isLoading) {
@@ -41,6 +42,16 @@ export default function OnboardingAnalytics() {
     );
   }
 
+  if (error) {
+    console.error("Analytics error:", error);
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-500 mb-2">Failed to load analytics data</p>
+        <p className="text-gray-500 text-sm">Error: {error.message || 'Unknown error'}</p>
+      </div>
+    );
+  }
+
   if (!analyticsData) {
     return (
       <div className="text-center py-8">
@@ -49,34 +60,42 @@ export default function OnboardingAnalytics() {
     );
   }
 
-  const { totalUsers, completedUsers, completionRate, locationStats, responseStats, users, formConfig } = analyticsData;
+  const { 
+    totalUsers = 0, 
+    completedUsers = 0, 
+    completionRate = 0, 
+    locationStats = { countries: {}, cities: {} }, 
+    responseStats = {}, 
+    users = [], 
+    formConfig = { questions: [] } 
+  } = analyticsData || {};
 
-  // Prepare chart data
-  const countryData = Object.entries(locationStats.countries)
+  // Prepare chart data with safe access
+  const countryData = locationStats?.countries ? Object.entries(locationStats.countries)
     .map(([country, count]) => ({ country, count }))
     .sort((a, b) => b.count - a.count)
-    .slice(0, 8);
+    .slice(0, 8) : [];
 
-  const cityData = Object.entries(locationStats.cities)
+  const cityData = locationStats?.cities ? Object.entries(locationStats.cities)
     .map(([city, count]) => ({ city, count }))
     .sort((a, b) => b.count - a.count)
-    .slice(0, 8);
+    .slice(0, 8) : [];
 
   // World map placeholder with hotspots
   const getHotspotSize = (count: number) => {
-    const maxCount = Math.max(...Object.values(locationStats.countries));
+    const maxCount = locationStats?.countries ? Math.max(...Object.values(locationStats.countries)) : 1;
     return Math.max(10, (count / maxCount) * 30);
   };
 
   const worldHotspots = [
-    { country: "USA", x: 25, y: 35, count: locationStats.countries["USA"] || 0 },
-    { country: "India", x: 70, y: 45, count: locationStats.countries["India"] || 0 },
-    { country: "Brazil", x: 35, y: 65, count: locationStats.countries["Brazil"] || 0 },
-    { country: "Kenya", x: 60, y: 55, count: locationStats.countries["Kenya"] || 0 },
-    { country: "Canada", x: 25, y: 25, count: locationStats.countries["Canada"] || 0 },
-    { country: "Australia", x: 80, y: 75, count: locationStats.countries["Australia"] || 0 },
-    { country: "Egypt", x: 58, y: 40, count: locationStats.countries["Egypt"] || 0 },
-    { country: "Singapore", x: 78, y: 52, count: locationStats.countries["Singapore"] || 0 },
+    { country: "USA", x: 25, y: 35, count: locationStats?.countries?.["USA"] || 0 },
+    { country: "India", x: 70, y: 45, count: locationStats?.countries?.["India"] || 0 },
+    { country: "Brazil", x: 35, y: 65, count: locationStats?.countries?.["Brazil"] || 0 },
+    { country: "Kenya", x: 60, y: 55, count: locationStats?.countries?.["Kenya"] || 0 },
+    { country: "Canada", x: 25, y: 25, count: locationStats?.countries?.["Canada"] || 0 },
+    { country: "Australia", x: 80, y: 75, count: locationStats?.countries?.["Australia"] || 0 },
+    { country: "Egypt", x: 58, y: 40, count: locationStats?.countries?.["Egypt"] || 0 },
+    { country: "Singapore", x: 78, y: 52, count: locationStats?.countries?.["Singapore"] || 0 },
   ];
 
   return (
@@ -246,8 +265,8 @@ export default function OnboardingAnalytics() {
         <TabsContent value="responses" className="space-y-6">
           {/* Form Response Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {formConfig.questions.map((question, index) => {
-              const questionStats = responseStats[question.id];
+            {formConfig?.questions?.map((question, index) => {
+              const questionStats = responseStats?.[question.id];
               if (!questionStats) return null;
 
               const chartData = Object.entries(questionStats)
@@ -313,7 +332,9 @@ export default function OnboardingAnalytics() {
                     <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div>
                         <p className="font-medium text-gray-900 dark:text-gray-100">{user.name}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{user.location.city}, {user.location.country}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {user.location?.city || 'Unknown'}, {user.location?.country || 'Unknown'}
+                        </p>
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge variant={user.firstLoginCompleted ? "default" : "secondary"}>
@@ -333,12 +354,12 @@ export default function OnboardingAnalytics() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {Object.entries(responseStats).map(([questionId, stats]) => {
-                    const question = formConfig.questions.find(q => q.id === questionId);
+                  {responseStats && Object.entries(responseStats).map(([questionId, stats]) => {
+                    const question = formConfig?.questions?.find(q => q.id === questionId);
                     if (!question) return null;
 
-                    const totalResponses = Object.values(stats).reduce((sum, count) => sum + count, 0);
-                    const topResponse = Object.entries(stats).reduce((max, [key, value]) => 
+                    const totalResponses = Object.values(stats || {}).reduce((sum, count) => sum + count, 0);
+                    const topResponse = Object.entries(stats || {}).reduce((max, [key, value]) => 
                       value > max.value ? { key, value } : max
                     , { key: '', value: 0 });
 
