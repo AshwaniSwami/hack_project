@@ -157,23 +157,44 @@ export async function initializeStorage() {
   try {
     console.log("🔄 Initializing storage...");
 
-    // Create tables if they don't exist
-    await createTables();
-    console.log("✅ Tables created/verified");
+    // Check if database is available
+    if (!process.env.DATABASE_URL) {
+      console.log("⚠️  DATABASE_URL not found - using fallback storage");
+      storage = new FallbackStorage();
+      return;
+    }
 
-    // Verify database connection
-    const testUser = await db.select().from(users).limit(1);
-    console.log("✅ Database connection verified");
+    // Verify database connection with a simple test
+    const dbInstance = getDb();
+    if (dbInstance) {
+      try {
+        const testQuery = await dbInstance.select().from(users).limit(1);
+        console.log("✅ Database connection verified");
+        storage = new DatabaseStorage();
+      } catch (error) {
+        console.log("⚠️  Database connection failed - using fallback storage");
+        storage = new FallbackStorage();
+      }
+    } else {
+      console.log("⚠️  Database not available - using fallback storage");
+      storage = new FallbackStorage();
+    }
 
-    // Initialize temp data if needed
-    await initializeTempData();
     console.log("✅ Storage initialization complete");
 
   } catch (error) {
     console.error("❌ Failed to initialize storage:", error);
-    console.error("Error details:", error);
-    throw error;
+    console.log("⚠️  Using fallback storage due to error");
+    storage = new FallbackStorage();
   }
+}
+
+// Export storage getter function
+export function getStorage(): DatabaseStorage | FallbackStorage {
+  if (!storage) {
+    throw new Error("Storage not initialized. Call initializeStorage() first.");
+  }
+  return storage;
 }
 
 export { storage };
