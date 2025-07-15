@@ -78,54 +78,70 @@ export async function getOnboardingAnalytics(req: any, res: any) {
         totalResponses: 0,
         responsesByQuestion: {},
         completionRate: 0,
-        demographics: {}
+        demographics: {
+          byLocation: {},
+          totalUsers: 0
+        }
       });
     }
 
-    const [responses, usersList] = await Promise.all([
-      db.select().from(onboardingFormResponses),
-      db.select().from(users).where(eq(users.onboardingCompleted, true))
-    ]);
+    try {
+      const [responses, usersList, totalUsersResult] = await Promise.all([
+        db.select().from(onboardingFormResponses).catch(() => []),
+        db.select().from(users).where(eq(users.onboardingCompleted, true)).catch(() => []),
+        db.select({ count: sql<number>`count(*)` }).from(users).catch(() => [{ count: 0 }])
+      ]);
 
-    const users = usersList;
+      console.log("Raw responses:", responses);
+      console.log("Completed users:", usersList);
 
-    console.log("Raw responses:", responses);
-    console.log("Completed users:", users);
+      // Group responses by question
+      const responsesByQuestion: Record<string, any[]> = {};
+      (responses || []).forEach(response => {
+        if (!responsesByQuestion[response.questionId]) {
+          responsesByQuestion[response.questionId] = [];
+        }
+        responsesByQuestion[response.questionId].push(response);
+      });
 
-    // Group responses by question
-    const responsesByQuestion: Record<string, any[]> = {};
-    responses.forEach(response => {
-      if (!responsesByQuestion[response.questionId]) {
-        responsesByQuestion[response.questionId] = [];
-      }
-      responsesByQuestion[response.questionId].push(response);
-    });
+      // Calculate demographics from user data
+      const demographics = {
+        byLocation: {} as Record<string, number>,
+        totalUsers: usersList?.length || 0
+      };
 
-    // Calculate demographics from user data
-    const demographics = {
-      byLocation: {} as Record<string, number>,
-      totalUsers: users.length
-    };
+      (usersList || []).forEach(user => {
+        if (user.location) {
+          demographics.byLocation[user.location] = (demographics.byLocation[user.location] || 0) + 1;
+        }
+      });
 
-    users.forEach(user => {
-      if (user.location) {
-        demographics.byLocation[user.location] = (demographics.byLocation[user.location] || 0) + 1;
-      }
-    });
+      const totalUsers = totalUsersResult?.[0]?.count || 0;
+      const completedUsers = usersList?.length || 0;
+      const completionRate = totalUsers > 0 ? (completedUsers / totalUsers) * 100 : 0;
 
-    const totalUsers = await db.select({ count: sql<number>`count(*)` }).from(users);
-    const completedUsers = users.length;
-    const completionRate = totalUsers[0]?.count > 0 ? (completedUsers / totalUsers[0].count) * 100 : 0;
+      const analytics = {
+        totalResponses: responses?.length || 0,
+        responsesByQuestion,
+        completionRate,
+        demographics
+      };
 
-    const analytics = {
-      totalResponses: responses.length,
-      responsesByQuestion,
-      completionRate,
-      demographics
-    };
-
-    console.log("Final analytics:", analytics);
-    res.json(analytics);
+      console.log("Final analytics:", analytics);
+      res.json(analytics);
+    } catch (dbError) {
+      console.error("Database error in analytics:", dbError);
+      // Return empty analytics if database tables don't exist yet
+      res.json({
+        totalResponses: 0,
+        responsesByQuestion: {},
+        completionRate: 0,
+        demographics: {
+          byLocation: {},
+          totalUsers: 0
+        }
+      });
+    }
   } catch (error) {
     console.error("Error getting onboarding analytics:", error);
     res.status(500).json({ error: "Failed to get onboarding analytics" });
@@ -161,11 +177,4 @@ export async function checkOnboardingStatus(req: any, res: any) {
   }
 }
 
-// Export all functions for use in routes.ts
-export {
-  getCurrentFormConfig,
-  updateFormConfig,
-  submitOnboardingForm,
-  getOnboardingAnalytics,
-  checkOnboardingStatus
-};
+// Functions are already exported above, no need for duplicate exports
