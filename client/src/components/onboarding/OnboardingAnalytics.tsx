@@ -49,34 +49,36 @@ export default function OnboardingAnalytics() {
     );
   }
 
-  const { totalUsers, completedUsers, completionRate, locationStats, responseStats, users, formConfig } = analyticsData;
+  // Extract data from the actual API response structure
+  const { totalResponses, responsesByQuestion, completionRate, demographics } = analyticsData;
+  const totalUsers = demographics?.totalUsers || 0;
+  const completedUsers = Math.round((completionRate / 100) * totalUsers);
+  const byLocation = demographics?.byLocation || {};
 
-  // Prepare chart data
-  const countryData = Object.entries(locationStats.countries)
+  // Prepare chart data from actual response structure
+  const countryData = Object.entries(byLocation)
     .map(([country, count]) => ({ country, count }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 8);
 
-  const cityData = Object.entries(locationStats.cities)
-    .map(([city, count]) => ({ city, count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 8);
+  // Since we don't have city data separately, we'll just use country data
+  const cityData = countryData;
 
   // World map placeholder with hotspots
   const getHotspotSize = (count: number) => {
-    const maxCount = Math.max(...Object.values(locationStats.countries));
+    const maxCount = Math.max(...Object.values(byLocation));
     return Math.max(10, (count / maxCount) * 30);
   };
 
   const worldHotspots = [
-    { country: "USA", x: 25, y: 35, count: locationStats.countries["USA"] || 0 },
-    { country: "India", x: 70, y: 45, count: locationStats.countries["India"] || 0 },
-    { country: "Brazil", x: 35, y: 65, count: locationStats.countries["Brazil"] || 0 },
-    { country: "Kenya", x: 60, y: 55, count: locationStats.countries["Kenya"] || 0 },
-    { country: "Canada", x: 25, y: 25, count: locationStats.countries["Canada"] || 0 },
-    { country: "Australia", x: 80, y: 75, count: locationStats.countries["Australia"] || 0 },
-    { country: "Egypt", x: 58, y: 40, count: locationStats.countries["Egypt"] || 0 },
-    { country: "Singapore", x: 78, y: 52, count: locationStats.countries["Singapore"] || 0 },
+    { country: "USA", x: 25, y: 35, count: byLocation["USA"] || 0 },
+    { country: "India", x: 70, y: 45, count: byLocation["India"] || 0 },
+    { country: "Brazil", x: 35, y: 65, count: byLocation["Brazil"] || 0 },
+    { country: "Kenya", x: 60, y: 55, count: byLocation["Kenya"] || 0 },
+    { country: "Canada", x: 25, y: 25, count: byLocation["Canada"] || 0 },
+    { country: "Australia", x: 80, y: 75, count: byLocation["Australia"] || 0 },
+    { country: "Egypt", x: 58, y: 40, count: byLocation["Egypt"] || 0 },
+    { country: "Singapore", x: 78, y: 52, count: byLocation["Singapore"] || 0 },
   ];
 
   return (
