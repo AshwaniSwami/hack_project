@@ -58,7 +58,7 @@ export default function FormBuilder() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: formConfig, isLoading } = useQuery<FormConfigData>({
+  const { data: formConfig, isLoading, error } = useQuery<FormConfigData>({
     queryKey: ["/api/onboarding/form-config"],
     enabled: true,
   });
@@ -163,9 +163,20 @@ export default function FormBuilder() {
   if (isLoading) {
     return (
       <div className="animate-pulse space-y-4">
-        <div className="h-8 bg-gray-200 rounded"></div>
-        <div className="h-32 bg-gray-200 rounded"></div>
-        <div className="h-32 bg-gray-200 rounded"></div>
+        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+        <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+        <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-500">Error loading form configuration</p>
+        <Button onClick={() => window.location.reload()} className="mt-4">
+          Retry
+        </Button>
       </div>
     );
   }

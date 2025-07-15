@@ -13,7 +13,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { MapPin, Users, TrendingUp, Filter, Globe, BarChart3, PieChart as PieChartIcon } from "lucide-react";
-import { mockUsers, mockFormConfig, getUserStatsByLocation, getResponseStatistics } from "@/data/mockData";
+// Remove mock data import - use API calls instead
 
 const COLORS = ['#0ea5e9', '#f43f5e', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', '#84cc16'];
 
@@ -21,25 +21,10 @@ export default function OnboardingAnalytics() {
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
   const [selectedQuestion, setSelectedQuestion] = useState<string>("all");
 
-  // In a real app, this would be API calls
+  // Real API call for analytics data
   const { data: analyticsData, isLoading } = useQuery({
     queryKey: ["/api/onboarding/analytics"],
-    queryFn: async () => {
-      // Simulate API call with mock data
-      const locationStats = getUserStatsByLocation();
-      const responseStats = getResponseStatistics();
-      const completedUsers = mockUsers.filter(user => user.firstLoginCompleted);
-      
-      return {
-        totalUsers: mockUsers.length,
-        completedUsers: completedUsers.length,
-        completionRate: Math.round((completedUsers.length / mockUsers.length) * 100),
-        locationStats,
-        responseStats,
-        users: mockUsers,
-        formConfig: mockFormConfig
-      };
-    },
+    enabled: true,
     refetchInterval: 30000, // Refetch every 30 seconds
   });
 

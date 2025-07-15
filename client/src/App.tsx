@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Navbar } from "@/components/navbar";
 import { FloatingActionButton } from "@/components/floating-action-button";
 import { NotificationPopup } from "@/components/NotificationPopup";
+import OnboardingCheck from "@/components/onboarding/OnboardingCheck";
 import { useAuth } from "@/hooks/useAuth";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import Dashboard from "@/pages/dashboard";
@@ -55,7 +56,7 @@ function Router() {
               <Route path="/" component={AuthPage} />
             </>
           ) : (
-            <>
+            <OnboardingCheck>
               <Route path="/" component={Dashboard} />
               <Route path="/dashboard" component={Dashboard} />
               <Route path="/projects" component={Projects} />
@@ -65,7 +66,7 @@ function Router() {
               {isAdmin && <Route path="/users" component={Users} />}
               {isAdmin && <Route path="/analytics" component={AnalyticsPage} />}
               {isAdmin && <Route path="/onboarding" component={OnboardingPage} />}
-            </>
+            </OnboardingCheck>
           )}
           <Route component={NotFound} />
         </Switch>

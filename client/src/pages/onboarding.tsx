@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import FormBuilder from "@/components/onboarding/FormBuilder";
 import OnboardingAnalytics from "@/components/onboarding/OnboardingAnalytics";
-import { Settings, BarChart3, Users, FormInput } from "lucide-react";
+import OnboardingDemo from "@/components/onboarding/OnboardingDemo";
+import { Settings, BarChart3, Users, FormInput, Play } from "lucide-react";
 
 export default function OnboardingPage() {
   const { user } = useAuth();
@@ -51,7 +52,7 @@ export default function OnboardingPage() {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md">
+          <TabsList className="grid w-full grid-cols-3 mb-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md">
             <TabsTrigger 
               value="builder" 
               className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-rose-500 data-[state=active]:text-white"
@@ -65,6 +66,13 @@ export default function OnboardingPage() {
             >
               <BarChart3 className="h-4 w-4" />
               Analytics
+            </TabsTrigger>
+            <TabsTrigger 
+              value="demo" 
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-rose-500 data-[state=active]:text-white"
+            >
+              <Play className="h-4 w-4" />
+              Demo
             </TabsTrigger>
           </TabsList>
 
@@ -80,6 +88,14 @@ export default function OnboardingPage() {
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-gray-200/50 dark:border-gray-700/50">
               <CardContent className="p-6">
                 <OnboardingAnalytics />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="demo" className="space-y-6">
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-gray-200/50 dark:border-gray-700/50">
+              <CardContent className="p-6">
+                <OnboardingDemo />
               </CardContent>
             </Card>
           </TabsContent>

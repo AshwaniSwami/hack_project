@@ -40,7 +40,7 @@ export default function UserOnboardingForm() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: formConfig, isLoading } = useQuery<FormConfig>({
+  const { data: formConfig, isLoading, error } = useQuery<FormConfig>({
     queryKey: ["/api/onboarding/form-config"],
     enabled: true,
   });
@@ -88,33 +88,43 @@ export default function UserOnboardingForm() {
         longitude: 0,
       },
     },
+    mode: "onChange", // Enable real-time validation
   });
 
   const submitMutation = useMutation({
     mutationFn: async (data: any) => {
+      console.log("Submitting onboarding data:", data);
       return apiRequest("POST", "/api/onboarding/submit", data);
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
+      console.log("Onboarding submission successful:", response);
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/onboarding/status"] });
       toast({
         title: "Welcome!",
         description: "Your onboarding has been completed successfully",
       });
+      
+      // Redirect to dashboard or refresh page
+      setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 1500);
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Onboarding submission failed:", error);
       toast({
         title: "Error",
-        description: "Failed to submit onboarding form",
+        description: error.message || "Failed to submit onboarding form",
         variant: "destructive",
       });
     },
   });
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep === 0) {
       // Validate location step
-      const locationErrors = form.formState.errors?.location;
-      if (locationErrors) {
+      const isValid = await form.trigger(["location.country", "location.city"]);
+      if (!isValid) {
         toast({
           title: "Please complete location information",
           description: "Country and city are required",
@@ -125,6 +135,18 @@ export default function UserOnboardingForm() {
     }
     
     if (formConfig && currentStep < formConfig.questions.length) {
+      const currentQuestion = formConfig.questions[currentStep - 1];
+      if (currentQuestion && currentQuestion.compulsory) {
+        const isValid = await form.trigger([currentQuestion.id]);
+        if (!isValid) {
+          toast({
+            title: "Please complete this question",
+            description: `${currentQuestion.label} is required`,
+            variant: "destructive",
+          });
+          return;
+        }
+      }
       setCurrentStep(currentStep + 1);
     }
   };
@@ -143,7 +165,28 @@ export default function UserOnboardingForm() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-sky-50 to-rose-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-500"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading onboarding form...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-sky-50 to-rose-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-6 text-center">
+            <h3 className="text-lg font-semibold mb-2 text-red-600">Error Loading Form</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Failed to load onboarding form. Please try again.
+            </p>
+            <Button onClick={() => window.location.reload()}>
+              Retry
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -288,7 +331,8 @@ export default function UserOnboardingForm() {
                                   control={form.control}
                                   name={currentQuestion.id}
                                   render={({ field }) => {
-                                    const isChecked = field.value?.includes(option.toLowerCase());
+                                    const currentValue = field.value || [];
+                                    const isChecked = currentValue.includes(option.toLowerCase());
                                     return (
                                       <FormItem
                                         key={option}
@@ -298,7 +342,7 @@ export default function UserOnboardingForm() {
                                           <Checkbox
                                             checked={isChecked}
                                             onCheckedChange={(checked) => {
-                                              const value = field.value || [];
+                                              const value = Array.isArray(field.value) ? field.value : [];
                                               if (checked) {
                                                 field.onChange([...value, option.toLowerCase()]);
                                               } else {
