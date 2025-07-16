@@ -168,9 +168,7 @@ export const getCurrentFormConfig = async (req: Request, res: Response) => {
     if (activeConfig.length === 0) {
       // Create default form configuration if none exists
       console.log("No active form config found, creating default...");
-      const { nanoid } = await import("nanoid");
       const defaultConfig = {
-        id: nanoid(),
         questions: [
           { id: "name", type: "text", label: "What is your name?", compulsory: true },
           { id: "role", type: "radio", label: "What is your primary role?", options: ["Radio Host", "Producer", "Script Writer", "Content Manager", "Technical Director"], compulsory: true },
@@ -179,7 +177,7 @@ export const getCurrentFormConfig = async (req: Request, res: Response) => {
           { id: "station_type", type: "radio", label: "What type of radio station are you affiliated with?", options: ["Community Radio", "Commercial Radio", "Public Radio", "Internet Radio", "Podcast Network", "Independent"], compulsory: true },
           { id: "goals", type: "text", label: "What are your main goals for using this platform?", compulsory: false }
         ] as FormQuestion[],
-        createdBy: "1CsOEJFXS4MSwk2nRWDm9", // Use the admin user ID
+        createdBy: "tjfcYkTgafSDO4GMJ0ygc", // Use the correct admin user ID
         version: 1,
         isActive: true,
       };
@@ -230,9 +228,7 @@ export const updateFormConfig = async (req: AuthenticatedRequest, res: Response)
     const nextVersion = latestVersion.length > 0 ? latestVersion[0].version + 1 : 1;
 
     // Insert new configuration
-    const { nanoid } = await import("nanoid");
     await db.insert(onboardingFormConfig).values({
-      id: nanoid(),
       ...configData,
       version: nextVersion,
       isActive: true,
