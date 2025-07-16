@@ -5,6 +5,7 @@ import { getDb, isDatabaseAvailable } from "./db";
 import { onboardingFormConfig, onboardingFormResponses, users } from "@shared/schema";
 import { AuthenticatedRequest, isAuthenticated, isAdmin } from "./auth";
 import { insertOnboardingFormConfigSchema, insertOnboardingFormResponseSchema } from "@shared/schema";
+import { nanoid } from "nanoid";
 // Mock data for demonstration
 const mockUsers = [
   {
@@ -169,6 +170,7 @@ export const getCurrentFormConfig = async (req: Request, res: Response) => {
       // Create default form configuration if none exists
       console.log("No active form config found, creating default...");
       const defaultConfig = {
+        id: nanoid(),
         questions: [
           { id: "name", type: "text", label: "What is your name?", compulsory: true },
           { id: "role", type: "radio", label: "What is your primary role?", options: ["Radio Host", "Producer", "Script Writer", "Content Manager", "Technical Director"], compulsory: true },
@@ -177,7 +179,7 @@ export const getCurrentFormConfig = async (req: Request, res: Response) => {
           { id: "station_type", type: "radio", label: "What type of radio station are you affiliated with?", options: ["Community Radio", "Commercial Radio", "Public Radio", "Internet Radio", "Podcast Network", "Independent"], compulsory: true },
           { id: "goals", type: "text", label: "What are your main goals for using this platform?", compulsory: false }
         ] as FormQuestion[],
-        createdBy: "srjJo8pVzsXT0b4O0_-wR", // Use the correct admin user ID
+        createdBy: "rjen7tw3u_HPnmJ2CiJ38", // Use the correct admin user ID
         version: 1,
         isActive: true,
       };
@@ -229,6 +231,7 @@ export const updateFormConfig = async (req: AuthenticatedRequest, res: Response)
 
     // Insert new configuration
     await db.insert(onboardingFormConfig).values({
+      id: nanoid(),
       ...configData,
       version: nextVersion,
       isActive: true,
