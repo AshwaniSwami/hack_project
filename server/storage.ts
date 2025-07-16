@@ -804,6 +804,11 @@ export class FallbackStorage implements IStorage {
   async updateScript(id: string, script: Partial<InsertScript>): Promise<Script> { return this.throwDatabaseError(); }
   async deleteScript(id: string): Promise<void> { return this.throwDatabaseError(); }
   async getAllScripts(): Promise<Script[]> { return this.throwDatabaseError(); }
+  async getScriptsByLanguage(language: string): Promise<Script[]> { return this.throwDatabaseError(); }
+  async getScriptsByProject(projectId: string): Promise<Script[]> { return this.throwDatabaseError(); }
+  async getScriptsByLanguageGroup(languageGroup: string): Promise<Script[]> { return this.throwDatabaseError(); }
+  async getTranslationsForScript(scriptId: string): Promise<Script[]> { return this.throwDatabaseError(); }
+  async getScriptWithTranslations(scriptId: string): Promise<{ script: Script; translations: Script[] } | undefined> { return this.throwDatabaseError(); }
 
   // Topics
   async getTopic(id: string): Promise<Topic | undefined> { return this.throwDatabaseError(); }
