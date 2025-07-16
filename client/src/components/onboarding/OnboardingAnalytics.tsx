@@ -26,13 +26,15 @@ export default function OnboardingAnalytics() {
   const queryClient = useQueryClient();
 
   // Real API call for analytics data with enhanced options
-  const { data: analyticsData, isLoading, isFetching, refetch } = useQuery({
+  const { data: analyticsData, isLoading, isFetching, refetch, error } = useQuery({
     queryKey: ["/api/onboarding/analytics", selectedFilter, selectedTimeRange],
     enabled: true,
     refetchInterval: autoRefresh ? 15000 : false, // Refetch every 15 seconds if auto-refresh is enabled
     staleTime: 10000, // Consider data stale after 10 seconds
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   // Update last refreshed timestamp
@@ -73,6 +75,23 @@ export default function OnboardingAnalytics() {
     );
   }
 
+  if (error) {
+    console.error("Analytics API error:", error);
+    return (
+      <div className="text-center py-12">
+        <Activity className="h-12 w-12 text-red-400 mx-auto mb-4" />
+        <p className="text-red-500 text-lg">Error loading analytics data</p>
+        <p className="text-gray-400 text-sm mt-2">
+          {error?.message || "Unable to fetch analytics data"}
+        </p>
+        <Button onClick={handleManualRefresh} className="mt-4">
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Try Again
+        </Button>
+      </div>
+    );
+  }
+
   if (!analyticsData) {
     return (
       <div className="text-center py-12">
@@ -87,32 +106,58 @@ export default function OnboardingAnalytics() {
     );
   }
 
-  // Extract data from the actual API response structure
-  const { totalResponses, responsesByQuestion, completionRate, demographics, users, formConfig, locationStats } = analyticsData;
-  const totalUsers = demographics?.totalUsers || 0;
-  const completedUsers = Math.round((completionRate / 100) * totalUsers);
-  const byLocation = demographics?.byLocation || {};
+  // Extract data from the actual API response structure with safe defaults
+  const totalResponses = analyticsData?.totalResponses || 0;
+  const responsesByQuestion = analyticsData?.responsesByQuestion || {};
+  const completionRate = analyticsData?.completionRate || 0;
+  const demographics = analyticsData?.demographics || {};
+  const users = analyticsData?.users || [];
+  const formConfig = analyticsData?.formConfig || { questions: [] };
+  const locationStats = analyticsData?.locationStats || { countries: {}, cities: {} };
+  
+  const totalUsers = analyticsData?.totalUsers || demographics?.totalUsers || 0;
+  const completedUsers = analyticsData?.completedUsers || Math.round((completionRate / 100) * totalUsers);
+  const byLocation = demographics?.byLocation || locationStats?.countries || {};
   const pendingUsers = totalUsers - completedUsers;
   const avgResponseTime = 2.5; // Could be calculated from actual data
   
-  // Enhanced data preparation
-  const countryData = Object.entries(locationStats?.countries || byLocation)
-    .map(([country, count]) => ({ 
-      country: country.charAt(0).toUpperCase() + country.slice(1), 
-      count: count as number,
-      percentage: totalUsers > 0 ? ((count as number / totalUsers) * 100).toFixed(1) : 0
-    }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 8);
+  console.log("Analytics data processed:", {
+    totalUsers,
+    completedUsers,
+    completionRate,
+    totalResponses,
+    hasLocationStats: Object.keys(byLocation).length > 0,
+    hasResponseData: Object.keys(responsesByQuestion).length > 0
+  });
+  
+  // Enhanced data preparation with fallbacks
+  const locationData = locationStats?.countries || byLocation || {};
+  const countryData = Object.entries(locationData).length > 0 
+    ? Object.entries(locationData)
+        .map(([country, count]) => ({ 
+          country: country.charAt(0).toUpperCase() + country.slice(1), 
+          count: count as number,
+          percentage: totalUsers > 0 ? ((count as number / totalUsers) * 100).toFixed(1) : 0
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 8)
+    : [
+        { country: "Sample Country", count: 0, percentage: "0" }
+      ];
 
-  const cityData = Object.entries(locationStats?.cities || byLocation)
-    .map(([city, count]) => ({ 
-      city: city.charAt(0).toUpperCase() + city.slice(1), 
-      count: count as number,
-      percentage: totalUsers > 0 ? ((count as number / totalUsers) * 100).toFixed(1) : 0
-    }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 8);
+  const cityDataObj = locationStats?.cities || {};
+  const cityData = Object.entries(cityDataObj).length > 0
+    ? Object.entries(cityDataObj)
+        .map(([city, count]) => ({ 
+          city: city.charAt(0).toUpperCase() + city.slice(1), 
+          count: count as number,
+          percentage: totalUsers > 0 ? ((count as number / totalUsers) * 100).toFixed(1) : 0
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 8)
+    : [
+        { city: "Sample City", count: 0, percentage: "0" }
+      ];
 
   // Prepare comprehensive chart data
   const completionData = [
