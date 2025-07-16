@@ -283,6 +283,11 @@ export const submitOnboardingForm = async (req: AuthenticatedRequest, res: Respo
     const submissionData: OnboardingSubmission = req.body;
     console.log("Onboarding submission received:", { userId: req.user.id, data: submissionData });
 
+    // Validate required fields
+    if (!submissionData.location || !submissionData.location.country || !submissionData.location.city) {
+      return res.status(400).json({ error: "Location information is required" });
+    }
+
     if (!isDatabaseAvailable()) {
       // In mock mode, we'll simulate the success but log the data
       console.log("Onboarding submission (mock mode):", {
@@ -305,71 +310,101 @@ export const submitOnboardingForm = async (req: AuthenticatedRequest, res: Respo
       });
     }
 
-    const db = getDb();
-    // Get current form configuration
-    const activeConfig = await db
-      .select()
-      .from(onboardingFormConfig)
-      .where(eq(onboardingFormConfig.isActive, true))
-      .orderBy(desc(onboardingFormConfig.version))
-      .limit(1);
-
-    let formConfig;
-    
-    if (activeConfig.length === 0) {
-      // Create default form configuration if none exists
-      console.log("No active form config found, creating default...");
-      const defaultConfig = {
-        questions: [
-          { id: "name", type: "text", label: "What is your name?", compulsory: true },
-          { id: "role", type: "radio", label: "What is your role?", options: ["Beginner", "Intermediate", "Advanced", "Expert"], compulsory: true },
-          { id: "experience", type: "radio", label: "How would you describe your experience level?", options: ["Beginner", "Intermediate", "Advanced", "Expert"], compulsory: true }
-        ] as FormQuestion[],
-        createdBy: req.user.id,
-        version: 1,
-        isActive: true,
-      };
+    try {
+      const db = getDb();
       
-      const [newConfig] = await db.insert(onboardingFormConfig).values(defaultConfig).returning();
-      formConfig = newConfig;
-      console.log("Created default form config:", formConfig);
-    } else {
-      formConfig = activeConfig[0];
-    }
-
-    // Update user's location and onboarding status
-    await db
-      .update(users)
-      .set({
-        location: submissionData.location,
-        onboardingResponses: submissionData,
-        firstLoginCompleted: true,
-      })
-      .where(eq(users.id, req.user.id));
-
-    // Save individual responses for analytics
-    const responses = [];
-    for (const question of formConfig.questions as FormQuestion[]) {
-      const response = submissionData[question.id];
-      if (response !== undefined) {
-        responses.push({
-          id: nanoid(),
-          userId: req.user.id,
-          formConfigId: formConfig.id,
-          questionId: question.id,
-          questionType: question.type,
-          questionLabel: question.label,
-          response: response,
-          isCompulsory: question.compulsory,
-        });
+      // Get current form configuration
+      let activeConfig;
+      try {
+        activeConfig = await db
+          .select()
+          .from(onboardingFormConfig)
+          .where(eq(onboardingFormConfig.isActive, true))
+          .orderBy(desc(onboardingFormConfig.version))
+          .limit(1);
+      } catch (configError) {
+        console.log("Error fetching form config, using default:", configError);
+        activeConfig = [];
       }
-    }
 
-    if (responses.length > 0) {
-      await db.insert(onboardingFormResponses).values(responses);
-    }
+      let formConfig;
+      
+      if (activeConfig.length === 0) {
+        // Create default form configuration if none exists
+        console.log("No active form config found, creating default...");
+        const defaultConfigData = {
+          id: randomUUID(),
+          questions: [
+            { id: "name", type: "text", label: "What is your name?", compulsory: true },
+            { id: "role", type: "radio", label: "What is your role?", options: ["Radio Host", "Producer", "Script Writer", "Content Manager", "Technical Director"], compulsory: true },
+            { id: "experience", type: "radio", label: "How would you describe your experience level?", options: ["Beginner", "Intermediate", "Advanced", "Expert"], compulsory: true }
+          ] as FormQuestion[],
+          createdBy: req.user.id,
+          version: 1,
+          isActive: true,
+        };
+        
+        try {
+          const [newConfig] = await db.insert(onboardingFormConfig).values(defaultConfigData).returning();
+          formConfig = newConfig;
+          console.log("Created default form config:", formConfig);
+        } catch (insertError) {
+          console.log("Error creating form config, using default data:", insertError);
+          formConfig = defaultConfigData;
+        }
+      } else {
+        formConfig = activeConfig[0];
+      }
 
-    res.json({ success: true, message: "Onboarding completed successfully" });
+      // Update user's location and onboarding status
+      try {
+        await db
+          .update(users)
+          .set({
+            location: submissionData.location,
+            onboardingResponses: submissionData,
+            firstLoginCompleted: true,
+          })
+          .where(eq(users.id, req.user.id));
+        
+        console.log("Successfully updated user onboarding status");
+      } catch (updateError) {
+        console.error("Error updating user:", updateError);
+        return res.status(500).json({ error: "Failed to update user information" });
+      }
+
+      // Save individual responses for analytics (optional - don't fail if this errors)
+      try {
+        const responses = [];
+        for (const question of formConfig.questions as FormQuestion[]) {
+          const response = submissionData[question.id];
+          if (response !== undefined) {
+            responses.push({
+              id: nanoid(),
+              userId: req.user.id,
+              formConfigId: formConfig.id,
+              questionId: question.id,
+              questionType: question.type,
+              questionLabel: question.label,
+              response: response,
+              isCompulsory: question.compulsory || false,
+            });
+          }
+        }
+
+        if (responses.length > 0) {
+          await db.insert(onboardingFormResponses).values(responses);
+          console.log("Successfully saved response analytics");
+        }
+      } catch (analyticsError) {
+        console.log("Warning: Failed to save analytics data, but onboarding still successful:", analyticsError);
+      }
+
+      res.json({ success: true, message: "Onboarding completed successfully" });
+    } catch (dbError) {
+      console.error("Database error during onboarding submission:", dbError);
+      res.status(500).json({ error: "Database error occurred during onboarding submission" });
+    }
   } catch (error) {
     console.error("Error submitting onboarding form:", error);
     res.status(500).json({ error: "Failed to submit onboarding form" });

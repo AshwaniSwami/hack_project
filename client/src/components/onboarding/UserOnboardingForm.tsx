@@ -94,7 +94,19 @@ export default function UserOnboardingForm() {
   const submitMutation = useMutation({
     mutationFn: async (data: any) => {
       console.log("Submitting onboarding data:", data);
-      return apiRequest("POST", "/api/onboarding/submit", data);
+      
+      // Ensure the data is properly structured
+      const submissionData = {
+        ...data,
+        location: {
+          country: data.location?.country || "",
+          city: data.location?.city || "",
+          latitude: data.location?.latitude || 0,
+          longitude: data.location?.longitude || 0,
+        }
+      };
+      
+      return apiRequest("POST", "/api/onboarding/submit", submissionData);
     },
     onSuccess: (response) => {
       console.log("Onboarding submission successful:", response);
@@ -112,9 +124,17 @@ export default function UserOnboardingForm() {
     },
     onError: (error: any) => {
       console.error("Onboarding submission failed:", error);
+      
+      let errorMessage = "Failed to submit onboarding form";
+      if (error?.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Error",
-        description: error.message || "Failed to submit onboarding form",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -173,6 +193,16 @@ export default function UserOnboardingForm() {
       toast({
         title: "Please complete all required fields",
         description: "Some required information is missing",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Ensure location is properly formatted
+    if (!data.location || !data.location.country || !data.location.city) {
+      toast({
+        title: "Location Required",
+        description: "Please provide your country and city",
         variant: "destructive",
       });
       return;
