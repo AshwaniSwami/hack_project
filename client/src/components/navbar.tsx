@@ -48,16 +48,16 @@ export function Navbar() {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-6">
             <Link href="/">
-              <div className="flex items-center space-x-2 cursor-pointer group">
-                <div className="relative p-2 bg-sky-50 rounded-xl backdrop-blur-sm group-hover:bg-sky-100 transition-all duration-300 shadow-md">
-                  <Radio className="h-5 w-5 text-sky-600 drop-shadow-sm" />
-                  <div className="absolute inset-0 bg-gradient-to-br from-sky-100/30 to-rose-100/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="flex items-center space-x-2 cursor-pointer group min-w-0">
+                <div className="relative p-1.5 bg-sky-50 rounded-lg backdrop-blur-sm group-hover:bg-sky-100 transition-all duration-300 shadow-md flex-shrink-0">
+                  <Radio className="h-4 w-4 text-sky-600 drop-shadow-sm" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-sky-100/30 to-rose-100/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
-                <div className="group-hover:scale-105 transition-transform duration-200">
-                  <h1 className="text-lg font-bold bg-gradient-to-r from-sky-600 to-rose-500 bg-clip-text text-transparent">
+                <div className="group-hover:scale-105 transition-transform duration-200 min-w-0">
+                  <h1 className="text-sm font-bold bg-gradient-to-r from-sky-600 to-rose-500 bg-clip-text text-transparent whitespace-nowrap">
                     SMART Radio
                   </h1>
-                  <p className="text-xs text-sky-700 dark:text-gray-300 font-medium tracking-wide">NGO Content Hub</p>
+                  <p className="text-xs text-sky-700 dark:text-gray-300 font-medium tracking-wide whitespace-nowrap">NGO Content Hub</p>
                 </div>
               </div>
             </Link>
