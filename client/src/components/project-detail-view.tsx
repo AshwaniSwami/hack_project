@@ -162,97 +162,13 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
         )}
       </div>
 
-      <Tabs defaultValue="episodes" className="w-full">
+      <Tabs defaultValue="scripts" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="episodes">Episodes</TabsTrigger>
           <TabsTrigger value="scripts">Scripts</TabsTrigger>
+          <TabsTrigger value="episodes">Episodes</TabsTrigger>
         </TabsList>
 
 
-
-        <TabsContent value="episodes" className="space-y-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-              <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Episodes</h3>
-          </div>
-          
-          <div className="grid gap-6">
-            {episodes.map((episode) => (
-              <div key={episode.id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{episode.title}</h4>
-                        <Badge variant="outline" className="text-xs">
-                          Episode #{episode.episodeNumber}
-                        </Badge>
-                        {episode.isPremium && (
-                          <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
-                            Premium
-                          </Badge>
-                        )}
-                      </div>
-                      
-                      {episode.description && (
-                        <div className="mb-3 p-3 bg-blue-50/80 rounded-md border border-blue-200">
-                          <p className="text-xs font-medium text-blue-600 mb-1">Episode Description</p>
-                          <p className="text-sm text-blue-700 leading-relaxed">{episode.description}</p>
-                        </div>
-                      )}
-                      
-                      {episode.broadcastDate && (
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                          Broadcast: {new Date(episode.broadcastDate).toLocaleDateString()}
-                        </p>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <FileList 
-                        entityType="episodes" 
-                        entityId={episode.id}
-                        title={`Episode ${episode.episodeNumber} Files`}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-            
-            {/* Show project-level episode files only if there are any */}
-            {projectEpisodeFiles.length > 0 && (
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-xl p-6 border border-blue-200/50 dark:border-blue-800/50">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                    <FolderOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-gray-100">Project Episode Files</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Audio/video files uploaded to this project</p>
-                  </div>
-                </div>
-                <FileList 
-                  entityType="episodes" 
-                  entityId={project.id}
-                  title=""
-                />
-              </div>
-            )}
-            
-            {episodes.length === 0 && projectEpisodeFiles.length === 0 && (
-              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-12 text-center border border-gray-200 dark:border-gray-700">
-                <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-full w-fit mx-auto mb-4">
-                  <Calendar className="h-8 w-8 text-gray-400 dark:text-gray-500" />
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No episodes yet</h3>
-                <p className="text-gray-600 dark:text-gray-400">Episodes can be created from the Episodes page</p>
-              </div>
-            )}
-          </div>
-        </TabsContent>
 
         <TabsContent value="scripts" className="space-y-6">
           <div className="flex items-center justify-between mb-6">
@@ -433,6 +349,89 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
           </div>
         </TabsContent>
 
+        <TabsContent value="episodes" className="space-y-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+              <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Episodes</h3>
+          </div>
+          
+          <div className="grid gap-6">
+            {episodes.map((episode) => (
+              <div key={episode.id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{episode.title}</h4>
+                        <Badge variant="outline" className="text-xs">
+                          Episode #{episode.episodeNumber}
+                        </Badge>
+                        {episode.isPremium && (
+                          <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                            Premium
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      {episode.description && (
+                        <div className="mb-3 p-3 bg-blue-50/80 rounded-md border border-blue-200">
+                          <p className="text-xs font-medium text-blue-600 mb-1">Episode Description</p>
+                          <p className="text-sm text-blue-700 leading-relaxed">{episode.description}</p>
+                        </div>
+                      )}
+                      
+                      {episode.broadcastDate && (
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                          Broadcast: {new Date(episode.broadcastDate).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <FileList 
+                        entityType="episodes" 
+                        entityId={episode.id}
+                        title={`Episode ${episode.episodeNumber} Files`}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {/* Show project-level episode files only if there are any */}
+            {projectEpisodeFiles.length > 0 && (
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-xl p-6 border border-blue-200/50 dark:border-blue-800/50">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                    <FolderOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 dark:text-gray-100">Project Episode Files</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Audio/video files uploaded to this project</p>
+                  </div>
+                </div>
+                <FileList 
+                  entityType="episodes" 
+                  entityId={project.id}
+                  title=""
+                />
+              </div>
+            )}
+            
+            {episodes.length === 0 && projectEpisodeFiles.length === 0 && (
+              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-12 text-center border border-gray-200 dark:border-gray-700">
+                <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-full w-fit mx-auto mb-4">
+                  <Calendar className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No episodes yet</h3>
+                <p className="text-gray-600 dark:text-gray-400">Episodes can be created from the Episodes page</p>
+              </div>
+            )}
+          </div>
+        </TabsContent>
 
       </Tabs>
     </div>
