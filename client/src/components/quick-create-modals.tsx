@@ -24,7 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Radio, Clapperboard, Loader2 } from "lucide-react";
+import { FolderOpen, RadioTower, Mic, Loader2 } from "lucide-react";
 import type { Project } from "@shared/schema";
 
 // Schemas for form validation
@@ -182,7 +182,7 @@ export function QuickCreateModals({
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle className="flex items-center">
-              <FileText className="h-5 w-5 mr-2 text-blue-600" />
+              <FolderOpen className="h-5 w-5 mr-2 text-blue-600" />
               Create New Project
             </DialogTitle>
             <DialogDescription>
@@ -264,7 +264,7 @@ export function QuickCreateModals({
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle className="flex items-center">
-              <Radio className="h-5 w-5 mr-2 text-green-600" />
+              <RadioTower className="h-5 w-5 mr-2 text-green-600" />
               Create New Episode
             </DialogTitle>
             <DialogDescription>
@@ -368,7 +368,7 @@ export function QuickCreateModals({
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle className="flex items-center">
-              <Clapperboard className="h-5 w-5 mr-2 text-purple-600" />
+              <Mic className="h-5 w-5 mr-2 text-purple-600" />
               Create New Script
             </DialogTitle>
             <DialogDescription>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, FileText, Radio, Clapperboard } from 'lucide-react';
+import { Plus, FolderOpen, RadioTower, Mic, PlusCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,30 +20,30 @@ export function FloatingActionButton() {
   const actions = [
     {
       label: 'New Project',
-      icon: <FileText className="h-4 w-4" />,
+      icon: <FolderOpen className="h-4 w-4" />,
       onClick: () => {
         setIsProjectModalOpen(true);
         setIsExpanded(false);
       },
-      color: 'bg-blue-500 hover:bg-blue-600'
+      color: 'bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700'
     },
     {
       label: 'New Episode',
-      icon: <Radio className="h-4 w-4" />,
+      icon: <RadioTower className="h-4 w-4" />,
       onClick: () => {
         setIsEpisodeModalOpen(true);
         setIsExpanded(false);
       },
-      color: 'bg-green-500 hover:bg-green-600'
+      color: 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700'
     },
     {
       label: 'New Script',
-      icon: <Clapperboard className="h-4 w-4" />,
+      icon: <Mic className="h-4 w-4" />,
       onClick: () => {
         setIsScriptModalOpen(true);
         setIsExpanded(false);
       },
-      color: 'bg-purple-500 hover:bg-purple-600'
+      color: 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700'
     }
   ];
 
@@ -88,7 +88,7 @@ export function FloatingActionButton() {
         >
           <Button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 rounded-full w-14 h-14 p-0"
+            className="bg-gradient-to-r from-sky-500 to-red-500 hover:from-sky-600 hover:to-red-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 rounded-full w-14 h-14 p-0"
           >
             <motion.div
               animate={{ rotate: isExpanded ? 45 : 0 }}

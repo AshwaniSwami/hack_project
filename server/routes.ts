@@ -599,8 +599,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/episodes", async (req, res) => {
     try {
-      const episodeData = insertEpisodeSchema.parse(req.body);
-      const episode = await storage.createEpisode(episodeData);
+      // Create custom schema that excludes episodeNumber
+      const episodeCreationSchema = insertEpisodeSchema.extend({
+        episodeNumber: insertEpisodeSchema.shape.episodeNumber.optional()
+      });
+      
+      const episodeData = episodeCreationSchema.parse(req.body);
+      
+      // Auto-generate episode number based on project if not provided
+      let episodeNumber = episodeData.episodeNumber;
+      if (!episodeNumber) {
+        const projectEpisodes = await storage.getEpisodesByProject(episodeData.projectId);
+        episodeNumber = projectEpisodes.length + 1;
+      }
+      
+      const episode = await storage.createEpisode({
+        ...episodeData,
+        episodeNumber: episodeNumber
+      });
       res.status(201).json(episode);
     } catch (error) {
       console.error("Error creating episode:", error);

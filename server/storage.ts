@@ -77,6 +77,7 @@ export interface IStorage {
   updateEpisode(id: string, episode: Partial<InsertEpisode>): Promise<Episode>;
   deleteEpisode(id: string): Promise<void>;
   getAllEpisodes(): Promise<Episode[]>;
+  getEpisodesByProject(projectId: string): Promise<Episode[]>;
 
   // Scripts
   getScript(id: string): Promise<Script | undefined>;
@@ -349,6 +350,13 @@ export class DatabaseStorage implements IStorage {
   async getAllEpisodes(): Promise<Episode[]> {
     const dbInstance = requireDatabase();
     return await dbInstance.select().from(episodes).orderBy(desc(episodes.createdAt));
+  }
+
+  async getEpisodesByProject(projectId: string): Promise<Episode[]> {
+    const dbInstance = requireDatabase();
+    return await dbInstance.select().from(episodes)
+      .where(eq(episodes.projectId, projectId))
+      .orderBy(asc(episodes.episodeNumber));
   }
 
   // Scripts
@@ -734,6 +742,7 @@ export class FallbackStorage implements IStorage {
   async updateEpisode(id: string, episode: Partial<InsertEpisode>): Promise<Episode> { return this.throwDatabaseError(); }
   async deleteEpisode(id: string): Promise<void> { return this.throwDatabaseError(); }
   async getAllEpisodes(): Promise<Episode[]> { return this.throwDatabaseError(); }
+  async getEpisodesByProject(projectId: string): Promise<Episode[]> { return this.throwDatabaseError(); }
 
   // Scripts
   async getScript(id: string): Promise<Script | undefined> { return this.throwDatabaseError(); }

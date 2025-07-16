@@ -474,6 +474,8 @@ export const insertEpisodeSchema = createInsertSchema(episodes).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  episodeNumber: createInsertSchema(episodes).shape.episodeNumber.optional()
 });
 
 export const insertScriptSchema = createInsertSchema(scripts).omit({
