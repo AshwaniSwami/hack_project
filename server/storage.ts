@@ -278,7 +278,7 @@ export class DatabaseStorage implements IStorage {
 
   async getActiveThemes(): Promise<Theme[]> {
     const dbInstance = requireDatabase();
-    return await dbInstance.select().from(themes).where(eq(themes.isActive, true)).orderBy(asc(themes.name));
+    return await dbInstance.select().from(themes).orderBy(asc(themes.name));
   }
 
   async getProjectsByTheme(themeId: string): Promise<Project[]> {
@@ -356,7 +356,7 @@ export class DatabaseStorage implements IStorage {
     const dbInstance = requireDatabase();
     return await dbInstance.select().from(episodes)
       .where(eq(episodes.projectId, projectId))
-      .orderBy(asc(episodes.episodeNumber));
+      .orderBy(asc(episodes.title));
   }
 
   // Scripts
