@@ -25,6 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { FolderOpen, RadioTower, Mic, Loader2 } from "lucide-react";
+import { LanguageSelector } from "@/components/language-selector";
 import type { Project } from "@shared/schema";
 
 // Schemas for form validation
@@ -46,6 +47,7 @@ const scriptSchema = z.object({
   content: z.string().optional(),
   projectId: z.string().min(1, "Project is required"),
   status: z.enum(["Draft", "Under Review", "Approved", "Needs Revision"]).default("Draft"),
+  language: z.string().default("en"),
 });
 
 interface QuickCreateModalsProps {
@@ -105,6 +107,7 @@ export function QuickCreateModals({
       content: "",
       projectId: "",
       status: "Draft",
+      language: "en",
     },
   });
 
@@ -427,6 +430,20 @@ export function QuickCreateModals({
                         {...field} 
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={scriptForm.control}
+                name="language"
+                render={({ field }) => (
+                  <FormItem>
+                    <LanguageSelector
+                      value={field.value}
+                      onChange={field.onChange}
+                      allowCustom={true}
+                    />
                     <FormMessage />
                   </FormItem>
                 )}

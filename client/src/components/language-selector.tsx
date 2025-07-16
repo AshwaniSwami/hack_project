@@ -28,7 +28,12 @@ export function LanguageSelector({
 }: LanguageSelectorProps) {
   const [isCustom, setIsCustom] = useState(false);
   const [customLanguage, setCustomLanguage] = useState("");
-  const languageOptions = getLanguageOptions();
+  
+  // Limited language options: English, Hindi, and custom
+  const languageOptions = [
+    { value: "en", name: "English", flag: "🇺🇸" },
+    { value: "hi", name: "Hindi", flag: "🇮🇳" }
+  ];
 
   const handleLanguageChange = (selectedValue: string) => {
     if (selectedValue === "custom") {
