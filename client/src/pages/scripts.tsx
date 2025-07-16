@@ -68,7 +68,6 @@ import { ScriptEditor } from "@/components/script-editor";
 import { ScriptFileUpload } from "@/components/script-file-upload";
 import { FileList } from "@/components/file-list";
 import { LanguageSelector, LanguageBadge } from "@/components/language-selector";
-import { ProjectScriptOrganizer } from "@/components/project-script-organizer";
 import { colors, getStatusColor, getCardStyle, getGradientStyle } from "@/lib/colors";
 import type { Script, Project } from "@shared/schema";
 import { DEFAULT_LANGUAGE, getLanguageName, getLanguageFlag } from "@shared/languages";
@@ -437,29 +436,21 @@ export default function Scripts() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <Tabs defaultValue="projects" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-4 lg:w-[600px] bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-1">
-            <TabsTrigger value="projects" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-rose-500 data-[state=active]:text-white transition-all duration-300 text-gray-700 dark:text-gray-300">
-              <FolderOpen className="h-4 w-4" />
-              By Project
-            </TabsTrigger>
+        <Tabs defaultValue="scripts" className="space-y-8">
+          <TabsList className="grid w-full grid-cols-3 lg:w-[450px] bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-1">
             <TabsTrigger value="scripts" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-rose-500 data-[state=active]:text-white transition-all duration-300 text-gray-700 dark:text-gray-300">
               <FileText className="h-4 w-4" />
-              All Scripts
+              Scripts
             </TabsTrigger>
             <TabsTrigger value="upload" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-rose-500 data-[state=active]:text-white transition-all duration-300 text-gray-700 dark:text-gray-300">
               <Upload className="h-4 w-4" />
               Upload
             </TabsTrigger>
             <TabsTrigger value="files" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-rose-500 data-[state=active]:text-white transition-all duration-300 text-gray-700 dark:text-gray-300">
-              <List className="h-4 w-4" />
+              <FolderOpen className="h-4 w-4" />
               Files
             </TabsTrigger>
           </TabsList>
-
-          <TabsContent value="projects" className="space-y-6">
-            <ProjectScriptOrganizer onViewScript={setViewingScript} />
-          </TabsContent>
 
           <TabsContent value="scripts" className="space-y-6">
             {/* Enhanced Controls Panel */}
