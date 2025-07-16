@@ -177,7 +177,7 @@ export const getCurrentFormConfig = async (req: Request, res: Response) => {
           { id: "station_type", type: "radio", label: "What type of radio station are you affiliated with?", options: ["Community Radio", "Commercial Radio", "Public Radio", "Internet Radio", "Podcast Network", "Independent"], compulsory: true },
           { id: "goals", type: "text", label: "What are your main goals for using this platform?", compulsory: false }
         ] as FormQuestion[],
-        createdBy: "tjfcYkTgafSDO4GMJ0ygc", // Use the correct admin user ID
+        createdBy: "srjJo8pVzsXT0b4O0_-wR", // Use the correct admin user ID
         version: 1,
         isActive: true,
       };
