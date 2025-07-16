@@ -73,24 +73,19 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
     select: (data) => data.filter(script => script.projectId === project.id)
   });
 
-  // Group scripts by language groups
-  const scriptGroups = scripts.reduce((groups, script) => {
-    const groupKey = script.languageGroup || script.id;
-    if (!groups[groupKey]) {
-      groups[groupKey] = [];
-    }
-    groups[groupKey].push(script);
-    return groups;
-  }, {} as Record<string, Script[]>);
-
   // Get available languages for filtering
   const availableLanguages = Array.from(new Set(scripts.map(script => script.language).filter(Boolean)));
 
-  // Filter script groups by selected language
-  const filteredScriptGroups = Object.entries(scriptGroups).filter(([_, groupScripts]) => {
-    if (selectedLanguage === "all") return true;
-    return groupScripts.some(script => script.language === selectedLanguage);
-  });
+  // Filter scripts by selected language
+  const filteredScripts = selectedLanguage === "all" 
+    ? scripts 
+    : scripts.filter(script => script.language === selectedLanguage);
+
+  // Group scripts by language groups for dropdown functionality
+  const getScriptLanguageVersions = (script: Script) => {
+    if (!script.languageGroup) return [script];
+    return scripts.filter(s => s.languageGroup === script.languageGroup);
+  };
 
   // Get project-level files to count episodes and scripts
   const { data: projectEpisodeFilesResponse = { files: [] } } = useQuery({
@@ -276,9 +271,9 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
           </div>
           
           <div className="grid gap-6">
-            {filteredScriptGroups.map(([groupKey, groupScripts]) => {
-              const primaryScript = groupScripts.find(s => !s.originalScriptId) || groupScripts[0];
-              const hasMultipleLanguages = groupScripts.length > 1;
+            {filteredScripts.map((script) => {
+              const languageVersions = getScriptLanguageVersions(script);
+              const hasMultipleLanguages = languageVersions.length > 1;
               
               // Get status color
               const getStatusColor = (status: string) => {
@@ -286,101 +281,102 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                   case 'Draft': return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
                   case 'Under Review': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
                   case 'Approved': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
-                  case 'Published': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
+                  case 'Needs Revision': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
                   default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
                 }
               };
 
               return (
-                <div key={groupKey} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                <div key={script.id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
                   <div className="p-6">
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{primaryScript.title}</h4>
-                          <Badge variant="outline" className={`text-xs ${getStatusColor(primaryScript.status)}`}>
-                            {primaryScript.status}
+                          <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{script.title}</h4>
+                          <Badge variant="outline" className={`text-xs ${getStatusColor(script.status)}`}>
+                            {script.status}
                           </Badge>
-                          {hasMultipleLanguages && (
-                            <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                              {groupScripts.length} languages
-                            </Badge>
-                          )}
+                          <LanguageBadge language={script.language || 'en'} />
                         </div>
                         
-                        {primaryScript.description && (
+                        {script.content && (
                           <div className="mb-3 p-3 bg-emerald-50/80 rounded-md border border-emerald-200">
-                            <p className="text-xs font-medium text-emerald-600 mb-1">Description</p>
-                            <p className="text-sm text-emerald-700 leading-relaxed">{primaryScript.description}</p>
+                            <p className="text-xs font-medium text-emerald-600 mb-1">Script Content</p>
+                            <p className="text-sm text-emerald-700 leading-relaxed">{script.content}</p>
                           </div>
                         )}
                         
                         <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                          Updated: {primaryScript.updatedAt ? new Date(primaryScript.updatedAt).toLocaleDateString() : 'No date'}
+                          Updated: {script.updatedAt ? new Date(script.updatedAt).toLocaleDateString() : 'No date'}
                         </p>
                       </div>
                       
                       <div className="flex items-center gap-2">
-                        {hasMultipleLanguages ? (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="outline" size="sm" className="gap-2">
-                                <Languages className="h-4 w-4" />
-                                <span>View Languages</span>
-                                <ChevronDown className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-64">
-                              {groupScripts.map(script => (
-                                <DropdownMenuItem key={script.id} className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <span>{getLanguageFlag(script.language || 'en')}</span>
-                                    <span>{getLanguageName(script.language || 'en')}</span>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <Button 
-                                      variant="ghost" 
-                                      size="sm" 
-                                      className="h-6 w-6 p-0"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        // Handle view script
-                                      }}
-                                    >
-                                      <Eye className="h-3 w-3" />
-                                    </Button>
-                                    <Button 
-                                      variant="ghost" 
-                                      size="sm" 
-                                      className="h-6 w-6 p-0"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        downloadScript(script);
-                                      }}
-                                    >
-                                      <Download className="h-3 w-3" />
-                                    </Button>
-                                  </div>
-                                </DropdownMenuItem>
-                              ))}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <LanguageBadge language={primaryScript.language || 'en'} />
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => downloadScript(primaryScript)}
-                              className="gap-1"
-                            >
-                              <Download className="h-4 w-4" />
-                              Download
-                            </Button>
-                          </div>
-                        )}
+                        <FileList 
+                          entityType="scripts" 
+                          entityId={script.id}
+                          title={`${script.title} Files`}
+                        />
                       </div>
                     </div>
+                    
+                    {/* Language Versions Dropdown */}
+                    {hasMultipleLanguages && (
+                      <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Languages className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Available in {languageVersions.length} languages
+                          </span>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" className="gap-2">
+                              <Globe className="h-4 w-4" />
+                              <span>View Other Languages</span>
+                              <ChevronDown className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="start" className="w-64">
+                            {languageVersions.map(langScript => (
+                              <DropdownMenuItem key={langScript.id} className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <span>{getLanguageFlag(langScript.language || 'en')}</span>
+                                  <span>{getLanguageName(langScript.language || 'en')}</span>
+                                  {langScript.id === script.id && (
+                                    <Badge variant="secondary" className="text-xs">Current</Badge>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-6 w-6 p-0"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      // Handle view script
+                                    }}
+                                  >
+                                    <Eye className="h-3 w-3" />
+                                  </Button>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-6 w-6 p-0"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      downloadScript(langScript);
+                                    }}
+                                  >
+                                    <Download className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -406,7 +402,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
               </div>
             )}
             
-            {filteredScriptGroups.length === 0 && projectScriptFiles.length === 0 && (
+            {filteredScripts.length === 0 && projectScriptFiles.length === 0 && (
               <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-12 text-center border border-gray-200 dark:border-gray-700">
                 <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-full w-fit mx-auto mb-4">
                   <FileText className="h-8 w-8 text-gray-400 dark:text-gray-500" />
