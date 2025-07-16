@@ -118,8 +118,15 @@ export async function createAdminNotification(
       // Broadcast real-time notification to connected admin users
       if (typeof (global as any).broadcastNotificationToAdmins === 'function') {
         (global as any).broadcastNotificationToAdmins({
-          ...createdNotification,
-          type: 'new_notification',
+          id: createdNotification.id,
+          type: createdNotification.type,
+          title: createdNotification.title,
+          message: createdNotification.message,
+          relatedUserId: createdNotification.relatedUserId,
+          relatedUserEmail: createdNotification.relatedUserEmail,
+          relatedUserName: createdNotification.relatedUserName,
+          priority: createdNotification.priority,
+          createdAt: createdNotification.createdAt,
           showPopup: true
         });
       }

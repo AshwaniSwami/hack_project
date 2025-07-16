@@ -1309,10 +1309,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       data: notification
     });
     
+    console.log(`Broadcasting notification to ${adminConnections.size} connected admins:`, notification);
+    
     adminConnections.forEach((ws, userId) => {
       if (ws.readyState === WebSocket.OPEN) {
         ws.send(message);
-        console.log(`Notification sent to admin user ${userId}`);
+        console.log(`✅ Notification sent to admin user ${userId}`);
+      } else {
+        console.log(`❌ WebSocket not open for admin user ${userId}`);
       }
     });
   };
