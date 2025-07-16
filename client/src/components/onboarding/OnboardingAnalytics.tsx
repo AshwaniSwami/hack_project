@@ -121,7 +121,7 @@ export default function OnboardingAnalytics() {
   ];
 
   // Question performance data
-  const questionPerformanceData = formConfig?.map((question: any) => {
+  const questionPerformanceData = formConfig?.questions?.map((question: any) => {
     const responses = responsesByQuestion[question.id] || {};
     const totalResponses = Object.values(responses).reduce((sum: number, count: any) => sum + count, 0);
     return {
