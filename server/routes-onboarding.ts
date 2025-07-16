@@ -6,6 +6,7 @@ import { onboardingFormConfig, onboardingFormResponses, users } from "@shared/sc
 import { AuthenticatedRequest, isAuthenticated, isAdmin } from "./auth";
 import { insertOnboardingFormConfigSchema, insertOnboardingFormResponseSchema } from "@shared/schema";
 import { nanoid } from "nanoid";
+import { randomUUID } from "crypto";
 // Mock data for demonstration
 const mockUsers = [
   {
@@ -169,8 +170,13 @@ export const getCurrentFormConfig = async (req: Request, res: Response) => {
     if (activeConfig.length === 0) {
       // Create default form configuration if none exists
       console.log("No active form config found, creating default...");
+      
+      // Get the first admin user to use as createdBy
+      const adminUser = await db.select().from(users).where(eq(users.role, 'admin')).limit(1);
+      const createdBy = adminUser[0]?.id || 'system';
+      
       const defaultConfig = {
-        id: nanoid(),
+        id: randomUUID(),
         questions: [
           { id: "name", type: "text", label: "What is your name?", compulsory: true },
           { id: "role", type: "radio", label: "What is your primary role?", options: ["Radio Host", "Producer", "Script Writer", "Content Manager", "Technical Director"], compulsory: true },
@@ -179,7 +185,7 @@ export const getCurrentFormConfig = async (req: Request, res: Response) => {
           { id: "station_type", type: "radio", label: "What type of radio station are you affiliated with?", options: ["Community Radio", "Commercial Radio", "Public Radio", "Internet Radio", "Podcast Network", "Independent"], compulsory: true },
           { id: "goals", type: "text", label: "What are your main goals for using this platform?", compulsory: false }
         ] as FormQuestion[],
-        createdBy: "rjen7tw3u_HPnmJ2CiJ38", // Use the correct admin user ID
+        createdBy: createdBy,
         version: 1,
         isActive: true,
       };
@@ -231,7 +237,7 @@ export const updateFormConfig = async (req: AuthenticatedRequest, res: Response)
 
     // Insert new configuration
     await db.insert(onboardingFormConfig).values({
-      id: nanoid(),
+      id: randomUUID(),
       ...configData,
       version: nextVersion,
       isActive: true,
@@ -342,7 +348,6 @@ export const submitOnboardingForm = async (req: AuthenticatedRequest, res: Respo
       .where(eq(users.id, req.user.id));
 
     // Save individual responses for analytics
-    const { nanoid } = await import("nanoid");
     const responses = [];
     for (const question of formConfig.questions as FormQuestion[]) {
       const response = submissionData[question.id];
