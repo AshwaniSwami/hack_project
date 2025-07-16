@@ -195,11 +195,30 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
       return;
     }
 
+    if (!data.projectId) {
+      toast({
+        title: "Error",
+        description: "Project selection is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!data.title.trim()) {
+      toast({
+        title: "Error",
+        description: "Script title is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const submitData = { 
       ...data, 
       content: cleanContent,
       episodeId: data.episodeId === "none" ? undefined : data.episodeId,
-      description: data.description || undefined
+      description: data.description || undefined,
+      title: data.title.trim()
     };
     mutation.mutate(submitData);
   };
