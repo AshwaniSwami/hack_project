@@ -45,16 +45,16 @@ export function Navbar() {
   return (
     <header className="bg-sky-100/80 dark:bg-gray-800/90 backdrop-blur-md text-slate-800 dark:text-gray-100 shadow-xl sticky top-0 z-50 border-b border-sky-200/30 dark:border-gray-700/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-6">
             <Link href="/">
-              <div className="flex items-center space-x-3 cursor-pointer group">
-                <div className="relative p-3 bg-sky-50 rounded-2xl backdrop-blur-sm group-hover:bg-sky-100 transition-all duration-300 shadow-lg">
-                  <Radio className="h-7 w-7 text-sky-600 drop-shadow-sm" />
-                  <div className="absolute inset-0 bg-gradient-to-br from-sky-100/30 to-rose-100/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="flex items-center space-x-2 cursor-pointer group">
+                <div className="relative p-2 bg-sky-50 rounded-xl backdrop-blur-sm group-hover:bg-sky-100 transition-all duration-300 shadow-md">
+                  <Radio className="h-5 w-5 text-sky-600 drop-shadow-sm" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-sky-100/30 to-rose-100/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
                 <div className="group-hover:scale-105 transition-transform duration-200">
-                  <h1 className="text-xl font-bold bg-gradient-to-r from-sky-600 to-rose-500 bg-clip-text text-transparent">
+                  <h1 className="text-lg font-bold bg-gradient-to-r from-sky-600 to-rose-500 bg-clip-text text-transparent">
                     SMART Radio
                   </h1>
                   <p className="text-xs text-sky-700 dark:text-gray-300 font-medium tracking-wide">NGO Content Hub</p>
