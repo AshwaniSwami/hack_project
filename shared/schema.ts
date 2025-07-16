@@ -64,9 +64,6 @@ export const otpVerifications = pgTable("otp_verifications", {
 export const themes = pgTable("themes", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name", { length: 255 }).notNull().unique(),
-  description: text("description"),
-  colorHex: varchar("color_hex", { length: 7 }).default("#3B82F6"), // Default blue color
-  isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -75,28 +72,17 @@ export const themes = pgTable("themes", {
 export const projects = pgTable("projects", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
   themeId: uuid("theme_id"), // Reference to theme
-  projectType: varchar("project_type", { length: 50 }).default("main"), // main, template
-  isTemplate: boolean("is_template").default(false),
-  sortOrder: integer("sort_order").default(0),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
-  index("idx_projects_type").on(table.projectType),
-  index("idx_projects_sort").on(table.sortOrder),
-]);
+});
 
 // Episodes table
 export const episodes = pgTable("episodes", {
   id: uuid("id").primaryKey().defaultRandom(),
   projectId: uuid("project_id").notNull(),
   title: varchar("title", { length: 255 }).notNull(),
-  episodeNumber: integer("episode_number").notNull(),
-  description: text("description"),
-  broadcastDate: date("broadcast_date"),
-  isPremium: boolean("is_premium").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -109,8 +95,6 @@ export const scripts = pgTable("scripts", {
   title: varchar("title", { length: 255 }).notNull(),
   content: text("content").notNull(),
   status: varchar("status", { length: 50 }).notNull().default("Draft"),
-  reviewComments: text("review_comments"),
-  isArchived: boolean("is_archived").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -474,8 +458,6 @@ export const insertEpisodeSchema = createInsertSchema(episodes).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-}).extend({
-  episodeNumber: createInsertSchema(episodes).shape.episodeNumber.optional()
 });
 
 export const insertScriptSchema = createInsertSchema(scripts).omit({
