@@ -196,10 +196,26 @@ export default function Scripts() {
   });
 
   const onSubmit = (data: ScriptFormData) => {
+    // Ensure content is provided for new scripts
+    if (!editingScript && (!data.content || data.content.trim() === '')) {
+      toast({
+        title: "Error",
+        description: "Script content is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const submitData = {
+      ...data,
+      content: data.content || '',
+      description: data.description || undefined
+    };
+
     if (editingScript) {
-      updateMutation.mutate(data);
+      updateMutation.mutate(submitData);
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(submitData);
     }
   };
 

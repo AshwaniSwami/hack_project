@@ -186,7 +186,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
   const onSubmit = (data: ScriptFormData) => {
     const cleanContent = content.replace(/<p><br><\/p>/g, '').trim();
 
-    if (!cleanContent || cleanContent === '<p></p>') {
+    if (!cleanContent || cleanContent === '<p></p>' || cleanContent === '<p><br></p>') {
       toast({
         title: "Error",
         description: "Script content is required",
@@ -195,7 +195,12 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
       return;
     }
 
-    const submitData = { ...data, content: cleanContent };
+    const submitData = { 
+      ...data, 
+      content: cleanContent,
+      episodeId: data.episodeId === "none" ? undefined : data.episodeId,
+      description: data.description || undefined
+    };
     mutation.mutate(submitData);
   };
 

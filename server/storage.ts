@@ -1,4 +1,3 @@
-
 import {
   users,
   themes,
@@ -373,8 +372,13 @@ export class DatabaseStorage implements IStorage {
 
   async createScript(scriptData: InsertScript): Promise<Script> {
     const dbInstance = requireDatabase();
-    const [script] = await dbInstance.insert(scripts).values(scriptData).returning();
-    return script;
+    try {
+      const [script] = await dbInstance.insert(scripts).values(scriptData).returning();
+      return script;
+    } catch (error) {
+      console.error('Error creating script:', error);
+      throw new Error('Failed to create script');
+    }
   }
 
   async updateScript(id: string, scriptData: Partial<InsertScript>): Promise<Script> {
@@ -435,14 +439,14 @@ export class DatabaseStorage implements IStorage {
 
   async getScriptWithTranslations(scriptId: string): Promise<{ script: Script; translations: Script[] } | undefined> {
     const dbInstance = requireDatabase();
-    
+
     // Get the original script
     const script = await this.getScript(scriptId);
     if (!script) return undefined;
 
     // Get all translations
     const translations = await this.getTranslationsForScript(scriptId);
-    
+
     return { script, translations };
   }
 
@@ -609,7 +613,7 @@ export class DatabaseStorage implements IStorage {
 
   async reorderFiles(entityType: string, entityId: string | null, fileIds: string[]): Promise<void> {
     const dbInstance = requireDatabase();
-    
+
     for (let i = 0; i < fileIds.length; i++) {
       await dbInstance
         .update(files)
@@ -883,7 +887,7 @@ export async function initializeStorage() {
         const pool = new Pool({ connectionString: process.env.DATABASE_URL });
         await pool.query('SELECT 1');
         await pool.end();
-        
+
         console.log("✅ Database connection verified");
         storage = new DatabaseStorage();
       } catch (error) {

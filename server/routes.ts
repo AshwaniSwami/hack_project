@@ -106,7 +106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const { registerEpisodeAnalyticsRoutes } = await import("./routes-episodes-analytics");
   registerAnalyticsRoutes(app);
   registerDownloadTrackingRoutes(app);
-  
+
   // Register onboarding routes
   const { 
     getCurrentFormConfig, 
@@ -115,7 +115,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     getOnboardingAnalytics, 
     checkOnboardingStatus 
   } = await import("./routes-onboarding");
-  
+
   app.get("/api/onboarding/form-config", getCurrentFormConfig);
   app.put("/api/onboarding/form-config", isAuthenticated, isAdmin, updateFormConfig);
   app.post("/api/onboarding/submit", isAuthenticated, submitOnboardingForm);
@@ -290,9 +290,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Get user info before deletion for broadcasting
       const userToDelete = await storage.getUser(req.params.id);
-      
+
       await storage.deleteUser(req.params.id);
-      
+
       // Broadcast real-time update to all connected admin users
       if (typeof (global as any).broadcastNotificationToAdmins === 'function') {
         (global as any).broadcastNotificationToAdmins({
@@ -303,7 +303,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           timestamp: new Date().toISOString()
         });
       }
-      
+
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -325,7 +325,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/admin/users/:id/verify", isAuthenticated, isAdmin, async (req, res) => {
     try {
       const user = await storage.verifyUser(req.params.id);
-      
+
       // Broadcast real-time update to all connected admin users
       if (typeof (global as any).broadcastNotificationToAdmins === 'function') {
         (global as any).broadcastNotificationToAdmins({
@@ -336,7 +336,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           timestamp: new Date().toISOString()
         });
       }
-      
+
       res.json({ message: "User verified successfully", user });
     } catch (error) {
       console.error("Error verifying user:", error);
@@ -603,16 +603,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const episodeCreationSchema = insertEpisodeSchema.extend({
         episodeNumber: insertEpisodeSchema.shape.episodeNumber.optional()
       });
-      
+
       const episodeData = episodeCreationSchema.parse(req.body);
-      
+
       // Auto-generate episode number based on project if not provided
       let episodeNumber = episodeData.episodeNumber;
       if (!episodeNumber) {
         const projectEpisodes = await storage.getEpisodesByProject(episodeData.projectId);
         episodeNumber = projectEpisodes.length + 1;
       }
-      
+
       const episode = await storage.createEpisode({
         ...episodeData,
         episodeNumber: episodeNumber
@@ -1315,29 +1315,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/me", getCurrentUser);
 
   const httpServer = createServer(app);
-  
+
   // Create WebSocket server for real-time notifications
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
-  
+
   // Store admin WebSocket connections
   const adminConnections = new Map<string, WebSocket>();
-  
+
   wss.on('connection', (ws: WebSocket, req) => {
     console.log('WebSocket connection established');
-    
+
     // Handle authentication for WebSocket connections
     ws.on('message', async (message) => {
       try {
         const data = JSON.parse(message.toString());
-        
+
         if (data.type === 'authenticate') {
           const { userId, userRole } = data;
-          
+
           // Only allow admin users to connect for notifications
           if (userRole === 'admin') {
             adminConnections.set(userId, ws);
             console.log(`Admin user ${userId} connected to WebSocket`);
-            
+
             ws.send(JSON.stringify({
               type: 'authenticated',
               message: 'Successfully authenticated for notifications'
@@ -1358,7 +1358,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }));
       }
     });
-    
+
     ws.on('close', () => {
       // Remove connection from admin connections when closed
       for (const [userId, connection] of adminConnections.entries()) {
@@ -1369,21 +1369,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
     });
-    
+
     ws.on('error', (error) => {
       console.error('WebSocket error:', error);
     });
   });
-  
+
   // Export function to broadcast notifications to all connected admins
   (global as any).broadcastNotificationToAdmins = (notification: any) => {
     const message = JSON.stringify({
       type: 'notification',
       data: notification
     });
-    
+
     console.log(`Broadcasting notification to ${adminConnections.size} connected admins:`, notification);
-    
+
     adminConnections.forEach((ws, userId) => {
       if (ws.readyState === WebSocket.OPEN) {
         ws.send(message);
@@ -1393,6 +1393,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     });
   };
-  
+
   return httpServer;
 }
