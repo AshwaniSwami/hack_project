@@ -67,8 +67,10 @@ import {
 import { ScriptEditor } from "@/components/script-editor";
 import { ScriptFileUpload } from "@/components/script-file-upload";
 import { FileList } from "@/components/file-list";
+import { LanguageSelector, LanguageBadge } from "@/components/language-selector";
 import { colors, getStatusColor, getCardStyle, getGradientStyle } from "@/lib/colors";
 import type { Script, Project } from "@shared/schema";
+import { DEFAULT_LANGUAGE, getLanguageName, getLanguageFlag } from "@shared/languages";
 
 const scriptFormSchema = z.object({
   projectId: z.string().min(1, "Project is required"),
@@ -76,6 +78,9 @@ const scriptFormSchema = z.object({
   description: z.string().optional(),
   content: z.string().optional(),
   status: z.enum(["Draft", "Under Review", "Approved", "Published"]).default("Draft"),
+  language: z.string().default(DEFAULT_LANGUAGE),
+  originalScriptId: z.string().optional(),
+  languageGroup: z.string().optional(),
 });
 
 type ScriptFormData = z.infer<typeof scriptFormSchema>;
@@ -96,6 +101,7 @@ export default function Scripts() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [projectFilter, setProjectFilter] = useState('all');
+  const [languageFilter, setLanguageFilter] = useState('all');
   const [sortBy, setSortBy] = useState<'title' | 'date' | 'status'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedScripts, setSelectedScripts] = useState<string[]>([]);
@@ -120,6 +126,7 @@ export default function Scripts() {
       description: "",
       content: "",
       status: "Draft",
+      language: DEFAULT_LANGUAGE,
     },
   });
 
@@ -238,7 +245,8 @@ export default function Scripts() {
         (project?.name.toLowerCase().includes(searchLower));
       const matchesStatus = statusFilter === "all" || script.status === statusFilter;
       const matchesProject = projectFilter === 'all' || script.projectId === projectFilter;
-      return matchesSearch && matchesStatus && matchesProject;
+      const matchesLanguage = languageFilter === 'all' || script.language === languageFilter;
+      return matchesSearch && matchesStatus && matchesProject && matchesLanguage;
     })
     .sort((a, b) => {
       let compareValue = 0;
@@ -367,7 +375,20 @@ export default function Scripts() {
                         )}
                       />
 
-                      
+                      <FormField
+                        control={form.control}
+                        name="language"
+                        render={({ field }) => (
+                          <FormItem>
+                            <LanguageSelector
+                              value={field.value}
+                              onChange={field.onChange}
+                              allowCustom={true}
+                            />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
                       <FormField
                         control={form.control}
@@ -470,6 +491,23 @@ export default function Scripts() {
                         {projects.map((project) => (
                           <SelectItem key={project.id} value={project.id}>
                             {project.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    
+                    <Select value={languageFilter} onValueChange={setLanguageFilter}>
+                      <SelectTrigger className="w-40">
+                        <SelectValue placeholder="All Languages" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Languages</SelectItem>
+                        {Array.from(new Set(scripts.map(script => script.language).filter(Boolean))).map((language) => (
+                          <SelectItem key={language} value={language}>
+                            <div className="flex items-center space-x-2">
+                              <span>{getLanguageFlag(language)}</span>
+                              <span>{getLanguageName(language)}</span>
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -670,12 +708,17 @@ export default function Scripts() {
                             {script.title}
                           </h3>
                           
-                          {project && (
-                            <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
-                              <FolderOpen className="h-3 w-3 text-blue-500 dark:text-blue-400" />
-                              <span className="truncate">{project.name}</span>
-                            </div>
-                          )}
+                          <div className="flex items-center justify-between">
+                            {project && (
+                              <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+                                <FolderOpen className="h-3 w-3 text-blue-500 dark:text-blue-400" />
+                                <span className="truncate">{project.name}</span>
+                              </div>
+                            )}
+                            {script.language && (
+                              <LanguageBadge language={script.language} className="ml-2 text-xs" />
+                            )}
+                          </div>
 
                           {script.description && (
                             <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
@@ -725,17 +768,22 @@ export default function Scripts() {
                               <h3 className="font-semibold text-sm text-gray-800 dark:text-gray-200 truncate group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors duration-300">
                                 {script.title}
                               </h3>
-                              <div className="flex items-center space-x-4 mt-1">
-                                {project && (
-                                  <div className="flex items-center space-x-1 text-xs text-gray-600 dark:text-gray-400">
-                                    <FolderOpen className="h-3 w-3 text-blue-500 dark:text-blue-400" />
-                                    <span>{project.name}</span>
+                              <div className="flex items-center justify-between mt-1">
+                                <div className="flex items-center space-x-4">
+                                  {project && (
+                                    <div className="flex items-center space-x-1 text-xs text-gray-600 dark:text-gray-400">
+                                      <FolderOpen className="h-3 w-3 text-blue-500 dark:text-blue-400" />
+                                      <span>{project.name}</span>
+                                    </div>
+                                  )}
+                                  <div className="flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-400">
+                                    <Clock className="h-3 w-3 text-gray-400 dark:text-gray-500" />
+                                    <span>{new Date(script.createdAt).toLocaleDateString()}</span>
                                   </div>
-                                )}
-                                <div className="flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-400">
-                                  <Clock className="h-3 w-3 text-gray-400 dark:text-gray-500" />
-                                  <span>{new Date(script.createdAt).toLocaleDateString()}</span>
                                 </div>
+                                {script.language && (
+                                  <LanguageBadge language={script.language} className="text-xs" />
+                                )}
                               </div>
                             </div>
                           </div>

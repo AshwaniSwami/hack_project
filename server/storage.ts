@@ -85,6 +85,11 @@ export interface IStorage {
   updateScript(id: string, script: Partial<InsertScript>): Promise<Script>;
   deleteScript(id: string): Promise<void>;
   getAllScripts(): Promise<Script[]>;
+  getScriptsByLanguage(language: string): Promise<Script[]>;
+  getScriptsByProject(projectId: string): Promise<Script[]>;
+  getScriptsByLanguageGroup(languageGroup: string): Promise<Script[]>;
+  getTranslationsForScript(scriptId: string): Promise<Script[]>;
+  getScriptWithTranslations(scriptId: string): Promise<{ script: Script; translations: Script[] } | undefined>;
 
   // Topics
   getTopic(id: string): Promise<Topic | undefined>;
@@ -390,6 +395,55 @@ export class DatabaseStorage implements IStorage {
   async getAllScripts(): Promise<Script[]> {
     const dbInstance = requireDatabase();
     return await dbInstance.select().from(scripts).orderBy(desc(scripts.createdAt));
+  }
+
+  async getScriptsByLanguage(language: string): Promise<Script[]> {
+    const dbInstance = requireDatabase();
+    return await dbInstance
+      .select()
+      .from(scripts)
+      .where(eq(scripts.language, language))
+      .orderBy(desc(scripts.createdAt));
+  }
+
+  async getScriptsByProject(projectId: string): Promise<Script[]> {
+    const dbInstance = requireDatabase();
+    return await dbInstance
+      .select()
+      .from(scripts)
+      .where(eq(scripts.projectId, projectId))
+      .orderBy(desc(scripts.createdAt));
+  }
+
+  async getScriptsByLanguageGroup(languageGroup: string): Promise<Script[]> {
+    const dbInstance = requireDatabase();
+    return await dbInstance
+      .select()
+      .from(scripts)
+      .where(eq(scripts.languageGroup, languageGroup))
+      .orderBy(desc(scripts.createdAt));
+  }
+
+  async getTranslationsForScript(scriptId: string): Promise<Script[]> {
+    const dbInstance = requireDatabase();
+    return await dbInstance
+      .select()
+      .from(scripts)
+      .where(eq(scripts.originalScriptId, scriptId))
+      .orderBy(desc(scripts.createdAt));
+  }
+
+  async getScriptWithTranslations(scriptId: string): Promise<{ script: Script; translations: Script[] } | undefined> {
+    const dbInstance = requireDatabase();
+    
+    // Get the original script
+    const script = await this.getScript(scriptId);
+    if (!script) return undefined;
+
+    // Get all translations
+    const translations = await this.getTranslationsForScript(scriptId);
+    
+    return { script, translations };
   }
 
   // Topics

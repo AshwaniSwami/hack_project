@@ -732,9 +732,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const scriptData = insertScriptSchema.parse(req.body);
 
+      // Auto-generate language group if not provided
+      let languageGroup = scriptData.languageGroup;
+      if (!languageGroup) {
+        languageGroup = `${scriptData.projectId}_${scriptData.title.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`;
+      }
+
       const script = await storage.createScript({
         ...scriptData,
-        authorId: req.user.id
+        authorId: req.user.id,
+        languageGroup,
+        isOriginal: !scriptData.originalScriptId // It's original if no originalScriptId is provided
       });
       res.status(201).json(script);
     } catch (error) {
@@ -821,6 +829,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting script:", error);
       res.status(500).json({ message: "Failed to delete script" });
+    }
+  });
+
+  // Language-specific script endpoints
+  app.get("/api/scripts/by-language/:language", async (req, res) => {
+    try {
+      const scripts = await storage.getScriptsByLanguage(req.params.language);
+      res.json(scripts);
+    } catch (error) {
+      console.error("Error fetching scripts by language:", error);
+      res.status(500).json({ message: "Failed to fetch scripts by language" });
+    }
+  });
+
+  app.get("/api/scripts/by-project/:projectId", async (req, res) => {
+    try {
+      const scripts = await storage.getScriptsByProject(req.params.projectId);
+      res.json(scripts);
+    } catch (error) {
+      console.error("Error fetching scripts by project:", error);
+      res.status(500).json({ message: "Failed to fetch scripts by project" });
+    }
+  });
+
+  app.get("/api/scripts/by-language-group/:languageGroup", async (req, res) => {
+    try {
+      const scripts = await storage.getScriptsByLanguageGroup(req.params.languageGroup);
+      res.json(scripts);
+    } catch (error) {
+      console.error("Error fetching scripts by language group:", error);
+      res.status(500).json({ message: "Failed to fetch scripts by language group" });
+    }
+  });
+
+  app.get("/api/scripts/:id/translations", async (req, res) => {
+    try {
+      const translations = await storage.getTranslationsForScript(req.params.id);
+      res.json(translations);
+    } catch (error) {
+      console.error("Error fetching script translations:", error);
+      res.status(500).json({ message: "Failed to fetch script translations" });
+    }
+  });
+
+  app.get("/api/scripts/:id/with-translations", async (req, res) => {
+    try {
+      const result = await storage.getScriptWithTranslations(req.params.id);
+      if (!result) {
+        return res.status(404).json({ message: "Script not found" });
+      }
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching script with translations:", error);
+      res.status(500).json({ message: "Failed to fetch script with translations" });
+    }
+  });
+
+  // Languages API
+  app.get("/api/languages", async (req, res) => {
+    try {
+      const { getLanguageOptions } = await import("@shared/languages");
+      res.json(getLanguageOptions());
+    } catch (error) {
+      console.error("Error fetching languages:", error);
+      res.status(500).json({ message: "Failed to fetch languages" });
     }
   });
 

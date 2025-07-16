@@ -95,9 +95,19 @@ export const scripts = pgTable("scripts", {
   title: varchar("title", { length: 255 }).notNull(),
   content: text("content").notNull(),
   status: varchar("status", { length: 50 }).notNull().default("Draft"),
+  // Language support fields
+  language: varchar("language", { length: 10 }).notNull().default("en"), // ISO language code (en, es, fr, hi, etc.)
+  originalScriptId: uuid("original_script_id"), // Reference to the original script (for translations)
+  languageGroup: varchar("language_group", { length: 100 }), // Groups related scripts across languages
+  isOriginal: boolean("is_original").default(true), // Whether this is the original script or a translation
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_scripts_language").on(table.language),
+  index("idx_scripts_language_group").on(table.languageGroup),
+  index("idx_scripts_original").on(table.originalScriptId),
+  index("idx_scripts_project_language").on(table.projectId, table.language),
+]);
 
 // Topics table
 export const topics = pgTable("topics", {
@@ -323,6 +333,11 @@ export const scriptsRelations = relations(scripts, ({ one, many }) => ({
     references: [users.id],
   }),
   scriptTopics: many(scriptTopics),
+  originalScript: one(scripts, {
+    fields: [scripts.originalScriptId],
+    references: [scripts.id],
+  }),
+  translations: many(scripts),
 }));
 
 export const topicsRelations = relations(topics, ({ many }) => ({
