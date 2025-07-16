@@ -130,7 +130,7 @@ The application uses a relational database with the following core entities:
 
 ## Recent Changes
 
-- July 16, 2025: ✅ SWAPPED SCRIPTS AND EPISODES POSITIONS - Interchanged the positions of Scripts and Episodes tabs in project detail view - Scripts now appear first, Episodes second as requested by user
+- July 16, 2025: ✅ SWAPPED SCRIPTS AND EPISODES POSITIONS - Interchanged the positions of Scripts and Episodes throughout the interface - Scripts now appear first, Episodes second in project cards, detail view tabs, and header badges
 - July 16, 2025: ✅ SIMPLIFIED SCRIPT LANGUAGE OPTIONS - Updated language selector to show only English, Hindi, and custom language options instead of all 23 languages in script creation forms
 - July 16, 2025: ✅ ENHANCED SCRIPT LANGUAGE CATEGORIZATION - Implemented script grouping by name with language dropdown menus in project detail view, allowing users to select different language versions of the same script instead of showing them as separate entries
 - July 16, 2025: ✅ MIGRATION FROM REPLIT AGENT TO REPLIT COMPLETED - Successfully migrated entire project to Replit environment with PostgreSQL database setup, schema migrations applied, and default admin user created (admin@example.com / admin123)

@@ -141,10 +141,10 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
               <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{project.name}</h1>
               <div className="flex items-center gap-4 mt-1">
                 <Badge variant="outline" className="bg-white/80 dark:bg-gray-800/80">
-                  {episodes.length + projectEpisodeFiles.length} episodes
+                  {scripts.length + projectScriptFiles.length} scripts
                 </Badge>
                 <Badge variant="outline" className="bg-white/80 dark:bg-gray-800/80">
-                  {scripts.length + projectScriptFiles.length} scripts
+                  {episodes.length + projectEpisodeFiles.length} episodes
                 </Badge>
               </div>
             </div>

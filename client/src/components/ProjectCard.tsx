@@ -103,15 +103,15 @@ export function ProjectCard({ project, theme, user, onView, onEdit, onDelete }: 
           )}
           
           <div className="grid grid-cols-2 gap-3 pt-2">
-            <div className="text-center p-2 bg-blue-50/80 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-700/50">
-              <Mic className="h-4 w-4 mx-auto text-blue-600 dark:text-blue-400 mb-1" />
-              <div className="text-base font-bold text-blue-700 dark:text-blue-300">{episodeCount}</div>
-              <div className="text-xs text-blue-600 dark:text-blue-400">Episodes</div>
-            </div>
             <div className="text-center p-2 bg-emerald-50/80 dark:bg-emerald-900/20 rounded-lg border border-emerald-100 dark:border-emerald-700/50">
               <FileText className="h-4 w-4 mx-auto text-emerald-600 dark:text-emerald-400 mb-1" />
               <div className="text-base font-bold text-emerald-700 dark:text-emerald-300">{scriptCount}</div>
               <div className="text-xs text-emerald-600 dark:text-emerald-400">Scripts</div>
+            </div>
+            <div className="text-center p-2 bg-blue-50/80 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-700/50">
+              <Mic className="h-4 w-4 mx-auto text-blue-600 dark:text-blue-400 mb-1" />
+              <div className="text-base font-bold text-blue-700 dark:text-blue-300">{episodeCount}</div>
+              <div className="text-xs text-blue-600 dark:text-blue-400">Episodes</div>
             </div>
           </div>
           
