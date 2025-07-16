@@ -211,6 +211,7 @@ export default function Scripts() {
       description: script.description || "",
       content: script.content || "",
       status: script.status as "Draft" | "Under Review" | "Approved" | "Published",
+      language: script.language || DEFAULT_LANGUAGE,
     });
   };
 
@@ -981,7 +982,20 @@ export default function Scripts() {
                 )}
               />
 
-              
+              <FormField
+                control={form.control}
+                name="language"
+                render={({ field }) => (
+                  <FormItem>
+                    <LanguageSelector
+                      value={field.value}
+                      onChange={field.onChange}
+                      allowCustom={true}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}

@@ -130,6 +130,8 @@ The application uses a relational database with the following core entities:
 
 ## Recent Changes
 
+- July 16, 2025: ✅ ENHANCED SCRIPT EDITING WITH LANGUAGE SUPPORT - Added language selector to script editing form, ensuring users can modify script language when editing existing scripts
+- July 16, 2025: ✅ CONFIRMED FAB SCRIPT CREATION - Verified that FAB menu already includes script creation functionality with language selector, providing quick access to script creation from dashboard
 - July 16, 2025: ✅ SWAPPED SCRIPTS AND EPISODES POSITIONS - Interchanged the positions of Scripts and Episodes throughout the interface - Scripts now appear first, Episodes second in project cards, detail view tabs, and header badges
 - July 16, 2025: ✅ SIMPLIFIED SCRIPT LANGUAGE OPTIONS - Updated language selector to show only English, Hindi, and custom language options instead of all 23 languages in script creation forms
 - July 16, 2025: ✅ ENHANCED SCRIPT LANGUAGE CATEGORIZATION - Implemented script grouping by name with language dropdown menus in project detail view, allowing users to select different language versions of the same script instead of showing them as separate entries
