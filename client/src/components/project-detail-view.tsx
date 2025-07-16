@@ -62,6 +62,7 @@ ${script.description ? `**Description:** ${script.description}\n\n` : ''}${scrip
 export function ProjectDetailView({ project }: ProjectDetailViewProps) {
   const queryClient = useQueryClient();
   const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
+  const [selectedScriptVersions, setSelectedScriptVersions] = useState<Record<string, Script>>({});
 
   const { data: episodes = [] } = useQuery<Episode[]>({
     queryKey: ["/api/episodes"],
@@ -76,12 +77,28 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
   // Get available languages for filtering
   const availableLanguages = Array.from(new Set(scripts.map(script => script.language).filter(Boolean)));
 
-  // Filter scripts by selected language
-  const filteredScripts = selectedLanguage === "all" 
-    ? scripts 
-    : scripts.filter(script => script.language === selectedLanguage);
+  // Group scripts by title (name) - this is the key change for the requested feature
+  const groupedScripts = scripts.reduce((acc, script) => {
+    const key = script.title;
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(script);
+    return acc;
+  }, {} as Record<string, Script[]>);
 
-  // Group scripts by language groups for dropdown functionality
+  // Filter grouped scripts by selected language
+  const filteredGroupedScripts = selectedLanguage === "all" 
+    ? groupedScripts 
+    : Object.entries(groupedScripts).reduce((acc, [title, scripts]) => {
+        const filtered = scripts.filter(script => script.language === selectedLanguage);
+        if (filtered.length > 0) {
+          acc[title] = filtered;
+        }
+        return acc;
+      }, {} as Record<string, Script[]>);
+
+  // Get all script language versions for a specific title
   const getScriptLanguageVersions = (script: Script) => {
     if (!script.languageGroup) return [script];
     return scripts.filter(s => s.languageGroup === script.languageGroup);
@@ -271,9 +288,9 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
           </div>
           
           <div className="grid gap-6">
-            {filteredScripts.map((script) => {
-              const languageVersions = getScriptLanguageVersions(script);
-              const hasMultipleLanguages = languageVersions.length > 1;
+            {Object.entries(filteredGroupedScripts).map(([scriptTitle, scriptVersions]) => {
+              const script = selectedScriptVersions[scriptTitle] || scriptVersions[0];
+              const hasMultipleLanguages = scriptVersions.length > 1;
               
               // Get status color
               const getStatusColor = (status: string) => {
@@ -287,16 +304,52 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
               };
 
               return (
-                <div key={script.id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                <div key={scriptTitle} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
                   <div className="p-6">
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{script.title}</h4>
+                          <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{scriptTitle}</h4>
                           <Badge variant="outline" className={`text-xs ${getStatusColor(script.status)}`}>
                             {script.status}
                           </Badge>
-                          <LanguageBadge language={script.language || 'en'} />
+                          
+                          {/* Language Dropdown for same script name */}
+                          {hasMultipleLanguages ? (
+                            <Select 
+                              value={script.id} 
+                              onValueChange={(scriptId) => {
+                                const selectedScript = scriptVersions.find(s => s.id === scriptId);
+                                if (selectedScript) {
+                                  setSelectedScriptVersions(prev => ({
+                                    ...prev,
+                                    [scriptTitle]: selectedScript
+                                  }));
+                                }
+                              }}
+                            >
+                              <SelectTrigger className="w-48">
+                                <SelectValue>
+                                  <div className="flex items-center gap-2">
+                                    <span>{getLanguageFlag(script.language || 'en')}</span>
+                                    <span>{getLanguageName(script.language || 'en')}</span>
+                                  </div>
+                                </SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                {scriptVersions.map(langScript => (
+                                  <SelectItem key={langScript.id} value={langScript.id}>
+                                    <div className="flex items-center gap-2">
+                                      <span>{getLanguageFlag(langScript.language || 'en')}</span>
+                                      <span>{getLanguageName(langScript.language || 'en')}</span>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <LanguageBadge language={script.language || 'en'} />
+                          )}
                         </div>
                         
                         {script.content && (
@@ -312,69 +365,31 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                       </div>
                       
                       <div className="flex items-center gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => downloadScript(script)}
+                          className="h-8 w-8 p-0 hover:bg-green-50 dark:hover:bg-green-900/30"
+                        >
+                          <Download className="h-4 w-4 text-green-600" />
+                        </Button>
                         <FileList 
                           entityType="scripts" 
                           entityId={script.id}
-                          title={`${script.title} Files`}
+                          title={`${scriptTitle} Files`}
                         />
                       </div>
                     </div>
                     
-                    {/* Language Versions Dropdown */}
+                    {/* Language availability indicator */}
                     {hasMultipleLanguages && (
                       <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                        <div className="flex items-center gap-2 mb-3">
+                        <div className="flex items-center gap-2">
                           <Languages className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Available in {languageVersions.length} languages
+                            Available in {scriptVersions.length} languages
                           </span>
                         </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="gap-2">
-                              <Globe className="h-4 w-4" />
-                              <span>View Other Languages</span>
-                              <ChevronDown className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="start" className="w-64">
-                            {languageVersions.map(langScript => (
-                              <DropdownMenuItem key={langScript.id} className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <span>{getLanguageFlag(langScript.language || 'en')}</span>
-                                  <span>{getLanguageName(langScript.language || 'en')}</span>
-                                  {langScript.id === script.id && (
-                                    <Badge variant="secondary" className="text-xs">Current</Badge>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="h-6 w-6 p-0"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      // Handle view script
-                                    }}
-                                  >
-                                    <Eye className="h-3 w-3" />
-                                  </Button>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="h-6 w-6 p-0"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      downloadScript(langScript);
-                                    }}
-                                  >
-                                    <Download className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                              </DropdownMenuItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
                       </div>
                     )}
                   </div>
@@ -402,7 +417,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
               </div>
             )}
             
-            {filteredScripts.length === 0 && projectScriptFiles.length === 0 && (
+            {Object.keys(filteredGroupedScripts).length === 0 && projectScriptFiles.length === 0 && (
               <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-12 text-center border border-gray-200 dark:border-gray-700">
                 <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-full w-fit mx-auto mb-4">
                   <FileText className="h-8 w-8 text-gray-400 dark:text-gray-500" />

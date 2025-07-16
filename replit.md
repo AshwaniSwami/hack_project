@@ -130,6 +130,8 @@ The application uses a relational database with the following core entities:
 
 ## Recent Changes
 
+- July 16, 2025: ✅ ENHANCED SCRIPT LANGUAGE CATEGORIZATION - Implemented script grouping by name with language dropdown menus in project detail view, allowing users to select different language versions of the same script instead of showing them as separate entries
+- July 16, 2025: ✅ MIGRATION FROM REPLIT AGENT TO REPLIT COMPLETED - Successfully migrated entire project to Replit environment with PostgreSQL database setup, schema migrations applied, and default admin user created (admin@example.com / admin123)
 - July 16, 2025: ✅ ENHANCED PROJECT DETAIL VIEW WITH LANGUAGE CATEGORIZATION - Implemented language dropdown menus under each script in project detail view, maintaining original design while adding multi-language support with view and download options
 - July 16, 2025: ✅ DEPLOYMENT READY - Successfully resolved all database schema issues and prepared application for final deployment
 - July 16, 2025: ✅ FIXED DATABASE SCHEMA ERRORS - Recreated entire database schema with proper table structure resolving project creation, episode management, and script editing issues
