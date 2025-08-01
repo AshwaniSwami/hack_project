@@ -417,9 +417,9 @@ export const getOnboardingAnalytics = async (req: AuthenticatedRequest, res: Res
     // Handle authentication in case middleware failed to set user
     if (!req.user && req.session && (req.session as any).userId) {
       const userId = (req.session as any).userId;
-      if (userId === "temp-admin-001") {
+      if (userId === "admin-001" || userId === "temp-admin-001") {
         req.user = {
-          id: "temp-admin-001",
+          id: userId,
           email: "admin@example.com",
           role: "admin",
           firstName: "Admin",

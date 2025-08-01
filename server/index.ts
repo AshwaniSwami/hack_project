@@ -81,28 +81,3 @@ app.use((req, res, next) => {
   }
 })();
 
-import express, { type Request, Response } from "express";
-import { registerRoutes } from "./routes";
-import { setupVite, serveStatic } from "./vite";
-import cors from "cors";
-import session from "express-session";
-import { registerAnalyticsRoutes } from "./routes-analytics";
-import { registerDownloadTrackingRoutes } from "./routes-download-tracking";
-import { registerNotificationRoutes } from "./routes-notifications";
-import { 
-  getCurrentFormConfig, 
-  updateFormConfig, 
-  submitOnboardingForm, 
-  getOnboardingAnalytics, 
-  checkOnboardingStatus 
-} from "./routes-onboarding";
-
-// Onboarding routes with error handling
-  app.get("/api/onboarding/config", getCurrentFormConfig);
-  app.put("/api/onboarding/config", updateFormConfig);
-  app.post("/api/onboarding/submit", submitOnboardingForm);
-  app.get("/api/onboarding/analytics", (req, res, next) => {
-    console.log("Analytics route hit:", req.url, req.method);
-    getOnboardingAnalytics(req as any, res).catch(next);
-  });
-  app.get("/api/onboarding/status", checkOnboardingStatus);
