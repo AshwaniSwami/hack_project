@@ -103,13 +103,26 @@ export function ThemeProvider({
     setTheme: (newTheme: Theme) => {
       console.log("Setting theme from", theme, "to", newTheme);
       localStorage.setItem(storageKey, newTheme);
+      
+      // Update theme state
       setTheme(newTheme);
       
-      // Immediately update actualTheme for better UI responsiveness
+      // Force immediate DOM and state update
+      const root = window.document.documentElement;
+      root.classList.remove("light", "dark");
+      
       const resolvedTheme = newTheme === "system" 
         ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
         : newTheme;
+      
+      root.classList.add(resolvedTheme);
       setActualTheme(resolvedTheme);
+      
+      console.log("Theme immediately applied:", {
+        newTheme,
+        resolvedTheme,
+        classList: root.classList.toString()
+      });
     },
   };
 

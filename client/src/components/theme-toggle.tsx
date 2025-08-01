@@ -9,10 +9,20 @@ export function ThemeToggle() {
   const handleToggle = () => {
     console.log("Theme toggle clicked. Current theme:", theme, "Actual theme:", actualTheme);
     
-    // Always alternate between light and dark, ignore system
+    // Force toggle between light and dark modes
     const newTheme = actualTheme === "light" ? "dark" : "light";
     console.log("Switching to theme:", newTheme);
+    
+    // Call setTheme and force re-render
     setTheme(newTheme);
+    
+    // Also force an immediate DOM update
+    setTimeout(() => {
+      const root = document.documentElement;
+      root.classList.remove("light", "dark");
+      root.classList.add(newTheme);
+      console.log("Forced DOM update:", root.classList.toString());
+    }, 0);
   };
 
   const getIcon = () => {
