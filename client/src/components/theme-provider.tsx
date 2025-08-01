@@ -11,11 +11,13 @@ type ThemeProviderProps = {
 type ThemeProviderState = {
   theme: Theme;
   setTheme: (theme: Theme) => void;
+  actualTheme: "dark" | "light"; // The actual resolved theme
 };
 
 const initialState: ThemeProviderState = {
   theme: "system",
   setTheme: () => null,
+  actualTheme: "light",
 };
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
@@ -23,36 +25,70 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 export function ThemeProvider({
   children,
   defaultTheme = "system",
-  storageKey = "vite-ui-theme",
+  storageKey = "smart-radio-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
-  );
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window !== "undefined") {
+      return (localStorage.getItem(storageKey) as Theme) || defaultTheme;
+    }
+    return defaultTheme;
+  });
+
+  const [actualTheme, setActualTheme] = useState<"dark" | "light">("light");
 
   useEffect(() => {
     const root = window.document.documentElement;
-
+    
+    // Remove existing theme classes
     root.classList.remove("light", "dark");
+    
+    let resolvedTheme: "dark" | "light" = "light";
 
     if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light";
-
-      root.classList.add(systemTheme);
-      return;
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      resolvedTheme = systemTheme ? "dark" : "light";
+    } else {
+      resolvedTheme = theme;
     }
 
-    root.classList.add(theme);
+    // Apply the resolved theme
+    root.classList.add(resolvedTheme);
+    setActualTheme(resolvedTheme);
+    
+    // Debug logging
+    console.log("Theme applied:", {
+      selectedTheme: theme,
+      resolvedTheme,
+      classList: root.classList.toString()
+    });
+  }, [theme]);
+
+  // Listen for system theme changes
+  useEffect(() => {
+    if (theme === "system") {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      
+      const handleChange = () => {
+        const root = window.document.documentElement;
+        root.classList.remove("light", "dark");
+        const systemTheme = mediaQuery.matches ? "dark" : "light";
+        root.classList.add(systemTheme);
+        setActualTheme(systemTheme);
+      };
+
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
   }, [theme]);
 
   const value = {
     theme,
+    actualTheme,
     setTheme: (newTheme: Theme) => {
       localStorage.setItem(storageKey, newTheme);
       setTheme(newTheme);
+      console.log("Theme changed to:", newTheme);
     },
   };
 

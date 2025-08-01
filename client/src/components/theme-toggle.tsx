@@ -4,38 +4,38 @@ import { Button } from "@/components/ui/button";
 import { useTheme } from "./theme-provider";
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { theme, actualTheme, setTheme } = useTheme();
 
-  const toggleTheme = () => {
-    if (theme === "system") {
-      setTheme("light");
-    } else if (theme === "light") {
+  const handleToggle = () => {
+    console.log("Theme toggle clicked. Current theme:", theme, "Actual theme:", actualTheme);
+    
+    if (actualTheme === "light") {
       setTheme("dark");
     } else {
       setTheme("light");
     }
   };
 
-  const currentIcon = () => {
-    if (theme === "system") {
-      // Show system icon based on current system preference
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-      return systemTheme === "dark" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />;
-    }
-    return theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />;
+  const getIcon = () => {
+    // Show sun icon when in dark mode (to indicate switching to light)
+    // Show moon icon when in light mode (to indicate switching to dark)
+    return actualTheme === "dark" ? 
+      <Sun className="h-5 w-5" /> : 
+      <Moon className="h-5 w-5" />;
   };
 
   return (
     <Button
       variant="ghost"
       size="sm"
-      onClick={toggleTheme}
+      onClick={handleToggle}
       className="relative p-3 text-foreground hover:text-foreground hover:bg-accent transition-all duration-300 rounded-xl group"
-      title={`Current theme: ${theme}`}
+      title={`Switch to ${actualTheme === "light" ? "dark" : "light"} mode`}
     >
       <div className="group-hover:scale-105 transition-transform duration-200">
-        {currentIcon()}
+        {getIcon()}
       </div>
+      <span className="sr-only">Toggle theme</span>
     </Button>
   );
 }
