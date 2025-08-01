@@ -9,11 +9,10 @@ export function ThemeToggle() {
   const handleToggle = () => {
     console.log("Theme toggle clicked. Current theme:", theme, "Actual theme:", actualTheme);
     
-    if (actualTheme === "light") {
-      setTheme("dark");
-    } else {
-      setTheme("light");
-    }
+    // Always alternate between light and dark, ignore system
+    const newTheme = actualTheme === "light" ? "dark" : "light";
+    console.log("Switching to theme:", newTheme);
+    setTheme(newTheme);
   };
 
   const getIcon = () => {

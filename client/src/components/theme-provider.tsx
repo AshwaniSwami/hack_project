@@ -35,7 +35,19 @@ export function ThemeProvider({
     return defaultTheme;
   });
 
-  const [actualTheme, setActualTheme] = useState<"dark" | "light">("light");
+  const [actualTheme, setActualTheme] = useState<"dark" | "light">(() => {
+    if (typeof window !== "undefined") {
+      // Check current DOM state first
+      if (document.documentElement.classList.contains("dark")) {
+        return "dark";
+      } else if (document.documentElement.classList.contains("light")) {
+        return "light";
+      }
+      // Fall back to system preference
+      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    return "light";
+  });
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -54,12 +66,15 @@ export function ThemeProvider({
 
     // Apply the resolved theme
     root.classList.add(resolvedTheme);
+    
+    // Update actual theme state immediately
     setActualTheme(resolvedTheme);
     
     // Debug logging
     console.log("Theme applied:", {
       selectedTheme: theme,
       resolvedTheme,
+      actualThemeState: resolvedTheme,
       classList: root.classList.toString()
     });
   }, [theme]);
@@ -86,9 +101,15 @@ export function ThemeProvider({
     theme,
     actualTheme,
     setTheme: (newTheme: Theme) => {
+      console.log("Setting theme from", theme, "to", newTheme);
       localStorage.setItem(storageKey, newTheme);
       setTheme(newTheme);
-      console.log("Theme changed to:", newTheme);
+      
+      // Immediately update actualTheme for better UI responsiveness
+      const resolvedTheme = newTheme === "system" 
+        ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+        : newTheme;
+      setActualTheme(resolvedTheme);
     },
   };
 
