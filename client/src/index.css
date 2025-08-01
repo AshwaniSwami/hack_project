@@ -24,13 +24,6 @@
     --input: 220 13% 91%;
     --ring: 220 91% 42%;
     --radius: 0.5rem;
-    
-    /* Chart colors */
-    --chart-1: 220 91% 52%;
-    --chart-2: 280 89% 60%;
-    --chart-3: 350 89% 60%;
-    --chart-4: 43 89% 60%;
-    --chart-5: 27 89% 60%;
   }
 
   .dark {
@@ -53,13 +46,6 @@
     --border: 220 13% 16%;
     --input: 220 13% 16%;
     --ring: 220 91% 52%;
-    
-    /* Chart colors for dark mode */
-    --chart-1: 220 91% 52%;
-    --chart-2: 280 89% 60%;
-    --chart-3: 350 89% 60%;
-    --chart-4: 43 89% 60%;
-    --chart-5: 27 89% 60%;
   }
 }
 
@@ -68,21 +54,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground transition-colors duration-300;
-  }
-  
-  /* Ensure theme transitions are smooth */
-  html {
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
-  
-  /* Force theme application */
-  html.light {
-    color-scheme: light;
-  }
-  
-  html.dark {
-    color-scheme: dark;
+    @apply bg-background text-foreground;
   }
 }
 

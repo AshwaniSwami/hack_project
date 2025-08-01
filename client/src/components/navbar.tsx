@@ -17,7 +17,7 @@ import {
   FormInput
 } from "lucide-react";
 import { ProfileDropdown } from "@/components/profile-dropdown";
-import { SimpleThemeToggle } from "@/components/simple-theme-toggle";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { NotificationBell } from "@/components/NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
@@ -93,7 +93,7 @@ export function Navbar() {
 
           <div className="flex items-center space-x-3">
             {/* Theme Toggle */}
-            <SimpleThemeToggle />
+            <ThemeToggle />
 
             {/* Notification Bell - Only for Admins */}
             <NotificationBell userRole={user?.role || ''} />

@@ -1,10 +1,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import type { User } from "@shared/schema";
 
 export function useAuth() {
   const queryClient = useQueryClient();
   
-  const { data: user, isLoading, refetch } = useQuery<User | null>({
+  const { data: user, isLoading, refetch } = useQuery({
     queryKey: ["/api/auth/user"],
     retry: false,
     staleTime: 0, // Always fetch fresh data

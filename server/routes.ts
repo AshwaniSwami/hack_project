@@ -732,12 +732,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const scriptData = insertScriptSchema.parse(req.body);
 
-      // Get the user ID from session
-      const userId = req.session?.userId;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-
       // Auto-generate language group if not provided
       let languageGroup = scriptData.languageGroup;
       if (!languageGroup) {
@@ -746,7 +740,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const script = await storage.createScript({
         ...scriptData,
-        authorId: userId,
+        authorId: req.user.id,
         languageGroup,
         isOriginal: !scriptData.originalScriptId // It's original if no originalScriptId is provided
       });
@@ -820,13 +814,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/scripts/:id", isAuthenticated, async (req: any, res) => {
     try {
       const scriptData = insertScriptSchema.partial().parse(req.body);
-      
-      // Get the user ID from session for authorization
-      const userId = req.session?.userId;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-
       const script = await storage.updateScript(req.params.id, scriptData);
       res.json(script);
     } catch (error) {
@@ -837,12 +824,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/scripts/:id", isAuthenticated, async (req: any, res) => {
     try {
-      // Get the user ID from session for authorization
-      const userId = req.session?.userId;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-
       await storage.deleteScript(req.params.id);
       res.status(204).send();
     } catch (error) {
