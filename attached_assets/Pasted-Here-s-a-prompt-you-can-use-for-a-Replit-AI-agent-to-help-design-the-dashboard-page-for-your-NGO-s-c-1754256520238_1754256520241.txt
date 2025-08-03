@@ -1,0 +1,60 @@
+Here's a prompt you can use for a Replit AI agent to help design the dashboard page for your NGO's content management platform:
+
+Replit AI Agent Prompt: NGO Content Exploration Dashboard Design
+Goal: Design a user-friendly and engaging dashboard page for a normal user of an NGO's content management platform. The primary purpose of this dashboard is to facilitate easy exploration and discovery of the NGO's diverse content.
+
+Context:
+
+Platform: Content Management System for an NGO.
+
+User Type: General users/visitors to the platform.
+
+Content Types: Articles, news updates, reports, success stories, events, videos, images, project descriptions, volunteer opportunities.
+
+NGO Mission: Assume the NGO focuses on a positive social or environmental impact (e.g., education, sustainability, community development). The design should subtly reflect this.
+
+Task: Generate a detailed description for the dashboard layout, key components, and user interaction flow.
+
+Key Design Considerations:
+
+Clarity & Simplicity: The layout should be clean, intuitive, and not overwhelming.
+
+Discoverability: Users should easily find new, popular, and relevant content.
+
+Engagement: Encourage users to click, explore further, and potentially engage with the NGO.
+
+Responsiveness: Assume a design that would adapt well to various screen sizes (though specific breakpoints aren't needed in this initial prompt).
+
+Dashboard Sections & Components to Include:
+
+Header/Navigation Bar:
+
+NGO Logo (prominent).
+
+Main navigation links (e.g., Home/Dashboard, About Us, Projects, Get Involved, Contact).
+
+Prominent Search Bar (for content).
+
+Hero/Featured Content Section:
+
+A prominent area to highlight 1-3 most important/latest pieces of content (e.g., a new campaign, a major report, a recent success story).
+
+Should include a compelling image/video thumbnail, title, brief description, and a clear "Read More" or "View Details" call to action.
+
+Content Discovery Sections (Below Hero):
+
+"Latest Content" / "What's New": A scrollable or paginated list of recently published content, ideally with content cards showing a thumbnail, title, short excerpt, publication date, and category/tags.
+
+"Popular Content" / "Trending Now": Show content that is currently receiving high engagement.
+
+"Content Categories/Topics": A visual representation (e.g., card-based or tag cloud) allowing users to browse content by topic (e.g., "Education," "Health," "Environment," "Community," "Youth Programs"). Each category should link to a filtered content list.
+
+"Explore by Content Type": Small, distinct sections or filters for specific content types (e.g., "Watch Our Videos," "Read Our Reports," "Upcoming Events").
+
+Call to Action / Engagement Section (Optional but good):
+
+A subtle prompt to "Donate," "Volunteer," or "Sign up for Newsletter," integrating visually with the NGO's mission.
+
+Footer:
+
+Standard links (Privacy Policy, Terms, Social Media icons, Contact Info).

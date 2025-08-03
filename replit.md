@@ -2,7 +2,7 @@
 
 ## Overview
 
-SMART Radio Content Hub is a comprehensive content management system for radio broadcasting, integrating dynamic user onboarding. It centralizes management of radio projects, episodes, scripts, and radio station access. Key capabilities include an advanced form builder for customized user registration, file uploads, user management with role-based access control, and content organization tailored for radio production workflows. The platform aims to streamline radio content creation and distribution, offering robust tools for content producers and station managers.
+NGO Content Management Hub is a comprehensive content management platform for non-profit organizations, designed to facilitate content exploration and community engagement. It centralizes management of articles, reports, success stories, projects, and events. Key capabilities include content discovery tools, user engagement features, donation and volunteer integration, and content organization tailored for NGO communication workflows. The platform aims to connect communities with impactful content while providing opportunities for involvement through donations, volunteering, and newsletter subscriptions.
 
 ## User Preferences
 
