@@ -26,7 +26,7 @@ export function registerDownloadTrackingRoutes(app: Express) {
       const file = await db
         .select()
         .from(files)
-        .where(and(eq(files.id, fileId), eq(files.isActive, true)))
+        .where(eq(files.id, fileId))
         .limit(1);
 
       if (!file || file.length === 0) {
@@ -35,6 +35,93 @@ export function registerDownloadTrackingRoutes(app: Express) {
 
       const fileRecord = file[0];
       const startTime = Date.now();
+
+      // Prepare download log data
+      const clientIp = req.ip || req.connection.remoteAddress || 'unknown';
+      const userAgent = req.get('User-Agent') || 'unknown';
+      const refererPage = req.get('Referer') || req.headers.referer || 'direct';
+
+      try {
+        // Decode base64 file data
+        const fileBuffer = Buffer.from(fileRecord.fileData, 'base64');
+        
+        // Calculate download duration
+        const downloadDuration = Date.now() - startTime;
+
+        // Log the download (if downloadLogs table exists)
+        try {
+          await db.insert(downloadLogs).values({
+            fileId: fileRecord.id,
+            userId: user.id,
+            userEmail: user.email || 'unknown',
+            userName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'unknown',
+            userRole: user.role || 'member',
+            ipAddress: clientIp,
+            userAgent: userAgent,
+            downloadSize: fileRecord.fileSize,
+            downloadDuration: downloadDuration,
+            downloadStatus: 'completed',
+            entityType: fileRecord.entityType,
+            entityId: fileRecord.entityId,
+            refererPage: refererPage
+          });
+        } catch (logError) {
+          // Continue with download even if logging fails
+          console.error("Download logging failed:", logError);
+        }
+
+        // Update file download count and last accessed time
+        try {
+          await db
+            .update(files)
+            .set({
+              downloadCount: sql`${files.downloadCount} + 1`,
+              lastAccessedAt: new Date()
+            })
+            .where(eq(files.id, fileId));
+        } catch (updateError) {
+          // Continue with download even if update fails
+          console.error("Download count update failed:", updateError);
+        }
+
+        // Set appropriate headers for file download
+        res.setHeader('Content-Type', fileRecord.mimeType);
+        res.setHeader('Content-Length', fileRecord.fileSize);
+        res.setHeader(
+          'Content-Disposition',
+          `attachment; filename="${encodeURIComponent(fileRecord.originalName)}"`
+        );
+        res.setHeader('Cache-Control', 'no-cache');
+
+        // Send the file
+        res.send(fileBuffer);
+
+      } catch (downloadError) {
+        // Log failed download
+        const downloadDuration = Date.now() - startTime;
+        try {
+          await db.insert(downloadLogs).values({
+            fileId: fileRecord.id,
+            userId: user.id,
+            userEmail: user.email || 'unknown',
+            userName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'unknown',
+            userRole: user.role || 'member',
+            ipAddress: clientIp,
+            userAgent: userAgent,
+            downloadSize: fileRecord.fileSize,
+            downloadDuration: downloadDuration,
+            downloadStatus: 'failed',
+            entityType: fileRecord.entityType,
+            entityId: fileRecord.entityId,
+            refererPage: refererPage
+          });
+        } catch (logError) {
+          console.error("Failed download logging failed:", logError);
+        }
+
+        console.error("Download error:", downloadError);
+        res.status(500).json({ error: "Download failed" });
+      }
 
       // Prepare download log data
       const clientIp = req.ip || req.connection.remoteAddress || 'unknown';
