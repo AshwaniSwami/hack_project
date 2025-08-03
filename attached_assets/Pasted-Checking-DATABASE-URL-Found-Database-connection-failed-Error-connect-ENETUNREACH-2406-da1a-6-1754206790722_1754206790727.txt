@@ -1,0 +1,442 @@
+Checking DATABASE_URL: ✅ Found
+❌ Database connection failed: Error: connect ENETUNREACH 2406:da1a:6b0:f608:572d:2eab:e51c:a439:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async checkDatabaseAvailability (file:///opt/render/project/src/dist/index.js:652:20)
+    at async getAuthModule (file:///opt/render/project/src/dist/index.js:4270:24)
+    at async getCurrentUser3 (file:///opt/render/project/src/dist/index.js:4296:22) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2406:da1a:6b0:f608:572d:2eab:e51c:a439',
+  port: 5432
+}
+Database availability check: ❌ Not available
+DATABASE_URL exists: true
+7:38:31 AM [express] GET /api/auth/user 401 in 18ms :: {"message":"Not authenticated"}
+Checking DATABASE_URL: ✅ Found
+❌ Database connection failed: Error: connect ENETUNREACH 2406:da1a:6b0:f608:572d:2eab:e51c:a439:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async checkDatabaseAvailability (file:///opt/render/project/src/dist/index.js:652:20)
+    at async getAuthModule (file:///opt/render/project/src/dist/index.js:4270:24)
+    at async register3 (file:///opt/render/project/src/dist/index.js:4288:22) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2406:da1a:6b0:f608:572d:2eab:e51c:a439',
+  port: 5432
+}
+Database availability check: ❌ Not available
+DATABASE_URL exists: true
+7:38:40 AM [express] POST /api/auth/register 400 in 6ms :: {"message":"Registration disabled in demo…
+Checking DATABASE_URL: ✅ Found
+❌ Database connection failed: Error: connect ENETUNREACH 2406:da1a:6b0:f608:572d:2eab:e51c:a439:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async checkDatabaseAvailability (file:///opt/render/project/src/dist/index.js:652:20)
+    at async getAuthModule (file:///opt/render/project/src/dist/index.js:4270:24)
+    at async login3 (file:///opt/render/project/src/dist/index.js:4284:22) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2406:da1a:6b0:f608:572d:2eab:e51c:a439',
+  port: 5432
+}
+Database availability check: ❌ Not available
+DATABASE_URL exists: true
+7:38:50 AM [express] POST /api/auth/login 200 in 571ms :: {"success":true,"user":{"id":"temp-admin-0…
+Checking DATABASE_URL: ✅ Found
+❌ Database connection failed: Error: connect ENETUNREACH 2406:da1a:6b0:f608:572d:2eab:e51c:a439:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async checkDatabaseAvailability (file:///opt/render/project/src/dist/index.js:652:20)
+    at async getAuthModule (file:///opt/render/project/src/dist/index.js:4270:24)
+    at async getCurrentUser3 (file:///opt/render/project/src/dist/index.js:4296:22) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2406:da1a:6b0:f608:572d:2eab:e51c:a439',
+  port: 5432
+}
+Database availability check: ❌ Not available
+DATABASE_URL exists: true
+7:38:50 AM [express] GET /api/auth/user 200 in 4ms :: {"id":"temp-admin-001","email":"admin@example.…
+Error fetching projects: Error: Database is not available. Please provision a PostgreSQL database to use this feature.
+    at FallbackStorage.throwDatabaseError (file:///opt/render/project/src/dist/index.js:1159:15)
+    at FallbackStorage.getAllProjects (file:///opt/render/project/src/dist/index.js:1234:21)
+    at file:///opt/render/project/src/dist/index.js:4626:39
+    at Layer.handle [as handle_request] (/opt/render/project/src/node_modules/express/lib/router/layer.js:95:5)
+    at next (/opt/render/project/src/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/opt/render/project/src/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/opt/render/project/src/node_modules/express/lib/router/layer.js:95:5)
+    at /opt/render/project/src/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/opt/render/project/src/node_modules/express/lib/router/index.js:346:12)
+    at next (/opt/render/project/src/node_modules/express/lib/router/index.js:280:10)
+7:38:50 AM [express] GET /api/projects 500 in 1ms :: {"message":"Failed to fetch projects"}
+isAuthenticated middleware - session: Session {
+  cookie: {
+    path: '/',
+    _expires: 2025-08-10T07:38:50.689Z,
+    originalMaxAge: 604800000,
+    httpOnly: true,
+    secure: false,
+    sameSite: 'lax'
+  },
+  userId: 'temp-admin-001'
+}
+isAuthenticated middleware - sessionId: ZQv3Hna34eTEMR05Q44LYEPUyY3H0hAW
+isAuthenticated middleware - userId: temp-admin-001
+Authentication error: Error: Database is not available. Please provision a PostgreSQL database to use this feature.
+    at FallbackStorage.throwDatabaseError (file:///opt/render/project/src/dist/index.js:1159:15)
+    at FallbackStorage.getUser (file:///opt/render/project/src/dist/index.js:1163:21)
+    at isAuthenticated (file:///opt/render/project/src/dist/index.js:1468:38)
+    at Layer.handle [as handle_request] (/opt/render/project/src/node_modules/express/lib/router/layer.js:95:5)
+    at next (/opt/render/project/src/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/opt/render/project/src/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/opt/render/project/src/node_modules/express/lib/router/layer.js:95:5)
+    at /opt/render/project/src/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/opt/render/project/src/node_modules/express/lib/router/index.js:346:12)
+    at next (/opt/render/project/src/node_modules/express/lib/router/index.js:280:10)
+7:38:50 AM [express] GET /api/notifications/unread 500 in 2ms :: {"message":"Authentication failed"}
+Checking DATABASE_URL: ✅ Found
+❌ Database connection failed: Error: connect ENETUNREACH 2406:da1a:6b0:f608:572d:2eab:e51c:a439:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async checkDatabaseAvailability (file:///opt/render/project/src/dist/index.js:652:20)
+    at async getAuthModule (file:///opt/render/project/src/dist/index.js:4270:24)
+    at async isAuthenticated3 (file:///opt/render/project/src/dist/index.js:4276:22) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2406:da1a:6b0:f608:572d:2eab:e51c:a439',
+  port: 5432
+}
+Database availability check: ❌ Not available
+DATABASE_URL exists: true
+7:38:50 AM [express] GET /api/onboarding/status 200 in 3ms :: {"needsOnboarding":false}
+Error fetching themes: Error: Database is not available. Please provision a PostgreSQL database to use this feature.
+    at FallbackStorage.throwDatabaseError (file:///opt/render/project/src/dist/index.js:1159:15)
+    at FallbackStorage.getAllThemes (file:///opt/render/project/src/dist/index.js:1212:21)
+    at file:///opt/render/project/src/dist/index.js:4547:37
+    at Layer.handle [as handle_request] (/opt/render/project/src/node_modules/express/lib/router/layer.js:95:5)
+    at next (/opt/render/project/src/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/opt/render/project/src/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/opt/render/project/src/node_modules/express/lib/router/layer.js:95:5)
+    at /opt/render/project/src/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/opt/render/project/src/node_modules/express/lib/router/index.js:346:12)
+    at next (/opt/render/project/src/node_modules/express/lib/router/index.js:280:10)
+7:38:50 AM [express] GET /api/themes 500 in 1ms :: {"message":"Failed to fetch themes"}
+Error fetching projects: Error: Database is not available. Please provision a PostgreSQL database to use this feature.
+    at FallbackStorage.throwDatabaseError (file:///opt/render/project/src/dist/index.js:1159:15)
+    at FallbackStorage.getAllProjects (file:///opt/render/project/src/dist/index.js:1234:21)
+    at file:///opt/render/project/src/dist/index.js:4626:39
+    at Layer.handle [as handle_request] (/opt/render/project/src/node_modules/express/lib/router/layer.js:95:5)
+    at next (/opt/render/project/src/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/opt/render/project/src/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/opt/render/project/src/node_modules/express/lib/router/layer.js:95:5)
+    at /opt/render/project/src/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/opt/render/project/src/node_modules/express/lib/router/index.js:346:12)
+    at next (/opt/render/project/src/node_modules/express/lib/router/index.js:280:10)
+7:38:50 AM [express] GET /api/projects 500 in 1ms :: {"message":"Failed to fetch projects"}
+Error fetching scripts: Error: Database is not available. Please provision a PostgreSQL database to use this feature.
+    at FallbackStorage.throwDatabaseError (file:///opt/render/project/src/dist/index.js:1159:15)
+    at FallbackStorage.getAllScripts (file:///opt/render/project/src/dist/index.js:1269:21)
+    at file:///opt/render/project/src/dist/index.js:4839:38
+    at Layer.handle [as handle_request] (/opt/render/project/src/node_modules/express/lib/router/layer.js:95:5)
+    at next (/opt/render/project/src/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/opt/render/project/src/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/opt/render/project/src/node_modules/express/lib/router/layer.js:95:5)
+    at /opt/render/project/src/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/opt/render/project/src/node_modules/express/lib/router/index.js:346:12)
+    at next (/opt/render/project/src/node_modules/express/lib/router/index.js:280:10)
+7:38:50 AM [express] GET /api/scripts 500 in 1ms :: {"message":"Failed to fetch scripts"}
+Checking DATABASE_URL: ✅ Found
+❌ Database connection failed: Error: connect ENETUNREACH 2406:da1a:6b0:f608:572d:2eab:e51c:a439:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async checkDatabaseAvailability (file:///opt/render/project/src/dist/index.js:652:20)
+    at async getAuthModule (file:///opt/render/project/src/dist/index.js:4270:24)
+    at async getCurrentUser3 (file:///opt/render/project/src/dist/index.js:4296:22) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2406:da1a:6b0:f608:572d:2eab:e51c:a439',
+  port: 5432
+}
+Database availability check: ❌ Not available
+DATABASE_URL exists: true
+7:38:50 AM [express] GET /api/auth/user 304 in 3ms :: {"id":"temp-admin-001","email":"admin@example.…
+Checking DATABASE_URL: ✅ Found
+❌ Database connection failed: Error: connect ENETUNREACH 2406:da1a:6b0:f608:572d:2eab:e51c:a439:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async checkDatabaseAvailability (file:///opt/render/project/src/dist/index.js:652:20)
+    at async getAuthModule (file:///opt/render/project/src/dist/index.js:4270:24)
+    at async isAuthenticated3 (file:///opt/render/project/src/dist/index.js:4276:22) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2406:da1a:6b0:f608:572d:2eab:e51c:a439',
+  port: 5432
+}
+Database availability check: ❌ Not available
+DATABASE_URL exists: true
+Checking DATABASE_URL: ✅ Found
+❌ Database connection failed: Error: connect ENETUNREACH 2406:da1a:6b0:f608:572d:2eab:e51c:a439:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async checkDatabaseAvailability (file:///opt/render/project/src/dist/index.js:652:20)
+    at async getAuthModule (file:///opt/render/project/src/dist/index.js:4270:24)
+    at async isAdmin3 (file:///opt/render/project/src/dist/index.js:4280:22) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2406:da1a:6b0:f608:572d:2eab:e51c:a439',
+  port: 5432
+}
+Database availability check: ❌ Not available
+DATABASE_URL exists: true
+Error fetching users: Error: Database is not available. Please provision a PostgreSQL database to use this feature.
+    at FallbackStorage.throwDatabaseError (file:///opt/render/project/src/dist/index.js:1159:15)
+    at FallbackStorage.getAllUsers (file:///opt/render/project/src/dist/index.js:1181:21)
+    at file:///opt/render/project/src/dist/index.js:4389:36
+    at Layer.handle [as handle_request] (/opt/render/project/src/node_modules/express/lib/router/layer.js:95:5)
+    at next (/opt/render/project/src/node_modules/express/lib/router/route.js:149:13)
+    at Object.isAdmin2 (file:///opt/render/project/src/dist/index.js:4189:7)
+    at isAdmin3 (file:///opt/render/project/src/dist/index.js:4281:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+7:38:50 AM [express] GET /api/users 500 in 5ms :: {"message":"Failed to fetch users"}
+WebSocket connection established
+Error fetching episodes: Error: Database is not available. Please provision a PostgreSQL database to use this feature.
+    at FallbackStorage.throwDatabaseError (file:///opt/render/project/src/dist/index.js:1159:15)
+    at FallbackStorage.getAllEpisodes (file:///opt/render/project/src/dist/index.js:1250:21)
+    at file:///opt/render/project/src/dist/index.js:4728:39
+    at Layer.handle [as handle_request] (/opt/render/project/src/node_modules/express/lib/router/layer.js:95:5)
+    at next (/opt/render/project/src/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/opt/render/project/src/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/opt/render/project/src/node_modules/express/lib/router/layer.js:95:5)
+    at /opt/render/project/src/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/opt/render/project/src/node_modules/express/lib/router/index.js:346:12)
+    at next (/opt/render/project/src/node_modules/express/lib/router/index.js:280:10)
+7:38:51 AM [express] GET /api/episodes 500 in 2ms :: {"message":"Failed to fetch episodes"}
+Admin user temp-admin-001 connected to WebSocket
+Checking DATABASE_URL: ✅ Found
+✅ Database connected successfully
+Checking DATABASE_URL: ✅ Found
+Error fetching form config: Error: connect ENETUNREACH 2406:da1a:6b0:f608:572d:2eab:e51c:a439:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///opt/render/project/src/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async getCurrentFormConfig (file:///opt/render/project/src/dist/index.js:3257:30) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2406:da1a:6b0:f608:572d:2eab:e51c:a439',
+  port: 5432
+}
+7:38:53 AM [express] GET /api/onboarding/form-config 500 in 10ms :: {"error":"Failed to fetch form c…
+❌ Database connection failed: Error: connect ENETUNREACH 2406:da1a:6b0:f608:572d:2eab:e51c:a439:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async checkDatabaseAvailability (file:///opt/render/project/src/dist/index.js:652:20)
+    at async getAuthModule (file:///opt/render/project/src/dist/index.js:4270:24)
+    at async getCurrentUser3 (file:///opt/render/project/src/dist/index.js:4296:22) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2406:da1a:6b0:f608:572d:2eab:e51c:a439',
+  port: 5432
+}
+Database availability check: ❌ Not available
+DATABASE_URL exists: true
+7:38:53 AM [express] GET /api/auth/user 304 in 10ms :: {"id":"temp-admin-001","email":"admin@example…
+Checking DATABASE_URL: ✅ Found
+❌ Database connection failed: Error: connect ENETUNREACH 2406:da1a:6b0:f608:572d:2eab:e51c:a439:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async checkDatabaseAvailability (file:///opt/render/project/src/dist/index.js:652:20)
+    at async getAuthModule (file:///opt/render/project/src/dist/index.js:4270:24)
+    at async isAuthenticated3 (file:///opt/render/project/src/dist/index.js:4276:22) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2406:da1a:6b0:f608:572d:2eab:e51c:a439',
+  port: 5432
+}
+Database availability check: ❌ Not available
+DATABASE_URL exists: true
+Analytics request - user: {
+  id: 'temp-admin-001',
+  email: 'admin@example.com',
+  role: 'admin',
+  firstName: 'Admin',
+  lastName: 'User'
+}
+Analytics request - user role: admin
+Checking DATABASE_URL: ✅ Found
+✅ Database connected successfully
+Error fetching onboarding analytics: Error: connect ENETUNREACH 2406:da1a:6b0:f608:572d:2eab:e51c:a439:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///opt/render/project/src/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async getOnboardingAnalytics (file:///opt/render/project/src/dist/index.js:3491:26) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2406:da1a:6b0:f608:572d:2eab:e51c:a439',
+  port: 5432
+}
+Returning fallback analytics data due to error
+7:38:54 AM [express] GET /api/onboarding/analytics 200 in 7ms :: {"totalUsers":8,"completedUsers":6,…
+isAuthenticated middleware - session: Session {
+  cookie: {
+    path: '/',
+    _expires: 2025-08-10T07:38:54.610Z,
+    originalMaxAge: 604800000,
+    httpOnly: true,
+    secure: false,
+    sameSite: 'lax'
+  },
+  userId: 'temp-admin-001'
+}
+isAuthenticated middleware - sessionId: ZQv3Hna34eTEMR05Q44LYEPUyY3H0hAW
+isAuthenticated middleware - userId: temp-admin-001
+Authentication error: Error: Database is not available. Please provision a PostgreSQL database to use this feature.
+    at FallbackStorage.throwDatabaseError (file:///opt/render/project/src/dist/index.js:1159:15)
+    at FallbackStorage.getUser (file:///opt/render/project/src/dist/index.js:1163:21)
+    at isAuthenticated (file:///opt/render/project/src/dist/index.js:1468:38)
+    at Layer.handle [as handle_request] (/opt/render/project/src/node_modules/express/lib/router/layer.js:95:5)
+    at next (/opt/render/project/src/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/opt/render/project/src/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/opt/render/project/src/node_modules/express/lib/router/layer.js:95:5)
+    at /opt/render/project/src/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/opt/render/project/src/node_modules/express/lib/router/index.js:346:12)
+    at next (/opt/render/project/src/node_modules/express/lib/router/index.js:280:10)
+7:38:55 AM [express] GET /api/notifications/unread 500 in 2ms :: {"message":"Authentication failed"}
+Error fetching form config: Error: connect ENETUNREACH 2406:da1a:6b0:f608:572d:2eab:e51c:a439:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///opt/render/project/src/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async getCurrentFormConfig (file:///opt/render/project/src/dist/index.js:3257:30) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2406:da1a:6b0:f608:572d:2eab:e51c:a439',
+  port: 5432
+}
+7:38:56 AM [express] GET /api/onboarding/form-config 500 in 6ms :: {"error":"Failed to fetch form co…
+Checking DATABASE_URL: ✅ Found
+❌ Database connection failed: Error: connect ENETUNREACH 2406:da1a:6b0:f608:572d:2eab:e51c:a439:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async checkDatabaseAvailability (file:///opt/render/project/src/dist/index.js:652:20)
+    at async getAuthModule (file:///opt/render/project/src/dist/index.js:4270:24)
+    at async logout3 (file:///opt/render/project/src/dist/index.js:4292:22) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2406:da1a:6b0:f608:572d:2eab:e51c:a439',
+  port: 5432
+}
+Database availability check: ❌ Not available
+DATABASE_URL exists: true
+7:38:58 AM [express] POST /api/auth/logout 200 in 4ms :: {"success":true}
+Admin user temp-admin-001 disconnected from WebSocket
+Checking DATABASE_URL: ✅ Found
+❌ Database connection failed: Error: connect ENETUNREACH 2406:da1a:6b0:f608:572d:2eab:e51c:a439:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async checkDatabaseAvailability (file:///opt/render/project/src/dist/index.js:652:20)
+    at async getAuthModule (file:///opt/render/project/src/dist/index.js:4270:24)
+    at async getCurrentUser3 (file:///opt/render/project/src/dist/index.js:4296:22) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2406:da1a:6b0:f608:572d:2eab:e51c:a439',
+  port: 5432
+}
+Database availability check: ❌ Not available
+DATABASE_URL exists: true
+7:38:59 AM [express] GET /api/auth/user 401 in 3ms :: {"message":"Not authenticated"}
+Checking DATABASE_URL: ✅ Found
+❌ Database connection failed: Error: connect ENETUNREACH 2406:da1a:6b0:f608:572d:2eab:e51c:a439:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async checkDatabaseAvailability (file:///opt/render/project/src/dist/index.js:652:20)
+    at async getAuthModule (file:///opt/render/project/src/dist/index.js:4270:24)
+    at async login3 (file:///opt/render/project/src/dist/index.js:4284:22) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2406:da1a:6b0:f608:572d:2eab:e51c:a439',
+  port: 5432
+}
+Database availability check: ❌ Not available
+DATABASE_URL exists: true
+7:39:22 AM [express] POST /api/auth/login 401 in 14ms :: {"message":"Invalid credentials. Use admin@…
+Checking DATABASE_URL: ✅ Found
+❌ Database connection failed: Error: connect ENETUNREACH 2406:da1a:6b0:f608:572d:2eab:e51c:a439:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async checkDatabaseAvailability (file:///opt/render/project/src/dist/index.js:652:20)
+    at async getAuthModule (file:///opt/render/project/src/dist/index.js:4270:24)
+    at async login3 (file:///opt/render/project/src/dist/index.js:4284:22) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2406:da1a:6b0:f608:572d:2eab:e51c:a439',
+  port: 5432
+}
+Database availability check: ❌ Not available
+DATABASE_URL exists: true
+7:39:23 AM [express] POST /api/auth/login 401 in 3ms :: {"message":"Invalid credentials. Use admin@e…
+Checking DATABASE_URL: ✅ Found
+❌ Database connection failed: Error: connect ENETUNREACH 2406:da1a:6b0:f608:572d:2eab:e51c:a439:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async checkDatabaseAvailability (file:///opt/render/project/src/dist/index.js:652:20)
+    at async getAuthModule (file:///opt/render/project/src/dist/index.js:4270:24)
+    at async login3 (file:///opt/render/project/src/dist/index.js:4284:22) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2406:da1a:6b0:f608:572d:2eab:e51c:a439',
+  port: 5432
+}
+Database availability check: ❌ Not available
+DATABASE_URL exists: true
+7:39:24 AM [express] POST /api/auth/login 401 in 3ms :: {"message":"Invalid credentials. Use admin@e…
+Checking DATABASE_URL: ✅ Found
+❌ Database connection failed: Error: connect ENETUNREACH 2406:da1a:6b0:f608:572d:2eab:e51c:a439:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async checkDatabaseAvailability (file:///opt/render/project/src/dist/index.js:652:20)
+    at async getAuthModule (file:///opt/render/project/src/dist/index.js:4270:24)
+    at async register3 (file:///opt/render/project/src/dist/index.js:4288:22) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2406:da1a:6b0:f608:572d:2eab:e51c:a439',
+  port: 5432
+}
+Database availability check: ❌ Not available
+DATABASE_URL exists: true
+7:39:32 AM [express] POST /api/auth/register 400 in 7ms :: {"message":"Registration disabled in demo…
+Checking DATABASE_URL: ✅ Found
+❌ Database connection failed: Error: connect ENETUNREACH 2406:da1a:6b0:f608:572d:2eab:e51c:a439:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async checkDatabaseAvailability (file:///opt/render/project/src/dist/index.js:652:20)
+    at async getAuthModule (file:///opt/render/project/src/dist/index.js:4270:24)
+    at async register3 (file:///opt/render/project/src/dist/index.js:4288:22) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2406:da1a:6b0:f608:572d:2eab:e51c:a439',
+  port: 5432
+}
+Database availability check: ❌ Not available
+DATABASE_URL exists: true
+7:39:33 AM [express] POST /api/auth/register 400 in 2ms :: {"message":"Registration disabled in demo…
+Need better 
