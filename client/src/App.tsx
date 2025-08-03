@@ -45,7 +45,9 @@ function Router() {
             </Route>
           ) : !isAuthenticated ? (
             <>
-              <Route path="/dashboard" component={AuthPage} />
+              {/* Public NGO content dashboard accessible to all */}
+              <Route path="/" component={Dashboard} />
+              <Route path="/dashboard" component={Dashboard} />
               <Route path="/projects" component={AuthPage} />
               <Route path="/episodes" component={AuthPage} />
               <Route path="/scripts" component={AuthPage} />
@@ -53,7 +55,6 @@ function Router() {
               <Route path="/users" component={AuthPage} />
               <Route path="/analytics" component={AuthPage} />
               <Route path="/onboarding" component={AuthPage} />
-              <Route path="/" component={AuthPage} />
             </>
           ) : (
             <OnboardingCheck>

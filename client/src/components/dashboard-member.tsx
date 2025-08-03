@@ -36,8 +36,7 @@ import {
   Download,
   Share2,
   FileText,
-  User,
-  Gift
+  User
 } from "lucide-react";
 import type { Script, Project, Episode } from "@shared/schema";
 import { useAuth } from "@/hooks/useAuth";
@@ -45,6 +44,9 @@ import { useAuth } from "@/hooks/useAuth";
 export function MemberDashboard() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
+  
+  // For public NGO content dashboard, use fallback user data if not authenticated
+  const displayUser = user || { firstName: 'Visitor' };
 
   const { data: scripts = [] } = useQuery<Script[]>({
     queryKey: ["/api/scripts"],
