@@ -1,10 +1,6 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
+import { Pool } from 'pg';
+import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
-import postgres from 'postgres';
-
-neonConfig.webSocketConstructor = ws;
 
 let db: any = null;
 let pool: Pool | null = null;
@@ -25,8 +21,11 @@ function initializeDatabase() {
   console.log("Checking DATABASE_URL:", process.env.DATABASE_URL ? "✅ Found" : "❌ Not found");
   if (process.env.DATABASE_URL) {
     try {
-      pool = new Pool({ connectionString: process.env.DATABASE_URL });
-      db = drizzle({ client: pool, schema });
+      pool = new Pool({ 
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false }
+      });
+      db = drizzle(pool, { schema });
       console.log("✅ Database connected successfully");
     } catch (error) {
       console.error("❌ Database connection failed:", error);
@@ -63,10 +62,13 @@ export async function checkDatabaseAvailability(): Promise<boolean> {
 
   try {
     // Test the connection with a simple query using pool
-    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-    await pool.query('SELECT 1');
+    const testPool = new Pool({ 
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false }
+    });
+    await testPool.query('SELECT 1');
     console.log("✅ Database connected successfully");
-    await pool.end();
+    await testPool.end();
     return true;
   } catch (error) {
     console.log("❌ Database connection failed:", error);
