@@ -1,6 +1,6 @@
 import { Express, Request, Response } from "express";
 import { eq, and, sql } from "drizzle-orm";
-import { db } from "./db";
+import { db, requireDatabase } from "./db";
 import { files, downloadLogs } from "@shared/schema";
 import { isAuthenticated, type AuthenticatedRequest } from "./auth";
 import { getFilePermissions } from "./filePermissions";
@@ -22,8 +22,14 @@ export function registerDownloadTrackingRoutes(app: Express) {
         return res.status(403).json({ error: "Download permission denied" });
       }
 
+      // Check if database is available
+      const database = db;
+      if (!database) {
+        return res.status(503).json({ error: "Database service unavailable" });
+      }
+
       // Get file information
-      const file = await db
+      const file = await database
         .select()
         .from(files)
         .where(eq(files.id, fileId))
@@ -50,7 +56,7 @@ export function registerDownloadTrackingRoutes(app: Express) {
 
         // Log the download (if downloadLogs table exists)
         try {
-          await db.insert(downloadLogs).values({
+          await database.insert(downloadLogs).values({
             fileId: fileRecord.id,
             userId: user.id,
             userEmail: user.email || 'unknown',
@@ -72,7 +78,7 @@ export function registerDownloadTrackingRoutes(app: Express) {
 
         // Update file download count and last accessed time
         try {
-          await db
+          await database
             .update(files)
             .set({
               downloadCount: sql`${files.downloadCount} + 1`,
@@ -100,7 +106,7 @@ export function registerDownloadTrackingRoutes(app: Express) {
         // Log failed download
         const downloadDuration = Date.now() - startTime;
         try {
-          await db.insert(downloadLogs).values({
+          await database.insert(downloadLogs).values({
             fileId: fileRecord.id,
             userId: user.id,
             userEmail: user.email || 'unknown',
@@ -139,8 +145,14 @@ export function registerDownloadTrackingRoutes(app: Express) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
+      // Check if database is available
+      const database = db;
+      if (!database) {
+        return res.status(503).json({ error: "Database service unavailable" });
+      }
+
       // Get file basic info and overall stats
-      const file = await db
+      const file = await database
         .select({
           id: files.id,
           filename: files.filename,
@@ -163,7 +175,7 @@ export function registerDownloadTrackingRoutes(app: Express) {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-        const recentDownloads = await db
+        const recentDownloads = await database
           .select({
             date: sql<string>`DATE(${downloadLogs.downloadedAt})`,
             downloadCount: sql<number>`COUNT(*)`,
@@ -178,7 +190,7 @@ export function registerDownloadTrackingRoutes(app: Express) {
           .orderBy(sql`DATE(${downloadLogs.downloadedAt})`);
 
         // Get top downloaders
-        const topDownloaders = await db
+        const topDownloaders = await database
           .select({
             userId: downloadLogs.userId,
             userEmail: downloadLogs.userEmail,
@@ -226,10 +238,16 @@ export function registerDownloadTrackingRoutes(app: Express) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
+      // Check if database is available
+      const database = db;
+      if (!database) {
+        return res.status(503).json({ error: "Database service unavailable" });
+      }
+
       const { page = 1, limit = 20 } = req.query;
       const offset = (Number(page) - 1) * Number(limit);
 
-      const userDownloads = await db
+      const userDownloads = await database
         .select({
           id: downloadLogs.id,
           fileId: downloadLogs.fileId,
@@ -248,7 +266,7 @@ export function registerDownloadTrackingRoutes(app: Express) {
         .offset(offset);
 
       // Get total count for pagination
-      const totalCount = await db
+      const totalCount = await database
         .select({ count: sql<number>`COUNT(*)` })
         .from(downloadLogs)
         .where(eq(downloadLogs.userId, user.id));
