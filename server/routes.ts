@@ -1,6 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { WebSocketServer, WebSocket } from "ws";
+import * as WebSocketModule from "ws";
+const { WebSocketServer } = WebSocketModule;
+const WebSocket = WebSocketModule.default;
 import multer from "multer";
 import { storage } from "./storage";
 import { registerProjectFileRoutes } from "./routes-projects-files";
