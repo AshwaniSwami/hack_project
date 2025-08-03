@@ -21,10 +21,17 @@ function initializeDatabase() {
   console.log("Checking DATABASE_URL:", process.env.DATABASE_URL ? "✅ Found" : "❌ Not found");
   if (process.env.DATABASE_URL) {
     try {
+      // Configure pool for Supabase with proper SSL and connection settings
       pool = new Pool({ 
         connectionString: process.env.DATABASE_URL,
-        ssl: { rejectUnauthorized: false }
+        ssl: { 
+          rejectUnauthorized: false 
+        },
+        max: 10,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 10000,
       });
+      
       db = drizzle(pool, { schema });
       console.log("✅ Database connected successfully");
     } catch (error) {
@@ -61,13 +68,18 @@ export async function checkDatabaseAvailability(): Promise<boolean> {
   console.log("Checking DATABASE_URL: ✅ Found");
 
   try {
-    // Test the connection with a simple query using pool
+    // Test the connection with a simple query using pool - configured for Supabase
     const testPool = new Pool({ 
       connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false }
+      ssl: { 
+        rejectUnauthorized: false 
+      },
+      max: 1,
+      connectionTimeoutMillis: 10000,
     });
-    await testPool.query('SELECT 1');
-    console.log("✅ Database connected successfully");
+    
+    const result = await testPool.query('SELECT 1 as test');
+    console.log("✅ Database connection test successful:", result.rows[0]);
     await testPool.end();
     return true;
   } catch (error) {
