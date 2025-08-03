@@ -547,12 +547,13 @@ export const getOnboardingAnalytics = async (req: AuthenticatedRequest, res: Res
       if (migrationFormConfig.length === 0) {
         // Create default form configuration for migration
         const defaultConfig = {
+          id: randomUUID(),
           questions: [
             { id: "name", type: "text", label: "What is your name?", compulsory: true },
-            { id: "role", type: "radio", label: "What is your role?", options: ["Beginner", "Intermediate", "Advanced", "Expert"], compulsory: true },
-            { id: "experience", type: "radio", label: "How would you describe your experience level?", options: ["Beginner", "Intermediate", "Advanced", "Expert"], compulsory: true }
+            { id: "role", type: "radio", label: "What is your role?", options: ["Radio Host", "Producer", "Script Writer", "Content Manager", "Technical Director"], compulsory: true },
+            { id: "experience", type: "radio", label: "How would you describe your experience level?", options: ["Less than 1 year", "1-3 years", "3-5 years", "5-10 years", "More than 10 years"], compulsory: true }
           ] as FormQuestion[],
-          createdBy: "1CsOEJFXS4MSwk2nRWDm9", // Use the admin user ID  
+          createdBy: req.user?.id || "system", // Use the current admin user ID  
           version: 1,
           isActive: true,
         };
@@ -564,7 +565,6 @@ export const getOnboardingAnalytics = async (req: AuthenticatedRequest, res: Res
       const formConfig = migrationFormConfig[0];
       
       // Migrate existing user responses
-      const { nanoid } = await import("nanoid");
       const migrationResponses = [];
       for (const user of completedUsers) {
         if (user.onboardingResponses) {
@@ -573,7 +573,7 @@ export const getOnboardingAnalytics = async (req: AuthenticatedRequest, res: Res
             const response = userResponses[question.id];
             if (response !== undefined) {
               migrationResponses.push({
-                id: nanoid(),
+                id: randomUUID(),
                 userId: user.id,
                 formConfigId: formConfig.id,
                 questionId: question.id,
