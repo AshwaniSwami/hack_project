@@ -34,7 +34,9 @@ import {
   Zap,
   Eye,
   Download,
-  Share2
+  Share2,
+  FileText,
+  User
 } from "lucide-react";
 import type { Script, Project, Episode } from "@shared/schema";
 import { useAuth } from "@/hooks/useAuth";
@@ -157,15 +159,7 @@ export function MemberDashboard() {
               </div>
             </div>
             
-            <div className="flex gap-2 flex-wrap">
-              <Badge className="bg-white/20 text-white border-white/30 px-3 py-1 backdrop-blur-sm text-xs">
-                <Star className="w-3 h-3 mr-1" />
-                Level {memberStats.memberLevel}
-              </Badge>
-              <Badge className="bg-yellow-400/20 text-yellow-100 border-yellow-300/30 px-3 py-1 backdrop-blur-sm text-xs">
-                {memberStats.points} Points
-              </Badge>
-            </div>
+
           </div>
         </div>
 
@@ -232,45 +226,73 @@ export function MemberDashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Actions */}
+          {/* Featured Content */}
           <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Explore Content</h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Featured Content</h2>
               <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400 hidden sm:flex">
                 View All <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             </div>
 
             <div className="grid gap-4">
-              {quickActions.map((action, index) => (
-                <Card 
-                  key={index}
-                  className="p-4 border-0 shadow-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
-                  onClick={() => setLocation(action.route)}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className={`p-3 bg-gradient-to-br ${action.gradient} rounded-xl shadow-lg group-hover:scale-105 transition-transform duration-300`}>
-                      <action.icon className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-1">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                          {action.title}
-                        </h3>
-                        <Badge variant="secondary" className="text-xs">
-                          {action.badge}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                        {action.description}
-                      </p>
-                      <Button variant="ghost" size="sm" className="p-0 h-auto font-medium text-blue-600 dark:text-blue-400 hover:bg-transparent">
-                        Get Started <ChevronRight className="w-4 h-4 ml-1" />
-                      </Button>
-                    </div>
+              {/* Featured content cards */}
+              <Card className="p-4 border-0 shadow-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                    <Headphones className="w-8 h-8 text-white" />
                   </div>
-                </Card>
-              ))}
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                      Latest Podcast Episodes
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                      Discover new episodes from your favorite shows
+                    </p>
+                    <Badge className="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+                      5 new episodes
+                    </Badge>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-4 border-0 shadow-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                    <FileText className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                      Script Library
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                      Access scripts and show notes for reference
+                    </p>
+                    <Badge className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                      12 scripts available
+                    </Badge>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-4 border-0 shadow-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
+                    <Users className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                      Community Highlights
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                      See what other members are exploring
+                    </p>
+                    <Badge className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300">
+                      Active community
+                    </Badge>
+                  </div>
+                </div>
+              </Card>
             </div>
           </div>
 
@@ -298,36 +320,31 @@ export function MemberDashboard() {
               </div>
             </Card>
 
-            {/* Activity Summary */}
+            {/* Quick Actions */}
             <Card className="p-6 border-0 shadow-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                  <Activity className="w-5 h-5 text-green-600 dark:text-green-400" />
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                  <Zap className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Activity</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Quick Actions</h3>
               </div>
               
               <div className="space-y-3">
-                <div className="flex items-center justify-between py-2">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Content Viewed</span>
-                  <span className="font-medium text-gray-900 dark:text-white">{memberStats.totalContent}</span>
-                </div>
-                <div className="flex items-center justify-between py-2">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Projects Explored</span>
-                  <span className="font-medium text-gray-900 dark:text-white">{memberStats.totalProjects}</span>
-                </div>
-                <div className="flex items-center justify-between py-2">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">This Week</span>
-                  <span className="font-medium text-green-600 dark:text-green-400">+{memberStats.thisWeekContent}</span>
-                </div>
-              </div>
-              
-              <Separator className="my-4" />
-              
-              <div className="text-center">
-                <Button variant="outline" size="sm" className="w-full">
-                  <Trophy className="w-4 h-4 mr-2" />
-                  View Achievements
+                <Button variant="outline" className="w-full justify-start" onClick={() => setLocation('/browse')}>
+                  <Search className="w-4 h-4 mr-2" />
+                  Browse Content
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => setLocation('/favorites')}>
+                  <Heart className="w-4 h-4 mr-2" />
+                  My Favorites
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => setLocation('/history')}>
+                  <Clock className="w-4 h-4 mr-2" />
+                  Recently Viewed
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={() => setLocation('/profile')}>
+                  <User className="w-4 h-4 mr-2" />
+                  My Profile
                 </Button>
               </div>
             </Card>
