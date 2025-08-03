@@ -1,0 +1,1436 @@
+{
+  "database": "smart_radio_hub",
+  "exportDate": "2025-08-03T06:59:11.655Z",
+  "tables": {
+    "download_logs": {
+      "rowCount": 0,
+      "data": []
+    },
+    "episodes": {
+      "rowCount": 0,
+      "data": []
+    },
+    "file_folders": {
+      "rowCount": 0,
+      "data": []
+    },
+    "files": {
+      "rowCount": 0,
+      "data": []
+    },
+    "free_project_access": {
+      "rowCount": 0,
+      "data": []
+    },
+    "notifications": {
+      "rowCount": 0,
+      "data": []
+    },
+    "onboarding_form_config": {
+      "rowCount": 1,
+      "data": [
+        {
+          "id": "1bc23c40-d0e8-4942-9acc-f463f8fae8c2",
+          "version": 1,
+          "is_active": true,
+          "questions": [
+            {
+              "id": "name",
+              "type": "text",
+              "label": "What is your name?",
+              "compulsory": true
+            },
+            {
+              "id": "role",
+              "type": "radio",
+              "label": "What is your primary role?",
+              "options": [
+                "Radio Host",
+                "Producer",
+                "Script Writer",
+                "Content Manager",
+                "Technical Director"
+              ],
+              "compulsory": true
+            },
+            {
+              "id": "experience",
+              "type": "radio",
+              "label": "How many years of radio experience do you have?",
+              "options": [
+                "Less than 1 year",
+                "1-3 years",
+                "3-5 years",
+                "5-10 years",
+                "More than 10 years"
+              ],
+              "compulsory": true
+            },
+            {
+              "id": "interests",
+              "type": "checkbox",
+              "label": "What type of content are you most interested in? (Select all that apply)",
+              "options": [
+                "News & Current Affairs",
+                "Music Shows",
+                "Talk Shows",
+                "Educational Content",
+                "Community Programs",
+                "Sports Commentary"
+              ],
+              "compulsory": false
+            },
+            {
+              "id": "station_type",
+              "type": "radio",
+              "label": "What type of radio station are you affiliated with?",
+              "options": [
+                "Community Radio",
+                "Commercial Radio",
+                "Public Radio",
+                "Internet Radio",
+                "Podcast Network",
+                "Independent"
+              ],
+              "compulsory": true
+            },
+            {
+              "id": "goals",
+              "type": "text",
+              "label": "What are your main goals for using this platform?",
+              "compulsory": false
+            }
+          ],
+          "created_by": "admin-001",
+          "created_at": "2025-08-01T08:39:32.387Z",
+          "updated_at": "2025-08-01T08:39:32.387Z"
+        }
+      ]
+    },
+    "onboarding_form_responses": {
+      "rowCount": 6,
+      "data": [
+        {
+          "id": "1d4d791d-466d-4912-bc9e-67a5bfc40021",
+          "user_id": "BD_AbZEBFPJtuv6HoyKVB",
+          "form_config_id": "1bc23c40-d0e8-4942-9acc-f463f8fae8c2",
+          "question_id": "name",
+          "question_type": "text",
+          "question_label": "What is your name?",
+          "response": "Ashwani Swami",
+          "is_compulsory": true,
+          "submitted_at": "2025-08-03T06:26:14.247Z"
+        },
+        {
+          "id": "5a272c0c-caed-4a8d-beb9-a2e165bef3e2",
+          "user_id": "BD_AbZEBFPJtuv6HoyKVB",
+          "form_config_id": "1bc23c40-d0e8-4942-9acc-f463f8fae8c2",
+          "question_id": "role",
+          "question_type": "radio",
+          "question_label": "What is your primary role?",
+          "response": "Radio Host",
+          "is_compulsory": true,
+          "submitted_at": "2025-08-03T06:26:14.247Z"
+        },
+        {
+          "id": "ba649fc6-b639-4523-ba11-c8f631e6c253",
+          "user_id": "BD_AbZEBFPJtuv6HoyKVB",
+          "form_config_id": "1bc23c40-d0e8-4942-9acc-f463f8fae8c2",
+          "question_id": "experience",
+          "question_type": "radio",
+          "question_label": "How many years of radio experience do you have?",
+          "response": "Less than 1 year",
+          "is_compulsory": true,
+          "submitted_at": "2025-08-03T06:26:14.247Z"
+        },
+        {
+          "id": "8447fd4d-0e60-4654-ad38-5d4c00a600a9",
+          "user_id": "BD_AbZEBFPJtuv6HoyKVB",
+          "form_config_id": "1bc23c40-d0e8-4942-9acc-f463f8fae8c2",
+          "question_id": "interests",
+          "question_type": "checkbox",
+          "question_label": "What type of content are you most interested in? (Select all that apply)",
+          "response": [
+            "talk shows"
+          ],
+          "is_compulsory": false,
+          "submitted_at": "2025-08-03T06:26:14.247Z"
+        },
+        {
+          "id": "49dad86d-aba9-4594-944c-3b8ce3da6668",
+          "user_id": "BD_AbZEBFPJtuv6HoyKVB",
+          "form_config_id": "1bc23c40-d0e8-4942-9acc-f463f8fae8c2",
+          "question_id": "station_type",
+          "question_type": "radio",
+          "question_label": "What type of radio station are you affiliated with?",
+          "response": "Internet Radio",
+          "is_compulsory": true,
+          "submitted_at": "2025-08-03T06:26:14.247Z"
+        },
+        {
+          "id": "c64c9452-278c-4de2-8d71-47d43c08075e",
+          "user_id": "BD_AbZEBFPJtuv6HoyKVB",
+          "form_config_id": "1bc23c40-d0e8-4942-9acc-f463f8fae8c2",
+          "question_id": "goals",
+          "question_type": "text",
+          "question_label": "What are your main goals for using this platform?",
+          "response": "Research",
+          "is_compulsory": false,
+          "submitted_at": "2025-08-03T06:26:14.247Z"
+        }
+      ]
+    },
+    "otp_verifications": {
+      "rowCount": 0,
+      "data": []
+    },
+    "projects": {
+      "rowCount": 0,
+      "data": []
+    },
+    "radio_stations": {
+      "rowCount": 0,
+      "data": []
+    },
+    "script_topics": {
+      "rowCount": 0,
+      "data": []
+    },
+    "scripts": {
+      "rowCount": 0,
+      "data": []
+    },
+    "sessions": {
+      "rowCount": 0,
+      "data": []
+    },
+    "themes": {
+      "rowCount": 4,
+      "data": [
+        {
+          "id": "0f9b9165-18c4-4272-906e-e17e30721ea4",
+          "name": "Technology",
+          "created_at": "2025-08-01T08:30:49.041Z",
+          "updated_at": "2025-08-01T08:30:49.041Z"
+        },
+        {
+          "id": "44e1696f-69ea-41e2-9122-1902478b5685",
+          "name": "Music",
+          "created_at": "2025-08-01T08:30:49.041Z",
+          "updated_at": "2025-08-01T08:30:49.041Z"
+        },
+        {
+          "id": "2809ef39-cf4a-4f65-9f7a-caa8d7738dcc",
+          "name": "News",
+          "created_at": "2025-08-01T08:30:49.041Z",
+          "updated_at": "2025-08-01T08:30:49.041Z"
+        },
+        {
+          "id": "d54ed581-78ff-45a9-8a4d-14b5ee8909bb",
+          "name": "Education",
+          "created_at": "2025-08-01T08:30:49.041Z",
+          "updated_at": "2025-08-01T08:41:46.709Z"
+        }
+      ]
+    },
+    "topics": {
+      "rowCount": 0,
+      "data": []
+    },
+    "users": {
+      "rowCount": 2,
+      "data": [
+        {
+          "id": "BD_AbZEBFPJtuv6HoyKVB",
+          "email": "ashwaniswami858@gmail.com",
+          "first_name": "Ashwani ",
+          "last_name": "",
+          "profile_image_url": null,
+          "username": null,
+          "password": "$2b$10$cT38kZa2Iu/t11Zyy4LVPu.Edh.5ueSG8ChGLbPOw8dzpPGleaYTK",
+          "role": "member",
+          "is_active": true,
+          "is_verified": true,
+          "login_count": 1,
+          "last_login_at": "2025-08-03T06:20:59.725Z",
+          "first_login_completed": true,
+          "location": {
+            "city": "Delhi",
+            "country": "India",
+            "latitude": 0,
+            "longitude": 0
+          },
+          "onboarding_responses": {
+            "name": "Ashwani Swami",
+            "role": "Radio Host",
+            "goals": "Research",
+            "location": {
+              "city": "Delhi",
+              "country": "India",
+              "latitude": 0,
+              "longitude": 0
+            },
+            "interests": [
+              "talk shows"
+            ],
+            "experience": "Less than 1 year",
+            "station_type": "Internet Radio"
+          },
+          "created_at": "2025-08-03T06:20:38.038Z",
+          "updated_at": "2025-08-03T06:20:59.725Z"
+        },
+        {
+          "id": "tTfRVB6nhIAt7cPQxiXmG",
+          "email": "ashwani@gmail.com",
+          "first_name": "Ashwani ",
+          "last_name": "",
+          "profile_image_url": null,
+          "username": null,
+          "password": "$2b$10$Y/xJXdKQJ3NzetSPdb8SJu.hRB6iV88eR57pzJ/GhLSo1RTJrNjFa",
+          "role": "admin",
+          "is_active": true,
+          "is_verified": true,
+          "login_count": 2,
+          "last_login_at": "2025-08-03T06:26:10.131Z",
+          "first_login_completed": false,
+          "location": null,
+          "onboarding_responses": null,
+          "created_at": "2025-08-03T06:19:42.118Z",
+          "updated_at": "2025-08-03T06:26:10.131Z"
+        }
+      ]
+    }
+  },
+  "schema": {
+    "download_logs": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "file_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "user_email",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "user_name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "user_role",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "ip_address",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": 45
+      },
+      {
+        "column_name": "user_agent",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "download_size",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "download_duration",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "download_status",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": "'completed'::character varying",
+        "character_maximum_length": 20
+      },
+      {
+        "column_name": "entity_type",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": 50
+      },
+      {
+        "column_name": "entity_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "referer_page",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "downloaded_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      }
+    ],
+    "episodes": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "project_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "title",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": 255
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      }
+    ],
+    "file_folders": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "name",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": 255
+      },
+      {
+        "column_name": "description",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "parent_folder_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "entity_type",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": 50
+      },
+      {
+        "column_name": "entity_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "folder_path",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "sort_order",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": "0",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "is_active",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "true",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      }
+    ],
+    "files": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "filename",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": 255
+      },
+      {
+        "column_name": "original_name",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": 255
+      },
+      {
+        "column_name": "mime_type",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": 100
+      },
+      {
+        "column_name": "file_size",
+        "data_type": "integer",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "file_data",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "entity_type",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": 50
+      },
+      {
+        "column_name": "entity_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "folder_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "uploaded_by",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "sort_order",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": "0",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "tags",
+        "data_type": "ARRAY",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "description",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "version",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": "1",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "is_archived",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "false",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "is_active",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "true",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "file_path",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "checksum",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": 64
+      },
+      {
+        "column_name": "access_level",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": "'project'::character varying",
+        "character_maximum_length": 20
+      },
+      {
+        "column_name": "download_count",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": "0",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "last_accessed_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      }
+    ],
+    "free_project_access": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "radio_station_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "project_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "granted_by_user_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "is_active",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "true",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      }
+    ],
+    "notifications": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "type",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": 50
+      },
+      {
+        "column_name": "title",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": 255
+      },
+      {
+        "column_name": "message",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "related_user_id",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "related_user_email",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "related_user_name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "is_read",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "false",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "is_archived",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "false",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "priority",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": "'normal'::character varying",
+        "character_maximum_length": 20
+      },
+      {
+        "column_name": "action_url",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": 500
+      },
+      {
+        "column_name": "metadata",
+        "data_type": "jsonb",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "read_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      }
+    ],
+    "onboarding_form_config": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "version",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": "1",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "is_active",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "true",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "questions",
+        "data_type": "jsonb",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "created_by",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      }
+    ],
+    "onboarding_form_responses": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "form_config_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "question_id",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "question_type",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": 20
+      },
+      {
+        "column_name": "question_label",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "response",
+        "data_type": "jsonb",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "is_compulsory",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "false",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "submitted_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      }
+    ],
+    "otp_verifications": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "otp_code",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": 6
+      },
+      {
+        "column_name": "purpose",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": 50
+      },
+      {
+        "column_name": "expires_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "is_used",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "false",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      }
+    ],
+    "projects": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "name",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": 255
+      },
+      {
+        "column_name": "theme_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "is_active",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "true",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      }
+    ],
+    "radio_stations": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "user_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "name",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": 255
+      },
+      {
+        "column_name": "contact_person",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": 255
+      },
+      {
+        "column_name": "email",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": 255
+      },
+      {
+        "column_name": "phone",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": 50
+      },
+      {
+        "column_name": "address",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "is_active",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "true",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      }
+    ],
+    "script_topics": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "script_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "topic_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      }
+    ],
+    "scripts": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "project_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "author_id",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "title",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": 255
+      },
+      {
+        "column_name": "content",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "status",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": "'Draft'::character varying",
+        "character_maximum_length": 50
+      },
+      {
+        "column_name": "language",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": "'en'::character varying",
+        "character_maximum_length": 10
+      },
+      {
+        "column_name": "original_script_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "language_group",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": 100
+      },
+      {
+        "column_name": "is_original",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "true",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      }
+    ],
+    "sessions": [
+      {
+        "column_name": "sid",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "sess",
+        "data_type": "jsonb",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "expire",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      }
+    ],
+    "themes": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "name",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": 255
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      }
+    ],
+    "topics": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "name",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": 255
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      }
+    ],
+    "users": [
+      {
+        "column_name": "id",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "email",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "first_name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "last_name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "profile_image_url",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "username",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "password",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "role",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": "'member'::character varying",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "is_active",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "true",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "is_verified",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "false",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "login_count",
+        "data_type": "integer",
+        "is_nullable": "YES",
+        "column_default": "0",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "last_login_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "first_login_completed",
+        "data_type": "boolean",
+        "is_nullable": "YES",
+        "column_default": "false",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "location",
+        "data_type": "jsonb",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "onboarding_responses",
+        "data_type": "jsonb",
+        "is_nullable": "YES",
+        "column_default": null,
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp without time zone",
+        "is_nullable": "YES",
+        "column_default": "now()",
+        "character_maximum_length": null
+      }
+    ]
+  },
+  "metadata": {
+    "totalTables": 17,
+    "exportedBy": "PostgreSQL Export Script"
+  }
+}
