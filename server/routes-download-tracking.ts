@@ -44,7 +44,7 @@ export function registerDownloadTrackingRoutes(app: Express) {
       try {
         // Decode base64 file data
         const fileBuffer = Buffer.from(fileRecord.fileData, 'base64');
-        
+
         // Calculate download duration
         const downloadDuration = Date.now() - startTime;
 
