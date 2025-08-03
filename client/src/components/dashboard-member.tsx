@@ -138,120 +138,105 @@ export function MemberDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-slate-900 dark:to-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        {/* Modern Hero Section */}
-        <div className="relative rounded-3xl bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 p-8 lg:p-12 mb-8 overflow-hidden">
-          <div className="absolute inset-0 bg-black/20"></div>
-          <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
-          <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
+        {/* Clean Welcome Section */}
+        <div className="relative rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 p-6 mb-8 overflow-hidden">
+          <div className="absolute inset-0 bg-black/10"></div>
           
-          <div className="relative flex flex-col lg:flex-row items-center justify-between gap-8">
-            <div className="flex-1 text-center lg:text-left">
-              <div className="flex items-center gap-3 justify-center lg:justify-start mb-4">
-                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                  <Radio className="w-6 h-6 text-white" />
-                </div>
-                <h1 className="text-2xl lg:text-4xl font-bold text-white">
-                  Welcome back, {user?.firstName}!
-                </h1>
+          <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                <Radio className="w-6 h-6 text-white" />
               </div>
-              <p className="text-lg text-white/90 mb-6 max-w-lg">
-                Explore impactful radio content and connect with stories that matter to your community.
-              </p>
-              
-              <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
-                <Badge className="bg-white/20 text-white border-white/30 px-4 py-2 backdrop-blur-sm">
-                  <Star className="w-4 h-4 mr-2" />
-                  Level {memberStats.memberLevel}
-                </Badge>
-                <Badge className="bg-gradient-to-r from-yellow-400/20 to-orange-400/20 text-yellow-100 border-yellow-300/30 px-4 py-2 backdrop-blur-sm">
-                  <Zap className="w-4 h-4 mr-2" />
-                  {memberStats.points} Points
-                </Badge>
-                <Badge className="bg-green-500/20 text-green-100 border-green-300/30 px-4 py-2 backdrop-blur-sm">
-                  <Activity className="w-4 h-4 mr-2" />
-                  {memberStats.streakDays}-day streak
-                </Badge>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-white">
+                  Welcome back, {user?.firstName || 'Member'}!
+                </h1>
+                <p className="text-blue-100 text-sm sm:text-base">
+                  Ready to explore radio content?
+                </p>
               </div>
             </div>
             
-            <div className="lg:flex-shrink-0">
-              <div className="relative">
-                <div className="w-32 h-32 lg:w-40 lg:h-40 bg-white/10 rounded-3xl backdrop-blur-sm border border-white/20 flex items-center justify-center">
-                  <Heart className="w-16 h-16 lg:w-20 lg:h-20 text-white" />
-                </div>
-                <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-400 rounded-full flex items-center justify-center shadow-lg">
-                  <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
-                </div>
-              </div>
+            <div className="flex gap-2 flex-wrap">
+              <Badge className="bg-white/20 text-white border-white/30 px-3 py-1 backdrop-blur-sm text-xs">
+                <Star className="w-3 h-3 mr-1" />
+                Level {memberStats.memberLevel}
+              </Badge>
+              <Badge className="bg-yellow-400/20 text-yellow-100 border-yellow-300/30 px-3 py-1 backdrop-blur-sm text-xs">
+                {memberStats.points} Points
+              </Badge>
             </div>
           </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6 border-0 shadow-sm bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm hover:shadow-md transition-all duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-                <Podcast className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <Card className="p-4 border-0 shadow-sm bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm hover:shadow-md transition-all duration-300">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                <Podcast className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
-              <TrendingUp className="w-4 h-4 text-green-500" />
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                  {memberStats.totalContent}
+                </h3>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Content</p>
+              </div>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-              {memberStats.totalContent}
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Available Content</p>
           </Card>
 
-          <Card className="p-6 border-0 shadow-sm bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm hover:shadow-md transition-all duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-xl">
-                <Radio className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+          <Card className="p-4 border-0 shadow-sm bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm hover:shadow-md transition-all duration-300">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                <Radio className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               </div>
-              <Eye className="w-4 h-4 text-blue-500" />
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                  {memberStats.totalProjects}
+                </h3>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Projects</p>
+              </div>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-              {memberStats.totalProjects}
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Radio Projects</p>
           </Card>
 
-          <Card className="p-6 border-0 shadow-sm bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm hover:shadow-md transition-all duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
-                <Clock className="w-6 h-6 text-green-600 dark:text-green-400" />
+          <Card className="p-4 border-0 shadow-sm bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm hover:shadow-md transition-all duration-300">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                <Clock className="w-5 h-5 text-green-600 dark:text-green-400" />
               </div>
-              <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded-full">
-                New
-              </span>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                  {memberStats.thisWeekContent}
+                </h3>
+                <p className="text-xs text-gray-600 dark:text-gray-400">This Week</p>
+              </div>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-              {memberStats.thisWeekContent}
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">This Week</p>
           </Card>
 
-          <Card className="p-6 border-0 shadow-sm bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm hover:shadow-md transition-all duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-xl">
-                <Target className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+          <Card className="p-4 border-0 shadow-sm bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm hover:shadow-md transition-all duration-300">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                <Target className="w-5 h-5 text-orange-600 dark:text-orange-400" />
               </div>
-              <span className="text-xs text-orange-600 dark:text-orange-400 font-medium">
-                {memberStats.completionRate.toFixed(0)}%
-              </span>
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                    {memberStats.completionRate.toFixed(0)}%
+                  </h3>
+                </div>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Progress</p>
+                <Progress value={memberStats.completionRate} className="h-1.5" />
+              </div>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-              Progress
-            </h3>
-            <Progress value={memberStats.completionRate} className="mt-2" />
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Actions */}
           <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Explore Content</h2>
-              <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Explore Content</h2>
+              <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400 hidden sm:flex">
                 View All <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             </div>
@@ -260,23 +245,23 @@ export function MemberDashboard() {
               {quickActions.map((action, index) => (
                 <Card 
                   key={index}
-                  className="p-6 border-0 shadow-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
+                  className="p-4 border-0 shadow-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
                   onClick={() => setLocation(action.route)}
                 >
-                  <div className="flex items-center gap-6">
-                    <div className={`p-4 bg-gradient-to-br ${action.gradient} rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                      <action.icon className="w-8 h-8 text-white" />
+                  <div className="flex items-center gap-4">
+                    <div className={`p-3 bg-gradient-to-br ${action.gradient} rounded-xl shadow-lg group-hover:scale-105 transition-transform duration-300`}>
+                      <action.icon className="w-6 h-6 text-white" />
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      <div className="flex items-center gap-3 mb-1">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                           {action.title}
                         </h3>
                         <Badge variant="secondary" className="text-xs">
                           {action.badge}
                         </Badge>
                       </div>
-                      <p className="text-gray-600 dark:text-gray-400 mb-4">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                         {action.description}
                       </p>
                       <Button variant="ghost" size="sm" className="p-0 h-auto font-medium text-blue-600 dark:text-blue-400 hover:bg-transparent">
@@ -313,33 +298,37 @@ export function MemberDashboard() {
               </div>
             </Card>
 
-            {/* Recent Activity */}
+            {/* Activity Summary */}
             <Card className="p-6 border-0 shadow-sm bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                  <Bell className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  <Activity className="w-5 h-5 text-green-600 dark:text-green-400" />
                 </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Recent Updates</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Activity</h3>
               </div>
-              <div className="space-y-4">
-                {recentHighlights.map((highlight, index) => (
-                  <div key={index} className="flex gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <div className={`p-2 rounded-full bg-gray-100 dark:bg-gray-700 ${highlight.color}`}>
-                      <highlight.icon className="w-4 h-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-gray-900 dark:text-white text-sm">
-                        {highlight.title}
-                      </h4>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                        {highlight.description}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-                        {highlight.time}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+              
+              <div className="space-y-3">
+                <div className="flex items-center justify-between py-2">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Content Viewed</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{memberStats.totalContent}</span>
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Projects Explored</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{memberStats.totalProjects}</span>
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">This Week</span>
+                  <span className="font-medium text-green-600 dark:text-green-400">+{memberStats.thisWeekContent}</span>
+                </div>
+              </div>
+              
+              <Separator className="my-4" />
+              
+              <div className="text-center">
+                <Button variant="outline" size="sm" className="w-full">
+                  <Trophy className="w-4 h-4 mr-2" />
+                  View Achievements
+                </Button>
               </div>
             </Card>
           </div>
