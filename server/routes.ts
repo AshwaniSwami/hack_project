@@ -17,13 +17,33 @@ import { getFilePermissions, requireFilePermission } from "./filePermissions";
 
 // Dynamically choose auth module based on database availability
 async function getAuthModule() {
-  // Force a fresh database check
-  resetDbConnection();
-  const { checkDatabaseAvailability } = await import("./db");
-  const dbAvailable = await checkDatabaseAvailability();
-  console.log("Database availability check:", dbAvailable ? "✅ Available" : "❌ Not available");
-  console.log("DATABASE_URL exists:", !!process.env.DATABASE_URL);
-  return dbAvailable ? realAuth : tempAuth;
+  // Check if we have a DATABASE_URL and if storage is using DatabaseStorage
+  const hasUrl = !!process.env.DATABASE_URL;
+  console.log("Auth module check - DATABASE_URL exists:", hasUrl);
+  
+  if (!hasUrl) {
+    console.log("Using tempAuth - no DATABASE_URL");
+    return tempAuth;
+  }
+
+  // Check if storage is properly initialized with database
+  try {
+    const { getStorage } = await import("./storage");
+    const storageInstance = getStorage();
+    const isUsingDatabase = storageInstance instanceof (await import("./storage")).DatabaseStorage;
+    console.log("Storage instance type:", isUsingDatabase ? "DatabaseStorage" : "FallbackStorage");
+    
+    if (isUsingDatabase) {
+      console.log("Using realAuth - database storage available");
+      return realAuth;
+    } else {
+      console.log("Using tempAuth - fallback storage in use");
+      return tempAuth;
+    }
+  } catch (error) {
+    console.log("Using tempAuth - error checking storage:", error);
+    return tempAuth;
+  }
 }
 
 // Dynamic auth handlers that check database availability at runtime
@@ -170,17 +190,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Users API - Admin only
   app.get("/api/users", isAuthenticated, isAdmin, async (req, res) => {
     try {
-      if (!isDatabaseAvailable()) {
+      // Check if we're using database storage
+      const { getStorage } = await import("./storage");
+      const storageInstance = getStorage();
+      const isUsingDatabase = storageInstance instanceof (await import("./storage")).DatabaseStorage;
+      
+      if (!isUsingDatabase) {
         const { tempUsers } = await import("./tempData");
         return res.json(tempUsers);
       }
+      
       const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
       const offset = req.query.offset ? parseInt(req.query.offset as string) : undefined;
       const users = await storage.getAllUsers(limit, offset);
       res.json(users);
     } catch (error) {
       console.error("Error fetching users:", error);
-      res.status(500).json({ message: "Failed to fetch users" });
+      // Fallback to temp data if database operation fails
+      try {
+        const { tempUsers } = await import("./tempData");
+        return res.json(tempUsers);
+      } catch (fallbackError) {
+        res.status(500).json({ message: "Failed to fetch users" });
+      }
     }
   });
 
@@ -454,15 +486,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Projects API
   app.get("/api/projects", async (req, res) => {
     try {
-      if (!isDatabaseAvailable()) {
+      // Check if we're using database storage
+      const { getStorage } = await import("./storage");
+      const storageInstance = getStorage();
+      const isUsingDatabase = storageInstance instanceof (await import("./storage")).DatabaseStorage;
+      
+      if (!isUsingDatabase) {
         const { tempProjects } = await import("./tempData");
         return res.json(tempProjects);
       }
+      
       const projects = await storage.getAllProjects();
       res.json(projects);
     } catch (error) {
       console.error("Error fetching projects:", error);
-      res.status(500).json({ message: "Failed to fetch projects" });
+      // Fallback to temp data if database operation fails
+      try {
+        const { tempProjects } = await import("./tempData");
+        return res.json(tempProjects);
+      } catch (fallbackError) {
+        res.status(500).json({ message: "Failed to fetch projects" });
+      }
     }
   });
 
@@ -574,15 +618,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Episodes API
   app.get("/api/episodes", async (req, res) => {
     try {
-      if (!isDatabaseAvailable()) {
+      // Check if we're using database storage
+      const { getStorage } = await import("./storage");
+      const storageInstance = getStorage();
+      const isUsingDatabase = storageInstance instanceof (await import("./storage")).DatabaseStorage;
+      
+      if (!isUsingDatabase) {
         const { tempEpisodes } = await import("./tempData");
         return res.json(tempEpisodes);
       }
+      
       const episodes = await storage.getAllEpisodes();
       res.json(episodes);
     } catch (error) {
       console.error("Error fetching episodes:", error);
-      res.status(500).json({ message: "Failed to fetch episodes" });
+      // Fallback to temp data if database operation fails
+      try {
+        const { tempEpisodes } = await import("./tempData");
+        return res.json(tempEpisodes);
+      } catch (fallbackError) {
+        res.status(500).json({ message: "Failed to fetch episodes" });
+      }
     }
   });
 
@@ -705,15 +761,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Scripts API
   app.get("/api/scripts", async (req, res) => {
     try {
-      if (!isDatabaseAvailable()) {
+      // Check if we're using database storage
+      const { getStorage } = await import("./storage");
+      const storageInstance = getStorage();
+      const isUsingDatabase = storageInstance instanceof (await import("./storage")).DatabaseStorage;
+      
+      if (!isUsingDatabase) {
         const { tempScripts } = await import("./tempData");
         return res.json(tempScripts);
       }
+      
       const scripts = await storage.getAllScripts();
       res.json(scripts);
     } catch (error) {
       console.error("Error fetching scripts:", error);
-      res.status(500).json({ message: "Failed to fetch scripts" });
+      // Fallback to temp data if database operation fails
+      try {
+        const { tempScripts } = await import("./tempData");
+        return res.json(tempScripts);
+      } catch (fallbackError) {
+        res.status(500).json({ message: "Failed to fetch scripts" });
+      }
     }
   });
 
@@ -924,17 +992,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Radio Stations API
   app.get("/api/radio-stations", async (req, res) => {
     try {
-      if (!isDatabaseAvailable()) {
+      // Check if we're using database storage
+      const { getStorage } = await import("./storage");
+      const storageInstance = getStorage();
+      const isUsingDatabase = storageInstance instanceof (await import("./storage")).DatabaseStorage;
+      
+      if (!isUsingDatabase) {
         const { tempRadioStations } = await import("./tempData");
         return res.json(tempRadioStations);
       }
+      
       const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
       const offset = req.query.offset ? parseInt(req.query.offset as string) : undefined;
       const stations = await storage.getAllRadioStations(limit, offset);
       res.json(stations);
     } catch (error) {
       console.error("Error fetching radio stations:", error);
-      res.status(500).json({ message: "Failed to fetch radio stations" });
+      // Fallback to temp data if database operation fails
+      try {
+        const { tempRadioStations } = await import("./tempData");
+        return res.json(tempRadioStations);
+      } catch (fallbackError) {
+        res.status(500).json({ message: "Failed to fetch radio stations" });
+      }
     }
   });
 

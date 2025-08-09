@@ -901,24 +901,29 @@ export async function initializeStorage() {
       return;
     }
 
-    // Verify database connection with a simple test
-    const dbInstance = getDb();
-    if (dbInstance) {
-      try {
-        // Test with a simple query first
-        const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-        await pool.query('SELECT 1');
-        await pool.end();
+    console.log("🔍 DATABASE_URL found, testing connection...");
+    
+    // Verify database connection with a simple test using the same config as db.ts
+    try {
+      const { Pool } = await import('pg');
+      const testPool = new Pool({ 
+        connectionString: process.env.DATABASE_URL,
+        ssl: { 
+          rejectUnauthorized: false 
+        },
+        max: 1,
+        connectionTimeoutMillis: 10000,
+      });
+      
+      const result = await testPool.query('SELECT 1 as test');
+      console.log("✅ Database connection test result:", result.rows[0]);
+      await testPool.end();
 
-        console.log("✅ Database connection verified");
-        storage = new DatabaseStorage();
-      } catch (error) {
-        console.log("⚠️  Database connection failed - using fallback storage");
-        console.log("Error:", error instanceof Error ? error.message : String(error));
-        storage = new FallbackStorage();
-      }
-    } else {
-      console.log("⚠️  Database not available - using fallback storage");
+      console.log("✅ Database connection verified - using DatabaseStorage");
+      storage = new DatabaseStorage();
+    } catch (error) {
+      console.log("⚠️  Database connection failed - using fallback storage");
+      console.log("Error:", error instanceof Error ? error.message : String(error));
       storage = new FallbackStorage();
     }
 
