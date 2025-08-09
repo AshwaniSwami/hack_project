@@ -38,6 +38,7 @@ import {
 import { db as getDb, isDatabaseAvailable, requireDatabase } from "./db";
 import { Pool } from '@neondatabase/serverless';
 import { eq, desc, and, sql, like, or, asc } from "drizzle-orm";
+import * as schema from "@shared/schema";
 
 export interface IStorage {
   // Users
@@ -320,6 +321,11 @@ export class DatabaseStorage implements IStorage {
 
   async getAllProjects(): Promise<Project[]> {
     const dbInstance = requireDatabase();
+    const [result] = await dbInstance.select({ count: sql<number>`count(*)` }).from(projects);
+    const count = result.count;
+    if (count === 0) {
+      return [];
+    }
     return await dbInstance.select().from(projects).orderBy(desc(projects.createdAt));
   }
 
@@ -353,6 +359,11 @@ export class DatabaseStorage implements IStorage {
 
   async getAllEpisodes(): Promise<Episode[]> {
     const dbInstance = requireDatabase();
+    const [result] = await dbInstance.select({ count: sql<number>`count(*)` }).from(episodes);
+    const count = result.count;
+    if (count === 0) {
+      return [];
+    }
     return await dbInstance.select().from(episodes).orderBy(desc(episodes.createdAt));
   }
 
@@ -398,6 +409,11 @@ export class DatabaseStorage implements IStorage {
 
   async getAllScripts(): Promise<Script[]> {
     const dbInstance = requireDatabase();
+    const [result] = await dbInstance.select({ count: sql<number>`count(*)` }).from(scripts);
+    const count = result.count;
+    if (count === 0) {
+      return [];
+    }
     return await dbInstance.select().from(scripts).orderBy(desc(scripts.createdAt));
   }
 
@@ -586,6 +602,11 @@ export class DatabaseStorage implements IStorage {
 
   async getAllFiles(limit?: number, offset?: number): Promise<File[]> {
     const dbInstance = requireDatabase();
+    const [result] = await dbInstance.select({ count: sql<number>`count(*)` }).from(files);
+    const count = result.count;
+    if (count === 0) {
+      return [];
+    }
     let query = dbInstance.select().from(files).orderBy(desc(files.createdAt));
     if (limit) {
       query = query.limit(limit);
@@ -684,7 +705,7 @@ export class DatabaseStorage implements IStorage {
 
   async getFoldersByParent(parentFolderId?: string): Promise<FileFolder[]> {
     const dbInstance = requireDatabase();
-    const condition = parentFolderId 
+    const condition = parentFolderId
       ? eq(fileFolders.parentFolderId, parentFolderId)
       : eq(fileFolders.parentFolderId, sql`null`);
     return await dbInstance
@@ -760,109 +781,110 @@ export class DatabaseStorage implements IStorage {
 }
 
 export class FallbackStorage implements IStorage {
-  private throwDatabaseError(): never {
+  private throwDatabaseError(operation: string): never {
+    console.error(`❌ Attempted ${operation} without database connection`);
     throw new Error("Database is not available. Please provision a PostgreSQL database to use this feature.");
   }
 
   // Users
-  async getUser(id: string): Promise<User | undefined> { return this.throwDatabaseError(); }
-  async getUserByUsername(username: string): Promise<User | undefined> { return this.throwDatabaseError(); }
-  async upsertUser(user: UpsertUser): Promise<User> { return this.throwDatabaseError(); }
-  async createUser(user: InsertUser): Promise<User> { return this.throwDatabaseError(); }
-  async updateUser(id: string, user: Partial<InsertUser>): Promise<User> { return this.throwDatabaseError(); }
-  async deleteUser(id: string): Promise<void> { return this.throwDatabaseError(); }
-  async getAllUsers(limit?: number, offset?: number): Promise<User[]> { return this.throwDatabaseError(); }
-  async getUsersPendingVerification(): Promise<User[]> { return this.throwDatabaseError(); }
-  async verifyUser(id: string): Promise<User> { return this.throwDatabaseError(); }
-  async suspendUser(id: string): Promise<User> { return this.throwDatabaseError(); }
-  async activateUser(id: string): Promise<User> { return this.throwDatabaseError(); }
-  async getAdminUsers(): Promise<User[]> { return this.throwDatabaseError(); }
+  async getUser(id: string): Promise<User | undefined> { return this.throwDatabaseError("get user"); }
+  async getUserByUsername(username: string): Promise<User | undefined> { return this.throwDatabaseError("get user by username"); }
+  async upsertUser(user: UpsertUser): Promise<User> { return this.throwDatabaseError("upsert user"); }
+  async createUser(user: InsertUser): Promise<User> { return this.throwDatabaseError("create user"); }
+  async updateUser(id: string, user: Partial<InsertUser>): Promise<User> { return this.throwDatabaseError("update user"); }
+  async deleteUser(id: string): Promise<void> { return this.throwDatabaseError("delete user"); }
+  async getAllUsers(limit?: number, offset?: number): Promise<User[]> { return this.throwDatabaseError("get all users"); }
+  async getUsersPendingVerification(): Promise<User[]> { return this.throwDatabaseError("get users pending verification"); }
+  async verifyUser(id: string): Promise<User> { return this.throwDatabaseError("verify user"); }
+  async suspendUser(id: string): Promise<User> { return this.throwDatabaseError("suspend user"); }
+  async activateUser(id: string): Promise<User> { return this.throwDatabaseError("activate user"); }
+  async getAdminUsers(): Promise<User[]> { return this.throwDatabaseError("get admin users"); }
 
   // Themes
-  async getTheme(id: string): Promise<Theme | undefined> { return this.throwDatabaseError(); }
-  async createTheme(theme: InsertTheme): Promise<Theme> { return this.throwDatabaseError(); }
-  async updateTheme(id: string, theme: Partial<InsertTheme>): Promise<Theme> { return this.throwDatabaseError(); }
-  async deleteTheme(id: string): Promise<void> { return this.throwDatabaseError(); }
-  async getAllThemes(): Promise<Theme[]> { return this.throwDatabaseError(); }
-  async getActiveThemes(): Promise<Theme[]> { return this.throwDatabaseError(); }
-  async getProjectsByTheme(themeId: string): Promise<Project[]> { return this.throwDatabaseError(); }
+  async getTheme(id: string): Promise<Theme | undefined> { return this.throwDatabaseError("get theme"); }
+  async createTheme(theme: InsertTheme): Promise<Theme> { return this.throwDatabaseError("create theme"); }
+  async updateTheme(id: string, theme: Partial<InsertTheme>): Promise<Theme> { return this.throwDatabaseError("update theme"); }
+  async deleteTheme(id: string): Promise<void> { return this.throwDatabaseError("delete theme"); }
+  async getAllThemes(): Promise<Theme[]> { return this.throwDatabaseError("get all themes"); }
+  async getActiveThemes(): Promise<Theme[]> { return this.throwDatabaseError("get active themes"); }
+  async getProjectsByTheme(themeId: string): Promise<Project[]> { return this.throwDatabaseError("get projects by theme"); }
 
   // Projects
-  async getProject(id: string): Promise<Project | undefined> { return this.throwDatabaseError(); }
-  async createProject(project: InsertProject): Promise<Project> { return this.throwDatabaseError(); }
-  async updateProject(id: string, project: Partial<InsertProject>): Promise<Project> { return this.throwDatabaseError(); }
-  async deleteProject(id: string): Promise<void> { return this.throwDatabaseError(); }
-  async getAllProjects(): Promise<Project[]> { return this.throwDatabaseError(); }
+  async getProject(id: string): Promise<Project | undefined> { return this.throwDatabaseError("get project"); }
+  async createProject(project: InsertProject): Promise<Project> { return this.throwDatabaseError("create project"); }
+  async updateProject(id: string, project: Partial<InsertProject>): Promise<Project> { return this.throwDatabaseError("update project"); }
+  async deleteProject(id: string): Promise<void> { return this.throwDatabaseError("delete project"); }
+  async getAllProjects(): Promise<Project[]> { return this.throwDatabaseError("get all projects"); }
 
   // Episodes
-  async getEpisode(id: string): Promise<Episode | undefined> { return this.throwDatabaseError(); }
-  async createEpisode(episode: InsertEpisode): Promise<Episode> { return this.throwDatabaseError(); }
-  async updateEpisode(id: string, episode: Partial<InsertEpisode>): Promise<Episode> { return this.throwDatabaseError(); }
-  async deleteEpisode(id: string): Promise<void> { return this.throwDatabaseError(); }
-  async getAllEpisodes(): Promise<Episode[]> { return this.throwDatabaseError(); }
-  async getEpisodesByProject(projectId: string): Promise<Episode[]> { return this.throwDatabaseError(); }
+  async getEpisode(id: string): Promise<Episode | undefined> { return this.throwDatabaseError("get episode"); }
+  async createEpisode(episode: InsertEpisode): Promise<Episode> { return this.throwDatabaseError("create episode"); }
+  async updateEpisode(id: string, episode: Partial<InsertEpisode>): Promise<Episode> { return this.throwDatabaseError("update episode"); }
+  async deleteEpisode(id: string): Promise<void> { return this.throwDatabaseError("delete episode"); }
+  async getAllEpisodes(): Promise<Episode[]> { return this.throwDatabaseError("get all episodes"); }
+  async getEpisodesByProject(projectId: string): Promise<Episode[]> { return this.throwDatabaseError("get episodes by project"); }
 
   // Scripts
-  async getScript(id: string): Promise<Script | undefined> { return this.throwDatabaseError(); }
-  async createScript(script: InsertScript): Promise<Script> { return this.throwDatabaseError(); }
-  async updateScript(id: string, script: Partial<InsertScript>): Promise<Script> { return this.throwDatabaseError(); }
-  async deleteScript(id: string): Promise<void> { return this.throwDatabaseError(); }
-  async getAllScripts(): Promise<Script[]> { return this.throwDatabaseError(); }
-  async getScriptsByLanguage(language: string): Promise<Script[]> { return this.throwDatabaseError(); }
-  async getScriptsByProject(projectId: string): Promise<Script[]> { return this.throwDatabaseError(); }
-  async getScriptsByLanguageGroup(languageGroup: string): Promise<Script[]> { return this.throwDatabaseError(); }
-  async getTranslationsForScript(scriptId: string): Promise<Script[]> { return this.throwDatabaseError(); }
-  async getScriptWithTranslations(scriptId: string): Promise<{ script: Script; translations: Script[] } | undefined> { return this.throwDatabaseError(); }
+  async getScript(id: string): Promise<Script | undefined> { return this.throwDatabaseError("get script"); }
+  async createScript(script: InsertScript): Promise<Script> { return this.throwDatabaseError("create script"); }
+  async updateScript(id: string, script: Partial<InsertScript>): Promise<Script> { return this.throwDatabaseError("update script"); }
+  async deleteScript(id: string): Promise<void> { return this.throwDatabaseError("delete script"); }
+  async getAllScripts(): Promise<Script[]> { return this.throwDatabaseError("get all scripts"); }
+  async getScriptsByLanguage(language: string): Promise<Script[]> { return this.throwDatabaseError("get scripts by language"); }
+  async getScriptsByProject(projectId: string): Promise<Script[]> { return this.throwDatabaseError("get scripts by project"); }
+  async getScriptsByLanguageGroup(languageGroup: string): Promise<Script[]> { return this.throwDatabaseError("get scripts by language group"); }
+  async getTranslationsForScript(scriptId: string): Promise<Script[]> { return this.throwDatabaseError("get translations for script"); }
+  async getScriptWithTranslations(scriptId: string): Promise<{ script: Script; translations: Script[] } | undefined> { return this.throwDatabaseError("get script with translations"); }
 
   // Topics
-  async getTopic(id: string): Promise<Topic | undefined> { return this.throwDatabaseError(); }
-  async createTopic(topic: InsertTopic): Promise<Topic> { return this.throwDatabaseError(); }
-  async updateTopic(id: string, topic: Partial<InsertTopic>): Promise<Topic> { return this.throwDatabaseError(); }
-  async deleteTopic(id: string): Promise<void> { return this.throwDatabaseError(); }
-  async getAllTopics(): Promise<Topic[]> { return this.throwDatabaseError(); }
+  async getTopic(id: string): Promise<Topic | undefined> { return this.throwDatabaseError("get topic"); }
+  async createTopic(topic: InsertTopic): Promise<Topic> { return this.throwDatabaseError("create topic"); }
+  async updateTopic(id: string, topic: Partial<InsertTopic>): Promise<Topic> { return this.throwDatabaseError("update topic"); }
+  async deleteTopic(id: string): Promise<void> { return this.throwDatabaseError("delete topic"); }
+  async getAllTopics(): Promise<Topic[]> { return this.throwDatabaseError("get all topics"); }
 
   // Radio Stations
-  async getRadioStation(id: string): Promise<RadioStation | undefined> { return this.throwDatabaseError(); }
-  async createRadioStation(station: InsertRadioStation): Promise<RadioStation> { return this.throwDatabaseError(); }
-  async updateRadioStation(id: string, station: Partial<InsertRadioStation>): Promise<RadioStation> { return this.throwDatabaseError(); }
-  async deleteRadioStation(id: string): Promise<void> { return this.throwDatabaseError(); }
-  async getAllRadioStations(limit?: number, offset?: number): Promise<RadioStation[]> { return this.throwDatabaseError(); }
+  async getRadioStation(id: string): Promise<RadioStation | undefined> { return this.throwDatabaseError("get radio station"); }
+  async createRadioStation(station: InsertRadioStation): Promise<RadioStation> { return this.throwDatabaseError("create radio station"); }
+  async updateRadioStation(id: string, station: Partial<InsertRadioStation>): Promise<RadioStation> { return this.throwDatabaseError("update radio station"); }
+  async deleteRadioStation(id: string): Promise<void> { return this.throwDatabaseError("delete radio station"); }
+  async getAllRadioStations(limit?: number, offset?: number): Promise<RadioStation[]> { return this.throwDatabaseError("get all radio stations"); }
 
   // Free Project Access
-  async getFreeProjectAccess(id: string): Promise<FreeProjectAccess | undefined> { return this.throwDatabaseError(); }
-  async createFreeProjectAccess(access: InsertFreeProjectAccess): Promise<FreeProjectAccess> { return this.throwDatabaseError(); }
-  async updateFreeProjectAccess(id: string, access: Partial<InsertFreeProjectAccess>): Promise<FreeProjectAccess> { return this.throwDatabaseError(); }
-  async deleteFreeProjectAccess(id: string): Promise<void> { return this.throwDatabaseError(); }
-  async getAllFreeProjectAccess(): Promise<FreeProjectAccess[]> { return this.throwDatabaseError(); }
+  async getFreeProjectAccess(id: string): Promise<FreeProjectAccess | undefined> { return this.throwDatabaseError("get free project access"); }
+  async createFreeProjectAccess(access: InsertFreeProjectAccess): Promise<FreeProjectAccess> { return this.throwDatabaseError("create free project access"); }
+  async updateFreeProjectAccess(id: string, access: Partial<InsertFreeProjectAccess>): Promise<FreeProjectAccess> { return this.throwDatabaseError("update free project access"); }
+  async deleteFreeProjectAccess(id: string): Promise<void> { return this.throwDatabaseError("delete free project access"); }
+  async getAllFreeProjectAccess(): Promise<FreeProjectAccess[]> { return this.throwDatabaseError("get all free project access"); }
 
   // Files
-  async getFile(id: string): Promise<File | undefined> { return this.throwDatabaseError(); }
-  async createFile(file: InsertFile): Promise<File> { return this.throwDatabaseError(); }
-  async updateFile(id: string, file: Partial<InsertFile>): Promise<File> { return this.throwDatabaseError(); }
-  async deleteFile(id: string): Promise<void> { return this.throwDatabaseError(); }
-  async getAllFiles(limit?: number, offset?: number): Promise<File[]> { return this.throwDatabaseError(); }
-  async getFilesByEntity(entityType: string, entityId: string): Promise<File[]> { return this.throwDatabaseError(); }
-  async getFileCount(): Promise<number> { return this.throwDatabaseError(); }
-  async reorderFiles(entityType: string, entityId: string | null, fileIds: string[]): Promise<void> { return this.throwDatabaseError(); }
-  async searchFiles(query: string, entityType?: string, entityId?: string): Promise<File[]> { return this.throwDatabaseError(); }
+  async getFile(id: string): Promise<File | undefined> { return this.throwDatabaseError("get file"); }
+  async createFile(file: InsertFile): Promise<File> { return this.throwDatabaseError("create file"); }
+  async updateFile(id: string, file: Partial<InsertFile>): Promise<File> { return this.throwDatabaseError("update file"); }
+  async deleteFile(id: string): Promise<void> { return this.throwDatabaseError("delete file"); }
+  async getAllFiles(limit?: number, offset?: number): Promise<File[]> { return this.throwDatabaseError("get all files"); }
+  async getFilesByEntity(entityType: string, entityId: string): Promise<File[]> { return this.throwDatabaseError("get files by entity"); }
+  async getFileCount(): Promise<number> { return this.throwDatabaseError("get file count"); }
+  async reorderFiles(entityType: string, entityId: string | null, fileIds: string[]): Promise<void> { return this.throwDatabaseError("reorder files"); }
+  async searchFiles(query: string, entityType?: string, entityId?: string): Promise<File[]> { return this.throwDatabaseError("search files"); }
 
   // File Folders
-  async getFileFolder(id: string): Promise<FileFolder | undefined> { return this.throwDatabaseError(); }
-  async createFileFolder(folder: InsertFileFolder): Promise<FileFolder> { return this.throwDatabaseError(); }
-  async updateFileFolder(id: string, folder: Partial<InsertFileFolder>): Promise<FileFolder> { return this.throwDatabaseError(); }
-  async deleteFileFolder(id: string): Promise<void> { return this.throwDatabaseError(); }
-  async getFoldersByEntity(entityType: string, entityId: string): Promise<FileFolder[]> { return this.throwDatabaseError(); }
-  async getFoldersByParent(parentFolderId?: string): Promise<FileFolder[]> { return this.throwDatabaseError(); }
+  async getFileFolder(id: string): Promise<FileFolder | undefined> { return this.throwDatabaseError("get file folder"); }
+  async createFileFolder(folder: InsertFileFolder): Promise<FileFolder> { return this.throwDatabaseError("create file folder"); }
+  async updateFileFolder(id: string, folder: Partial<InsertFileFolder>): Promise<FileFolder> { return this.throwDatabaseError("update file folder"); }
+  async deleteFileFolder(id: string): Promise<void> { return this.throwDatabaseError("delete file folder"); }
+  async getFoldersByEntity(entityType: string, entityId: string): Promise<FileFolder[]> { return this.throwDatabaseError("get folders by entity"); }
+  async getFoldersByParent(parentFolderId?: string): Promise<FileFolder[]> { return this.throwDatabaseError("get folders by parent"); }
 
   // Notifications
-  async getNotification(id: string): Promise<Notification | undefined> { return this.throwDatabaseError(); }
-  async createNotification(notification: InsertNotification): Promise<Notification> { return this.throwDatabaseError(); }
-  async updateNotification(id: string, notification: Partial<InsertNotification>): Promise<Notification> { return this.throwDatabaseError(); }
-  async deleteNotification(id: string): Promise<void> { return this.throwDatabaseError(); }
-  async getUserNotifications(userId: string): Promise<Notification[]> { return this.throwDatabaseError(); }
-  async getUnreadNotifications(userId: string): Promise<Notification[]> { return this.throwDatabaseError(); }
-  async markNotificationAsRead(id: string): Promise<Notification> { return this.throwDatabaseError(); }
-  async markAllNotificationsAsRead(userId: string): Promise<void> { return this.throwDatabaseError(); }
+  async getNotification(id: string): Promise<Notification | undefined> { return this.throwDatabaseError("get notification"); }
+  async createNotification(notification: InsertNotification): Promise<Notification> { return this.throwDatabaseError("create notification"); }
+  async updateNotification(id: string, notification: Partial<InsertNotification>): Promise<Notification> { return this.throwDatabaseError("update notification"); }
+  async deleteNotification(id: string): Promise<void> { return this.throwDatabaseError("delete notification"); }
+  async getUserNotifications(userId: string): Promise<Notification[]> { return this.throwDatabaseError("get user notifications"); }
+  async getUnreadNotifications(userId: string): Promise<Notification[]> { return this.throwDatabaseError("get unread notifications"); }
+  async markNotificationAsRead(id: string): Promise<Notification> { return this.throwDatabaseError("mark notification as read"); }
+  async markAllNotificationsAsRead(userId: string): Promise<void> { return this.throwDatabaseError("mark all notifications as read"); }
 }
 
 // Storage will be initialized after database check
