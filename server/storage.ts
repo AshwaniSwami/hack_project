@@ -760,18 +760,47 @@ export class DatabaseStorage implements IStorage {
 }
 
 export class FallbackStorage implements IStorage {
+  private tempUsers: User[] = [
+    {
+      id: "temp-admin-001",
+      email: "admin@example.com",
+      username: "admin",
+      password: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", // password: "password"
+      firstName: "Admin",
+      lastName: "User",
+      role: "admin",
+      isActive: true,
+      profileImageUrl: null,
+      isEmailVerified: true,
+      verificationToken: null,
+      resetToken: null,
+      resetTokenExpiry: null,
+      loginCount: 0,
+      lastLoginAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+  ];
+
   private throwDatabaseError(): never {
     throw new Error("Database is not available. Please provision a PostgreSQL database to use this feature.");
   }
 
-  // Users
-  async getUser(id: string): Promise<User | undefined> { return this.throwDatabaseError(); }
-  async getUserByUsername(username: string): Promise<User | undefined> { return this.throwDatabaseError(); }
+  // Users - implement basic functionality for authentication
+  async getUser(id: string): Promise<User | undefined> { 
+    return this.tempUsers.find(u => u.id === id);
+  }
+  async getUserByUsername(username: string): Promise<User | undefined> { 
+    return this.tempUsers.find(u => u.username === username || u.email === username);
+  }
   async upsertUser(user: UpsertUser): Promise<User> { return this.throwDatabaseError(); }
   async createUser(user: InsertUser): Promise<User> { return this.throwDatabaseError(); }
   async updateUser(id: string, user: Partial<InsertUser>): Promise<User> { return this.throwDatabaseError(); }
   async deleteUser(id: string): Promise<void> { return this.throwDatabaseError(); }
-  async getAllUsers(limit?: number, offset?: number): Promise<User[]> { return this.throwDatabaseError(); }
+  async getAllUsers(limit?: number, offset?: number): Promise<User[]> { 
+    console.log("FallbackStorage: getAllUsers called, returning temp users:", this.tempUsers.length);
+    return this.tempUsers;
+  }
   async getUsersPendingVerification(): Promise<User[]> { return this.throwDatabaseError(); }
   async verifyUser(id: string): Promise<User> { return this.throwDatabaseError(); }
   async suspendUser(id: string): Promise<User> { return this.throwDatabaseError(); }

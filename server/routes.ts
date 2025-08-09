@@ -104,10 +104,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const { registerAnalyticsRoutes } = await import("./routes-analytics");
   const { registerDownloadRoutes } = await import("./routes-download-fixed");
   const { registerProjectAnalyticsRoutes } = await import("./routes-projects-analytics");
-  const { registerScriptAnalyticsRoutes } = await import("./routes-script-analytics");
+  // const { registerScriptAnalyticsRoutes } = await import("./routes-script-analytics");
   const { registerEpisodeAnalyticsRoutes } = await import("./routes-episodes-analytics");
   registerAnalyticsRoutes(app);
-  registerDownloadRoutes(app);
+  registerDownloadRoutes(app); // Use only the fixed download route
 
   // Register onboarding routes
   const { 
@@ -124,7 +124,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/onboarding/analytics", isAuthenticated, getOnboardingAnalytics);
   app.get("/api/onboarding/status", isAuthenticated, checkOnboardingStatus);
   registerProjectAnalyticsRoutes(app);
-  registerScriptAnalyticsRoutes(app);
+  // registerScriptAnalyticsRoutes(app); // Disabled to fix server issues
   registerEpisodeAnalyticsRoutes(app);
 
   // Auth routes

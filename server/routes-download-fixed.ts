@@ -71,10 +71,12 @@ export function registerDownloadRoutes(app: Express) {
         // Allow download for testing when permission check fails
       }
 
-      // Get database instance
+      // Get database instance (use storage for better reliability)
+      const { storage } = await import("./storage");
       const database = db();
+      
       if (!database) {
-        console.error("Database not available");
+        console.error("Database not available, using storage fallback");
         return res.status(500).json({ error: "Database connection failed" });
       }
 

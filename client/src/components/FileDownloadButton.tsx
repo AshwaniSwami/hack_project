@@ -66,8 +66,8 @@ export function FileDownloadButton({
       window.URL.revokeObjectURL(url);
       document.body.removeChild(link);
       
-      // Refresh the page data to show updated download count
-      window.location.reload();
+      // Optionally show success message instead of full page reload
+      console.log("File downloaded successfully");
       
     } catch (error) {
       console.error("Download error:", error);

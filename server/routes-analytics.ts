@@ -10,8 +10,9 @@ export function registerAnalyticsRoutes(app: Express) {
     try {
       const { timeframe = '7d' } = req.query;
       
-      // If database is not available, return mock data
-      if (!db) {
+      // Get database instance
+      const database = db();
+      if (!database) {
         return res.json({
           timeframe,
           totalDownloads: 1247,
@@ -76,25 +77,25 @@ export function registerAnalyticsRoutes(app: Express) {
       }
 
       // Get total downloads in timeframe
-      const totalDownloads = await db
+      const totalDownloads = await database
         .select({ count: count() })
         .from(downloadLogs)
         .where(gte(downloadLogs.downloadedAt, startDate));
 
       // Get unique users who downloaded
-      const uniqueDownloaders = await db
+      const uniqueDownloaders = await database
         .select({ count: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})` })
         .from(downloadLogs)
         .where(gte(downloadLogs.downloadedAt, startDate));
 
       // Get total data downloaded (in bytes)
-      const totalDataDownloaded = await db
+      const totalDataDownloaded = await database
         .select({ total: sum(downloadLogs.downloadSize) })
         .from(downloadLogs)
         .where(gte(downloadLogs.downloadedAt, startDate));
 
       // Get most popular files with project info
-      const popularFiles = await db
+      const popularFiles = await database
         .select({
           fileId: downloadLogs.fileId,
           filename: files.filename,
@@ -112,7 +113,7 @@ export function registerAnalyticsRoutes(app: Express) {
         .limit(10);
 
       // Get downloads by day for chart
-      const downloadsByDay = await db
+      const downloadsByDay = await database
         .select({
           date: sql<string>`DATE(${downloadLogs.downloadedAt})`,
           count: count(downloadLogs.id),
@@ -125,7 +126,7 @@ export function registerAnalyticsRoutes(app: Express) {
         .orderBy(sql`DATE(${downloadLogs.downloadedAt})`);
 
       // Get downloads by entity type
-      const downloadsByType = await db
+      const downloadsByType = await database
         .select({
           entityType: downloadLogs.entityType,
           count: count(downloadLogs.id),
@@ -136,7 +137,7 @@ export function registerAnalyticsRoutes(app: Express) {
         .groupBy(downloadLogs.entityType);
 
       // Get top download hours
-      const downloadsByHour = await db
+      const downloadsByHour = await database
         .select({
           hour: sql<number>`EXTRACT(hour FROM ${downloadLogs.downloadedAt})`,
           count: count(downloadLogs.id)
@@ -170,8 +171,9 @@ export function registerAnalyticsRoutes(app: Express) {
       const { page = 1, limit = 20, search = '', timeframe = '30d' } = req.query;
       const offset = (Number(page) - 1) * Number(limit);
       
-      // If database is not available, return mock data
-      if (!db) {
+      // Get database instance
+      const database = db();
+      if (!database) {
         const mockUsers = [
           {
             userId: "user-001",
@@ -218,7 +220,7 @@ export function registerAnalyticsRoutes(app: Express) {
         );
       }
 
-      const userDownloads = await db
+      const userDownloads = await database
         .select({
           userId: downloadLogs.userId,
           userEmail: downloadLogs.userEmail,

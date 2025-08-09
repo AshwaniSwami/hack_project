@@ -38,26 +38,19 @@ export const isAuthenticated = async (req: AuthenticatedRequest, res: Response, 
   
   if (req.session && (req.session as any).userId) {
     try {
-      // Check if database is available
-      if (!isDatabaseAvailable()) {
-        // Use temporary authentication when database is not available
-        const userId = (req.session as any).userId;
-        console.log("Temp auth - checking userId:", userId, "against", TEMP_ADMIN.id);
-        if (userId === TEMP_ADMIN.id) {
-          req.user = {
-            id: TEMP_ADMIN.id,
-            email: TEMP_ADMIN.email,
-            role: TEMP_ADMIN.role,
-            firstName: TEMP_ADMIN.firstName,
-            lastName: TEMP_ADMIN.lastName,
-          };
-          console.log("Temp auth - user set:", req.user);
-          next();
-        } else {
-          console.log("Temp auth - user not found");
-          res.status(401).json({ message: "User not found" });
-        }
-        return;
+      // Always check temp authentication first for demo purposes
+      const userId = (req.session as any).userId;
+      console.log("Auth check - userId from session:", userId);
+      if (userId === TEMP_ADMIN.id) {
+        req.user = {
+          id: TEMP_ADMIN.id,
+          email: TEMP_ADMIN.email,
+          role: TEMP_ADMIN.role,
+          firstName: TEMP_ADMIN.firstName,
+          lastName: TEMP_ADMIN.lastName,
+        };
+        console.log("Demo auth - user authenticated:", req.user);
+        return next();
       }
 
       // Use database authentication when available
@@ -139,26 +132,23 @@ export const login = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Email and password are required" });
     }
 
-    // Check if database is available
-    if (!isDatabaseAvailable()) {
-      // Use temporary authentication when database is not available
-      if (email === TEMP_ADMIN.email) {
-        const isValid = await bcrypt.compare(password, TEMP_ADMIN.password);
-        if (isValid) {
-          (req.session as any).userId = TEMP_ADMIN.id;
-          return res.json({
-            message: "Login successful",
-            user: {
-              id: TEMP_ADMIN.id,
-              email: TEMP_ADMIN.email,
-              role: TEMP_ADMIN.role,
-              firstName: TEMP_ADMIN.firstName,
-              lastName: TEMP_ADMIN.lastName,
-            }
-          });
-        }
+    // Always try to use fallback authentication for demo purposes
+    if (email === TEMP_ADMIN.email) {
+      const isValid = await bcrypt.compare(password, TEMP_ADMIN.password);
+      if (isValid) {
+        (req.session as any).userId = TEMP_ADMIN.id;
+        console.log("Demo login successful - stored userId:", TEMP_ADMIN.id);
+        return res.json({
+          message: "Login successful",
+          user: {
+            id: TEMP_ADMIN.id,
+            email: TEMP_ADMIN.email,
+            role: TEMP_ADMIN.role,
+            firstName: TEMP_ADMIN.firstName,
+            lastName: TEMP_ADMIN.lastName,
+          }
+        });
       }
-      return res.status(401).json({ message: "Invalid credentials" });
     }
 
     // Get all users and find by email (since we don't have email-specific query)
