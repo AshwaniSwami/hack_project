@@ -1,221 +1,194 @@
-import { Express, Request, Response, NextFunction } from "express";
-import { eq, and, sql } from "drizzle-orm";
+import { Express, Request, Response } from "express";
+import { eq, sql } from "drizzle-orm";
 import { db } from "./db";
 import { files, downloadLogs } from "@shared/schema";
+import { isAuthenticated, type AuthenticatedRequest } from "./auth";
 import { getFilePermissions } from "./filePermissions";
 
-// Custom interface for authenticated requests
-interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    role: string;
-    firstName?: string;
-    lastName?: string;
-  };
+// File cache to avoid repeated Base64 decode operations
+const fileCache = new Map<string, { buffer: Buffer; timestamp: number }>();
+const FILE_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
+function getCachedFile(fileId: string): Buffer | null {
+  const entry = fileCache.get(fileId);
+  if (entry && (Date.now() - entry.timestamp) < FILE_CACHE_TTL) {
+    return entry.buffer;
+  }
+  if (entry) {
+    fileCache.delete(fileId);
+  }
+  return null;
 }
 
-// Middleware to check authentication
-const isAuthenticatedMiddleware = (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    // Check session for user
-    if (req.session && (req.session as any)?.userId) {
-      const userId = (req.session as any).userId;
-      
-      // For now, create a basic user object from session
-      // This should be replaced with proper user lookup when auth is fixed
-      req.user = {
-        id: userId,
-        email: "user@example.com", // Placeholder
-        role: "admin", // Give admin role for testing downloads
-        firstName: "User",
-        lastName: "Name"
-      };
-      
-      return next();
-    }
-    
-    return res.status(401).json({ error: "Authentication required" });
-  } catch (error) {
-    console.error("Authentication error:", error);
-    return res.status(401).json({ error: "Authentication failed" });
+function setCachedFile(fileId: string, buffer: Buffer): void {
+  // Limit cache size - only cache files under 10MB and max 20 files
+  if (buffer.length < 10 * 1024 * 1024 && fileCache.size < 20) {
+    fileCache.set(fileId, { buffer, timestamp: Date.now() });
   }
-};
+}
 
-export function registerDownloadRoutes(app: Express) {
-  // Enhanced file download endpoint with proper error handling
-  app.get("/api/files/:fileId/download", isAuthenticatedMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+export function registerFixedDownloadRoutes(app: Express) {
+  app.get("/api/files/:fileId/download", async (req: Request, res: Response) => {
+    const startTime = Date.now();
+    const { fileId } = req.params;
+    
     try {
-      const { fileId } = req.params;
-      const user = req.user;
-
-      if (!user) {
+      // Check if user is authenticated
+      const authModule = await import("./routes");
+      const isAuthenticatedMiddleware = authModule.isAuthenticated;
+      
+      // For temporary auth, we'll check session directly
+      if (!req.session || !req.session.userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
-      console.log("Download request for file:", fileId, "by user:", user.id);
+      console.log(`[DOWNLOAD] ${fileId} requested by user ${req.session.userId}`);
 
-      // Check download permissions
-      try {
-        const permissions = getFilePermissions(user);
-        if (!permissions.canDownload) {
-          console.log("Download permission denied for user:", user.id);
-          return res.status(403).json({ error: "Download permission denied" });
+      // Check cache first for file buffer
+      let fileBuffer = getCachedFile(fileId);
+      let fileRecord;
+
+      if (!fileBuffer) {
+        // Get file record from database
+        const database = db;
+        if (!database) {
+          return res.status(500).json({ error: "Database not available" });
         }
-      } catch (permError) {
-        console.log("Permission check failed, allowing download for testing");
-        // Allow download for testing when permission check fails
-      }
 
-      // Get database instance (use storage for better reliability)
-      const { storage } = await import("./storage");
-      const database = db();
-      
-      if (!database) {
-        console.error("Database not available, using storage fallback");
-        return res.status(500).json({ error: "Database connection failed" });
-      }
-
-      console.log("Fetching file from database...");
-      
-      // Get file information with better error handling
-      let fileResults;
-      try {
-        fileResults = await database
+        const fileResults = await database
           .select()
           .from(files)
           .where(eq(files.id, fileId))
           .limit(1);
-      } catch (dbError) {
-        console.error("Database query error:", dbError);
-        return res.status(500).json({ error: "Database query failed" });
-      }
 
-      if (!fileResults || fileResults.length === 0) {
-        console.log("File not found:", fileId);
-        return res.status(404).json({ error: "File not found" });
-      }
+        if (!fileResults || fileResults.length === 0) {
+          return res.status(404).json({ error: "File not found" });
+        }
 
-      const fileRecord = fileResults[0];
-      console.log("File found:", fileRecord.filename, "Size:", fileRecord.fileSize);
-      
-      const startTime = Date.now();
+        fileRecord = fileResults[0];
 
-      // Prepare download log data
-      const clientIp = req.ip || req.connection?.remoteAddress || 'unknown';
-      const userAgent = req.get('User-Agent') || 'unknown';
-      const refererPage = req.get('Referer') || req.headers.referer || 'direct';
-
-      try {
-        // Validate file data exists
         if (!fileRecord.fileData) {
-          console.error("File data is missing for file:", fileId);
-          return res.status(500).json({ error: "File data is corrupted" });
+          return res.status(500).json({ error: "File data missing" });
         }
 
-        console.log("Decoding file data...");
-        // Decode base64 file data with error handling
-        let fileBuffer;
+        // Decode file data efficiently
         try {
+          console.log(`[DOWNLOAD] Decoding file data for ${fileId}`);
           fileBuffer = Buffer.from(fileRecord.fileData, 'base64');
+          setCachedFile(fileId, fileBuffer);
+          console.log(`[DOWNLOAD] File ${fileId} cached (${fileBuffer.length} bytes)`);
         } catch (decodeError) {
-          console.error("Failed to decode file data:", decodeError);
-          return res.status(500).json({ error: "File data is corrupted" });
+          console.error("File decode error:", decodeError);
+          return res.status(500).json({ error: "File data corrupted" });
         }
+      } else {
+        console.log(`[DOWNLOAD] Cache hit for ${fileId} (${fileBuffer.length} bytes)`);
+        // Still need file record for metadata
+        const database = db;
+        const fileResults = await database
+          .select({
+            id: files.id,
+            filename: files.filename,
+            originalName: files.originalName,
+            mimeType: files.mimeType,
+            fileSize: files.fileSize,
+            entityType: files.entityType,
+            entityId: files.entityId
+          })
+          .from(files)
+          .where(eq(files.id, fileId))
+          .limit(1);
+        
+        if (fileResults.length > 0) {
+          fileRecord = fileResults[0];
+        }
+      }
 
-        const downloadDuration = Date.now() - startTime;
-        console.log("File decoded successfully, buffer size:", fileBuffer.length);
+      if (!fileRecord) {
+        return res.status(404).json({ error: "File record not found" });
+      }
 
-        // Log the download (if downloadLogs table exists) - with try/catch
+      const downloadDuration = Date.now() - startTime;
+
+      // Log download asynchronously (don't wait)
+      setImmediate(async () => {
         try {
-          await database.insert(downloadLogs).values({
-            fileId: fileRecord.id,
-            userId: user.id,
-            userEmail: user.email || 'unknown',
-            userName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'unknown',
-            userRole: user.role || 'member',
-            ipAddress: clientIp,
-            userAgent: userAgent,
-            downloadSize: fileRecord.fileSize,
-            downloadDuration: downloadDuration,
-            downloadStatus: 'completed',
-            entityType: fileRecord.entityType,
-            entityId: fileRecord.entityId,
-            refererPage: refererPage
-          });
-          console.log("Download logged successfully");
+          const database = db;
+          if (database) {
+            const clientIp = req.ip || req.connection?.remoteAddress || 'unknown';
+            const userAgent = req.get('User-Agent') || 'unknown';
+            const refererPage = req.get('Referer') || 'direct';
+
+            await database.insert(downloadLogs).values({
+              fileId: fileRecord.id,
+              userId: req.session?.userId || 'unknown',
+              userEmail: 'temp-user@example.com', // Temporary for auth
+              userName: 'Temp User',
+              userRole: 'member',
+              ipAddress: clientIp,
+              userAgent: userAgent,
+              downloadSize: fileRecord.fileSize || fileBuffer.length,
+              downloadDuration: downloadDuration,
+              downloadStatus: 'completed',
+              entityType: fileRecord.entityType,
+              entityId: fileRecord.entityId,
+              refererPage: refererPage
+            });
+
+            // Update file stats
+            await database
+              .update(files)
+              .set({
+                downloadCount: sql`${files.downloadCount} + 1`,
+                lastDownloadAt: new Date()
+              })
+              .where(eq(files.id, fileId));
+          }
         } catch (logError) {
-          // Continue with download even if logging fails
           console.error("Download logging failed:", logError);
         }
+      });
 
-        // Update file download count and last accessed time - with try/catch
-        try {
-          await database
-            .update(files)
-            .set({
-              downloadCount: sql`${files.downloadCount} + 1`,
-              lastAccessedAt: new Date()
-            })
-            .where(eq(files.id, fileId));
-          console.log("Download count updated");
-        } catch (updateError) {
-          // Continue with download even if update fails
-          console.error("Download count update failed:", updateError);
-        }
+      // Set optimal headers for file download
+      const filename = fileRecord.originalName || fileRecord.filename;
+      res.setHeader('Content-Type', fileRecord.mimeType || 'application/octet-stream');
+      res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(filename)}"`);
+      res.setHeader('Content-Length', fileBuffer.length.toString());
+      res.setHeader('Cache-Control', 'private, max-age=3600'); // Cache for 1 hour
+      res.setHeader('X-Download-Time', `${downloadDuration}ms`);
 
-        console.log("Setting response headers...");
-        // Set appropriate headers for file download
-        res.setHeader('Content-Type', fileRecord.mimeType || 'application/octet-stream');
-        res.setHeader('Content-Length', fileBuffer.length);
-        res.setHeader(
-          'Content-Disposition',
-          `attachment; filename="${encodeURIComponent(fileRecord.originalName)}"`
-        );
-        res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('Pragma', 'no-cache');
-
-        console.log("Sending file to client...");
-        // Send the file
-        res.send(fileBuffer);
-        console.log("File sent successfully");
-
-      } catch (downloadError) {
-        // Log failed download
-        const downloadDuration = Date.now() - startTime;
-        console.error("Download error:", downloadError);
-        
-        try {
-          await database.insert(downloadLogs).values({
-            fileId: fileRecord.id,
-            userId: user.id,
-            userEmail: user.email || 'unknown',
-            userName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'unknown',
-            userRole: user.role || 'member',
-            ipAddress: clientIp,
-            userAgent: userAgent,
-            downloadSize: fileRecord.fileSize,
-            downloadDuration: downloadDuration,
-            downloadStatus: 'failed',
-            entityType: fileRecord.entityType,
-            entityId: fileRecord.entityId,
-            refererPage: refererPage
-          });
-        } catch (logError) {
-          console.error("Failed download logging failed:", logError);
-        }
-
-        console.error("Download error details:", downloadError);
-        res.status(500).json({ error: "Download failed", details: downloadError instanceof Error ? downloadError.message : 'Unknown error' });
-      }
+      // Send file
+      res.end(fileBuffer);
+      console.log(`[DOWNLOAD] ${fileId} completed (${fileBuffer.length} bytes) in ${downloadDuration}ms`);
 
     } catch (error) {
-      console.error("Error processing download:", error);
-      res.status(500).json({ error: "Failed to process download", details: error instanceof Error ? error.message : 'Unknown error' });
+      const errorDuration = Date.now() - startTime;
+      console.error(`[DOWNLOAD] Error after ${errorDuration}ms:`, error);
+      
+      if (!res.headersSent) {
+        res.status(500).json({ error: "Download failed" });
+      }
     }
   });
+
+  // Download cache status
+  app.get("/api/downloads/cache/status", async (req: Request, res: Response) => {
+    const totalSize = Array.from(fileCache.values()).reduce((sum, entry) => sum + entry.buffer.length, 0);
+    res.json({
+      cacheSize: fileCache.size,
+      cacheSizeMB: Math.round(totalSize / (1024 * 1024) * 100) / 100,
+      cacheFiles: Array.from(fileCache.keys())
+    });
+  });
 }
+
+// Clean up old cache entries periodically
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of fileCache.entries()) {
+    if (now - entry.timestamp > FILE_CACHE_TTL) {
+      fileCache.delete(key);
+      console.log(`[CACHE] Evicted expired file: ${key}`);
+    }
+  }
+}, 5 * 60 * 1000); // Clean every 5 minutes

@@ -10,6 +10,7 @@ import { registerEpisodeFileRoutes } from "./routes-episodes-files";
 import { registerScriptFileRoutes } from "./routes-scripts-files";
 import { registerNotificationRoutes } from "./routes-notifications";
 import { isDatabaseAvailable, resetDbConnection } from "./db";
+import { cacheMiddleware, performanceHeaders } from "./performance-middleware";
 // Import both auth modules
 import * as realAuth from "./auth";
 import * as tempAuth from "./tempAuth";

@@ -21,15 +21,18 @@ function initializeDatabase() {
   console.log("Checking DATABASE_URL:", process.env.DATABASE_URL ? "✅ Found" : "❌ Not found");
   if (process.env.DATABASE_URL) {
     try {
-      // Configure pool for Supabase with proper SSL and connection settings
+      // Configure optimized pool for Supabase with connection pooling
       pool = new Pool({ 
         connectionString: process.env.DATABASE_URL,
         ssl: { 
           rejectUnauthorized: false 
         },
-        max: 10,
-        idleTimeoutMillis: 30000,
-        connectionTimeoutMillis: 10000,
+        max: 20,                    // Increased for better concurrency
+        min: 2,                     // Keep minimum connections ready
+        idleTimeoutMillis: 60000,   // Keep connections alive longer
+        connectionTimeoutMillis: 5000,  // Faster timeout for quick failure
+        acquireTimeoutMillis: 3000, // Quick acquisition timeout
+        allowExitOnIdle: false      // Keep pool alive
       });
       
       db = drizzle(pool, { schema });
