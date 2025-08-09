@@ -1,28 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-
-// Simple memory cache
-const cache = new Map();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
-interface CacheEntry {
-  data: any;
-  timestamp: number;
-}
-
-function getCached(key: string): any | null {
-  const entry: CacheEntry | undefined = cache.get(key);
-  if (entry && (Date.now() - entry.timestamp) < CACHE_TTL) {
-    return entry.data;
-  }
-  if (entry) {
-    cache.delete(key);
-  }
-  return null;
-}
-
-function setCache(key: string, data: any): void {
-  cache.set(key, { data, timestamp: Date.now() });
-}
+import { responseCache } from './simple-cache';
 
 export function cacheMiddleware(ttl: number = 5 * 60 * 1000) {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -32,7 +9,7 @@ export function cacheMiddleware(ttl: number = 5 * 60 * 1000) {
     }
 
     const cacheKey = req.originalUrl || req.url;
-    const cached = getCached(cacheKey);
+    const cached = responseCache.get(cacheKey);
 
     if (cached) {
       console.log(`[CACHE HIT] ${cacheKey}`);
@@ -44,7 +21,7 @@ export function cacheMiddleware(ttl: number = 5 * 60 * 1000) {
     res.json = function(body: any) {
       // Cache successful responses
       if (res.statusCode === 200 && body) {
-        setCache(cacheKey, body);
+        responseCache.set(cacheKey, body);
         console.log(`[CACHE SET] ${cacheKey}`);
       }
       return originalJson.call(this, body);

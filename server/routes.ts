@@ -103,12 +103,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register analytics and download tracking routes
   const { registerAnalyticsRoutes } = await import("./routes-analytics");
-  const { registerDownloadRoutes } = await import("./routes-download-fixed");
   const { registerProjectAnalyticsRoutes } = await import("./routes-projects-analytics");
   // const { registerScriptAnalyticsRoutes } = await import("./routes-script-analytics");
   const { registerEpisodeAnalyticsRoutes } = await import("./routes-episodes-analytics");
   registerAnalyticsRoutes(app);
-  registerDownloadRoutes(app); // Use only the fixed download route
+  
+  // Register optimized download routes
+  const { registerDownloadRoutes } = await import("./routes-download-fixed");
+  registerDownloadRoutes(app);
 
   // Register onboarding routes
   const { 
@@ -452,8 +454,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Projects API
-  app.get("/api/projects", async (req, res) => {
+  // Projects API with performance optimization
+  app.get("/api/projects", performanceHeaders(), cacheMiddleware(), async (req, res) => {
     try {
       if (!isDatabaseAvailable()) {
         const { tempProjects } = await import("./tempData");

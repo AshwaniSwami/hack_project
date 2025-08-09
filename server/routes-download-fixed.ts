@@ -5,29 +5,20 @@ import { files, downloadLogs } from "@shared/schema";
 import { isAuthenticated, type AuthenticatedRequest } from "./auth";
 import { getFilePermissions } from "./filePermissions";
 
-// File cache to avoid repeated Base64 decode operations
-const fileCache = new Map<string, { buffer: Buffer; timestamp: number }>();
-const FILE_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+import { fileCache } from "./simple-cache";
 
 function getCachedFile(fileId: string): Buffer | null {
-  const entry = fileCache.get(fileId);
-  if (entry && (Date.now() - entry.timestamp) < FILE_CACHE_TTL) {
-    return entry.buffer;
-  }
-  if (entry) {
-    fileCache.delete(fileId);
-  }
-  return null;
+  return fileCache.get(fileId);
 }
 
 function setCachedFile(fileId: string, buffer: Buffer): void {
-  // Limit cache size - only cache files under 10MB and max 20 files
-  if (buffer.length < 10 * 1024 * 1024 && fileCache.size < 20) {
-    fileCache.set(fileId, { buffer, timestamp: Date.now() });
+  // Only cache files under 10MB to prevent memory issues
+  if (buffer.length < 10 * 1024 * 1024) {
+    fileCache.set(fileId, buffer);
   }
 }
 
-export function registerFixedDownloadRoutes(app: Express) {
+export function registerDownloadRoutes(app: Express) {
   app.get("/api/files/:fileId/download", async (req: Request, res: Response) => {
     const startTime = Date.now();
     const { fileId } = req.params;
@@ -173,22 +164,9 @@ export function registerFixedDownloadRoutes(app: Express) {
 
   // Download cache status
   app.get("/api/downloads/cache/status", async (req: Request, res: Response) => {
-    const totalSize = Array.from(fileCache.values()).reduce((sum, entry) => sum + entry.buffer.length, 0);
     res.json({
-      cacheSize: fileCache.size,
-      cacheSizeMB: Math.round(totalSize / (1024 * 1024) * 100) / 100,
-      cacheFiles: Array.from(fileCache.keys())
+      cacheSize: fileCache.size(),
+      message: "File cache status"
     });
   });
 }
-
-// Clean up old cache entries periodically
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of fileCache.entries()) {
-    if (now - entry.timestamp > FILE_CACHE_TTL) {
-      fileCache.delete(key);
-      console.log(`[CACHE] Evicted expired file: ${key}`);
-    }
-  }
-}, 5 * 60 * 1000); // Clean every 5 minutes
