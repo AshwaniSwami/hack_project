@@ -110,8 +110,8 @@ export function registerDownloadRoutes(app: Express) {
                 INSERT INTO download_logs (
                   file_id, user_id, user_email, user_name, user_role,
                   ip_address, user_agent, download_size, download_duration,
-                  download_status, entity_type, entity_id, referer_page
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+                  download_status, entity_type, entity_id, referer_page, downloaded_at
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW())
               `, [
                 fileRecord.id,
                 req.session?.userId || 'unknown',

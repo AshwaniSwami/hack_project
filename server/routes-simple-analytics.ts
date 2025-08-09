@@ -53,13 +53,13 @@ export function registerAnalyticsRoutes(app: Express) {
             dl.id,
             'download' as type,
             CONCAT('Downloaded ', COALESCE(f.original_name, f.filename, 'unknown file')) as description,
-            dl.created_at as timestamp,
+            dl.downloaded_at as timestamp,
             dl.user_name as user,
             dl.entity_type,
             dl.entity_id
           FROM download_logs dl
           LEFT JOIN files f ON dl.file_id = f.id
-          ORDER BY dl.created_at DESC
+          ORDER BY dl.downloaded_at DESC
           LIMIT 10
         `);
 
@@ -150,19 +150,19 @@ export function registerAnalyticsRoutes(app: Express) {
       try {
         // Get total downloads in timeframe
         const totalDownloadsResult = await pool.query(
-          'SELECT COUNT(*) as count FROM download_logs WHERE created_at >= $1',
+          'SELECT COUNT(*) as count FROM download_logs WHERE downloaded_at >= $1',
           [startDate]
         );
 
         // Get unique downloaders count
         const uniqueDownloadersResult = await pool.query(
-          'SELECT COUNT(DISTINCT user_id) as count FROM download_logs WHERE created_at >= $1',
+          'SELECT COUNT(DISTINCT user_id) as count FROM download_logs WHERE downloaded_at >= $1',
           [startDate]
         );
 
         // Get total data downloaded
         const totalDataResult = await pool.query(
-          'SELECT SUM(download_size) as total FROM download_logs WHERE created_at >= $1',
+          'SELECT SUM(download_size) as total FROM download_logs WHERE downloaded_at >= $1',
           [startDate]
         );
 
@@ -178,7 +178,7 @@ export function registerAnalyticsRoutes(app: Express) {
             SUM(dl.download_size) as total_size
           FROM download_logs dl
           LEFT JOIN files f ON dl.file_id = f.id
-          WHERE dl.created_at >= $1
+          WHERE dl.downloaded_at >= $1
           GROUP BY dl.file_id, f.filename, f.original_name, dl.entity_type, dl.entity_id
           ORDER BY COUNT(*) DESC
           LIMIT 10
@@ -187,14 +187,14 @@ export function registerAnalyticsRoutes(app: Express) {
         // Get downloads by day
         const downloadsByDayResult = await pool.query(`
           SELECT 
-            DATE(created_at) as date,
+            DATE(downloaded_at) as date,
             COUNT(*) as count,
             COUNT(DISTINCT user_id) as unique_users,
             SUM(download_size) as total_size
           FROM download_logs 
-          WHERE created_at >= $1
-          GROUP BY DATE(created_at)
-          ORDER BY DATE(created_at)
+          WHERE downloaded_at >= $1
+          GROUP BY DATE(downloaded_at)
+          ORDER BY DATE(downloaded_at)
         `, [startDate]);
 
         // Get downloads by entity type
@@ -204,7 +204,7 @@ export function registerAnalyticsRoutes(app: Express) {
             COUNT(*) as count,
             SUM(download_size) as total_size
           FROM download_logs 
-          WHERE created_at >= $1
+          WHERE downloaded_at >= $1
           GROUP BY entity_type
           ORDER BY COUNT(*) DESC
         `, [startDate]);
@@ -212,12 +212,12 @@ export function registerAnalyticsRoutes(app: Express) {
         // Get downloads by hour
         const downloadsByHourResult = await pool.query(`
           SELECT 
-            EXTRACT(HOUR FROM created_at) as hour,
+            EXTRACT(HOUR FROM downloaded_at) as hour,
             COUNT(*) as count
           FROM download_logs 
-          WHERE created_at >= $1
-          GROUP BY EXTRACT(HOUR FROM created_at)
-          ORDER BY EXTRACT(HOUR FROM created_at)
+          WHERE downloaded_at >= $1
+          GROUP BY EXTRACT(HOUR FROM downloaded_at)
+          ORDER BY EXTRACT(HOUR FROM downloaded_at)
         `, [startDate]);
 
         // Format response with REAL data
@@ -321,10 +321,10 @@ export function registerAnalyticsRoutes(app: Express) {
               download_duration,
               ip_address,
               user_agent,
-              created_at
+              downloaded_at
             FROM download_logs 
             WHERE file_id = $1
-            ORDER BY created_at DESC
+            ORDER BY downloaded_at DESC
             LIMIT 50
           `, [fileId])
         ]);
@@ -343,7 +343,7 @@ export function registerAnalyticsRoutes(app: Express) {
             downloadDuration: download.download_duration,
             ipAddress: download.ip_address,
             userAgent: download.user_agent,
-            timestamp: download.created_at
+            timestamp: download.downloaded_at
           }))
         };
 
