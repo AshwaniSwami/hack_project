@@ -7,15 +7,20 @@ import { useAuth } from "@/hooks/useAuth";
 export default function Dashboard() {
   const { user } = useAuth();
 
-  // For NGO content platform, show public dashboard for non-authenticated users
-  // and role-specific dashboards for authenticated users
-  const renderDashboard = () => {
-    if (!user) {
-      // Public NGO content dashboard for visitors
-      return <MemberDashboard />;
-    }
+  // Show loading if user data is not available yet
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
-    // Role-specific dashboards for authenticated users
+  // Render role-specific dashboard
+  const renderDashboard = () => {
     switch (user.role) {
       case 'admin':
         return <AdminDashboard />;

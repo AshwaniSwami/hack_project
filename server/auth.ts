@@ -35,7 +35,7 @@ export const isAuthenticated = async (req: AuthenticatedRequest, res: Response, 
   console.log("isAuthenticated middleware - session:", req.session);
   console.log("isAuthenticated middleware - sessionId:", req.sessionID);
   console.log("isAuthenticated middleware - userId:", (req.session as any)?.userId);
-
+  
   if (req.session && (req.session as any).userId) {
     try {
       // Check if database is available
@@ -134,7 +134,7 @@ export const isAdmin = async (req: AuthenticatedRequest, res: Response, next: Ne
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
-
+    
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password are required" });
     }
@@ -164,7 +164,7 @@ export const login = async (req: Request, res: Response) => {
     // Get all users and find by email (since we don't have email-specific query)
     const users = await storage.getAllUsers();
     const user = users.find(u => u.email === email);
-
+    
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
@@ -181,7 +181,7 @@ export const login = async (req: Request, res: Response) => {
 
     // Check password
     const isValid = user.password ? await bcrypt.compare(password, user.password) : false;
-
+    
     if (!isValid) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
@@ -195,7 +195,7 @@ export const login = async (req: Request, res: Response) => {
     // Store user ID in session
     (req.session as any).userId = user.id;
     console.log("Login successful - stored userId in session:", user.id, "sessionID:", req.sessionID);
-
+    
     res.json({
       success: true,
       user: {
@@ -216,7 +216,7 @@ export const login = async (req: Request, res: Response) => {
 export const register = async (req: Request, res: Response) => {
   try {
     const { email, password, firstName, lastName } = req.body;
-
+    
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password are required" });
     }
@@ -224,18 +224,18 @@ export const register = async (req: Request, res: Response) => {
     // Check if user already exists
     const users = await storage.getAllUsers();
     const existingUser = users.find(u => u.email === email);
-
+    
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-
+    
     // Determine role - first user is admin, rest are members
     const isFirstUser = users.length === 0;
     const role = isFirstUser ? 'admin' : 'member';
-
+    
     // First user (admin) is auto-verified, others need verification
     const isVerified = isFirstUser;
 
@@ -269,7 +269,7 @@ export const register = async (req: Request, res: Response) => {
         "high"
       );
     }
-
+    
     res.json({
       success: true,
       user: {
@@ -279,8 +279,8 @@ export const register = async (req: Request, res: Response) => {
         lastName: newUser.lastName,
         role: newUser.role,
       },
-      message: isFirstUser
-        ? "Welcome! Your admin account has been created successfully."
+      message: isFirstUser 
+        ? "Welcome! Your admin account has been created successfully." 
         : "Account created successfully! Please wait for admin verification before you can log in."
     });
   } catch (error) {
@@ -304,8 +304,7 @@ export const getCurrentUser = async (req: AuthenticatedRequest, res: Response) =
   try {
     const userId = (req.session as any).userId;
     console.log("Session check - userId:", userId, "sessionID:", req.sessionID);
-    console.log("Database availability:", isDatabaseAvailable());
-
+    
     if (!userId) {
       console.log("No userId in session");
       return res.status(401).json({ message: "Not authenticated" });
