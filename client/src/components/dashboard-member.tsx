@@ -36,8 +36,7 @@ import {
   Download,
   Share2,
   FileText,
-  User,
-  Gift
+  User
 } from "lucide-react";
 import type { Script, Project, Episode } from "@shared/schema";
 import { useAuth } from "@/hooks/useAuth";

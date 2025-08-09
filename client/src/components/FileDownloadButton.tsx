@@ -71,7 +71,16 @@ export function FileDownloadButton({
       
     } catch (error) {
       console.error("Download error:", error);
-      alert("Failed to download file. Please try again.");
+      let errorMessage = "Failed to download file. Please try again.";
+      
+      // More detailed error handling
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        errorMessage = "Network error: Unable to connect to server. Please check your connection.";
+      } else if (error instanceof Error) {
+        errorMessage = `Download failed: ${error.message}`;
+      }
+      
+      alert(errorMessage);
     } finally {
       setIsDownloading(false);
     }

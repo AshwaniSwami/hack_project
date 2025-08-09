@@ -102,12 +102,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register analytics and download tracking routes
   const { registerAnalyticsRoutes } = await import("./routes-analytics");
-  const { registerDownloadTrackingRoutes } = await import("./routes-download-tracking");
+  const { registerDownloadRoutes } = await import("./routes-download-fixed");
   const { registerProjectAnalyticsRoutes } = await import("./routes-projects-analytics");
   const { registerScriptAnalyticsRoutes } = await import("./routes-script-analytics");
   const { registerEpisodeAnalyticsRoutes } = await import("./routes-episodes-analytics");
   registerAnalyticsRoutes(app);
-  registerDownloadTrackingRoutes(app);
+  registerDownloadRoutes(app);
 
   // Register onboarding routes
   const { 

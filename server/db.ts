@@ -55,6 +55,7 @@ function getPool() {
   return pool;
 }
 
+// Export the getter functions directly
 export { getPool as pool, getDb as db, getDb };
 
 let dbAvailable: boolean | null = null;
