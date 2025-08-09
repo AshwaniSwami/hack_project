@@ -1,11 +1,22 @@
 import { Express, Request, Response } from "express";
 import { eq, sql } from "drizzle-orm";
-import { db } from "./db";
 import { files, downloadLogs } from "@shared/schema";
 import { isAuthenticated, type AuthenticatedRequest } from "./auth";
 import { getFilePermissions } from "./filePermissions";
-
 import { fileCache } from "./simple-cache";
+
+// Get database connection dynamically
+async function getDatabase() {
+  try {
+    const { db } = await import("./db");
+    // Call the function to get the actual database instance
+    const database = typeof db === 'function' ? db() : db;
+    return database;
+  } catch (error) {
+    console.error("Failed to get database connection:", error);
+    return null;
+  }
+}
 
 function getCachedFile(fileId: string): Buffer | null {
   return fileCache.get(fileId);
@@ -24,11 +35,7 @@ export function registerDownloadRoutes(app: Express) {
     const { fileId } = req.params;
     
     try {
-      // Check if user is authenticated
-      const authModule = await import("./routes");
-      const isAuthenticatedMiddleware = authModule.isAuthenticated;
-      
-      // For temporary auth, we'll check session directly
+      // Check if user is authenticated via session
       if (!req.session || !req.session.userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
@@ -41,7 +48,7 @@ export function registerDownloadRoutes(app: Express) {
 
       if (!fileBuffer) {
         // Get file record from database
-        const database = db;
+        const database = await getDatabase();
         if (!database) {
           return res.status(500).json({ error: "Database not available" });
         }
@@ -75,7 +82,7 @@ export function registerDownloadRoutes(app: Express) {
       } else {
         console.log(`[DOWNLOAD] Cache hit for ${fileId} (${fileBuffer.length} bytes)`);
         // Still need file record for metadata
-        const database = db;
+        const database = await getDatabase();
         const fileResults = await database
           .select({
             id: files.id,
@@ -104,7 +111,7 @@ export function registerDownloadRoutes(app: Express) {
       // Log download asynchronously (don't wait)
       setImmediate(async () => {
         try {
-          const database = db;
+          const database = await getDatabase();
           if (database) {
             const clientIp = req.ip || req.connection?.remoteAddress || 'unknown';
             const userAgent = req.get('User-Agent') || 'unknown';
