@@ -101,12 +101,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register notification routes
   registerNotificationRoutes(app);
 
-  // Register SIMPLE analytics and download routes with REAL DATA
+  // Register WORKING analytics and download routes with REAL DATA
   const { registerAnalyticsRoutes } = await import("./routes-simple-analytics");
   const { registerDownloadRoutes } = await import("./routes-simple-download");
-  const { registerProjectAnalyticsRoutes } = await import("./routes-projects-analytics");
-  // const { registerScriptAnalyticsRoutes } = await import("./routes-script-analytics");
-  const { registerEpisodeAnalyticsRoutes } = await import("./routes-episodes-analytics");
   registerAnalyticsRoutes(app);
   registerDownloadRoutes(app);
 
@@ -124,9 +121,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/onboarding/submit", isAuthenticated, submitOnboardingForm);
   app.get("/api/onboarding/analytics", isAuthenticated, getOnboardingAnalytics);
   app.get("/api/onboarding/status", isAuthenticated, checkOnboardingStatus);
-  registerProjectAnalyticsRoutes(app);
-  // registerScriptAnalyticsRoutes(app); // Disabled to fix server issues
-  registerEpisodeAnalyticsRoutes(app);
 
   // Auth routes
   app.post('/api/auth/login', login);
