@@ -27,13 +27,13 @@ function initializeDatabase() {
       // Configure connection pool specifically for Supabase
       pool = new Pool({ 
         connectionString: process.env.DATABASE_URL,
-        ssl: { 
+        ssl: process.env.DATABASE_URL.includes('supabase.com') ? { 
           rejectUnauthorized: false 
-        },
-        max: 10,                    // Reasonable pool size
+        } : false,
+        max: 5,                     // Reduced pool size for Supabase
         min: 1,                     // Keep at least one connection
         idleTimeoutMillis: 30000,   // 30 seconds idle timeout
-        connectionTimeoutMillis: 10000,  // 10 second connection timeout
+        connectionTimeoutMillis: 15000,  // 15 second connection timeout
         statement_timeout: 30000,   // 30 second query timeout
         query_timeout: 30000,       // 30 second query timeout
         allowExitOnIdle: true       // Allow process to exit
@@ -46,7 +46,10 @@ function initializeDatabase() {
         console.error("❌ Database pool test failed:", err.message);
       });
       
-      db = drizzle(pool, { schema });
+      db = drizzle(pool, { 
+        schema,
+        logger: false // Disable query logging for production
+      });
       console.log("✅ Database connected successfully");
     } catch (error) {
       console.error("❌ Database connection failed:", error);

@@ -36,7 +36,6 @@ import {
   type InsertNotification,
 } from "@shared/schema";
 import { db as getDb, isDatabaseAvailable, requireDatabase } from "./db";
-import { Pool } from '@neondatabase/serverless';
 import { eq, desc, and, sql, like, or, asc } from "drizzle-orm";
 
 export interface IStorage {
@@ -912,11 +911,8 @@ export async function initializeStorage() {
     const dbInstance = getDb();
     if (dbInstance) {
       try {
-        // Test with a simple query first
-        const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-        await pool.query('SELECT 1');
-        await pool.end();
-
+        // Test the database connection directly
+        await dbInstance.execute(sql`SELECT 1 as test`);
         console.log("✅ Database connection verified");
         storage = new DatabaseStorage();
       } catch (error) {
