@@ -132,7 +132,7 @@ export function AnalyticsPage() {
   const { data: episodeStats, isLoading: episodesLoading } = useEpisodesAnalytics();
   const { data: scriptStats, isLoading: scriptsLoading } = useScriptsAnalytics();
   const { data: userStats, isLoading: usersLoading2 } = useUsersAnalytics();
-  const { data: fileStats2, isLoading: filesLoading2 } = useFilesAnalytics();
+  const { data: fileStats2, isLoading: filesLoading } = useFilesAnalytics();
 
   return (
     <div className="container mx-auto px-6 py-8 max-w-7xl">
@@ -457,12 +457,12 @@ export function AnalyticsPage() {
                           <FolderOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div>
-                          <p className="font-medium">{project.title || 'Unknown Project'}</p>
+                          <p className="font-medium">{project.projectName || 'Unknown Project'}</p>
                           <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <span>{project.fileCount || 0} files</span>
+                            <span>{project.filesCount || 0} files</span>
                             <span>•</span>
                             <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                              ID: {project.id?.slice(-8)}
+                              ID: {project.projectId?.slice(-8)}
                             </span>
                           </div>
                         </div>
@@ -470,7 +470,7 @@ export function AnalyticsPage() {
                       <div className="text-right">
                         <p className="font-semibold">{project.downloadCount || 0} downloads</p>
                         <div className="flex items-center gap-2 text-sm text-gray-500">
-                          <span>{formatBytes(project.totalSize || 0)}</span>
+                          <span>{formatBytes(project.totalDataDownloaded || 0)}</span>
                           <span>•</span>
                           <span>{project.uniqueDownloaders || 0} users</span>
                         </div>
@@ -1157,7 +1157,7 @@ export function AnalyticsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {filesLoading2 ? (
+              {filesLoading ? (
                 <div className="text-center py-8 text-gray-500">Loading...</div>
               ) : !fileStats2 || fileStats2.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">No files found</div>
