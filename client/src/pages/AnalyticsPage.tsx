@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useRealTimeAnalytics, useAnalyticsQuery } from "@/hooks/useRealTimeAnalytics";
+import { 
+  useRealTimeAnalytics, 
+  useAnalyticsQuery, 
+  useProjectsAnalytics,
+  useEpisodesAnalytics,
+  useScriptsAnalytics,
+  useUsersAnalytics,
+  useFilesAnalytics
+} from "@/hooks/useRealTimeAnalytics";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -119,29 +127,12 @@ export function AnalyticsPage() {
     }
   );
 
-  // File Statistics Query with real-time updates
-  const { data: fileStats, isLoading: filesLoading } = useAnalyticsQuery(
-    "/api/analytics/downloads/files",
-    { limit: "20" }
-  );
-
-  // Project Analytics Query with real-time updates
-  const { data: projectStats, isLoading: projectsLoading } = useAnalyticsQuery(
-    "/api/analytics/projects",
-    { timeframe }
-  );
-
-  // Script Analytics Query with real-time updates
-  const { data: scriptStats, isLoading: scriptsLoading } = useAnalyticsQuery(
-    "/api/analytics/scripts",
-    { timeframe }
-  );
-
-  // Episode Analytics Query with real-time updates
-  const { data: episodeStats, isLoading: episodesLoading } = useAnalyticsQuery(
-    "/api/analytics/episodes",
-    { timeframe }
-  );
+  // Analytics hooks for different sections
+  const { data: projectStats, isLoading: projectsLoading } = useProjectsAnalytics();
+  const { data: episodeStats, isLoading: episodesLoading } = useEpisodesAnalytics();
+  const { data: scriptStats, isLoading: scriptsLoading } = useScriptsAnalytics();
+  const { data: userStats, isLoading: usersLoading2 } = useUsersAnalytics();
+  const { data: fileStats2, isLoading: filesLoading2 } = useFilesAnalytics();
 
   return (
     <div className="container mx-auto px-6 py-8 max-w-7xl">

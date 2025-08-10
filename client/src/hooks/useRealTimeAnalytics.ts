@@ -63,3 +63,24 @@ export function useAnalyticsQuery<T>(
     },
   });
 }
+
+// Custom hooks for the different analytics sections
+export const useProjectsAnalytics = () => {
+  return useAnalyticsQuery('/api/analytics/projects', {}, { refetchInterval: 30000 });
+};
+
+export const useEpisodesAnalytics = () => {
+  return useAnalyticsQuery('/api/analytics/episodes', {}, { refetchInterval: 30000 });
+};
+
+export const useScriptsAnalytics = () => {
+  return useAnalyticsQuery('/api/analytics/scripts', {}, { refetchInterval: 30000 });
+};
+
+export const useUsersAnalytics = () => {
+  return useAnalyticsQuery('/api/analytics/users', {}, { refetchInterval: 30000 });
+};
+
+export const useFilesAnalytics = () => {
+  return useAnalyticsQuery('/api/analytics/files', {}, { refetchInterval: 30000 });
+};

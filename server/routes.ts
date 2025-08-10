@@ -104,8 +104,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register FIXED analytics and download routes with REAL DATABASE DATA
   const { registerAnalyticsRoutes } = await import("./routes-analytics-fixed");
   const { registerDownloadRoutes } = await import("./routes-simple-download");
+  const { registerCompleteAnalyticsRoutes } = await import("./routes-analytics-complete");
   registerAnalyticsRoutes(app);
   registerDownloadRoutes(app);
+  registerCompleteAnalyticsRoutes(app);
 
   // Register simple theme and project routes that work with real database
   const { registerThemeRoutes } = await import("./simple-theme-routes");
