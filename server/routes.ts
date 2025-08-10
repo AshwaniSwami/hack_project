@@ -107,6 +107,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerAnalyticsRoutes(app);
   registerDownloadRoutes(app);
 
+  // Register simple theme and project routes that work with real database
+  const { registerThemeRoutes } = await import("./simple-theme-routes");
+  registerThemeRoutes(app);
+
   // Register onboarding routes
   const { 
     getCurrentFormConfig, 

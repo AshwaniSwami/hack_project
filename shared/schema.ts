@@ -64,6 +64,9 @@ export const otpVerifications = pgTable("otp_verifications", {
 export const themes = pgTable("themes", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name", { length: 255 }).notNull().unique(),
+  description: text("description"),
+  colorHex: varchar("color_hex", { length: 7 }).notNull().default("#3B82F6"), // Hex color for theme
+  isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -72,6 +75,7 @@ export const themes = pgTable("themes", {
 export const projects = pgTable("projects", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
   themeId: uuid("theme_id"), // Reference to theme
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
