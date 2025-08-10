@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  useRealTimeAnalytics,
-  useAnalyticsQuery,
+import { 
+  useRealTimeAnalytics, 
+  useAnalyticsQuery, 
   useProjectsAnalytics,
   useEpisodesAnalytics,
   useScriptsAnalytics,
@@ -31,7 +31,6 @@ interface DownloadOverview {
     entityType: string;
     downloadCount: number;
     totalSize: number;
-    entityId?: string;
   }>;
   downloadsByDay: Array<{
     date: string;
@@ -78,18 +77,6 @@ interface DownloadLog {
   downloadedAt: string;
 }
 
-interface FileDownload {
-  id: string;
-  filename: string;
-  originalName: string;
-  entityType: string;
-  downloadCount: number;
-  uniqueDownloaders: number;
-  totalSize: number;
-  lastDownload: string | null;
-  entityId?: string;
-}
-
 function formatBytes(bytes: number): string {
   if (!bytes) return "0 Bytes";
   const k = 1024;
@@ -118,7 +105,7 @@ export function AnalyticsPage() {
 
   // Download Overview Query with real-time updates
   const { data: overview, isLoading: overviewLoading } = useAnalyticsQuery<DownloadOverview>(
-    "/api/analytics/downloads/overview",
+    "/api/analytics/downloads/overview", 
     { timeframe }
   );
 
@@ -144,17 +131,8 @@ export function AnalyticsPage() {
   const { data: projectStats, isLoading: projectsLoading } = useProjectsAnalytics();
   const { data: episodeStats, isLoading: episodesLoading } = useEpisodesAnalytics();
   const { data: scriptStats, isLoading: scriptsLoading } = useScriptsAnalytics();
-  const { data: userAnalytics, isLoading: usersLoading } = useQuery({
-    queryKey: ["/api/analytics/users"],
-    queryFn: () => apiRequest("GET", "/api/analytics/users"),
-  });
-
-  const { data: fileAnalytics, isLoading: filesLoading } = useQuery({
-    queryKey: ["/api/analytics/files"],
-    queryFn: () => apiRequest("GET", "/api/analytics/files"),
-  });
-
-  const isLoading = projectsLoading || scriptsLoading || episodesLoading || usersLoading || filesLoading;
+  const { data: userStats, isLoading: usersLoading2 } = useUsersAnalytics();
+  const { data: fileStats2, isLoading: filesLoading2 } = useFilesAnalytics();
 
   return (
     <div className="container mx-auto px-6 py-8 max-w-7xl">
@@ -187,7 +165,7 @@ export function AnalyticsPage() {
               <SelectItem value="90d">Last 90 Days</SelectItem>
             </SelectContent>
           </Select>
-
+          
           <Button
             onClick={refreshAnalytics}
             variant="outline"
@@ -198,7 +176,7 @@ export function AnalyticsPage() {
             Refresh Data
           </Button>
         </div>
-
+        
         <div className="text-sm text-gray-500 dark:text-gray-400">
           Last updated: {format(new Date(lastUpdate), "HH:mm:ss")}
         </div>
@@ -213,7 +191,6 @@ export function AnalyticsPage() {
           <TabsTrigger value="scripts">Scripts</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="files">Files</TabsTrigger>
-          <TabsTrigger value="logs">Logs</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
@@ -256,7 +233,7 @@ export function AnalyticsPage() {
                 <Database className="h-4 w-4 text-purple-600 dark:text-purple-400" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-purple-900 dark:text-blue-100">
+                <div className="text-2xl font-bold text-purple-900 dark:text-purple-100">
                   {overviewLoading ? "..." : formatBytes(overview?.totalDataDownloaded || 0)}
                 </div>
               </CardContent>
@@ -356,7 +333,7 @@ export function AnalyticsPage() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
                       <YAxis />
-                      <Tooltip
+                      <Tooltip 
                         formatter={(value, name) => [
                           name === 'count' ? `${value} downloads` : `${value} users`,
                           name === 'count' ? 'Downloads' : 'Unique Users'
@@ -392,8 +369,8 @@ export function AnalyticsPage() {
                           data={overview?.downloadsByType?.map((item: any) => ({
                             name: item.entityType,
                             value: item.count,
-                            fill: item.entityType === 'projects' ? '#3B82F6' :
-                                 item.entityType === 'episodes' ? '#10B981' :
+                            fill: item.entityType === 'projects' ? '#3B82F6' : 
+                                 item.entityType === 'episodes' ? '#10B981' : 
                                  item.entityType === 'scripts' ? '#F59E0B' : '#EF4444'
                           })) || []}
                           cx="50%"
@@ -404,8 +381,8 @@ export function AnalyticsPage() {
                         >
                           {overview?.downloadsByType?.map((entry: any, index: number) => (
                             <Cell key={`cell-${index}`} fill={
-                              entry.entityType === 'projects' ? '#3B82F6' :
-                              entry.entityType === 'episodes' ? '#10B981' :
+                              entry.entityType === 'projects' ? '#3B82F6' : 
+                              entry.entityType === 'episodes' ? '#10B981' : 
                               entry.entityType === 'scripts' ? '#F59E0B' : '#EF4444'
                             } />
                           ))}
@@ -436,7 +413,7 @@ export function AnalyticsPage() {
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="hour" tickFormatter={(hour) => `${hour}:00`} />
                         <YAxis />
-                        <Tooltip
+                        <Tooltip 
                           formatter={(value) => [`${value} downloads`, 'Downloads']}
                           labelFormatter={(hour) => `Time: ${hour}:00`}
                         />
@@ -480,12 +457,12 @@ export function AnalyticsPage() {
                           <FolderOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div>
-                          <p className="font-medium">{project.projectName || 'Unknown Project'}</p>
+                          <p className="font-medium">{project.title || 'Unknown Project'}</p>
                           <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <span>{project.filesCount || 0} files</span>
+                            <span>{project.fileCount || 0} files</span>
                             <span>•</span>
                             <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                              ID: {project.projectId?.slice(-8)}
+                              ID: {project.id?.slice(-8)}
                             </span>
                           </div>
                         </div>
@@ -493,7 +470,7 @@ export function AnalyticsPage() {
                       <div className="text-right">
                         <p className="font-semibold">{project.downloadCount || 0} downloads</p>
                         <div className="flex items-center gap-2 text-sm text-gray-500">
-                          <span>{formatBytes(project.totalDataDownloaded || 0)}</span>
+                          <span>{formatBytes(project.totalSize || 0)}</span>
                           <span>•</span>
                           <span>{project.uniqueDownloaders || 0} users</span>
                         </div>
@@ -527,16 +504,16 @@ export function AnalyticsPage() {
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={projectStats}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis
-                          dataKey="projectName"
-                          angle={-45}
-                          textAnchor="end"
+                        <XAxis 
+                          dataKey="projectName" 
+                          angle={-45} 
+                          textAnchor="end" 
                           height={100}
                           interval={0}
                           fontSize={12}
                         />
                         <YAxis fontSize={12} />
-                        <Tooltip
+                        <Tooltip 
                           formatter={(value, name) => [
                             `${value} ${name === 'downloadCount' ? 'downloads' : name === 'uniqueDownloaders' ? 'users' : 'files'}`,
                             name === 'downloadCount' ? 'Downloads' : name === 'uniqueDownloaders' ? 'Unique Users' : 'Files'
@@ -593,7 +570,7 @@ export function AnalyticsPage() {
                             ][index % 10]} />
                           ))}
                         </Pie>
-                        <Tooltip
+                        <Tooltip 
                           formatter={(value) => [`${value} downloads`, 'Downloads']}
                           contentStyle={{
                             backgroundColor: '#f8fafc',
@@ -711,7 +688,7 @@ export function AnalyticsPage() {
                           ][index % 8]} />
                         ))}
                       </Pie>
-                      <Tooltip
+                      <Tooltip 
                         formatter={(value) => [`${value} downloads`, 'Downloads']}
                         contentStyle={{
                           backgroundColor: '#f8fafc',
@@ -743,16 +720,16 @@ export function AnalyticsPage() {
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={episodeStats.episodeDownloadsByProject}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis
-                          dataKey="projectName"
-                          angle={-45}
-                          textAnchor="end"
+                        <XAxis 
+                          dataKey="projectName" 
+                          angle={-45} 
+                          textAnchor="end" 
                           height={100}
                           interval={0}
                           fontSize={12}
                         />
                         <YAxis fontSize={12} />
-                        <Tooltip
+                        <Tooltip 
                           formatter={(value, name) => [
                             `${value} ${name === 'downloadCount' ? 'downloads' : name === 'episodeCount' ? 'episodes' : 'users'}`,
                             name === 'downloadCount' ? 'Downloads' : name === 'episodeCount' ? 'Episodes' : 'Unique Users'
@@ -807,7 +784,7 @@ export function AnalyticsPage() {
                             ][index % 10]} />
                           ))}
                         </Pie>
-                        <Tooltip
+                        <Tooltip 
                           formatter={(value) => [`${value} downloads`, 'Downloads']}
                           contentStyle={{
                             backgroundColor: '#f8fafc',
@@ -856,7 +833,7 @@ export function AnalyticsPage() {
                     const percentage = ((project.downloadCount || 0) / maxDownloads) * 100;
                     const colors = [
                       'from-blue-500 to-blue-600',
-                      'from-purple-500 to-purple-600',
+                      'from-purple-500 to-purple-600', 
                       'from-indigo-500 to-indigo-600',
                       'from-teal-500 to-teal-600',
                       'from-emerald-500 to-emerald-600'
@@ -868,17 +845,17 @@ export function AnalyticsPage() {
                       'from-teal-50 to-teal-100 dark:from-teal-950/30 dark:to-teal-900/30',
                       'from-emerald-50 to-emerald-100 dark:from-emerald-950/30 dark:to-emerald-900/30'
                     ];
-
+                    
                     return (
                       <div
                         key={project.projectId}
                         className={`relative p-5 bg-gradient-to-r ${bgColors[index % bgColors.length]} rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200`}
                       >
                         {/* Progress bar background */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-xl"
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-xl" 
                              style={{ width: `${Math.max(percentage, 10)}%` }}>
                         </div>
-
+                        
                         <div className="relative flex items-center justify-between">
                           <div className="flex items-center gap-4">
                             <div className={`p-3 bg-gradient-to-br ${colors[index % colors.length]} rounded-lg shadow-md`}>
@@ -945,16 +922,16 @@ export function AnalyticsPage() {
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={scriptStats.scriptDownloadsByProject}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis
-                          dataKey="projectName"
-                          angle={-45}
-                          textAnchor="end"
+                        <XAxis 
+                          dataKey="projectName" 
+                          angle={-45} 
+                          textAnchor="end" 
                           height={100}
                           interval={0}
                           fontSize={12}
                         />
                         <YAxis fontSize={12} />
-                        <Tooltip
+                        <Tooltip 
                           formatter={(value, name) => [
                             `${value} ${name === 'downloadCount' ? 'downloads' : 'scripts'}`,
                             name === 'downloadCount' ? 'Script Downloads' : 'Total Scripts'
@@ -1011,7 +988,7 @@ export function AnalyticsPage() {
                             ][index % 10]} />
                           ))}
                         </Pie>
-                        <Tooltip
+                        <Tooltip 
                           formatter={(value) => [`${value} downloads`, 'Downloads']}
                           contentStyle={{
                             backgroundColor: '#f8fafc',
@@ -1059,7 +1036,7 @@ export function AnalyticsPage() {
                       { bg: 'from-teal-500/10 to-teal-600/10', text: 'text-teal-700 dark:text-teal-300', border: 'border-teal-200 dark:border-teal-800' }
                     ];
                     const colorScheme = projectColors[index % projectColors.length];
-
+                    
                     return (
                       <div
                         key={script.scriptId}
@@ -1180,13 +1157,13 @@ export function AnalyticsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {filesLoading ? (
+              {filesLoading2 ? (
                 <div className="text-center py-8 text-gray-500">Loading...</div>
-              ) : !fileAnalytics || fileAnalytics.length === 0 ? (
+              ) : !fileStats2 || fileStats2.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">No files found</div>
               ) : (
                 <div className="space-y-3">
-                  {fileAnalytics.map((file: FileDownload) => (
+                  {fileStats2.map((file: any) => (
                     <div
                       key={file.id}
                       className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
@@ -1237,8 +1214,8 @@ export function AnalyticsPage() {
                 Detailed log of all download activities
               </CardDescription>
               <div className="flex gap-4 pt-4">
-                <Select
-                  value={logFilters.entityType}
+                <Select 
+                  value={logFilters.entityType} 
                   onValueChange={(value) => setLogFilters(prev => ({ ...prev, entityType: value }))}
                 >
                   <SelectTrigger className="w-48">
@@ -1251,9 +1228,9 @@ export function AnalyticsPage() {
                     <SelectItem value="scripts">Scripts</SelectItem>
                   </SelectContent>
                 </Select>
-
-                <Select
-                  value={logFilters.status}
+                
+                <Select 
+                  value={logFilters.status} 
                   onValueChange={(value) => setLogFilters(prev => ({ ...prev, status: value }))}
                 >
                   <SelectTrigger className="w-48">
@@ -1281,8 +1258,8 @@ export function AnalyticsPage() {
                       className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
                     >
                       <div className="flex items-center gap-3">
-                        <Badge
-                          variant={log.downloadStatus === 'completed' ? 'default' :
+                        <Badge 
+                          variant={log.downloadStatus === 'completed' ? 'default' : 
                                    log.downloadStatus === 'failed' ? 'destructive' : 'secondary'}
                           className="w-20 justify-center"
                         >

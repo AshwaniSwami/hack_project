@@ -58,25 +58,9 @@ app.use((req, res, next) => {
     const { initializeStorage } = await import("./storage");
     await initializeStorage();
 
-    // Import route modules
+    // Register all routes using the main registerRoutes function
     const { registerRoutes } = await import("./routes");
-    const { registerOptimizedDownloadRoutes } = await import("./routes-download-optimized");
-    const { registerOnboardingRoutes } = await import("./routes-onboarding-fixed");
-    const { registerNotificationRoutes } = await import("./routes-notifications");
-    const { registerAnalyticsRoutes } = await import("./routes-analytics");
-    const { registerUserManagementRoutes } = await import("./routes-user-management");
-    const { setupViteDevServer } = await import("./vite");
-
-    // Register all routes
-    registerOptimizedDownloadRoutes(app);
-    registerOnboardingRoutes(app);
-    registerNotificationRoutes(app);
-    registerUserManagementRoutes(app);
-    await registerRoutes(app);
-
-    // Register analytics routes
-    registerAnalyticsRoutes(app);
-
+    const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -90,14 +74,7 @@ app.use((req, res, next) => {
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
   if (app.get("env") === "development") {
-    const viteDevServer = await setupViteDevServer(app);
-    const server = viteDevServer.listen(); // Ensure server is assigned from viteDevServer
-
-    // IMPORTANT: Vite's dev server needs to be the one listening
-    // so we don't call app.listen() here.
-    // We will return this server instance from the registerRoutes function.
-    // The main server instance needs to be returned so we can listen on it.
-    return server; // Return the server instance from viteDevServer
+    await setupVite(app, server);
   } else {
     serveStatic(app);
   }
@@ -106,14 +83,7 @@ app.use((req, res, next) => {
     // this serves both the API and the client.
     // It is the only port that is not firewalled.
     const port = 5000;
-    // The server instance from viteDevServer should be used if in development
-    // Otherwise, create a new server instance.
-    const serverInstance = app.get("env") === "development"
-        ? await setupViteDevServer(app).then(vite => vite.listen())
-        : await import("http").then(({ createServer }) => createServer(app));
-
-
-    serverInstance.listen(port, "0.0.0.0", () => {
+    server.listen(port, "0.0.0.0", () => {
       log(`serving on port ${port}`);
     });
   } catch (error) {
@@ -121,3 +91,4 @@ app.use((req, res, next) => {
     process.exit(1);
   }
 })();
+

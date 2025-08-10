@@ -460,7 +460,12 @@ export function registerAnalyticsRoutes(app: Express) {
       
       const database = db;
       if (!database) {
-        return res.json([]);
+        return res.json({
+          timeframe,
+          startDate: new Date(),
+          endDate: new Date(),
+          projects: []
+        });
       }
       
       // Calculate date range
@@ -578,10 +583,20 @@ export function registerAnalyticsRoutes(app: Express) {
           }
         }
 
-        res.json(projectStats.sort((a, b) => b.downloadCount - a.downloadCount));
+        res.json({
+          timeframe,
+          startDate,
+          endDate: now,
+          projects: projectStats.sort((a, b) => b.downloadCount - a.downloadCount)
+        });
       } catch (dbError) {
         console.error("Database error for project analytics:", dbError);
-        res.json([]);
+        res.json({
+          timeframe,
+          startDate,
+          endDate: now,
+          projects: []
+        });
       }
 
     } catch (error) {
@@ -598,6 +613,9 @@ export function registerAnalyticsRoutes(app: Express) {
       const database = db;
       if (!database) {
         return res.json({
+          timeframe,
+          startDate: new Date(),
+          endDate: new Date(),
           episodes: [],
           episodeDownloadsByProject: []
         });
@@ -673,12 +691,18 @@ export function registerAnalyticsRoutes(app: Express) {
           .orderBy(desc(count(downloadLogs.id)));
 
         res.json({
-          episodes: episodeStats,
-          episodeDownloadsByProject
+          timeframe,
+          startDate,
+          endDate: now,
+          episodeDownloadsByProject,
+          episodes: episodeStats
         });
       } catch (dbError) {
         console.error("Database error for episode analytics:", dbError);
         res.json({
+          timeframe,
+          startDate,
+          endDate: now,
           episodes: [],
           episodeDownloadsByProject: []
         });
@@ -698,6 +722,9 @@ export function registerAnalyticsRoutes(app: Express) {
       const database = db;
       if (!database) {
         return res.json({
+          timeframe,
+          startDate: new Date(),
+          endDate: new Date(),
           scripts: [],
           scriptDownloadsByProject: []
         });
@@ -769,12 +796,18 @@ export function registerAnalyticsRoutes(app: Express) {
           .orderBy(desc(count(downloadLogs.id)));
 
         res.json({
-          scripts: scriptStats,
-          scriptDownloadsByProject
+          timeframe,
+          startDate,
+          endDate: now,
+          scriptDownloadsByProject,
+          scripts: scriptStats
         });
       } catch (dbError) {
         console.error("Database error for script analytics:", dbError);
         res.json({
+          timeframe,
+          startDate,
+          endDate: now,
           scripts: [],
           scriptDownloadsByProject: []
         });
