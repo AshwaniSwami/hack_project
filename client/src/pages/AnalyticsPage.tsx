@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useRealTimeAnalytics, useAnalyticsQuery } from "@/hooks/useRealTimeAnalytics";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -91,85 +92,56 @@ export function AnalyticsPage() {
     page: 1
   });
 
-  // Download Overview Query
-  const { data: overview, isLoading: overviewLoading } = useQuery<DownloadOverview>({
-    queryKey: ["/api/analytics/downloads/overview", timeframe],
-    queryFn: async () => {
-      const response = await fetch(`/api/analytics/downloads/overview?timeframe=${timeframe}`);
-      if (!response.ok) throw new Error("Failed to fetch download overview");
-      return response.json();
-    },
-  });
+  // Real-time analytics with auto-refresh
+  const { lastUpdate, refreshAnalytics } = useRealTimeAnalytics(timeframe, 30000);
 
-  // User Downloads Query
-  const { data: userDownloads, isLoading: usersLoading } = useQuery({
-    queryKey: ["/api/analytics/downloads/users", timeframe, userSearchTerm],
-    queryFn: async () => {
-      const response = await fetch(
-        `/api/analytics/downloads/users?timeframe=${timeframe}&search=${encodeURIComponent(userSearchTerm)}&limit=50`
-      );
-      if (!response.ok) throw new Error("Failed to fetch user downloads");
-      return response.json();
-    },
-  });
+  // Download Overview Query with real-time updates
+  const { data: overview, isLoading: overviewLoading } = useAnalyticsQuery<DownloadOverview>(
+    "/api/analytics/downloads/overview", 
+    { timeframe }
+  );
 
-  // Download Logs Query
-  const { data: downloadLogs, isLoading: logsLoading } = useQuery({
-    queryKey: ["/api/analytics/downloads/logs", timeframe, logFilters],
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        timeframe,
-        entityType: logFilters.entityType,
-        status: logFilters.status,
-        page: logFilters.page.toString(),
-        limit: "50"
-      });
-      
-      const response = await fetch(`/api/analytics/downloads/logs?${params}`);
-      if (!response.ok) throw new Error("Failed to fetch download logs");
-      return response.json();
-    },
-  });
+  // User Downloads Query with real-time updates
+  const { data: userDownloads, isLoading: usersLoading } = useAnalyticsQuery(
+    "/api/analytics/downloads/users",
+    { timeframe, search: userSearchTerm, limit: "50" }
+  );
 
-  // File Statistics Query
-  const { data: fileStats, isLoading: filesLoading } = useQuery({
-    queryKey: ["/api/analytics/downloads/files"],
-    queryFn: async () => {
-      const response = await fetch("/api/analytics/downloads/files?limit=20");
-      if (!response.ok) throw new Error("Failed to fetch file statistics");
-      return response.json();
-    },
-  });
+  // Download Logs Query with real-time updates
+  const { data: downloadLogs, isLoading: logsLoading } = useAnalyticsQuery(
+    "/api/analytics/downloads/logs",
+    {
+      timeframe,
+      entityType: logFilters.entityType,
+      status: logFilters.status,
+      page: logFilters.page.toString(),
+      limit: "50"
+    }
+  );
 
-  // Project Analytics Query
-  const { data: projectStats, isLoading: projectsLoading } = useQuery({
-    queryKey: ["/api/analytics/projects", timeframe],
-    queryFn: async () => {
-      const response = await fetch(`/api/analytics/projects?timeframe=${timeframe}`);
-      if (!response.ok) throw new Error("Failed to fetch project analytics");
-      return response.json();
-    },
-  });
+  // File Statistics Query with real-time updates
+  const { data: fileStats, isLoading: filesLoading } = useAnalyticsQuery(
+    "/api/analytics/downloads/files",
+    { limit: "20" }
+  );
 
-  // Script Analytics Query
-  const { data: scriptStats, isLoading: scriptsLoading } = useQuery({
-    queryKey: ["/api/analytics/scripts", timeframe],
-    queryFn: async () => {
-      const response = await fetch(`/api/analytics/scripts?timeframe=${timeframe}`);
-      if (!response.ok) throw new Error("Failed to fetch script analytics");
-      return response.json();
-    },
-  });
+  // Project Analytics Query with real-time updates
+  const { data: projectStats, isLoading: projectsLoading } = useAnalyticsQuery(
+    "/api/analytics/projects",
+    { timeframe }
+  );
 
-  // Episode Analytics Query
-  const { data: episodeStats, isLoading: episodesLoading } = useQuery({
-    queryKey: ["/api/analytics/episodes", timeframe],
-    queryFn: async () => {
-      const response = await fetch(`/api/analytics/episodes?timeframe=${timeframe}`);
-      if (!response.ok) throw new Error("Failed to fetch episode analytics");
-      return response.json();
-    },
-  });
+  // Script Analytics Query with real-time updates
+  const { data: scriptStats, isLoading: scriptsLoading } = useAnalyticsQuery(
+    "/api/analytics/scripts",
+    { timeframe }
+  );
+
+  // Episode Analytics Query with real-time updates
+  const { data: episodeStats, isLoading: episodesLoading } = useAnalyticsQuery(
+    "/api/analytics/episodes",
+    { timeframe }
+  );
 
   return (
     <div className="container mx-auto px-6 py-8 max-w-7xl">
@@ -188,19 +160,35 @@ export function AnalyticsPage() {
         </p>
       </div>
 
-      {/* Time Range Selector */}
-      <div className="mb-6">
-        <Select value={timeframe} onValueChange={setTimeframe}>
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Select timeframe" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="24h">Last 24 Hours</SelectItem>
-            <SelectItem value="7d">Last 7 Days</SelectItem>
-            <SelectItem value="30d">Last 30 Days</SelectItem>
-            <SelectItem value="90d">Last 90 Days</SelectItem>
-          </SelectContent>
-        </Select>
+      {/* Time Range Selector and Controls */}
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Select value={timeframe} onValueChange={setTimeframe}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Select timeframe" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="24h">Last 24 Hours</SelectItem>
+              <SelectItem value="7d">Last 7 Days</SelectItem>
+              <SelectItem value="30d">Last 30 Days</SelectItem>
+              <SelectItem value="90d">Last 90 Days</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Button
+            onClick={refreshAnalytics}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <Clock className="h-4 w-4" />
+            Refresh Data
+          </Button>
+        </div>
+        
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          Last updated: {format(new Date(lastUpdate), "HH:mm:ss")}
+        </div>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">

@@ -138,6 +138,11 @@ export interface IStorage {
   getUnreadNotifications(userId: string): Promise<Notification[]>;
   markNotificationAsRead(id: string): Promise<Notification>;
   markAllNotificationsAsRead(userId: string): Promise<void>;
+
+  // User Management
+  getUserById(id: string): Promise<User | undefined>;
+  updateUserRole(id: string, role: string): Promise<void>;
+  cleanupDownloadLogs(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -756,6 +761,33 @@ export class DatabaseStorage implements IStorage {
       .set({ isRead: true, readAt: new Date() })
       .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
   }
+
+  // User Management Methods
+  async getUserById(id: string): Promise<User | undefined> {
+    return this.getUser(id);
+  }
+
+  async updateUserRole(id: string, role: string): Promise<void> {
+    const dbInstance = requireDatabase();
+    await dbInstance
+      .update(users)
+      .set({ role: role as any, updatedAt: new Date() })
+      .where(eq(users.id, id));
+  }
+
+  async cleanupDownloadLogs(): Promise<void> {
+    const dbInstance = requireDatabase();
+    // Update download logs with correct user information from users table
+    await dbInstance.execute(sql`
+      UPDATE download_logs 
+      SET user_email = u.email, 
+          user_name = COALESCE(u.first_name || ' ' || u.last_name, u.username, u.email),
+          user_role = u.role
+      FROM users u 
+      WHERE download_logs.user_id = u.id 
+      AND (download_logs.user_email = 'temp-user@example.com' OR download_logs.user_email != u.email)
+    `);
+  }
 }
 
 export class FallbackStorage implements IStorage {
@@ -1034,6 +1066,11 @@ export class FallbackStorage implements IStorage {
   async getUnreadNotifications(userId: string): Promise<Notification[]> { return []; }
   async markNotificationAsRead(id: string): Promise<Notification> { return this.throwDatabaseError(); }
   async markAllNotificationsAsRead(userId: string): Promise<void> { return this.throwDatabaseError(); }
+
+  // User Management (fallback mode doesn't support these operations)
+  async getUserById(id: string): Promise<User | undefined> { return this.getUser(id); }
+  async updateUserRole(id: string, role: string): Promise<void> { return this.throwDatabaseError(); }
+  async cleanupDownloadLogs(): Promise<void> { return this.throwDatabaseError(); }
 }
 
 // Storage will be initialized after database check

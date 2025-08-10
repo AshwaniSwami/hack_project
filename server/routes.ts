@@ -111,6 +111,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const { registerThemeRoutes } = await import("./simple-theme-routes");
   registerThemeRoutes(app);
 
+  // Register user management routes for admin functionality
+  const { registerUserManagementRoutes } = await import("./routes-user-management");
+  registerUserManagementRoutes(app);
+
   // Register onboarding routes
   const { 
     getCurrentFormConfig, 
