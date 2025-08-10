@@ -770,11 +770,11 @@ export class FallbackStorage implements IStorage {
       role: "admin",
       isActive: true,
       profileImageUrl: null,
-      isEmailVerified: true,
-      verificationToken: null,
-      resetToken: null,
-      resetTokenExpiry: null,
+      isVerified: true,
       loginCount: 0,
+      firstLoginCompleted: true,
+      location: null,
+      onboardingResponses: null,
       lastLoginAt: new Date(),
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -888,7 +888,7 @@ export class FallbackStorage implements IStorage {
   async updateNotification(id: string, notification: Partial<InsertNotification>): Promise<Notification> { return this.throwDatabaseError(); }
   async deleteNotification(id: string): Promise<void> { return this.throwDatabaseError(); }
   async getUserNotifications(userId: string): Promise<Notification[]> { return this.throwDatabaseError(); }
-  async getUnreadNotifications(userId: string): Promise<Notification[]> { return this.throwDatabaseError(); }
+  async getUnreadNotifications(userId: string): Promise<Notification[]> { return []; }
   async markNotificationAsRead(id: string): Promise<Notification> { return this.throwDatabaseError(); }
   async markAllNotificationsAsRead(userId: string): Promise<void> { return this.throwDatabaseError(); }
 }
