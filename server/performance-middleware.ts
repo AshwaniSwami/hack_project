@@ -53,19 +53,3 @@ export function performanceHeaders() {
     next();
   };
 }
-
-export function performanceMiddleware(req: Request, res: Response, next: NextFunction) {
-  // Combine all performance middleware
-  const startTime = Date.now();
-  
-  res.setHeader('X-Response-Time', startTime.toString());
-  res.setHeader('Cache-Control', 'public, max-age=300');
-  
-  // Log response time when request completes
-  res.on('finish', () => {
-    const duration = Date.now() - startTime;
-    console.log(`${req.method} ${req.path} - ${res.statusCode} - ${duration}ms`);
-  });
-  
-  next();
-}

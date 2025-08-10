@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "NODE_ENV=development tsx server/index.ts",
-    "build": "vite build && esbuild server/index.ts --platform=node --bundle --format=cjs --outdir=dist --external:pg-native --external:sharp --external:canvas",
+    "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc",
     "db:push": "drizzle-kit push"
@@ -44,8 +44,6 @@
     "@tanstack/react-query": "^5.60.5",
     "@types/bcryptjs": "^2.4.6",
     "@types/compression": "^1.8.1",
-    "@types/cookie-parser": "^1.4.9",
-    "@types/cors": "^2.8.19",
     "@types/lru-cache": "^7.10.9",
     "@types/memoizee": "^0.4.12",
     "@types/multer": "^1.4.13",
@@ -56,8 +54,6 @@
     "cmdk": "^1.1.1",
     "compression": "^1.8.1",
     "connect-pg-simple": "^10.0.0",
-    "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
     "date-fns": "^3.6.0",
     "dotenv": "^17.2.0",
     "drizzle-orm": "^0.39.1",
