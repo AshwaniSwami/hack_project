@@ -3,13 +3,6 @@ dotenv.config();
 
 import express, { type Request, Response, NextFunction } from "express";
 import compression from "compression";
-// import { registerAuthRoutes } from "./routes-auth"; // Removed as per troubleshooting
-import { registerStorageRoutes } from "./storage";
-import { registerOnboardingRoutes } from "./routes-onboarding";
-import { registerDownloadTrackingRoutes } from "./routes-download-tracking";
-import { registerNotificationRoutes } from "./routes-notifications";
-import { registerAnalyticsRoutes } from "./routes-analytics";
-import { registerThemeRoutes } from "./simple-theme-routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
@@ -65,14 +58,9 @@ app.use((req, res, next) => {
     const { initializeStorage } = await import("./storage");
     await initializeStorage();
 
-    // Register all routes
-    // registerAuthRoutes(app); // Removed as per troubleshooting
-    registerStorageRoutes(app);
-    registerOnboardingRoutes(app);
-    registerDownloadTrackingRoutes(app);
-    registerNotificationRoutes(app);
-    registerAnalyticsRoutes(app);
-    registerThemeRoutes(app);
+    // Register all routes using the main registerRoutes function
+    const { registerRoutes } = await import("./routes");
+    const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -95,11 +83,7 @@ app.use((req, res, next) => {
     // this serves both the API and the client.
     // It is the only port that is not firewalled.
     const port = 5000;
-    server.listen({
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    }, () => {
+    server.listen(port, "0.0.0.0", () => {
       log(`serving on port ${port}`);
     });
   } catch (error) {
@@ -108,12 +92,3 @@ app.use((req, res, next) => {
   }
 })();
 
-// This is a placeholder for the server variable which is not defined in the provided snippet.
-// In a real scenario, 'server' would be obtained from a call like `const server = await registerRoutes(app);`
-// For the sake of providing a complete file, we'll define a dummy server object.
-const server = {
-  listen: (options: any, callback: () => void) => {
-    callback();
-    return { close: () => {} };
-  }
-};
