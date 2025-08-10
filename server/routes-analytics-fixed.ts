@@ -1,6 +1,6 @@
 import { Express, Request, Response } from "express";
 import { eq, desc, and, gte, sql, count, sum } from "drizzle-orm";
-import { db } from "./db";
+import { db as getDb, requireDatabase } from "./db";
 import { downloadLogs, files, users, projects, episodes, scripts } from "@shared/schema";
 import { isAuthenticated, type AuthenticatedRequest } from "./auth";
 
@@ -32,6 +32,8 @@ export function registerAnalyticsRoutes(app: Express) {
       }
 
       try {
+        const db = requireDatabase();
+        
         // Get total downloads in timeframe
         const totalDownloadsResult = await db
           .select({ count: count() })
@@ -154,6 +156,7 @@ export function registerAnalyticsRoutes(app: Express) {
       }
 
       try {
+        const db = requireDatabase();
         let query = db
           .select({
             userId: downloadLogs.userId,
@@ -220,6 +223,7 @@ export function registerAnalyticsRoutes(app: Express) {
           whereConditions.push(eq(downloadLogs.downloadStatus, status as string));
         }
 
+        const db = requireDatabase();
         const logs = await db
           .select({
             id: downloadLogs.id,
@@ -295,6 +299,7 @@ export function registerAnalyticsRoutes(app: Express) {
       }
 
       try {
+        const db = requireDatabase();
         const fileAnalytics = await db
           .select({
             fileId: files.id,
@@ -335,6 +340,7 @@ export function registerAnalyticsRoutes(app: Express) {
   app.get("/api/analytics/entities", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
       try {
+        const db = requireDatabase();
         // Get projects with file and download counts
         const projectStats = await db
           .select({
