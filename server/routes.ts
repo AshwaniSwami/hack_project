@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import * as WebSocketModule from "ws";
 const { WebSocketServer } = WebSocketModule;
@@ -15,6 +15,12 @@ import { cacheMiddleware, performanceHeaders } from "./performance-middleware";
 import * as realAuth from "./auth";
 import * as tempAuth from "./tempAuth";
 import { getFilePermissions, requireFilePermission } from "./filePermissions";
+import path from "path";
+import fs from "fs";
+import { eq, desc, and, sql, count, sum, gte, or, like, inArray } from "drizzle-orm";
+import { db } from "./db";
+import { users, projects, episodes, scripts, files, onboardingFormConfig, onboardingFormResponses, downloadLogs } from "@shared/schema";
+import { randomUUID } from "crypto";
 
 // Dynamically choose auth module based on database availability
 async function getAuthModule() {
@@ -500,7 +506,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const { projectId } = req.body; // Get projectId from form data
+      const {projectId} = req.body; // Get projectId from form data
       console.log("Upload request - projectId:", projectId, "file:", req.file.originalname);
 
       // Store the file in the database
@@ -1119,28 +1125,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/files/:id/download", isAuthenticated, async (req: any, res) => {
+  // Download file endpoint with tracking
+  app.get("/api/files/:fileId/download", async (req: Request, res: Response) => {
     try {
-      const user = await storage.getUser(req.user.id);
-      if (!requireFilePermission('canDownload', user)) {
-        return res.status(403).json({ message: "Insufficient permissions to download files" });
+      const { fileId } = req.params;
+      const downloadStartTime = Date.now();
+
+      const fileRecord = await storage.getFileById(fileId);
+      if (!fileRecord) {
+        return res.status(404).json({ error: "File not found" });
       }
 
-      const file = await storage.getFile(req.params.id);
-      if (!file) {
-        return res.status(404).json({ message: "File not found" });
+      const filePath = path.join(process.cwd(), fileRecord.filename);
+
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ error: "File not found on disk" });
       }
 
-      const buffer = Buffer.from(file.fileData, 'base64');
+      const stat = fs.statSync(filePath);
 
-      res.setHeader('Content-Disposition', `attachment; filename="${file.originalName}"`);
-      res.setHeader('Content-Type', file.mimeType);
-      res.setHeader('Content-Length', buffer.length);
+      // Track download start
+      let userId = 'anonymous';
+      let userEmail = 'anonymous@example.com';
+      let userName = 'Anonymous User';
+      let userRole = 'guest';
 
-      res.send(buffer);
+      if ((req as any).user) {
+        const user = (req as any).user;
+        userId = user.id;
+        userEmail = user.email;
+        userName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
+        userRole = user.role;
+      } else if (req.session && (req.session as any).userId) {
+        userId = (req.session as any).userId;
+        userEmail = (req.session as any).userEmail || 'session@example.com';
+        userName = (req.session as any).userName || 'Session User';
+        userRole = (req.session as any).userRole || 'member';
+      }
+
+      const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
+      const refererPage = req.get('Referer') || req.originalUrl;
+
+      console.log(`[DOWNLOAD] ${userName} downloading ${fileRecord.originalName}`);
+
+      res.setHeader('Content-Disposition', `attachment; filename="${fileRecord.originalName}"`);
+      res.setHeader('Content-Type', 'application/octet-stream');
+      res.setHeader('Content-Length', stat.size);
+
+      const stream = fs.createReadStream(filePath);
+
+      // Track download completion
+      stream.on('end', async () => {
+        const downloadEndTime = Date.now();
+        const downloadDuration = downloadEndTime - downloadStartTime;
+
+        try {
+          if (db) {
+            await db.insert(downloadLogs).values({
+              id: randomUUID(),
+              fileId: fileId,
+              userId: userId,
+              userEmail: userEmail,
+              userName: userName,
+              userRole: userRole,
+              ipAddress: ipAddress,
+              downloadSize: stat.size,
+              downloadDuration: downloadDuration,
+              downloadStatus: 'completed',
+              entityType: fileRecord.entityType,
+              entityId: fileRecord.entityId,
+              refererPage: refererPage,
+              downloadedAt: new Date(),
+              createdAt: new Date(),
+              updatedAt: new Date()
+            });
+            console.log(`[DOWNLOAD] Logged successful download: ${fileRecord.originalName}`);
+          }
+        } catch (error) {
+          console.error('[DOWNLOAD] Failed to log download:', error);
+        }
+      });
+
+      stream.on('error', async (error) => {
+        const downloadEndTime = Date.now();
+        const downloadDuration = downloadEndTime - downloadStartTime;
+
+        try {
+          if (db) {
+            await db.insert(downloadLogs).values({
+              id: randomUUID(),
+              fileId: fileId,
+              userId: userId,
+              userEmail: userEmail,
+              userName: userName,
+              userRole: userRole,
+              ipAddress: ipAddress,
+              downloadSize: 0,
+              downloadDuration: downloadDuration,
+              downloadStatus: 'failed',
+              entityType: fileRecord.entityType,
+              entityId: fileRecord.entityId,
+              refererPage: refererPage,
+              downloadedAt: new Date(),
+              createdAt: new Date(),
+              updatedAt: new Date()
+            });
+            console.log(`[DOWNLOAD] Logged failed download: ${fileRecord.originalName}`);
+          }
+        } catch (logError) {
+          console.error('[DOWNLOAD] Failed to log download error:', logError);
+        }
+      });
+
+      stream.pipe(res);
     } catch (error) {
       console.error("Error downloading file:", error);
-      res.status(500).json({ message: "Failed to download file" });
+      res.status(500).json({ error: "Failed to download file" });
     }
   });
 

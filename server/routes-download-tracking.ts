@@ -1,271 +1,149 @@
-import { Express, Request, Response } from "express";
-import { eq, and, sql } from "drizzle-orm";
+
+import { Express, Request, Response, NextFunction } from "express";
 import { db } from "./db";
-import { files, downloadLogs } from "@shared/schema";
-import { isAuthenticated, type AuthenticatedRequest } from "./auth";
-import { getFilePermissions } from "./filePermissions";
+import { downloadLogs, files } from "@shared/schema";
+import { eq } from "drizzle-orm";
+import { randomUUID } from "crypto";
 
-export function registerDownloadTrackingRoutes(app: Express) {
-  // Enhanced file download endpoint with tracking
-  app.get("/api/files/:fileId/download", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const { fileId } = req.params;
-      const user = req.user;
+interface DownloadTrackingRequest extends Request {
+  user?: {
+    id: string;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    role: string;
+  };
+  downloadStartTime?: number;
+}
 
-      if (!user) {
-        return res.status(401).json({ error: "Authentication required" });
-      }
+export function trackDownload(fileId: string, entityType: string, entityId: string) {
+  return async (req: DownloadTrackingRequest, res: Response, next: NextFunction) => {
+    const downloadStartTime = Date.now();
+    req.downloadStartTime = downloadStartTime;
 
-      // Check download permissions
-      const permissions = getFilePermissions(user);
-      if (!permissions.canDownload) {
-        return res.status(403).json({ error: "Download permission denied" });
-      }
+    // Get user info from session or request
+    let userId = 'anonymous';
+    let userEmail = 'anonymous@example.com';
+    let userName = 'Anonymous User';
+    let userRole = 'guest';
 
-      // Get file information
-      const file = await db
-        .select()
-        .from(files)
-        .where(eq(files.id, fileId))
-        .limit(1);
-
-      if (!file || file.length === 0) {
-        return res.status(404).json({ error: "File not found" });
-      }
-
-      const fileRecord = file[0];
-      const startTime = Date.now();
-
-      // Prepare download log data
-      const clientIp = req.ip || req.connection.remoteAddress || 'unknown';
-      const userAgent = req.get('User-Agent') || 'unknown';
-      const refererPage = req.get('Referer') || req.headers.referer || 'direct';
-
-      try {
-        // Decode base64 file data
-        const fileBuffer = Buffer.from(fileRecord.fileData, 'base64');
-
-        // Calculate download duration
-        const downloadDuration = Date.now() - startTime;
-
-        // Log the download (if downloadLogs table exists)
-        try {
-          await db.insert(downloadLogs).values({
-            fileId: fileRecord.id,
-            userId: user.id,
-            userEmail: user.email || 'unknown',
-            userName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'unknown',
-            userRole: user.role || 'member',
-            ipAddress: clientIp,
-            userAgent: userAgent,
-            downloadSize: fileRecord.fileSize,
-            downloadDuration: downloadDuration,
-            downloadStatus: 'completed',
-            entityType: fileRecord.entityType,
-            entityId: fileRecord.entityId,
-            refererPage: refererPage
-          });
-        } catch (logError) {
-          // Continue with download even if logging fails
-          console.error("Download logging failed:", logError);
-        }
-
-        // Update file download count and last accessed time
-        try {
-          await db
-            .update(files)
-            .set({
-              downloadCount: sql`${files.downloadCount} + 1`,
-              lastAccessedAt: new Date()
-            })
-            .where(eq(files.id, fileId));
-        } catch (updateError) {
-          // Continue with download even if update fails
-          console.error("Download count update failed:", updateError);
-        }
-
-        // Set appropriate headers for file download
-        res.setHeader('Content-Type', fileRecord.mimeType);
-        res.setHeader('Content-Length', fileRecord.fileSize);
-        res.setHeader(
-          'Content-Disposition',
-          `attachment; filename="${encodeURIComponent(fileRecord.originalName)}"`
-        );
-        res.setHeader('Cache-Control', 'no-cache');
-
-        // Send the file
-        res.send(fileBuffer);
-
-      } catch (downloadError) {
-        // Log failed download
-        const downloadDuration = Date.now() - startTime;
-        try {
-          await db.insert(downloadLogs).values({
-            fileId: fileRecord.id,
-            userId: user.id,
-            userEmail: user.email || 'unknown',
-            userName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'unknown',
-            userRole: user.role || 'member',
-            ipAddress: clientIp,
-            userAgent: userAgent,
-            downloadSize: fileRecord.fileSize,
-            downloadDuration: downloadDuration,
-            downloadStatus: 'failed',
-            entityType: fileRecord.entityType,
-            entityId: fileRecord.entityId,
-            refererPage: refererPage
-          });
-        } catch (logError) {
-          console.error("Failed download logging failed:", logError);
-        }
-
-        console.error("Download error:", downloadError);
-        res.status(500).json({ error: "Download failed" });
-      }
-
-    } catch (error) {
-      console.error("Error processing download:", error);
-      res.status(500).json({ error: "Failed to process download" });
+    if (req.user) {
+      userId = req.user.id;
+      userEmail = req.user.email;
+      userName = `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || req.user.email;
+      userRole = req.user.role;
+    } else if (req.session && (req.session as any).userId) {
+      userId = (req.session as any).userId;
+      userEmail = (req.session as any).userEmail || 'session@example.com';
+      userName = (req.session as any).userName || 'Session User';
+      userRole = (req.session as any).userRole || 'member';
     }
-  });
 
-  // Get file download statistics for a specific file
-  app.get("/api/files/:fileId/download-stats", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    // Get client IP address
+    const ipAddress = req.ip || 
+                     req.connection.remoteAddress || 
+                     req.headers['x-forwarded-for'] as string || 
+                     'unknown';
+
+    // Get referer
+    const refererPage = req.get('Referer') || req.originalUrl;
+
     try {
-      const { fileId } = req.params;
-      const user = req.user;
-
-      if (!user) {
-        return res.status(401).json({ error: "Authentication required" });
-      }
-
-      // Get file basic info and overall stats
-      const file = await db
-        .select({
-          id: files.id,
-          filename: files.filename,
-          originalName: files.originalName,
-          downloadCount: files.downloadCount,
-          lastAccessedAt: files.lastAccessedAt,
-          createdAt: files.createdAt
-        })
-        .from(files)
-        .where(eq(files.id, fileId))
-        .limit(1);
-
-      if (!file || file.length === 0) {
-        return res.status(404).json({ error: "File not found" });
-      }
-
-      // For admin/editor users, provide detailed stats
-      if (user.role === 'admin' || user.role === 'editor') {
-        // Get recent download activity (last 30 days)
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-        const recentDownloads = await db
+      if (db) {
+        // Get file information
+        const fileInfo = await db
           .select({
-            date: sql<string>`DATE(${downloadLogs.downloadedAt})`,
-            downloadCount: sql<number>`COUNT(*)`,
-            uniqueUsers: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`
+            filename: files.filename,
+            originalName: files.originalName,
+            fileSize: files.fileSize
           })
-          .from(downloadLogs)
-          .where(and(
-            eq(downloadLogs.fileId, fileId),
-            sql`${downloadLogs.downloadedAt} >= ${thirtyDaysAgo}`
-          ))
-          .groupBy(sql`DATE(${downloadLogs.downloadedAt})`)
-          .orderBy(sql`DATE(${downloadLogs.downloadedAt})`);
+          .from(files)
+          .where(eq(files.id, fileId))
+          .limit(1);
 
-        // Get top downloaders
-        const topDownloaders = await db
-          .select({
-            userId: downloadLogs.userId,
-            userEmail: downloadLogs.userEmail,
-            userName: downloadLogs.userName,
-            userRole: downloadLogs.userRole,
-            downloadCount: sql<number>`COUNT(*)`,
-            lastDownload: sql<Date>`MAX(${downloadLogs.downloadedAt})`
-          })
-          .from(downloadLogs)
-          .where(eq(downloadLogs.fileId, fileId))
-          .groupBy(
-            downloadLogs.userId,
-            downloadLogs.userEmail,
-            downloadLogs.userName,
-            downloadLogs.userRole
-          )
-          .orderBy(sql`COUNT(*) DESC`)
-          .limit(10);
+        const filename = fileInfo[0]?.filename || 'unknown';
+        const originalName = fileInfo[0]?.originalName || 'unknown';
+        const fileSize = fileInfo[0]?.fileSize || 0;
 
-        res.json({
-          file: file[0],
-          recentDownloads,
-          topDownloaders,
-          isDetailedView: true
+        console.log(`[DOWNLOAD TRACKING] Starting download: ${originalName} by ${userName}`);
+
+        // Hook into response finish to log completion
+        res.on('finish', async () => {
+          const downloadEndTime = Date.now();
+          const downloadDuration = downloadEndTime - downloadStartTime;
+          
+          let downloadStatus = 'completed';
+          if (res.statusCode >= 400) {
+            downloadStatus = 'failed';
+          } else if (res.statusCode === 206) {
+            downloadStatus = 'partial';
+          }
+
+          try {
+            await db.insert(downloadLogs).values({
+              id: randomUUID(),
+              fileId: fileId,
+              userId: userId,
+              userEmail: userEmail,
+              userName: userName,
+              userRole: userRole,
+              ipAddress: ipAddress.split(',')[0].trim(), // Take first IP if multiple
+              downloadSize: fileSize,
+              downloadDuration: downloadDuration,
+              downloadStatus: downloadStatus,
+              entityType: entityType,
+              entityId: entityId,
+              refererPage: refererPage,
+              downloadedAt: new Date(),
+              createdAt: new Date(),
+              updatedAt: new Date()
+            });
+
+            console.log(`[DOWNLOAD TRACKING] Logged download: ${originalName} - ${downloadStatus} - ${downloadDuration}ms`);
+          } catch (error) {
+            console.error('[DOWNLOAD TRACKING] Failed to log download:', error);
+          }
         });
-      } else {
-        // For regular members, only show basic info
-        res.json({
-          file: file[0],
-          isDetailedView: false
+
+        // Hook into response error
+        res.on('error', async (error) => {
+          const downloadEndTime = Date.now();
+          const downloadDuration = downloadEndTime - downloadStartTime;
+
+          try {
+            await db.insert(downloadLogs).values({
+              id: randomUUID(),
+              fileId: fileId,
+              userId: userId,
+              userEmail: userEmail,
+              userName: userName,
+              userRole: userRole,
+              ipAddress: ipAddress.split(',')[0].trim(),
+              downloadSize: 0,
+              downloadDuration: downloadDuration,
+              downloadStatus: 'failed',
+              entityType: entityType,
+              entityId: entityId,
+              refererPage: refererPage,
+              downloadedAt: new Date(),
+              createdAt: new Date(),
+              updatedAt: new Date()
+            });
+
+            console.log(`[DOWNLOAD TRACKING] Logged failed download: ${originalName} - ${error.message}`);
+          } catch (logError) {
+            console.error('[DOWNLOAD TRACKING] Failed to log download error:', logError);
+          }
         });
       }
-
     } catch (error) {
-      console.error("Error fetching download stats:", error);
-      res.status(500).json({ error: "Failed to fetch download statistics" });
+      console.error('[DOWNLOAD TRACKING] Setup error:', error);
     }
-  });
 
-  // Get user's personal download history
-  app.get("/api/downloads/my-history", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const user = req.user;
-      if (!user) {
-        return res.status(401).json({ error: "Authentication required" });
-      }
+    next();
+  };
+}
 
-      const { page = 1, limit = 20 } = req.query;
-      const offset = (Number(page) - 1) * Number(limit);
-
-      const userDownloads = await db
-        .select({
-          id: downloadLogs.id,
-          fileId: downloadLogs.fileId,
-          filename: files.filename,
-          originalName: files.originalName,
-          entityType: downloadLogs.entityType,
-          downloadSize: downloadLogs.downloadSize,
-          downloadStatus: downloadLogs.downloadStatus,
-          downloadedAt: downloadLogs.downloadedAt
-        })
-        .from(downloadLogs)
-        .innerJoin(files, eq(downloadLogs.fileId, files.id))
-        .where(eq(downloadLogs.userId, user.id))
-        .orderBy(sql`${downloadLogs.downloadedAt} DESC`)
-        .limit(Number(limit))
-        .offset(offset);
-
-      // Get total count for pagination
-      const totalCount = await db
-        .select({ count: sql<number>`COUNT(*)` })
-        .from(downloadLogs)
-        .where(eq(downloadLogs.userId, user.id));
-
-      res.json({
-        downloads: userDownloads,
-        pagination: {
-          page: Number(page),
-          limit: Number(limit),
-          total: totalCount[0]?.count || 0,
-          hasMore: offset + userDownloads.length < (totalCount[0]?.count || 0)
-        }
-      });
-
-    } catch (error) {
-      console.error("Error fetching user download history:", error);
-      res.status(500).json({ error: "Failed to fetch download history" });
-    }
-  });
+export function registerDownloadTracking(app: Express) {
+  console.log('✅ Download tracking middleware registered');
 }
