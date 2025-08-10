@@ -191,3 +191,13 @@ export async function checkOnboardingStatus(req: any, res: any) {
     res.status(500).json({ error: "Failed to check onboarding status" });
   }
 }
+
+export function registerOnboardingRoutes(app: any) {
+  const { authenticateUser } = require("./auth");
+  
+  app.get("/api/onboarding/form-config", getCurrentFormConfig);
+  app.post("/api/onboarding/form-config", authenticateUser, updateFormConfig);
+  app.post("/api/onboarding/submit", authenticateUser, submitOnboardingForm);
+  app.get("/api/onboarding/analytics", authenticateUser, getOnboardingAnalytics);
+  app.get("/api/onboarding/status", authenticateUser, checkOnboardingStatus);
+}

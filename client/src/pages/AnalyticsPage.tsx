@@ -144,8 +144,17 @@ export function AnalyticsPage() {
   const { data: projectStats, isLoading: projectsLoading } = useProjectsAnalytics();
   const { data: episodeStats, isLoading: episodesLoading } = useEpisodesAnalytics();
   const { data: scriptStats, isLoading: scriptsLoading } = useScriptsAnalytics();
-  const { data: userStats, isLoading: usersLoading2 } = useUsersAnalytics();
-  const { data: fileStats2, isLoading: filesLoading } = useFilesAnalytics();
+  const { data: userAnalytics, isLoading: usersLoading } = useQuery({
+    queryKey: ["/api/analytics/users"],
+    queryFn: () => apiRequest("GET", "/api/analytics/users"),
+  });
+
+  const { data: fileAnalytics, isLoading: filesLoading } = useQuery({
+    queryKey: ["/api/analytics/files"],
+    queryFn: () => apiRequest("GET", "/api/analytics/files"),
+  });
+
+  const isLoading = projectsLoading || scriptsLoading || episodesLoading || usersLoading || filesLoading;
 
   return (
     <div className="container mx-auto px-6 py-8 max-w-7xl">
@@ -1173,11 +1182,11 @@ export function AnalyticsPage() {
             <CardContent>
               {filesLoading ? (
                 <div className="text-center py-8 text-gray-500">Loading...</div>
-              ) : !fileStats2 || fileStats2.length === 0 ? (
+              ) : !fileAnalytics || fileAnalytics.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">No files found</div>
               ) : (
                 <div className="space-y-3">
-                  {fileStats2.map((file: FileDownload) => (
+                  {fileAnalytics.map((file: FileDownload) => (
                     <div
                       key={file.id}
                       className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
