@@ -60,28 +60,22 @@ app.use((req, res, next) => {
 
     // Import route modules
     const { registerRoutes } = await import("./routes");
-    const { registerDownloadRoutes } = await import("./routes-download-optimized");
+    const { registerOptimizedDownloadRoutes } = await import("./routes-download-optimized");
     const { registerOnboardingRoutes } = await import("./routes-onboarding-fixed");
     const { registerNotificationRoutes } = await import("./routes-notifications");
     const { registerAnalyticsRoutes } = await import("./routes-analytics");
     const { registerUserManagementRoutes } = await import("./routes-user-management");
     const { setupViteDevServer } = await import("./vite");
-    const { registerProjectAnalyticsRoutes } = await import("./routes-projects-analytics");
-    const { registerEpisodeAnalyticsRoutes } = await import("./routes-episodes-analytics");
-    const { registerScriptAnalyticsRoutes } = await import("./routes-script-analytics");
 
     // Register all routes
-    app.use("/api/download", await registerDownloadRoutes());
-    app.use("/api/onboarding", await registerOnboardingRoutes());
-    app.use("/api/notifications", await registerNotificationRoutes());
-    app.use("/api/user-management", await registerUserManagementRoutes());
-    app.use("/api", await registerRoutes());
+    registerOptimizedDownloadRoutes(app);
+    registerOnboardingRoutes(app);
+    registerNotificationRoutes(app);
+    registerUserManagementRoutes(app);
+    await registerRoutes(app);
 
-    // Register enhanced analytics routes
-    app.use("/api/analytics", await registerAnalyticsRoutes());
-    app.use("/api/projects-analytics", await registerProjectAnalyticsRoutes());
-    app.use("/api/episodes-analytics", await registerEpisodeAnalyticsRoutes());
-    app.use("/api/script-analytics", await registerScriptAnalyticsRoutes());
+    // Register analytics routes
+    registerAnalyticsRoutes(app);
 
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
