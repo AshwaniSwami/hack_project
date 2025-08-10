@@ -19,11 +19,11 @@ export function registerCompleteAnalyticsRoutes(app: Express) {
           themeId: projects.themeId,
           createdAt: projects.createdAt,
           updatedAt: projects.updatedAt,
-          fileCount: sql<number>`COUNT(DISTINCT ${files.id})`,
-          downloadCount: sql<number>`COUNT(DISTINCT ${downloadLogs.id})`,
-          totalSize: sql<number>`COALESCE(SUM(${downloadLogs.downloadSize}), 0)`,
-          uniqueDownloaders: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`,
-          lastDownload: sql<string>`MAX(${downloadLogs.downloadedAt})`
+          fileCount: sql<number>`COUNT(DISTINCT ${files.id})`.as('fileCount'),
+          downloadCount: sql<number>`COUNT(DISTINCT ${downloadLogs.id})`.as('downloadCount'),
+          totalSize: sql<number>`COALESCE(SUM(${downloadLogs.downloadSize}), 0)`.as('totalSize'),
+          uniqueDownloaders: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`.as('uniqueDownloaders'),
+          lastDownload: sql<string>`MAX(${downloadLogs.downloadedAt})`.as('lastDownload')
         })
         .from(projects)
         .leftJoin(files, and(
@@ -31,7 +31,7 @@ export function registerCompleteAnalyticsRoutes(app: Express) {
           eq(files.entityId, projects.id)
         ))
         .leftJoin(downloadLogs, eq(downloadLogs.fileId, files.id))
-        .groupBy(projects.id, projects.title, projects.description, projects.themeId, projects.createdAt, projects.updatedAt)
+        .groupBy(projects.id)
         .orderBy(desc(sql<number>`COUNT(DISTINCT ${downloadLogs.id})`));
 
       res.json(projectAnalytics || []);
@@ -56,11 +56,11 @@ export function registerCompleteAnalyticsRoutes(app: Express) {
           duration: episodes.duration,
           createdAt: episodes.createdAt,
           updatedAt: episodes.updatedAt,
-          fileCount: sql<number>`COUNT(DISTINCT ${files.id})`,
-          downloadCount: sql<number>`COUNT(DISTINCT ${downloadLogs.id})`,
-          totalSize: sql<number>`COALESCE(SUM(${downloadLogs.downloadSize}), 0)`,
-          uniqueDownloaders: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`,
-          lastDownload: sql<string>`MAX(${downloadLogs.downloadedAt})`
+          fileCount: sql<number>`COUNT(DISTINCT ${files.id})`.as('fileCount'),
+          downloadCount: sql<number>`COUNT(DISTINCT ${downloadLogs.id})`.as('downloadCount'),
+          totalSize: sql<number>`COALESCE(SUM(${downloadLogs.downloadSize}), 0)`.as('totalSize'),
+          uniqueDownloaders: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`.as('uniqueDownloaders'),
+          lastDownload: sql<string>`MAX(${downloadLogs.downloadedAt})`.as('lastDownload')
         })
         .from(episodes)
         .leftJoin(files, and(
@@ -68,7 +68,7 @@ export function registerCompleteAnalyticsRoutes(app: Express) {
           eq(files.entityId, episodes.id)
         ))
         .leftJoin(downloadLogs, eq(downloadLogs.fileId, files.id))
-        .groupBy(episodes.id, episodes.title, episodes.description, episodes.projectId, episodes.duration, episodes.createdAt, episodes.updatedAt)
+        .groupBy(episodes.id)
         .orderBy(desc(sql<number>`COUNT(DISTINCT ${downloadLogs.id})`));
 
       res.json(episodeAnalytics || []);
@@ -94,11 +94,11 @@ export function registerCompleteAnalyticsRoutes(app: Express) {
           content: scripts.content,
           createdAt: scripts.createdAt,
           updatedAt: scripts.updatedAt,
-          fileCount: sql<number>`COUNT(DISTINCT ${files.id})`,
-          downloadCount: sql<number>`COUNT(DISTINCT ${downloadLogs.id})`,
-          totalSize: sql<number>`COALESCE(SUM(${downloadLogs.downloadSize}), 0)`,
-          uniqueDownloaders: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`,
-          lastDownload: sql<string>`MAX(${downloadLogs.downloadedAt})`
+          fileCount: sql<number>`COUNT(DISTINCT ${files.id})`.as('fileCount'),
+          downloadCount: sql<number>`COUNT(DISTINCT ${downloadLogs.id})`.as('downloadCount'),
+          totalSize: sql<number>`COALESCE(SUM(${downloadLogs.downloadSize}), 0)`.as('totalSize'),
+          uniqueDownloaders: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`.as('uniqueDownloaders'),
+          lastDownload: sql<string>`MAX(${downloadLogs.downloadedAt})`.as('lastDownload')
         })
         .from(scripts)
         .leftJoin(files, and(
@@ -106,7 +106,7 @@ export function registerCompleteAnalyticsRoutes(app: Express) {
           eq(files.entityId, scripts.id)
         ))
         .leftJoin(downloadLogs, eq(downloadLogs.fileId, files.id))
-        .groupBy(scripts.id, scripts.title, scripts.description, scripts.projectId, scripts.episodeId, scripts.content, scripts.createdAt, scripts.updatedAt)
+        .groupBy(scripts.id)
         .orderBy(desc(sql<number>`COUNT(DISTINCT ${downloadLogs.id})`));
 
       res.json(scriptAnalytics || []);
@@ -130,14 +130,14 @@ export function registerCompleteAnalyticsRoutes(app: Express) {
           role: users.role,
           isApproved: users.isApproved,
           createdAt: users.createdAt,
-          downloadCount: sql<number>`COUNT(DISTINCT ${downloadLogs.id})`,
-          totalDataDownloaded: sql<number>`COALESCE(SUM(${downloadLogs.downloadSize}), 0)`,
-          lastDownload: sql<string>`MAX(${downloadLogs.downloadedAt})`,
-          lastActivity: sql<string>`MAX(COALESCE(${downloadLogs.downloadedAt}, ${users.createdAt}))`
+          downloadCount: sql<number>`COUNT(DISTINCT ${downloadLogs.id})`.as('downloadCount'),
+          totalDataDownloaded: sql<number>`COALESCE(SUM(${downloadLogs.downloadSize}), 0)`.as('totalDataDownloaded'),
+          lastDownload: sql<string>`MAX(${downloadLogs.downloadedAt})`.as('lastDownload'),
+          lastActivity: sql<string>`MAX(COALESCE(${downloadLogs.downloadedAt}, ${users.createdAt}))`.as('lastActivity')
         })
         .from(users)
         .leftJoin(downloadLogs, eq(downloadLogs.userId, users.id))
-        .groupBy(users.id, users.email, users.name, users.role, users.isApproved, users.createdAt)
+        .groupBy(users.id)
         .orderBy(desc(sql<number>`COUNT(DISTINCT ${downloadLogs.id})`));
 
       res.json(userAnalytics || []);
@@ -163,14 +163,14 @@ export function registerCompleteAnalyticsRoutes(app: Express) {
           entityType: files.entityType,
           entityId: files.entityId,
           createdAt: files.createdAt,
-          downloadCount: sql<number>`COUNT(DISTINCT ${downloadLogs.id})`,
-          totalDataDownloaded: sql<number>`COALESCE(SUM(${downloadLogs.downloadSize}), 0)`,
-          uniqueDownloaders: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`,
-          lastDownload: sql<string>`MAX(${downloadLogs.downloadedAt})`
+          downloadCount: sql<number>`COUNT(DISTINCT ${downloadLogs.id})`.as('downloadCount'),
+          totalDataDownloaded: sql<number>`COALESCE(SUM(${downloadLogs.downloadSize}), 0)`.as('totalDataDownloaded'),
+          uniqueDownloaders: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`.as('uniqueDownloaders'),
+          lastDownload: sql<string>`MAX(${downloadLogs.downloadedAt})`.as('lastDownload')
         })
         .from(files)
         .leftJoin(downloadLogs, eq(downloadLogs.fileId, files.id))
-        .groupBy(files.id, files.filename, files.originalName, files.mimeType, files.fileSize, files.entityType, files.entityId, files.createdAt)
+        .groupBy(files.id)
         .orderBy(desc(sql<number>`COUNT(DISTINCT ${downloadLogs.id})`));
 
       res.json(fileAnalytics || []);

@@ -443,13 +443,13 @@ export function AnalyticsPage() {
             <CardContent>
               {projectsLoading ? (
                 <div className="text-center py-8 text-gray-500">Loading...</div>
-              ) : projectStats?.projects?.length === 0 ? (
+              ) : !projectStats || projectStats.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">No project downloads found</div>
               ) : (
                 <div className="space-y-3">
-                  {projectStats?.projects?.map((project: any) => (
+                  {projectStats.map((project: any) => (
                     <div
-                      key={project.projectId}
+                      key={project.id}
                       className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
                     >
                       <div className="flex items-center gap-3">
@@ -457,12 +457,12 @@ export function AnalyticsPage() {
                           <FolderOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div>
-                          <p className="font-medium">{project.projectName || 'Unknown Project'}</p>
+                          <p className="font-medium">{project.title || 'Unknown Project'}</p>
                           <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <span>{project.filesCount || 0} files</span>
+                            <span>{project.fileCount || 0} files</span>
                             <span>•</span>
                             <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                              ID: {project.projectId?.slice(-8)}
+                              ID: {project.id?.slice(-8)}
                             </span>
                           </div>
                         </div>
@@ -470,7 +470,7 @@ export function AnalyticsPage() {
                       <div className="text-right">
                         <p className="font-semibold">{project.downloadCount || 0} downloads</p>
                         <div className="flex items-center gap-2 text-sm text-gray-500">
-                          <span>{formatBytes(project.totalDataDownloaded || 0)}</span>
+                          <span>{formatBytes(project.totalSize || 0)}</span>
                           <span>•</span>
                           <span>{project.uniqueDownloaders || 0} users</span>
                         </div>
@@ -490,7 +490,7 @@ export function AnalyticsPage() {
           {/* Project Analytics Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Project Downloads Bar Chart */}
-            {projectStats?.projects && projectStats.projects.length > 0 && (
+            {projectStats && projectStats.length > 0 && (
               <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -502,7 +502,7 @@ export function AnalyticsPage() {
                 <CardContent>
                   <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={projectStats.projects}>
+                      <BarChart data={projectStats}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                         <XAxis 
                           dataKey="projectName" 
@@ -534,7 +534,7 @@ export function AnalyticsPage() {
             )}
 
             {/* Project Distribution Pie Chart */}
-            {projectStats?.projects && projectStats.projects.length > 0 && (
+            {projectStats && projectStats.length > 0 && (
               <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -548,8 +548,8 @@ export function AnalyticsPage() {
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
-                          data={projectStats.projects.map((project: any, index: number) => ({
-                            name: project.projectName || 'Unknown Project',
+                          data={projectStats.map((project: any, index: number) => ({
+                            name: project.title || 'Unknown Project',
                             value: project.downloadCount || 0,
                             fill: [
                               '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444',
@@ -563,7 +563,7 @@ export function AnalyticsPage() {
                           label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
                           labelLine={false}
                         >
-                          {projectStats.projects.map((entry: any, index: number) => (
+                          {projectStats.map((entry: any, index: number) => (
                             <Cell key={`cell-${index}`} fill={[
                               '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444',
                               '#06B6D4', '#84CC16', '#F97316', '#EC4899', '#6366F1'
@@ -1157,15 +1157,15 @@ export function AnalyticsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {filesLoading ? (
+              {filesLoading2 ? (
                 <div className="text-center py-8 text-gray-500">Loading...</div>
-              ) : fileStats?.files?.length === 0 ? (
+              ) : !fileStats2 || fileStats2.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">No files found</div>
               ) : (
                 <div className="space-y-3">
-                  {fileStats?.files?.map((file: any) => (
+                  {fileStats2.map((file: any) => (
                     <div
-                      key={file.fileId}
+                      key={file.id}
                       className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
                     >
                       <div className="flex items-center gap-3">
