@@ -267,7 +267,7 @@ export default function Scripts() {
     })
     .sort((a, b) => {
       let compareValue = 0;
-      
+
       switch (sortBy) {
         case 'title':
           compareValue = a.title.localeCompare(b.title);
@@ -280,7 +280,7 @@ export default function Scripts() {
           compareValue = statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
           break;
       }
-      
+
       return sortOrder === 'asc' ? compareValue : -compareValue;
     });
 
@@ -485,7 +485,7 @@ export default function Scripts() {
                         className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:border-sky-500 text-gray-900 dark:text-gray-100"
                       />
                     </div>
-                    
+
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
                       <SelectTrigger className="w-40">
                         <SelectValue placeholder="All Statuses" />
@@ -498,7 +498,7 @@ export default function Scripts() {
                         <SelectItem value="Published">Published</SelectItem>
                       </SelectContent>
                     </Select>
-                    
+
                     <Select value={projectFilter} onValueChange={setProjectFilter}>
                       <SelectTrigger className="w-48">
                         <SelectValue placeholder="All Projects" />
@@ -512,7 +512,7 @@ export default function Scripts() {
                         ))}
                       </SelectContent>
                     </Select>
-                    
+
                     <Select value={languageFilter} onValueChange={setLanguageFilter}>
                       <SelectTrigger className="w-40">
                         <SelectValue placeholder="All Languages" />
@@ -529,7 +529,7 @@ export default function Scripts() {
                         ))}
                       </SelectContent>
                     </Select>
-                    
+
                     {/* Sort Options */}
                     <div className="flex items-center gap-2">
                       <Select value={sortBy} onValueChange={(value: 'title' | 'date' | 'status') => setSortBy(value)}>
@@ -552,7 +552,7 @@ export default function Scripts() {
                       </Button>
                     </div>
                   </div>
-                  
+
                   {/* Action Controls */}
                   <div className="flex items-center gap-2">
                     {selectedScripts.length > 0 && (user?.role === 'admin' || user?.role === 'editor') && (
@@ -568,7 +568,7 @@ export default function Scripts() {
                         </Button>
                       </div>
                     )}
-                    
+
                     <Button
                       variant="outline"
                       size="sm"
@@ -576,7 +576,7 @@ export default function Scripts() {
                     >
                       <RefreshCw className="h-4 w-4" />
                     </Button>
-                    
+
                     <div className="flex items-center gap-1 border rounded-md">
                       <Button
                         variant={viewMode === 'grid' ? 'default' : 'ghost'}
@@ -597,7 +597,7 @@ export default function Scripts() {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Results Count */}
                 <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
                   <div className="flex items-center gap-4">
@@ -724,7 +724,7 @@ export default function Scripts() {
                           <h3 className="font-semibold text-sm text-gray-800 dark:text-gray-200 line-clamp-2 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors duration-300 leading-tight">
                             {script.title}
                           </h3>
-                          
+
                           <div className="flex items-center justify-between">
                             {project && (
                               <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
