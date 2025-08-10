@@ -10,7 +10,10 @@ let initialized = false;
 export function resetDbConnection() {
   initialized = false;
   db = null;
-  pool = null;
+  if (pool) {
+    pool.end();
+    pool = null;
+  }
 }
 
 // Initialize database connection lazily
@@ -21,18 +24,26 @@ function initializeDatabase() {
   console.log("Checking DATABASE_URL:", process.env.DATABASE_URL ? "✅ Found" : "❌ Not found");
   if (process.env.DATABASE_URL) {
     try {
-      // Configure optimized pool for Supabase with connection pooling
+      // Configure connection pool specifically for Supabase
       pool = new Pool({ 
         connectionString: process.env.DATABASE_URL,
         ssl: { 
           rejectUnauthorized: false 
         },
-        max: 20,                    // Increased for better concurrency
-        min: 2,                     // Keep minimum connections ready
-        idleTimeoutMillis: 60000,   // Keep connections alive longer
-        connectionTimeoutMillis: 5000,  // Faster timeout for quick failure
-        acquireTimeoutMillis: 3000, // Quick acquisition timeout
-        allowExitOnIdle: false      // Keep pool alive
+        max: 10,                    // Reasonable pool size
+        min: 1,                     // Keep at least one connection
+        idleTimeoutMillis: 30000,   // 30 seconds idle timeout
+        connectionTimeoutMillis: 10000,  // 10 second connection timeout
+        statement_timeout: 30000,   // 30 second query timeout
+        query_timeout: 30000,       // 30 second query timeout
+        allowExitOnIdle: true       // Allow process to exit
+      });
+      
+      // Test the connection immediately
+      pool.query('SELECT 1').then(() => {
+        console.log("✅ Database pool test successful");
+      }).catch(err => {
+        console.error("❌ Database pool test failed:", err.message);
       });
       
       db = drizzle(pool, { schema });
@@ -43,7 +54,6 @@ function initializeDatabase() {
     }
   } else {
     console.warn("⚠️  DATABASE_URL not found. The application will start but database features will be unavailable.");
-    console.warn("   To enable full functionality, please provision a PostgreSQL database in your Replit project.");
   }
 }
 
@@ -79,7 +89,9 @@ export async function checkDatabaseAvailability(): Promise<boolean> {
         rejectUnauthorized: false 
       },
       max: 1,
-      connectionTimeoutMillis: 10000,
+      connectionTimeoutMillis: 15000,
+      statement_timeout: 10000,
+      query_timeout: 10000,
     });
     
     const result = await testPool.query('SELECT 1 as test');
@@ -87,7 +99,7 @@ export async function checkDatabaseAvailability(): Promise<boolean> {
     await testPool.end();
     return true;
   } catch (error) {
-    console.log("❌ Database connection failed:", error);
+    console.log("❌ Database connection failed:", error.message);
     return false;
   }
 }

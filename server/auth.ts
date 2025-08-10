@@ -32,29 +32,34 @@ const TEMP_ADMIN = {
 
 // Middleware to check if user is authenticated
 export const isAuthenticated = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  console.log("isAuthenticated middleware - session:", req.session);
   console.log("isAuthenticated middleware - sessionId:", req.sessionID);
   console.log("isAuthenticated middleware - userId:", (req.session as any)?.userId);
   
   if (req.session && (req.session as any).userId) {
     try {
-      // Always check temp authentication first for demo purposes
       const userId = (req.session as any).userId;
       console.log("Auth check - userId from session:", userId);
-      if (userId === TEMP_ADMIN.id) {
-        req.user = {
-          id: TEMP_ADMIN.id,
-          email: TEMP_ADMIN.email,
-          role: TEMP_ADMIN.role,
-          firstName: TEMP_ADMIN.firstName,
-          lastName: TEMP_ADMIN.lastName,
-        };
-        console.log("Demo auth - user authenticated:", req.user);
-        return next();
+      
+      // Check if database is available first
+      if (!isDatabaseAvailable()) {
+        console.log("Database not available, using temp admin");
+        if (userId === TEMP_ADMIN.id) {
+          req.user = {
+            id: TEMP_ADMIN.id,
+            email: TEMP_ADMIN.email,
+            role: TEMP_ADMIN.role,
+            firstName: TEMP_ADMIN.firstName,
+            lastName: TEMP_ADMIN.lastName,
+          };
+          console.log("Demo auth - user authenticated:", req.user);
+          return next();
+        } else {
+          return res.status(401).json({ message: "User not found in demo mode" });
+        }
       }
 
       // Use database authentication when available
-      const user = await storage.getUser((req.session as any).userId);
+      const user = await storage.getUser(userId);
       if (user) {
         req.user = {
           id: user.id,
@@ -63,8 +68,10 @@ export const isAuthenticated = async (req: AuthenticatedRequest, res: Response, 
           firstName: user.firstName,
           lastName: user.lastName,
         };
+        console.log("Database auth - user authenticated:", req.user.email);
         next();
       } else {
+        console.log("User not found in database:", userId);
         res.status(401).json({ message: "User not found" });
       }
     } catch (error) {
@@ -132,28 +139,37 @@ export const login = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Email and password are required" });
     }
 
-    // Always try to use fallback authentication for demo purposes
-    if (email === TEMP_ADMIN.email) {
-      const isValid = await bcrypt.compare(password, TEMP_ADMIN.password);
-      if (isValid) {
-        (req.session as any).userId = TEMP_ADMIN.id;
-        console.log("Demo login successful - stored userId:", TEMP_ADMIN.id);
-        return res.json({
-          message: "Login successful",
-          user: {
-            id: TEMP_ADMIN.id,
-            email: TEMP_ADMIN.email,
-            role: TEMP_ADMIN.role,
-            firstName: TEMP_ADMIN.firstName,
-            lastName: TEMP_ADMIN.lastName,
-          }
-        });
+    console.log("Login attempt for:", email);
+    console.log("Database available:", isDatabaseAvailable());
+
+    // Check if database is available first
+    if (!isDatabaseAvailable()) {
+      console.log("Database not available, checking temp admin");
+      if (email === TEMP_ADMIN.email) {
+        const isValid = await bcrypt.compare(password, TEMP_ADMIN.password);
+        if (isValid) {
+          (req.session as any).userId = TEMP_ADMIN.id;
+          console.log("Demo login successful - stored userId:", TEMP_ADMIN.id);
+          return res.json({
+            message: "Login successful (demo mode)",
+            user: {
+              id: TEMP_ADMIN.id,
+              email: TEMP_ADMIN.email,
+              role: TEMP_ADMIN.role,
+              firstName: TEMP_ADMIN.firstName,
+              lastName: TEMP_ADMIN.lastName,
+            }
+          });
+        }
       }
+      return res.status(401).json({ message: "Invalid credentials or database unavailable" });
     }
 
-    // Get all users and find by email (since we don't have email-specific query)
+    // Get all users and find by email
     const users = await storage.getAllUsers();
     const user = users.find(u => u.email === email);
+    
+    console.log("Found user:", user ? user.email : "none");
     
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
