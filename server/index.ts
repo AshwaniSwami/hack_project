@@ -3,7 +3,7 @@ dotenv.config();
 
 import express, { type Request, Response, NextFunction } from "express";
 import compression from "compression";
-import { registerAuthRoutes } from "./routes-auth";
+// import { registerAuthRoutes } from "./routes-auth"; // Removed as per troubleshooting
 import { registerStorageRoutes } from "./storage";
 import { registerOnboardingRoutes } from "./routes-onboarding";
 import { registerDownloadTrackingRoutes } from "./routes-download-tracking";
@@ -66,7 +66,7 @@ app.use((req, res, next) => {
     await initializeStorage();
 
     // Register all routes
-    registerAuthRoutes(app);
+    // registerAuthRoutes(app); // Removed as per troubleshooting
     registerStorageRoutes(app);
     registerOnboardingRoutes(app);
     registerDownloadTrackingRoutes(app);
