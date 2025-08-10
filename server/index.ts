@@ -87,7 +87,12 @@ app.use(express.static(clientDistPath));
 
 // Handle client-side routing
 app.get("*", (req, res) => {
-  res.sendFile(path.join(clientDistPath, "index.html"));
+  res.sendFile(path.join(clientDistPath, "index.html"), (err) => {
+    if (err) {
+      console.error("Error serving index.html:", err);
+      res.status(404).send("Page not found");
+    }
+  });
 });
 
 const PORT = process.env.PORT || 5000;
