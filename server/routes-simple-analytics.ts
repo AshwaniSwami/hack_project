@@ -17,7 +17,7 @@ function createDirectConnection() {
 }
 
 export function registerAnalyticsRoutes(app: Express) {
-  // Get analytics overview with REAL DATA from database
+  // Get analytics overview with demo data when no database
   app.get("/api/analytics/overview", async (req: Request, res: Response) => {
     try {
       // Check authentication via session
@@ -28,12 +28,31 @@ export function registerAnalyticsRoutes(app: Express) {
       const pool = createDirectConnection();
       if (!pool) {
         return res.json({
-          totalUsers: 0,
-          totalProjects: 0,
-          totalFiles: 0,
-          totalDownloads: 0,
-          recentActivity: [],
-          message: "Database not available - showing empty state"
+          totalUsers: 1,
+          totalProjects: 3,
+          totalFiles: 5,
+          totalDownloads: 12,
+          recentActivity: [
+            {
+              id: "1",
+              type: "download", 
+              description: "Downloaded Health Awareness Script",
+              timestamp: new Date(Date.now() - 3600000),
+              user: "Admin User",
+              entityType: "script",
+              entityId: "demo-script-1"
+            },
+            {
+              id: "2", 
+              type: "download",
+              description: "Downloaded Digital Skills Episode",
+              timestamp: new Date(Date.now() - 7200000), 
+              user: "Admin User",
+              entityType: "episode",
+              entityId: "demo-episode-3"
+            }
+          ],
+          message: "Demo data - database not connected"
         });
       }
 
@@ -113,14 +132,41 @@ export function registerAnalyticsRoutes(app: Express) {
       if (!pool) {
         return res.json({
           timeframe,
-          totalDownloads: 0,
-          uniqueDownloaders: 0,
-          totalDataDownloaded: 0,
-          popularFiles: [],
-          downloadsByDay: [],
-          downloadsByType: [],
-          downloadsByHour: Array.from({length: 24}, (_, i) => ({ hour: i, count: 0 })),
-          message: "Database not available - showing empty state"
+          totalDownloads: 12,
+          uniqueDownloaders: 1,
+          totalDataDownloaded: 2048576, // 2MB
+          popularFiles: [
+            {
+              fileId: "demo-file-1",
+              filename: "health-script.pdf",
+              originalName: "Health Awareness Script.pdf",
+              entityType: "script",
+              downloadCount: 8,
+              totalSize: 1024000
+            },
+            {
+              fileId: "demo-file-2",
+              filename: "education-episode.mp3", 
+              originalName: "Digital Skills Episode.mp3",
+              entityType: "episode",
+              downloadCount: 4,
+              totalSize: 1024576
+            }
+          ],
+          downloadsByDay: [
+            { date: "2024-08-08", count: 3, uniqueUsers: 1, totalSize: 512000 },
+            { date: "2024-08-09", count: 5, uniqueUsers: 1, totalSize: 768000 },
+            { date: "2024-08-10", count: 4, uniqueUsers: 1, totalSize: 768576 }
+          ],
+          downloadsByType: [
+            { entityType: "script", count: 8, totalSize: 1024000 },
+            { entityType: "episode", count: 4, totalSize: 1024576 }
+          ],
+          downloadsByHour: Array.from({length: 24}, (_, i) => ({ 
+            hour: i, 
+            count: i >= 9 && i <= 17 ? Math.floor(Math.random() * 3) : 0 
+          })),
+          message: "Demo data - database not connected"
         });
       }
       

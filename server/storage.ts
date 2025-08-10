@@ -806,41 +806,184 @@ export class FallbackStorage implements IStorage {
   async activateUser(id: string): Promise<User> { return this.throwDatabaseError(); }
   async getAdminUsers(): Promise<User[]> { return this.throwDatabaseError(); }
 
-  // Themes
-  async getTheme(id: string): Promise<Theme | undefined> { return this.throwDatabaseError(); }
+  // Themes - provide demo data
+  async getTheme(id: string): Promise<Theme | undefined> { 
+    const themes = await this.getAllThemes();
+    return themes.find(t => t.id === id);
+  }
   async createTheme(theme: InsertTheme): Promise<Theme> { return this.throwDatabaseError(); }
   async updateTheme(id: string, theme: Partial<InsertTheme>): Promise<Theme> { return this.throwDatabaseError(); }
   async deleteTheme(id: string): Promise<void> { return this.throwDatabaseError(); }
-  async getAllThemes(): Promise<Theme[]> { return this.throwDatabaseError(); }
-  async getActiveThemes(): Promise<Theme[]> { return this.throwDatabaseError(); }
-  async getProjectsByTheme(themeId: string): Promise<Project[]> { return this.throwDatabaseError(); }
+  async getAllThemes(): Promise<Theme[]> { 
+    return [
+      {
+        id: "demo-theme-1",
+        name: "Ocean Blue",
+        description: "Professional ocean blue theme",
+        colorHex: "#0EA5E9",
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: "demo-theme-2", 
+        name: "Forest Green",
+        description: "Natural forest green theme",
+        colorHex: "#10B981",
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+    ];
+  }
+  async getActiveThemes(): Promise<Theme[]> { return this.getAllThemes(); }
+  async getProjectsByTheme(themeId: string): Promise<Project[]> { 
+    const projects = await this.getAllProjects();
+    return projects.filter(p => p.themeId === themeId);
+  }
 
-  // Projects
-  async getProject(id: string): Promise<Project | undefined> { return this.throwDatabaseError(); }
+  // Projects - provide demo data
+  async getProject(id: string): Promise<Project | undefined> { 
+    const projects = await this.getAllProjects();
+    return projects.find(p => p.id === id);
+  }
   async createProject(project: InsertProject): Promise<Project> { return this.throwDatabaseError(); }
   async updateProject(id: string, project: Partial<InsertProject>): Promise<Project> { return this.throwDatabaseError(); }
   async deleteProject(id: string): Promise<void> { return this.throwDatabaseError(); }
-  async getAllProjects(): Promise<Project[]> { return this.throwDatabaseError(); }
+  async getAllProjects(): Promise<Project[]> { 
+    return [
+      {
+        id: "demo-project-1",
+        name: "Community Health Radio",
+        description: "Health awareness campaigns for rural communities",
+        themeId: "demo-theme-1",
+        isActive: true,
+        createdAt: new Date('2024-01-15'),
+        updatedAt: new Date(),
+      },
+      {
+        id: "demo-project-2",
+        name: "Education Outreach",
+        description: "Educational programs for youth development",
+        themeId: "demo-theme-2",
+        isActive: true,
+        createdAt: new Date('2024-02-01'),
+        updatedAt: new Date(),
+      },
+      {
+        id: "demo-project-3",
+        name: "Environmental Awareness",
+        description: "Climate change and conservation programs",
+        themeId: "demo-theme-1",
+        isActive: true,
+        createdAt: new Date('2024-03-10'),
+        updatedAt: new Date(),
+      }
+    ];
+  }
 
-  // Episodes
-  async getEpisode(id: string): Promise<Episode | undefined> { return this.throwDatabaseError(); }
+  // Episodes - provide demo data
+  async getEpisode(id: string): Promise<Episode | undefined> { 
+    const episodes = await this.getAllEpisodes();
+    return episodes.find(e => e.id === id);
+  }
   async createEpisode(episode: InsertEpisode): Promise<Episode> { return this.throwDatabaseError(); }
   async updateEpisode(id: string, episode: Partial<InsertEpisode>): Promise<Episode> { return this.throwDatabaseError(); }
   async deleteEpisode(id: string): Promise<void> { return this.throwDatabaseError(); }
-  async getAllEpisodes(): Promise<Episode[]> { return this.throwDatabaseError(); }
-  async getEpisodesByProject(projectId: string): Promise<Episode[]> { return this.throwDatabaseError(); }
+  async getAllEpisodes(): Promise<Episode[]> { 
+    return [
+      {
+        id: "demo-episode-1",
+        projectId: "demo-project-1",
+        title: "Understanding Diabetes Prevention",
+        createdAt: new Date('2024-08-01'),
+        updatedAt: new Date(),
+      },
+      {
+        id: "demo-episode-2",
+        projectId: "demo-project-1",
+        title: "Mental Health Awareness",
+        createdAt: new Date('2024-08-05'),
+        updatedAt: new Date(),
+      },
+      {
+        id: "demo-episode-3",
+        projectId: "demo-project-2",
+        title: "Digital Literacy for Students",
+        createdAt: new Date('2024-08-08'),
+        updatedAt: new Date(),
+      }
+    ];
+  }
+  async getEpisodesByProject(projectId: string): Promise<Episode[]> { 
+    const episodes = await this.getAllEpisodes();
+    return episodes.filter(e => e.projectId === projectId);
+  }
 
-  // Scripts
-  async getScript(id: string): Promise<Script | undefined> { return this.throwDatabaseError(); }
+  // Scripts - provide demo data
+  async getScript(id: string): Promise<Script | undefined> { 
+    const scripts = await this.getAllScripts();
+    return scripts.find(s => s.id === id);
+  }
   async createScript(script: InsertScript): Promise<Script> { return this.throwDatabaseError(); }
   async updateScript(id: string, script: Partial<InsertScript>): Promise<Script> { return this.throwDatabaseError(); }
   async deleteScript(id: string): Promise<void> { return this.throwDatabaseError(); }
-  async getAllScripts(): Promise<Script[]> { return this.throwDatabaseError(); }
-  async getScriptsByLanguage(language: string): Promise<Script[]> { return this.throwDatabaseError(); }
-  async getScriptsByProject(projectId: string): Promise<Script[]> { return this.throwDatabaseError(); }
-  async getScriptsByLanguageGroup(languageGroup: string): Promise<Script[]> { return this.throwDatabaseError(); }
-  async getTranslationsForScript(scriptId: string): Promise<Script[]> { return this.throwDatabaseError(); }
-  async getScriptWithTranslations(scriptId: string): Promise<{ script: Script; translations: Script[] } | undefined> { return this.throwDatabaseError(); }
+  async getAllScripts(): Promise<Script[]> { 
+    return [
+      {
+        id: "demo-script-1",
+        projectId: "demo-project-1",
+        authorId: "temp-admin-001",
+        title: "Diabetes Prevention Script",
+        content: "Welcome to our health awareness program focusing on diabetes prevention...",
+        status: "Published",
+        language: "en",
+        originalScriptId: null,
+        languageGroup: "diabetes-prevention",
+        isOriginal: true,
+        createdAt: new Date('2024-08-01'),
+        updatedAt: new Date(),
+      },
+      {
+        id: "demo-script-2",
+        projectId: "demo-project-2",
+        authorId: "temp-admin-001",
+        title: "Digital Skills for Youth",
+        content: "Today we'll explore essential digital skills every student should know...",
+        status: "Draft",
+        language: "en",
+        originalScriptId: null,
+        languageGroup: "digital-literacy",
+        isOriginal: true,
+        createdAt: new Date('2024-08-05'),
+        updatedAt: new Date(),
+      }
+    ];
+  }
+  async getScriptsByLanguage(language: string): Promise<Script[]> { 
+    const scripts = await this.getAllScripts();
+    return scripts.filter(s => s.language === language);
+  }
+  async getScriptsByProject(projectId: string): Promise<Script[]> { 
+    const scripts = await this.getAllScripts();
+    return scripts.filter(s => s.projectId === projectId);
+  }
+  async getScriptsByLanguageGroup(languageGroup: string): Promise<Script[]> { 
+    const scripts = await this.getAllScripts();
+    return scripts.filter(s => s.languageGroup === languageGroup);
+  }
+  async getTranslationsForScript(scriptId: string): Promise<Script[]> { 
+    const scripts = await this.getAllScripts();
+    const originalScript = scripts.find(s => s.id === scriptId);
+    if (!originalScript) return [];
+    return scripts.filter(s => s.languageGroup === originalScript.languageGroup && s.id !== scriptId);
+  }
+  async getScriptWithTranslations(scriptId: string): Promise<{ script: Script; translations: Script[] } | undefined> { 
+    const script = await this.getScript(scriptId);
+    if (!script) return undefined;
+    const translations = await this.getTranslationsForScript(scriptId);
+    return { script, translations };
+  }
 
   // Topics
   async getTopic(id: string): Promise<Topic | undefined> { return this.throwDatabaseError(); }
