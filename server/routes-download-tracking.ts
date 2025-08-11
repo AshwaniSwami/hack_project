@@ -269,3 +269,201 @@ export function registerDownloadTrackingRoutes(app: Express) {
     }
   });
 }
+import { Express, Request, Response, NextFunction } from "express";
+import { db } from "./db";
+import { downloadLogs, files } from "@shared/schema";
+import { eq } from "drizzle-orm";
+import { isAuthenticated, type AuthenticatedRequest } from "./auth";
+
+interface DownloadRequest extends AuthenticatedRequest {
+  downloadStartTime?: number;
+  downloadFileId?: string;
+  downloadFileName?: string;
+  downloadEntityType?: string;
+  downloadEntityId?: string;
+}
+
+// Middleware to track download start
+export function trackDownloadStart(req: DownloadRequest, res: Response, next: NextFunction) {
+  req.downloadStartTime = Date.now();
+  console.log(`[DOWNLOAD_TRACKING] Starting download tracking for ${req.path}`);
+  next();
+}
+
+// Middleware to track download completion
+export function trackDownloadEnd(req: DownloadRequest, res: Response, next: NextFunction) {
+  const originalSend = res.send;
+  const originalJson = res.json;
+  const originalEnd = res.end;
+
+  // Track when response is sent
+  res.send = function(data: any) {
+    logDownloadEvent(req, res, data);
+    return originalSend.call(this, data);
+  };
+
+  res.json = function(data: any) {
+    logDownloadEvent(req, res, data);
+    return originalJson.call(this, data);
+  };
+
+  res.end = function(chunk?: any, encoding?: any) {
+    logDownloadEvent(req, res, chunk);
+    return originalEnd.call(this, chunk, encoding);
+  };
+
+  next();
+}
+
+async function logDownloadEvent(req: DownloadRequest, res: Response, data?: any) {
+  try {
+    // Only log successful downloads (status 200) and file routes
+    if (res.statusCode !== 200 || !req.path.includes('/files/')) {
+      return;
+    }
+
+    const database = db;
+    if (!database) {
+      console.log("[DOWNLOAD_TRACKING] Database not available");
+      return;
+    }
+
+    // Extract file ID from path or query
+    let fileId = req.params.fileId || req.query.fileId as string;
+    
+    // If no fileId in params, try to extract from path
+    if (!fileId) {
+      const pathParts = req.path.split('/');
+      const filesIndex = pathParts.indexOf('files');
+      if (filesIndex !== -1 && pathParts[filesIndex + 1]) {
+        fileId = pathParts[filesIndex + 1];
+      }
+    }
+
+    if (!fileId) {
+      console.log("[DOWNLOAD_TRACKING] No file ID found in request");
+      return;
+    }
+
+    // Get file details
+    const file = await database
+      .select()
+      .from(files)
+      .where(eq(files.id, fileId))
+      .limit(1);
+
+    if (!file || file.length === 0) {
+      console.log(`[DOWNLOAD_TRACKING] File not found: ${fileId}`);
+      return;
+    }
+
+    const fileData = file[0];
+    const downloadDuration = req.downloadStartTime ? Date.now() - req.downloadStartTime : 0;
+    const downloadSize = fileData.fileSize || 0;
+    const userAgent = req.get('User-Agent') || '';
+    const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
+
+    // Create download log entry
+    const downloadLog = {
+      id: `download-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      fileId: fileData.id,
+      userId: req.userId || 'anonymous',
+      userEmail: req.userEmail || 'anonymous@unknown.com',
+      userName: req.userName || 'Anonymous User',
+      userRole: req.userRole || 'visitor',
+      ipAddress: ipAddress.replace(/::ffff:/, ''), // Clean IPv4-mapped IPv6 addresses
+      downloadSize: downloadSize,
+      downloadDuration: downloadDuration,
+      downloadStatus: res.statusCode === 200 ? 'completed' : 'failed',
+      entityType: fileData.entityType,
+      entityId: fileData.entityId,
+      refererPage: req.get('Referer') || req.headers.referer as string || 'direct',
+      userAgent: userAgent,
+      downloadedAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    await database.insert(downloadLogs).values(downloadLog);
+
+    console.log(`[DOWNLOAD_TRACKING] Successfully logged download:`, {
+      fileId: downloadLog.fileId,
+      fileName: fileData.originalName,
+      userId: downloadLog.userId,
+      downloadSize: downloadLog.downloadSize,
+      downloadDuration: downloadLog.downloadDuration,
+      status: downloadLog.downloadStatus
+    });
+
+  } catch (error) {
+    console.error("[DOWNLOAD_TRACKING] Error logging download:", error);
+  }
+}
+
+// Route to manually track downloads (for client-side initiated downloads)
+export function registerDownloadTrackingRoutes(app: Express) {
+  app.post("/api/analytics/track-download", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { fileId, downloadSize, downloadDuration, status = 'completed' } = req.body;
+
+      if (!fileId) {
+        return res.status(400).json({ error: "File ID is required" });
+      }
+
+      const database = db;
+      if (!database) {
+        return res.status(500).json({ error: "Database not available" });
+      }
+
+      // Get file details
+      const file = await database
+        .select()
+        .from(files)
+        .where(eq(files.id, fileId))
+        .limit(1);
+
+      if (!file || file.length === 0) {
+        return res.status(404).json({ error: "File not found" });
+      }
+
+      const fileData = file[0];
+      const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
+
+      // Create download log entry
+      const downloadLog = {
+        id: `manual-download-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        fileId: fileData.id,
+        userId: req.userId || 'anonymous',
+        userEmail: req.userEmail || 'anonymous@unknown.com', 
+        userName: req.userName || 'Anonymous User',
+        userRole: req.userRole || 'visitor',
+        ipAddress: ipAddress.replace(/::ffff:/, ''),
+        downloadSize: downloadSize || fileData.fileSize || 0,
+        downloadDuration: downloadDuration || 0,
+        downloadStatus: status,
+        entityType: fileData.entityType,
+        entityId: fileData.entityId,
+        refererPage: req.get('Referer') || 'manual-track',
+        userAgent: req.get('User-Agent') || '',
+        downloadedAt: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      await database.insert(downloadLogs).values(downloadLog);
+
+      console.log(`[DOWNLOAD_TRACKING] Manually tracked download:`, {
+        fileId: downloadLog.fileId,
+        fileName: fileData.originalName,
+        userId: downloadLog.userId,
+        status: downloadLog.downloadStatus
+      });
+
+      res.json({ success: true, downloadId: downloadLog.id });
+
+    } catch (error) {
+      console.error("[DOWNLOAD_TRACKING] Error in manual tracking:", error);
+      res.status(500).json({ error: "Failed to track download" });
+    }
+  });
+}

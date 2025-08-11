@@ -15,6 +15,7 @@ import { cacheMiddleware, performanceHeaders } from "./performance-middleware";
 import * as realAuth from "./auth";
 import * as tempAuth from "./tempAuth";
 import { getFilePermissions, requireFilePermission } from "./filePermissions";
+import { trackDownloadStart, trackDownloadEnd } from "./routes-download-tracking";
 
 // Dynamically choose auth module based on database availability
 async function getAuthModule() {
@@ -504,7 +505,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const { projectId } = req.body; // Get projectId from form data
+      const {projectId} = req.body; // Get projectId from form data
       console.log("Upload request - projectId:", projectId, "file:", req.file.originalname);
 
       // Store the file in the database
@@ -1123,7 +1124,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/files/:id/download", isAuthenticated, async (req: any, res) => {
+  app.get("/api/files/:id/download", isAuthenticated, async (req: any, res: Response) => {
     try {
       const user = await storage.getUser(req.user.id);
       if (!requireFilePermission('canDownload', user)) {

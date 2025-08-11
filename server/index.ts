@@ -4,6 +4,11 @@ dotenv.config();
 import express, { type Request, Response, NextFunction } from "express";
 import compression from "compression";
 import { setupVite, serveStatic, log } from "./vite";
+import { registerAnalyticsRoutes } from "./routes-analytics";
+import { registerUserManagementRoutes } from "./routes-user-management";
+import { registerOnboardingRoutes } from "./routes-onboarding";
+import { registerNotificationRoutes } from "./routes-notifications";
+import { registerDownloadTrackingRoutes } from "./routes-download-tracking";
 
 const app = express();
 
@@ -62,6 +67,12 @@ app.use((req, res, next) => {
     const { registerRoutes } = await import("./routes");
     const server = await registerRoutes(app);
 
+    registerAnalyticsRoutes(app);
+    registerUserManagementRoutes(app);
+    registerOnboardingRoutes(app);
+    registerNotificationRoutes(app);
+    registerDownloadTrackingRoutes(app);
+
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
@@ -91,4 +102,3 @@ app.use((req, res, next) => {
     process.exit(1);
   }
 })();
-
