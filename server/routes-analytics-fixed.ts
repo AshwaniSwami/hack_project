@@ -345,7 +345,7 @@ export function registerAnalyticsRoutes(app: Express) {
         const projectStats = await db
           .select({
             id: projects.id,
-            title: projects.title,
+            title: projects.name,
             description: projects.description,
             entityType: sql<string>`'project'`,
             fileCount: count(files.id),
@@ -359,7 +359,7 @@ export function registerAnalyticsRoutes(app: Express) {
             eq(files.entityId, projects.id)
           ))
           .leftJoin(downloadLogs, eq(downloadLogs.fileId, files.id))
-          .groupBy(projects.id, projects.title, projects.description)
+          .groupBy(projects.id, projects.name, projects.description)
           .orderBy(desc(count(downloadLogs.id)));
 
         // Get episodes with file and download counts  
@@ -367,7 +367,7 @@ export function registerAnalyticsRoutes(app: Express) {
           .select({
             id: episodes.id,
             title: episodes.title,
-            description: episodes.description,
+            description: sql<string>`''`,
             entityType: sql<string>`'episode'`,
             fileCount: count(files.id),
             downloadCount: count(downloadLogs.id),
@@ -380,7 +380,7 @@ export function registerAnalyticsRoutes(app: Express) {
             eq(files.entityId, episodes.id)
           ))
           .leftJoin(downloadLogs, eq(downloadLogs.fileId, files.id))
-          .groupBy(episodes.id, episodes.title, episodes.description)
+          .groupBy(episodes.id, episodes.title)
           .orderBy(desc(count(downloadLogs.id)));
 
         // Get scripts with file and download counts
@@ -388,7 +388,7 @@ export function registerAnalyticsRoutes(app: Express) {
           .select({
             id: scripts.id,
             title: scripts.title,
-            description: scripts.description,
+            description: sql<string>`''`,
             entityType: sql<string>`'script'`,
             fileCount: count(files.id),
             downloadCount: count(downloadLogs.id),
@@ -401,7 +401,7 @@ export function registerAnalyticsRoutes(app: Express) {
             eq(files.entityId, scripts.id)
           ))
           .leftJoin(downloadLogs, eq(downloadLogs.fileId, files.id))
-          .groupBy(scripts.id, scripts.title, scripts.description)
+          .groupBy(scripts.id, scripts.title)
           .orderBy(desc(count(downloadLogs.id)));
 
         res.json({
