@@ -34,6 +34,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/api";
+import { LanguageSelector } from "@/components/language-selector";
+import { insertScriptSchema } from "@shared/schema";
 import { 
   Plus, 
   Edit, 
@@ -67,21 +69,13 @@ import {
 import { ScriptEditor } from "@/components/script-editor";
 import { ScriptFileUpload } from "@/components/script-file-upload";
 import { FileList } from "@/components/file-list";
-import { LanguageSelector, LanguageBadge } from "@/components/language-selector";
+import { LanguageBadge } from "@/components/language-selector";
 import { colors, getStatusColor, getCardStyle, getGradientStyle } from "@/lib/colors";
 import type { Script, Project } from "@shared/schema";
 import { DEFAULT_LANGUAGE, getLanguageName, getLanguageFlag } from "@shared/languages";
 
-const scriptFormSchema = z.object({
-  projectId: z.string().min(1, "Project is required"),
-  title: z.string().min(1, "Title is required"),
-  description: z.string().optional(),
-  content: z.string().optional(),
-  status: z.enum(["Draft", "Under Review", "Approved", "Published"]).default("Draft"),
-  language: z.string().default(DEFAULT_LANGUAGE),
-  originalScriptId: z.string().optional(),
-  languageGroup: z.string().optional(),
-});
+// Use the same schema as the working FAB component
+const scriptFormSchema = insertScriptSchema;
 
 type ScriptFormData = z.infer<typeof scriptFormSchema>;
 
@@ -123,7 +117,6 @@ export default function Scripts() {
     defaultValues: {
       projectId: "",
       title: "",
-      description: "",
       content: "",
       status: "Draft",
       language: DEFAULT_LANGUAGE,
@@ -208,8 +201,7 @@ export default function Scripts() {
 
     const submitData = {
       ...data,
-      content: data.content || '',
-      description: data.description || undefined
+      content: data.content || ''
     };
 
     if (editingScript) {
@@ -224,7 +216,6 @@ export default function Scripts() {
     form.reset({
       projectId: script.projectId,
       title: script.title,
-      description: script.description || "",
       content: script.content || "",
       status: script.status as "Draft" | "Under Review" | "Approved" | "Published",
       language: script.language || DEFAULT_LANGUAGE,
@@ -258,7 +249,7 @@ export default function Scripts() {
       const project = projects.find(p => p.id === script.projectId);
       const searchLower = searchTerm.toLowerCase();
       const matchesSearch = script.title.toLowerCase().includes(searchLower) ||
-        (script.description && script.description.toLowerCase().includes(searchLower)) ||
+        (script.content && script.content.toLowerCase().includes(searchLower)) ||
         (project?.name.toLowerCase().includes(searchLower));
       const matchesStatus = statusFilter === "all" || script.status === statusFilter;
       const matchesProject = projectFilter === 'all' || script.projectId === projectFilter;
@@ -273,7 +264,7 @@ export default function Scripts() {
           compareValue = a.title.localeCompare(b.title);
           break;
         case 'date':
-          compareValue = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          compareValue = new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
           break;
         case 'status':
           const statusOrder = ['Draft', 'Under Review', 'Approved', 'Published'];
@@ -398,7 +389,7 @@ export default function Scripts() {
                         render={({ field }) => (
                           <FormItem>
                             <LanguageSelector
-                              value={field.value}
+                              value={field.value || "en"}
                               onChange={field.onChange}
                               allowCustom={true}
                             />
@@ -737,9 +728,9 @@ export default function Scripts() {
                             )}
                           </div>
 
-                          {script.description && (
+                          {script.content && (
                             <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
-                              {script.description}
+                              {script.content.length > 100 ? `${script.content.substring(0, 100)}...` : script.content}
                             </p>
                           )}
 
@@ -747,7 +738,7 @@ export default function Scripts() {
                             <div className="flex items-center space-x-1">
                               <Clock className="h-3 w-3 text-gray-400 dark:text-gray-500" />
                               <span className="text-xs text-gray-500 dark:text-gray-400">
-                                {new Date(script.createdAt).toLocaleDateString()}
+                                {script.createdAt ? new Date(script.createdAt).toLocaleDateString() : 'Unknown'}
                               </span>
                             </div>
                           </div>
@@ -795,7 +786,7 @@ export default function Scripts() {
                                   )}
                                   <div className="flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-400">
                                     <Clock className="h-3 w-3 text-gray-400 dark:text-gray-500" />
-                                    <span>{new Date(script.createdAt).toLocaleDateString()}</span>
+                                    <span>{script.createdAt ? new Date(script.createdAt).toLocaleDateString() : 'Unknown'}</span>
                                   </div>
                                 </div>
                                 {script.language && (
@@ -1004,7 +995,7 @@ export default function Scripts() {
                 render={({ field }) => (
                   <FormItem>
                     <LanguageSelector
-                      value={field.value}
+                      value={field.value || "en"}
                       onChange={field.onChange}
                       allowCustom={true}
                     />

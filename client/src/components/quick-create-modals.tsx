@@ -74,7 +74,7 @@ export function QuickCreateModals({
     queryKey: ["/api/projects"],
   });
 
-  const { data: themes = [] } = useQuery({
+  const { data: themes = [] } = useQuery<{id: string, name: string}[]>({
     queryKey: ["/api/themes"],
   });
 
