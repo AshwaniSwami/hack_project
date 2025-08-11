@@ -29,6 +29,7 @@ interface DownloadOverview {
     filename: string;
     originalName: string;
     entityType: string;
+    entityId: string;
     downloadCount: number;
     totalSize: number;
   }>;
@@ -73,6 +74,7 @@ interface DownloadLog {
   downloadDuration: number;
   downloadStatus: string;
   entityType: string;
+  entityId: string;
   refererPage: string;
   downloadedAt: string;
 }
@@ -110,13 +112,13 @@ export function AnalyticsPage() {
   );
 
   // User Downloads Query with real-time updates
-  const { data: userDownloads, isLoading: usersLoading } = useAnalyticsQuery(
+  const { data: userDownloads = [], isLoading: usersLoading } = useAnalyticsQuery(
     "/api/analytics/downloads/users",
     { timeframe, search: userSearchTerm, limit: "50" }
   );
 
-  // Download Logs Query with real-time updates
-  const { data: downloadLogs, isLoading: logsLoading } = useAnalyticsQuery(
+  // Download Logs Query with real-time updates  
+  const { data: downloadLogs = { logs: [] }, isLoading: logsLoading } = useAnalyticsQuery(
     "/api/analytics/downloads/logs",
     {
       timeframe,
@@ -128,11 +130,11 @@ export function AnalyticsPage() {
   );
 
   // Analytics hooks for different sections
-  const { data: projectStats, isLoading: projectsLoading } = useProjectsAnalytics();
-  const { data: episodeStats, isLoading: episodesLoading } = useEpisodesAnalytics();
-  const { data: scriptStats, isLoading: scriptsLoading } = useScriptsAnalytics();
-  const { data: userStats, isLoading: usersLoading2 } = useUsersAnalytics();
-  const { data: fileStats2, isLoading: filesLoading2 } = useFilesAnalytics();
+  const { data: projectStats = [], isLoading: projectsLoading } = useProjectsAnalytics();
+  const { data: episodeStats = { episodes: [], episodeDownloadsByProject: [] }, isLoading: episodesLoading } = useEpisodesAnalytics();
+  const { data: scriptStats = { scripts: [], scriptDownloadsByProject: [] }, isLoading: scriptsLoading } = useScriptsAnalytics();
+  const { data: userStats = { users: [] }, isLoading: usersLoading2 } = useUsersAnalytics();
+  const { data: fileStats2 = [], isLoading: filesLoading2 } = useFilesAnalytics();
 
   return (
     <div className="container mx-auto px-6 py-8 max-w-7xl">
@@ -443,11 +445,11 @@ export function AnalyticsPage() {
             <CardContent>
               {projectsLoading ? (
                 <div className="text-center py-8 text-gray-500">Loading...</div>
-              ) : !projectStats || projectStats.length === 0 ? (
+              ) : !Array.isArray(projectStats) || projectStats.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">No project downloads found</div>
               ) : (
                 <div className="space-y-3">
-                  {projectStats.map((project: any) => (
+                  {Array.isArray(projectStats) && projectStats.map((project: any) => (
                     <div
                       key={project.id}
                       className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
@@ -490,7 +492,7 @@ export function AnalyticsPage() {
           {/* Project Analytics Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Project Downloads Bar Chart */}
-            {projectStats && projectStats.length > 0 && (
+            {Array.isArray(projectStats) && projectStats.length > 0 && (
               <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -534,7 +536,7 @@ export function AnalyticsPage() {
             )}
 
             {/* Project Distribution Pie Chart */}
-            {projectStats && projectStats.length > 0 && (
+            {Array.isArray(projectStats) && projectStats.length > 0 && (
               <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
