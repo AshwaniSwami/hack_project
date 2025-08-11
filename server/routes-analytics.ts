@@ -1,4 +1,3 @@
-
 import { Express, Request, Response } from "express";
 import { eq, desc, and, gte, sql, count, sum } from "drizzle-orm";
 import { db } from "./db";
@@ -10,10 +9,13 @@ export function registerAnalyticsRoutes(app: Express) {
   app.get("/api/analytics/downloads/overview", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { timeframe = '7d' } = req.query;
-      
+
+      console.log(`[ANALYTICS] Fetching overview for timeframe: ${timeframe}`);
+
       // Get database instance
       const database = db;
       if (!database) {
+        console.log("[ANALYTICS] Database not available");
         return res.json({
           timeframe,
           totalDownloads: 0,
@@ -25,11 +27,11 @@ export function registerAnalyticsRoutes(app: Express) {
           downloadsByHour: Array.from({length: 24}, (_, i) => ({ hour: i, count: 0 }))
         });
       }
-      
+
       // Calculate date range
       const now = new Date();
       let startDate = new Date();
-      
+
       switch (timeframe) {
         case '24h':
           startDate.setDate(now.getDate() - 1);
@@ -47,21 +49,25 @@ export function registerAnalyticsRoutes(app: Express) {
           startDate.setDate(now.getDate() - 7);
       }
 
+      console.log(`[ANALYTICS] Date range: ${startDate.toISOString()} to ${now.toISOString()}`);
+
       try {
         // Get total downloads in timeframe
-        const totalDownloads = await database
+        const totalDownloadsResult = await database
           .select({ count: count() })
           .from(downloadLogs)
           .where(gte(downloadLogs.downloadedAt, startDate));
 
+        console.log(`[ANALYTICS] Total downloads query result:`, totalDownloadsResult);
+
         // Get unique users who downloaded
-        const uniqueDownloaders = await database
+        const uniqueDownloadersResult = await database
           .select({ count: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})` })
           .from(downloadLogs)
           .where(gte(downloadLogs.downloadedAt, startDate));
 
         // Get total data downloaded (in bytes)
-        const totalDataDownloaded = await database
+        const totalDataDownloadedResult = await database
           .select({ total: sum(downloadLogs.downloadSize) })
           .from(downloadLogs)
           .where(gte(downloadLogs.downloadedAt, startDate));
@@ -120,18 +126,27 @@ export function registerAnalyticsRoutes(app: Express) {
           .groupBy(sql`EXTRACT(hour FROM ${downloadLogs.downloadedAt})`)
           .orderBy(sql`EXTRACT(hour FROM ${downloadLogs.downloadedAt})`);
 
-        res.json({
+        const result = {
           timeframe,
-          totalDownloads: totalDownloads[0]?.count || 0,
-          uniqueDownloaders: uniqueDownloaders[0]?.count || 0,
-          totalDataDownloaded: totalDataDownloaded[0]?.total || 0,
+          totalDownloads: totalDownloadsResult[0]?.count || 0,
+          uniqueDownloaders: uniqueDownloadersResult[0]?.count || 0,
+          totalDataDownloaded: totalDataDownloadedResult[0]?.total || 0,
           popularFiles: popularFiles || [],
           downloadsByDay: downloadsByDay || [],
           downloadsByType: downloadsByType || [],
           downloadsByHour: downloadsByHour || []
+        };
+
+        console.log(`[ANALYTICS] Overview result:`, {
+          totalDownloads: result.totalDownloads,
+          uniqueDownloaders: result.uniqueDownloaders,
+          popularFilesCount: result.popularFiles.length,
+          downloadsByDayCount: result.downloadsByDay.length
         });
+
+        res.json(result);
       } catch (dbError) {
-        console.error("Database query error:", dbError);
+        console.error("[ANALYTICS] Database query error:", dbError);
         // Return empty data as fallback
         res.json({
           timeframe,
@@ -146,7 +161,7 @@ export function registerAnalyticsRoutes(app: Express) {
       }
 
     } catch (error) {
-      console.error("Error fetching download overview:", error);
+      console.error("[ANALYTICS] Error fetching download overview:", error);
       res.status(500).json({ error: "Failed to fetch download overview" });
     }
   });
@@ -156,7 +171,7 @@ export function registerAnalyticsRoutes(app: Express) {
     try {
       const { page = 1, limit = 20, search = '', timeframe = '30d' } = req.query;
       const offset = (Number(page) - 1) * Number(limit);
-      
+
       const database = db;
       if (!database) {
         return res.json({
@@ -169,7 +184,7 @@ export function registerAnalyticsRoutes(app: Express) {
           }
         });
       }
-      
+
       // Calculate date range
       const now = new Date();
       let startDate = new Date();
@@ -177,7 +192,7 @@ export function registerAnalyticsRoutes(app: Express) {
 
       try {
         let whereCondition = gte(downloadLogs.downloadedAt, startDate);
-        
+
         if (search) {
           const searchCondition = sql`(${downloadLogs.userEmail} ILIKE ${`%${search}%`} OR ${downloadLogs.userName} ILIKE ${`%${search}%`})`;
           whereCondition = and(whereCondition, searchCondition) || whereCondition;
@@ -232,7 +247,7 @@ export function registerAnalyticsRoutes(app: Express) {
           }
         });
       } catch (dbError) {
-        console.error("Database query error for user downloads:", dbError);
+        console.error("[ANALYTICS] Database query error for user downloads:", dbError);
         return res.json({
           users: [],
           pagination: {
@@ -245,7 +260,7 @@ export function registerAnalyticsRoutes(app: Express) {
       }
 
     } catch (error) {
-      console.error("Error fetching user download statistics:", error);
+      console.error("[ANALYTICS] Error fetching user download statistics:", error);
       res.status(500).json({ error: "Failed to fetch user download statistics" });
     }
   });
@@ -263,7 +278,7 @@ export function registerAnalyticsRoutes(app: Express) {
         status = 'all'
       } = req.query;
       const offset = (Number(page) - 1) * Number(limit);
-      
+
       const database = db;
       if (!database) {
         return res.json({
@@ -276,7 +291,7 @@ export function registerAnalyticsRoutes(app: Express) {
           }
         });
       }
-      
+
       // Calculate date range
       const now = new Date();
       let startDate = new Date();
@@ -284,19 +299,19 @@ export function registerAnalyticsRoutes(app: Express) {
 
       try {
         let whereConditions = [gte(downloadLogs.downloadedAt, startDate)];
-        
+
         if (fileId) {
           whereConditions.push(eq(downloadLogs.fileId, String(fileId)));
         }
-        
+
         if (userId) {
           whereConditions.push(eq(downloadLogs.userId, String(userId)));
         }
-        
+
         if (entityType && entityType !== 'all') {
           whereConditions.push(eq(downloadLogs.entityType, String(entityType)));
         }
-        
+
         if (status !== 'all') {
           whereConditions.push(eq(downloadLogs.downloadStatus, String(status)));
         }
@@ -327,6 +342,8 @@ export function registerAnalyticsRoutes(app: Express) {
           .limit(Number(limit))
           .offset(offset);
 
+        console.log(`[ANALYTICS] Download logs: ${logs.length} results`);
+
         // Get total count for pagination
         const totalCount = await database
           .select({ count: count() })
@@ -343,7 +360,7 @@ export function registerAnalyticsRoutes(app: Express) {
           }
         });
       } catch (dbError) {
-        console.error("Database query error for download logs:", dbError);
+        console.error("[ANALYTICS] Database query error for download logs:", dbError);
         return res.json({
           logs: [],
           pagination: {
@@ -356,7 +373,7 @@ export function registerAnalyticsRoutes(app: Express) {
       }
 
     } catch (error) {
-      console.error("Error fetching download logs:", error);
+      console.error("[ANALYTICS] Error fetching download logs:", error);
       res.status(500).json({ error: "Failed to fetch download logs" });
     }
   });
@@ -366,7 +383,7 @@ export function registerAnalyticsRoutes(app: Express) {
     try {
       const { page = 1, limit = 20, entityType = 'all', timeframe = '30d' } = req.query;
       const offset = (Number(page) - 1) * Number(limit);
-      
+
       const database = db;
       if (!database) {
         return res.json({
@@ -387,7 +404,7 @@ export function registerAnalyticsRoutes(app: Express) {
 
       try {
         let whereConditions = [gte(downloadLogs.downloadedAt, startDate)];
-        
+
         if (entityType !== 'all') {
           whereConditions.push(eq(files.entityType, String(entityType)));
         }
@@ -435,7 +452,7 @@ export function registerAnalyticsRoutes(app: Express) {
           }
         });
       } catch (dbError) {
-        console.error("Database query error for file stats:", dbError);
+        console.error("[ANALYTICS] Database query error for file stats:", dbError);
         return res.json({
           files: [],
           pagination: {
@@ -448,7 +465,7 @@ export function registerAnalyticsRoutes(app: Express) {
       }
 
     } catch (error) {
-      console.error("Error fetching file download statistics:", error);
+      console.error("[ANALYTICS] Error fetching file download statistics:", error);
       res.status(500).json({ error: "Failed to fetch file download statistics" });
     }
   });
@@ -457,21 +474,16 @@ export function registerAnalyticsRoutes(app: Express) {
   app.get("/api/analytics/projects", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { timeframe = '30d' } = req.query;
-      
+
       const database = db;
       if (!database) {
-        return res.json({
-          timeframe,
-          startDate: new Date(),
-          endDate: new Date(),
-          projects: []
-        });
+        return res.json([]);
       }
-      
+
       // Calculate date range
       const now = new Date();
       let startDate = new Date();
-      
+
       switch (timeframe) {
         case '7d':
           startDate.setDate(now.getDate() - 7);
@@ -487,120 +499,37 @@ export function registerAnalyticsRoutes(app: Express) {
       }
 
       try {
-        // Get all projects first
-        const allProjects = await database
+        // Get projects with download stats
+        const projectStats = await database
           .select({
             id: projects.id,
-            name: projects.name,
-            description: projects.description
+            title: projects.title,
+            description: projects.description,
+            createdAt: projects.createdAt,
+            fileCount: sql<number>`COALESCE(COUNT(DISTINCT ${files.id}), 0)`,
+            downloadCount: sql<number>`COALESCE(COUNT(DISTINCT ${downloadLogs.id}), 0)`,
+            totalSize: sql<number>`COALESCE(SUM(${downloadLogs.downloadSize}), 0)`,
+            uniqueDownloaders: sql<number>`COALESCE(COUNT(DISTINCT ${downloadLogs.userId}), 0)`,
+            lastDownload: sql<string>`MAX(${downloadLogs.downloadedAt})`
           })
-          .from(projects);
+          .from(projects)
+          .leftJoin(files, eq(files.entityId, projects.id))
+          .leftJoin(downloadLogs, and(
+            eq(downloadLogs.fileId, files.id),
+            gte(downloadLogs.downloadedAt, startDate)
+          ))
+          .groupBy(projects.id, projects.title, projects.description, projects.createdAt)
+          .orderBy(desc(sql<number>`COALESCE(COUNT(DISTINCT ${downloadLogs.id}), 0)`));
 
-        // Get download stats for projects
-        const projectStats = [];
-        for (const project of allProjects) {
-          // Get downloads for project files directly
-          const projectFileDownloads = await database
-            .select({
-              downloadCount: count(downloadLogs.id),
-              totalDataDownloaded: sum(downloadLogs.downloadSize),
-              uniqueDownloaders: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`,
-              filesCount: sql<number>`COUNT(DISTINCT ${files.id})`,
-              lastDownload: sql<string>`MAX(${downloadLogs.downloadedAt})`
-            })
-            .from(downloadLogs)
-            .innerJoin(files, eq(downloadLogs.fileId, files.id))
-            .where(and(
-              eq(files.entityId, project.id),
-              eq(files.entityType, 'projects'),
-              gte(downloadLogs.downloadedAt, startDate)
-            ));
+        res.json(projectStats || []);
 
-          // Get downloads for episodes of this project
-          const episodeDownloads = await database
-            .select({
-              downloadCount: count(downloadLogs.id),
-              totalDataDownloaded: sum(downloadLogs.downloadSize),
-              uniqueDownloaders: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`,
-              filesCount: sql<number>`COUNT(DISTINCT ${files.id})`
-            })
-            .from(downloadLogs)
-            .innerJoin(files, eq(downloadLogs.fileId, files.id))
-            .innerJoin(episodes, eq(files.entityId, episodes.id))
-            .where(and(
-              eq(episodes.projectId, project.id),
-              eq(files.entityType, 'episodes'),
-              gte(downloadLogs.downloadedAt, startDate)
-            ));
-
-          // Get downloads for scripts of this project
-          const scriptDownloads = await database
-            .select({
-              downloadCount: count(downloadLogs.id),
-              totalDataDownloaded: sum(downloadLogs.downloadSize),
-              uniqueDownloaders: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`,
-              filesCount: sql<number>`COUNT(DISTINCT ${files.id})`
-            })
-            .from(downloadLogs)
-            .innerJoin(files, eq(downloadLogs.fileId, files.id))
-            .innerJoin(scripts, eq(files.entityId, scripts.id))
-            .where(and(
-              eq(scripts.projectId, project.id),
-              eq(files.entityType, 'scripts'),
-              gte(downloadLogs.downloadedAt, startDate)
-            ));
-
-          // Combine stats
-          const totalDownloads = (projectFileDownloads[0]?.downloadCount || 0) + 
-                                (episodeDownloads[0]?.downloadCount || 0) + 
-                                (scriptDownloads[0]?.downloadCount || 0);
-          
-          const totalData = (projectFileDownloads[0]?.totalDataDownloaded || 0) + 
-                           (episodeDownloads[0]?.totalDataDownloaded || 0) + 
-                           (scriptDownloads[0]?.totalDataDownloaded || 0);
-          
-          const uniqueUsers = Math.max(
-            projectFileDownloads[0]?.uniqueDownloaders || 0,
-            episodeDownloads[0]?.uniqueDownloaders || 0,
-            scriptDownloads[0]?.uniqueDownloaders || 0
-          );
-          
-          const totalFiles = (projectFileDownloads[0]?.filesCount || 0) + 
-                            (episodeDownloads[0]?.filesCount || 0) + 
-                            (scriptDownloads[0]?.filesCount || 0);
-
-          if (totalDownloads > 0) {
-            projectStats.push({
-              projectId: project.id,
-              projectName: project.name,
-              projectDescription: project.description,
-              downloadCount: totalDownloads,
-              totalDataDownloaded: totalData,
-              uniqueDownloaders: uniqueUsers,
-              filesCount: totalFiles,
-              lastDownload: projectFileDownloads[0]?.lastDownload
-            });
-          }
-        }
-
-        res.json({
-          timeframe,
-          startDate,
-          endDate: now,
-          projects: projectStats.sort((a, b) => b.downloadCount - a.downloadCount)
-        });
       } catch (dbError) {
-        console.error("Database error for project analytics:", dbError);
-        res.json({
-          timeframe,
-          startDate,
-          endDate: now,
-          projects: []
-        });
+        console.error("[ANALYTICS] Database error for project analytics:", dbError);
+        res.json([]);
       }
 
     } catch (error) {
-      console.error("Error fetching project analytics:", error);
+      console.error("[ANALYTICS] Error fetching project analytics:", error);
       res.status(500).json({ error: "Failed to fetch project analytics" });
     }
   });
@@ -609,13 +538,10 @@ export function registerAnalyticsRoutes(app: Express) {
   app.get("/api/analytics/episodes", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { timeframe = '30d', projectId } = req.query;
-      
+
       const database = db;
       if (!database) {
         return res.json({
-          timeframe,
-          startDate: new Date(),
-          endDate: new Date(),
           episodes: [],
           episodeDownloadsByProject: []
         });
@@ -624,7 +550,7 @@ export function registerAnalyticsRoutes(app: Express) {
       // Calculate date range
       const now = new Date();
       let startDate = new Date();
-      
+
       switch (timeframe) {
         case '7d':
           startDate.setDate(now.getDate() - 7);
@@ -697,8 +623,9 @@ export function registerAnalyticsRoutes(app: Express) {
           episodeDownloadsByProject,
           episodes: episodeStats
         });
+
       } catch (dbError) {
-        console.error("Database error for episode analytics:", dbError);
+        console.error("[ANALYTICS] Database error for episode analytics:", dbError);
         res.json({
           timeframe,
           startDate,
@@ -709,7 +636,7 @@ export function registerAnalyticsRoutes(app: Express) {
       }
 
     } catch (error) {
-      console.error("Error fetching episode analytics:", error);
+      console.error("[ANALYTICS] Error fetching episode analytics:", error);
       res.status(500).json({ error: "Failed to fetch episode analytics" });
     }
   });
@@ -718,13 +645,10 @@ export function registerAnalyticsRoutes(app: Express) {
   app.get("/api/analytics/scripts", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { timeframe = '30d', projectId } = req.query;
-      
+
       const database = db;
       if (!database) {
         return res.json({
-          timeframe,
-          startDate: new Date(),
-          endDate: new Date(),
           scripts: [],
           scriptDownloadsByProject: []
         });
@@ -733,7 +657,7 @@ export function registerAnalyticsRoutes(app: Express) {
       // Calculate date range
       const now = new Date();
       let startDate = new Date();
-      
+
       switch (timeframe) {
         case '7d':
           startDate.setDate(now.getDate() - 7);
@@ -785,6 +709,8 @@ export function registerAnalyticsRoutes(app: Express) {
             projectId: scripts.projectId,
             projectName: projects.name,
             downloadCount: count(downloadLogs.id),
+            totalDataDownloaded: sum(downloadLogs.downloadSize),
+            uniqueDownloaders: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`,
             lastDownload: sql<string>`MAX(${downloadLogs.downloadedAt})`
           })
           .from(files)
@@ -802,8 +728,9 @@ export function registerAnalyticsRoutes(app: Express) {
           scriptDownloadsByProject,
           scripts: scriptStats
         });
+
       } catch (dbError) {
-        console.error("Database error for script analytics:", dbError);
+        console.error("[ANALYTICS] Database error for script analytics:", dbError);
         res.json({
           timeframe,
           startDate,
@@ -814,8 +741,91 @@ export function registerAnalyticsRoutes(app: Express) {
       }
 
     } catch (error) {
-      console.error("Error fetching script analytics:", error);
+      console.error("[ANALYTICS] Error fetching script analytics:", error);
       res.status(500).json({ error: "Failed to fetch script analytics" });
+    }
+  });
+
+  // Users Analytics
+  app.get("/api/analytics/users", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const database = db;
+      if (!database) {
+        return res.json([]);
+      }
+
+      try {
+        const userStats = await database
+          .select({
+            id: users.id,
+            email: users.email,
+            name: users.name,
+            role: users.role,
+            isApproved: users.isApproved,
+            createdAt: users.createdAt,
+            downloadCount: sql<number>`COALESCE(COUNT(DISTINCT ${downloadLogs.id}), 0)`,
+            totalDataDownloaded: sql<number>`COALESCE(SUM(${downloadLogs.downloadSize}), 0)`,
+            lastDownload: sql<string>`MAX(${downloadLogs.downloadedAt})`,
+            lastActivity: sql<string>`MAX(COALESCE(${downloadLogs.downloadedAt}, ${users.createdAt}))`
+          })
+          .from(users)
+          .leftJoin(downloadLogs, eq(downloadLogs.userId, users.id))
+          .groupBy(users.id, users.email, users.name, users.role, users.isApproved, users.createdAt)
+          .orderBy(desc(sql<number>`COALESCE(COUNT(DISTINCT ${downloadLogs.id}), 0)`));
+
+        res.json(userStats || []);
+
+      } catch (dbError) {
+        console.error("[ANALYTICS] Database error for user analytics:", dbError);
+        res.json([]);
+      }
+
+    } catch (error) {
+      console.error("[ANALYTICS] Error fetching user analytics:", error);
+      res.status(500).json({ error: "Failed to fetch user analytics" });
+    }
+  });
+
+  // Files Analytics
+  app.get("/api/analytics/files", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const database = db;
+      if (!database) {
+        return res.json([]);
+      }
+
+      try {
+        const fileStats = await database
+          .select({
+            id: files.id,
+            filename: files.filename,
+            originalName: files.originalName,
+            mimeType: files.mimeType,
+            fileSize: files.fileSize,
+            entityType: files.entityType,
+            entityId: files.entityId,
+            createdAt: files.createdAt,
+            downloadCount: sql<number>`COALESCE(COUNT(DISTINCT ${downloadLogs.id}), 0)`,
+            totalDataDownloaded: sql<number>`COALESCE(SUM(${downloadLogs.downloadSize}), 0)`,
+            uniqueDownloaders: sql<number>`COALESCE(COUNT(DISTINCT ${downloadLogs.userId}), 0)`,
+            lastDownload: sql<string>`MAX(${downloadLogs.downloadedAt})`
+          })
+          .from(files)
+          .leftJoin(downloadLogs, eq(downloadLogs.fileId, files.id))
+          .groupBy(files.id, files.filename, files.originalName, files.mimeType, files.fileSize, files.entityType, files.entityId, files.createdAt)
+          .orderBy(desc(sql<number>`COALESCE(COUNT(DISTINCT ${downloadLogs.id}), 0)`));
+
+        console.log(`[ANALYTICS] Found ${fileStats.length} files`);
+        res.json(fileStats || []);
+
+      } catch (dbError) {
+        console.error("[ANALYTICS] Database error for file analytics:", dbError);
+        res.json([]);
+      }
+
+    } catch (error) {
+      console.error("[ANALYTICS] Error fetching file analytics:", error);
+      res.status(500).json({ error: "Failed to fetch file analytics" });
     }
   });
 }
