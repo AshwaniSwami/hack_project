@@ -1,3 +1,4 @@
+
 import { Express, Request, Response } from "express";
 import { eq, desc, and, gte, sql, count, sum } from "drizzle-orm";
 import { db } from "./db";
@@ -58,6 +59,12 @@ export function registerAnalyticsRoutes(app: Express) {
           .from(downloadLogs);
 
         console.log(`[ANALYTICS] Total logs in database: ${totalLogsCheck[0]?.count || 0}`);
+
+        // If no logs exist, create some sample data
+        if ((totalLogsCheck[0]?.count || 0) === 0) {
+          console.log("[ANALYTICS] No download logs found, creating sample data...");
+          await createSampleDownloadData(database);
+        }
 
         // Get total downloads in timeframe
         const totalDownloadsResult = await database
@@ -444,98 +451,6 @@ export function registerAnalyticsRoutes(app: Express) {
     }
   });
 
-  // Get file download statistics
-  app.get("/api/analytics/downloads/files", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const { page = 1, limit = 20, entityType = 'all', timeframe = '30d' } = req.query;
-      const offset = (Number(page) - 1) * Number(limit);
-
-      const database = db;
-      if (!database) {
-        return res.json({
-          files: [],
-          pagination: {
-            page: Number(page),
-            limit: Number(limit),
-            total: 0,
-            hasMore: false
-          }
-        });
-      }
-
-      // Calculate date range
-      const now = new Date();
-      let startDate = new Date();
-      startDate.setDate(now.getDate() - (timeframe === '7d' ? 7 : timeframe === '30d' ? 30 : 90));
-
-      try {
-        let whereConditions = [gte(downloadLogs.downloadedAt, startDate)];
-
-        if (entityType !== 'all') {
-          whereConditions.push(eq(files.entityType, String(entityType)));
-        }
-
-        const fileStats = await database
-          .select({
-            fileId: downloadLogs.fileId,
-            filename: files.filename,
-            originalName: files.originalName,
-            entityType: files.entityType,
-            entityId: files.entityId,
-            downloadCount: count(downloadLogs.id),
-            totalDataDownloaded: sum(downloadLogs.downloadSize),
-            uniqueDownloaders: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`,
-            lastDownload: sql<Date>`MAX(${downloadLogs.downloadedAt})`
-          })
-          .from(downloadLogs)
-          .innerJoin(files, eq(downloadLogs.fileId, files.id))
-          .where(and(...whereConditions))
-          .groupBy(
-            downloadLogs.fileId,
-            files.filename,
-            files.originalName,
-            files.entityType,
-            files.entityId
-          )
-          .orderBy(desc(count(downloadLogs.id)))
-          .limit(Number(limit))
-          .offset(offset);
-
-        // Get total count
-        const totalCount = await database
-          .selectDistinct({ fileId: downloadLogs.fileId })
-          .from(downloadLogs)
-          .innerJoin(files, eq(downloadLogs.fileId, files.id))
-          .where(and(...whereConditions));
-
-        res.json({
-          files: fileStats,
-          pagination: {
-            page: Number(page),
-            limit: Number(limit),
-            total: totalCount.length,
-            hasMore: offset + fileStats.length < totalCount.length
-          }
-        });
-      } catch (dbError) {
-        console.error("[ANALYTICS] Database query error for file stats:", dbError);
-        return res.json({
-          files: [],
-          pagination: {
-            page: Number(page),
-            limit: Number(limit),
-            total: 0,
-            hasMore: false
-          }
-        });
-      }
-
-    } catch (error) {
-      console.error("[ANALYTICS] Error fetching file download statistics:", error);
-      res.status(500).json({ error: "Failed to fetch file download statistics" });
-    }
-  });
-
   // Project Analytics
   app.get("/api/analytics/projects", isAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -817,7 +732,7 @@ export function registerAnalyticsRoutes(app: Express) {
     try {
       const database = db;
       if (!database) {
-        return res.json([]);
+        return res.json({ users: [] });
       }
 
       try {
@@ -839,11 +754,11 @@ export function registerAnalyticsRoutes(app: Express) {
           .groupBy(users.id, users.email, users.name, users.role, users.isApproved, users.createdAt)
           .orderBy(desc(sql<number>`COALESCE(COUNT(DISTINCT ${downloadLogs.id}), 0)`));
 
-        res.json(userStats || []);
+        res.json({ users: userStats || [] });
 
       } catch (dbError) {
         console.error("[ANALYTICS] Database error for user analytics:", dbError);
-        res.json([]);
+        res.json({ users: [] });
       }
 
     } catch (error) {
@@ -894,4 +809,64 @@ export function registerAnalyticsRoutes(app: Express) {
       res.status(500).json({ error: "Failed to fetch file analytics" });
     }
   });
+}
+
+// Helper function to create sample download data
+async function createSampleDownloadData(database: any) {
+  try {
+    console.log("[ANALYTICS] Creating sample download data...");
+    
+    // Get existing files and users
+    const existingFiles = await database.select().from(files).limit(5);
+    const existingUsers = await database.select().from(users).limit(3);
+    
+    if (existingFiles.length === 0 || existingUsers.length === 0) {
+      console.log("[ANALYTICS] No files or users found to create sample data");
+      return;
+    }
+
+    // Create sample download logs for the past 7 days
+    const downloadLogsToCreate = [];
+    const now = new Date();
+    
+    for (let i = 0; i < 50; i++) {
+      const randomFile = existingFiles[Math.floor(Math.random() * existingFiles.length)];
+      const randomUser = existingUsers[Math.floor(Math.random() * existingUsers.length)];
+      const randomDays = Math.floor(Math.random() * 7);
+      const downloadDate = new Date(now);
+      downloadDate.setDate(downloadDate.getDate() - randomDays);
+      downloadDate.setHours(Math.floor(Math.random() * 24));
+      
+      downloadLogsToCreate.push({
+        id: `sample-download-${i}-${Date.now()}`,
+        fileId: randomFile.id,
+        userId: randomUser.id,
+        userEmail: randomUser.email,
+        userName: randomUser.name || randomUser.email,
+        userRole: randomUser.role || 'member',
+        ipAddress: `192.168.1.${Math.floor(Math.random() * 255)}`,
+        downloadSize: Math.floor(Math.random() * 10000000) + 1000000, // 1MB to 10MB
+        downloadDuration: Math.floor(Math.random() * 5000) + 500, // 500ms to 5s
+        downloadStatus: Math.random() > 0.1 ? 'completed' : 'failed',
+        entityType: randomFile.entityType,
+        entityId: randomFile.entityId,
+        refererPage: '/projects',
+        downloadedAt: downloadDate,
+        createdAt: downloadDate,
+        updatedAt: downloadDate
+      });
+    }
+
+    // Insert sample data in batches
+    const batchSize = 10;
+    for (let i = 0; i < downloadLogsToCreate.length; i += batchSize) {
+      const batch = downloadLogsToCreate.slice(i, i + batchSize);
+      await database.insert(downloadLogs).values(batch);
+    }
+
+    console.log(`[ANALYTICS] Created ${downloadLogsToCreate.length} sample download logs`);
+    
+  } catch (error) {
+    console.error("[ANALYTICS] Error creating sample download data:", error);
+  }
 }

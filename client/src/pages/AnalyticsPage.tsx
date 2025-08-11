@@ -112,10 +112,11 @@ export function AnalyticsPage() {
   );
 
   // User Downloads Query with real-time updates
-  const { data: userDownloads = [], isLoading: usersLoading } = useAnalyticsQuery(
+  const { data: userDownloadsResponse = { users: [] }, isLoading: usersLoading } = useAnalyticsQuery(
     "/api/analytics/downloads/users",
     { timeframe, search: userSearchTerm, limit: "50" }
   );
+  const userDownloads = userDownloadsResponse?.users || [];
 
   // Download Logs Query with real-time updates  
   const { data: downloadLogs = { logs: [] }, isLoading: logsLoading } = useAnalyticsQuery(
@@ -133,7 +134,8 @@ export function AnalyticsPage() {
   const { data: projectStats = [], isLoading: projectsLoading } = useProjectsAnalytics();
   const { data: episodeStats = { episodes: [], episodeDownloadsByProject: [] }, isLoading: episodesLoading } = useEpisodesAnalytics();
   const { data: scriptStats = { scripts: [], scriptDownloadsByProject: [] }, isLoading: scriptsLoading } = useScriptsAnalytics();
-  const { data: userStats = { users: [] }, isLoading: usersLoading2 } = useUsersAnalytics();
+  const { data: userStatsResponse = { users: [] }, isLoading: usersLoading2 } = useUsersAnalytics();
+  const userStats = userStatsResponse?.users || [];
   const { data: fileStats2 = [], isLoading: filesLoading2 } = useFilesAnalytics();
 
   return (
@@ -1138,11 +1140,11 @@ export function AnalyticsPage() {
             <CardContent>
               {usersLoading ? (
                 <div className="text-center py-8 text-gray-500">Loading...</div>
-              ) : userDownloads?.users?.length === 0 ? (
+              ) : userDownloads?.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">No user downloads found</div>
               ) : (
                 <div className="space-y-3">
-                  {userDownloads?.users?.map((user: UserDownload) => (
+                  {userDownloads?.map((user: UserDownload) => (
                     <div
                       key={user.userId}
                       className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
