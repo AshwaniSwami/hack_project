@@ -15,7 +15,7 @@ import Episodes from "@/pages/episodes";
 import Scripts from "@/pages/scripts";
 import RadioStations from "@/pages/radio-stations";
 import Users from "@/pages/users";
-import { AnalyticsPage } from "@/pages/AnalyticsPage";
+import AnalyticsPageSimple from "@/pages/AnalyticsPageSimple";
 import OnboardingPage from "@/pages/onboarding";
 import AuthPage from "@/pages/AuthPage";
 import NotFound from "@/pages/not-found";
@@ -64,7 +64,7 @@ function Router() {
               {canAccessAdvancedFeatures && <Route path="/episodes" component={Episodes} />}
               {canAccessAdvancedFeatures && <Route path="/scripts" component={Scripts} />}
               {isAdmin && <Route path="/users" component={Users} />}
-              {isAdmin && <Route path="/analytics" component={AnalyticsPage} />}
+              {isAdmin && <Route path="/analytics" component={AnalyticsPageSimple} />}
               {isAdmin && <Route path="/onboarding" component={OnboardingPage} />}
             </OnboardingCheck>
           )}

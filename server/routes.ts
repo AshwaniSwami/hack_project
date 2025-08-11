@@ -101,13 +101,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register notification routes
   registerNotificationRoutes(app);
 
-  // Register WORKING analytics and download routes with CORRECT DATABASE SCHEMA
-  const { registerWorkingAnalyticsRoutes } = await import("./routes-analytics-working-fixed");
+  // Register WORKING analytics and download routes with REAL DATABASE DATA
+  const { registerAnalyticsRoutes } = await import("./routes-analytics-working");
   const { registerDownloadRoutes } = await import("./routes-simple-download");
-  const { registerSimpleAnalyticsRoutes } = await import("./routes-analytics-simple");
-  registerWorkingAnalyticsRoutes(app);
+  registerAnalyticsRoutes(app);
   registerDownloadRoutes(app);
-  registerSimpleAnalyticsRoutes(app);
 
   // Register simple theme and project routes that work with real database
   const { registerThemeRoutes } = await import("./simple-theme-routes");
