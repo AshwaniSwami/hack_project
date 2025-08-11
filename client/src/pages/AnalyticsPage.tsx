@@ -208,8 +208,15 @@ export function AnalyticsPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-                  {overviewLoading ? "..." : (overview?.totalDownloads || 0).toLocaleString()}
+                  {overviewLoading ? (
+                    <div className="animate-pulse bg-blue-200 dark:bg-blue-800 h-8 w-16 rounded"></div>
+                  ) : (
+                    <span>{(overview?.totalDownloads || 0).toLocaleString()}</span>
+                  )}
                 </div>
+                {!overviewLoading && overview?.totalDownloads === 0 && (
+                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">No downloads recorded</p>
+                )}
               </CardContent>
             </Card>
 
@@ -222,8 +229,15 @@ export function AnalyticsPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-emerald-900 dark:text-emerald-100">
-                  {overviewLoading ? "..." : (overview?.uniqueDownloaders || 0)}
+                  {overviewLoading ? (
+                    <div className="animate-pulse bg-emerald-200 dark:bg-emerald-800 h-8 w-12 rounded"></div>
+                  ) : (
+                    <span>{(overview?.uniqueDownloaders || 0)}</span>
+                  )}
                 </div>
+                {!overviewLoading && overview?.uniqueDownloaders === 0 && (
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">No users yet</p>
+                )}
               </CardContent>
             </Card>
 
@@ -236,8 +250,15 @@ export function AnalyticsPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-purple-900 dark:text-purple-100">
-                  {overviewLoading ? "..." : formatBytes(overview?.totalDataDownloaded || 0)}
+                  {overviewLoading ? (
+                    <div className="animate-pulse bg-purple-200 dark:bg-purple-800 h-8 w-20 rounded"></div>
+                  ) : (
+                    <span>{formatBytes(overview?.totalDataDownloaded || 0)}</span>
+                  )}
                 </div>
+                {!overviewLoading && overview?.totalDataDownloaded === 0 && (
+                  <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">No data transferred</p>
+                )}
               </CardContent>
             </Card>
 
@@ -250,8 +271,15 @@ export function AnalyticsPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-pink-900 dark:text-pink-100">
-                  {overviewLoading ? "..." : (overview?.popularFiles?.length || 0)}
+                  {overviewLoading ? (
+                    <div className="animate-pulse bg-pink-200 dark:bg-pink-800 h-8 w-12 rounded"></div>
+                  ) : (
+                    <span>{(overview?.popularFiles?.length || 0)}</span>
+                  )}
                 </div>
+                {!overviewLoading && (overview?.popularFiles?.length || 0) === 0 && (
+                  <p className="text-xs text-pink-600 dark:text-pink-400 mt-1">No files downloaded</p>
+                )}
               </CardContent>
             </Card>
           </div>

@@ -15,7 +15,7 @@ export function registerAnalyticsRoutes(app: Express) {
       // Get database instance
       const database = db;
       if (!database) {
-        console.log("[ANALYTICS] Database not available");
+        console.log("[ANALYTICS] Database not available - returning fallback data");
         return res.json({
           timeframe,
           totalDownloads: 0,
@@ -52,13 +52,20 @@ export function registerAnalyticsRoutes(app: Express) {
       console.log(`[ANALYTICS] Date range: ${startDate.toISOString()} to ${now.toISOString()}`);
 
       try {
+        // First check if download_logs table has any data
+        const totalLogsCheck = await database
+          .select({ count: count() })
+          .from(downloadLogs);
+
+        console.log(`[ANALYTICS] Total logs in database: ${totalLogsCheck[0]?.count || 0}`);
+
         // Get total downloads in timeframe
         const totalDownloadsResult = await database
           .select({ count: count() })
           .from(downloadLogs)
           .where(gte(downloadLogs.downloadedAt, startDate));
 
-        console.log(`[ANALYTICS] Total downloads query result:`, totalDownloadsResult);
+        console.log(`[ANALYTICS] Total downloads in timeframe: ${totalDownloadsResult[0]?.count || 0}`);
 
         // Get unique users who downloaded
         const uniqueDownloadersResult = await database
@@ -72,76 +79,125 @@ export function registerAnalyticsRoutes(app: Express) {
           .from(downloadLogs)
           .where(gte(downloadLogs.downloadedAt, startDate));
 
-        // Get most popular files
-        const popularFiles = await database
-          .select({
-            fileId: downloadLogs.fileId,
-            filename: files.filename,
-            originalName: files.originalName,
-            entityType: files.entityType,
-            entityId: files.entityId,
-            downloadCount: count(downloadLogs.id),
-            totalSize: sum(downloadLogs.downloadSize)
-          })
-          .from(downloadLogs)
-          .innerJoin(files, eq(downloadLogs.fileId, files.id))
-          .where(gte(downloadLogs.downloadedAt, startDate))
-          .groupBy(downloadLogs.fileId, files.filename, files.originalName, files.entityType, files.entityId)
-          .orderBy(desc(count(downloadLogs.id)))
-          .limit(10);
+        // Get most popular files with better error handling
+        let popularFiles = [];
+        try {
+          popularFiles = await database
+            .select({
+              fileId: downloadLogs.fileId,
+              filename: files.filename,
+              originalName: files.originalName,
+              entityType: files.entityType,
+              entityId: files.entityId,
+              downloadCount: count(downloadLogs.id),
+              totalSize: sum(downloadLogs.downloadSize)
+            })
+            .from(downloadLogs)
+            .innerJoin(files, eq(downloadLogs.fileId, files.id))
+            .where(gte(downloadLogs.downloadedAt, startDate))
+            .groupBy(downloadLogs.fileId, files.filename, files.originalName, files.entityType, files.entityId)
+            .orderBy(desc(count(downloadLogs.id)))
+            .limit(10);
+        } catch (filesError) {
+          console.warn("[ANALYTICS] Error fetching popular files:", filesError);
+          popularFiles = [];
+        }
 
         // Get downloads by day for chart
-        const downloadsByDay = await database
-          .select({
-            date: sql<string>`DATE(${downloadLogs.downloadedAt})`,
-            count: count(downloadLogs.id),
-            uniqueUsers: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`,
-            totalSize: sum(downloadLogs.downloadSize)
-          })
-          .from(downloadLogs)
-          .where(gte(downloadLogs.downloadedAt, startDate))
-          .groupBy(sql`DATE(${downloadLogs.downloadedAt})`)
-          .orderBy(sql`DATE(${downloadLogs.downloadedAt})`);
+        let downloadsByDay = [];
+        try {
+          downloadsByDay = await database
+            .select({
+              date: sql<string>`DATE(${downloadLogs.downloadedAt})`,
+              count: count(downloadLogs.id),
+              uniqueUsers: sql<number>`COUNT(DISTINCT ${downloadLogs.userId})`,
+              totalSize: sum(downloadLogs.downloadSize)
+            })
+            .from(downloadLogs)
+            .where(gte(downloadLogs.downloadedAt, startDate))
+            .groupBy(sql`DATE(${downloadLogs.downloadedAt})`)
+            .orderBy(sql`DATE(${downloadLogs.downloadedAt})`);
+        } catch (dayError) {
+          console.warn("[ANALYTICS] Error fetching downloads by day:", dayError);
+          downloadsByDay = [];
+        }
 
         // Get downloads by entity type
-        const downloadsByType = await database
-          .select({
-            entityType: downloadLogs.entityType,
-            count: count(downloadLogs.id),
-            totalSize: sum(downloadLogs.downloadSize)
-          })
-          .from(downloadLogs)
-          .where(gte(downloadLogs.downloadedAt, startDate))
-          .groupBy(downloadLogs.entityType)
-          .orderBy(desc(count(downloadLogs.id)));
+        let downloadsByType = [];
+        try {
+          downloadsByType = await database
+            .select({
+              entityType: downloadLogs.entityType,
+              count: count(downloadLogs.id),
+              totalSize: sum(downloadLogs.downloadSize)
+            })
+            .from(downloadLogs)
+            .where(gte(downloadLogs.downloadedAt, startDate))
+            .groupBy(downloadLogs.entityType)
+            .orderBy(desc(count(downloadLogs.id)));
+        } catch (typeError) {
+          console.warn("[ANALYTICS] Error fetching downloads by type:", typeError);
+          downloadsByType = [];
+        }
 
-        // Get downloads by hour
-        const downloadsByHour = await database
-          .select({
-            hour: sql<number>`EXTRACT(hour FROM ${downloadLogs.downloadedAt})`,
-            count: count(downloadLogs.id)
-          })
-          .from(downloadLogs)
-          .where(gte(downloadLogs.downloadedAt, startDate))
-          .groupBy(sql`EXTRACT(hour FROM ${downloadLogs.downloadedAt})`)
-          .orderBy(sql`EXTRACT(hour FROM ${downloadLogs.downloadedAt})`);
+        // Get downloads by hour with fallback
+        let downloadsByHour = [];
+        try {
+          const hourlyData = await database
+            .select({
+              hour: sql<number>`EXTRACT(hour FROM ${downloadLogs.downloadedAt})`,
+              count: count(downloadLogs.id)
+            })
+            .from(downloadLogs)
+            .where(gte(downloadLogs.downloadedAt, startDate))
+            .groupBy(sql`EXTRACT(hour FROM ${downloadLogs.downloadedAt})`)
+            .orderBy(sql`EXTRACT(hour FROM ${downloadLogs.downloadedAt})`);
+
+          // Fill in missing hours with 0 counts
+          const hourlyMap = new Map(hourlyData.map(h => [h.hour, h.count]));
+          downloadsByHour = Array.from({length: 24}, (_, hour) => ({
+            hour,
+            count: hourlyMap.get(hour) || 0
+          }));
+        } catch (hourError) {
+          console.warn("[ANALYTICS] Error fetching downloads by hour:", hourError);
+          downloadsByHour = Array.from({length: 24}, (_, hour) => ({ hour, count: 0 }));
+        }
 
         const result = {
           timeframe,
-          totalDownloads: totalDownloadsResult[0]?.count || 0,
-          uniqueDownloaders: uniqueDownloadersResult[0]?.count || 0,
-          totalDataDownloaded: totalDataDownloadedResult[0]?.total || 0,
-          popularFiles: popularFiles || [],
-          downloadsByDay: downloadsByDay || [],
-          downloadsByType: downloadsByType || [],
-          downloadsByHour: downloadsByHour || []
+          totalDownloads: Number(totalDownloadsResult[0]?.count || 0),
+          uniqueDownloaders: Number(uniqueDownloadersResult[0]?.count || 0),
+          totalDataDownloaded: Number(totalDataDownloadedResult[0]?.total || 0),
+          popularFiles: popularFiles.map(file => ({
+            ...file,
+            downloadCount: Number(file.downloadCount || 0),
+            totalSize: Number(file.totalSize || 0)
+          })),
+          downloadsByDay: downloadsByDay.map(day => ({
+            ...day,
+            count: Number(day.count || 0),
+            uniqueUsers: Number(day.uniqueUsers || 0),
+            totalSize: Number(day.totalSize || 0)
+          })),
+          downloadsByType: downloadsByType.map(type => ({
+            ...type,
+            count: Number(type.count || 0),
+            totalSize: Number(type.totalSize || 0)
+          })),
+          downloadsByHour: downloadsByHour.map(hour => ({
+            ...hour,
+            count: Number(hour.count || 0)
+          }))
         };
 
         console.log(`[ANALYTICS] Overview result:`, {
           totalDownloads: result.totalDownloads,
           uniqueDownloaders: result.uniqueDownloaders,
+          totalDataDownloaded: result.totalDataDownloaded,
           popularFilesCount: result.popularFiles.length,
-          downloadsByDayCount: result.downloadsByDay.length
+          downloadsByDayCount: result.downloadsByDay.length,
+          downloadsByTypeCount: result.downloadsByType.length
         });
 
         res.json(result);
@@ -162,7 +218,17 @@ export function registerAnalyticsRoutes(app: Express) {
 
     } catch (error) {
       console.error("[ANALYTICS] Error fetching download overview:", error);
-      res.status(500).json({ error: "Failed to fetch download overview" });
+      res.status(500).json({ 
+        error: "Failed to fetch download overview",
+        timeframe: req.query.timeframe || '7d',
+        totalDownloads: 0,
+        uniqueDownloaders: 0,
+        totalDataDownloaded: 0,
+        popularFiles: [],
+        downloadsByDay: [],
+        downloadsByType: [],
+        downloadsByHour: Array.from({length: 24}, (_, i) => ({ hour: i, count: 0 }))
+      });
     }
   });
 
