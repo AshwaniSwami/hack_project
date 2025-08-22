@@ -28,18 +28,21 @@ function setCachedFile(fileId: string, buffer: Buffer): void {
   }
 }
 
+import { isAuthenticated } from "./auth";
+
 export function registerDownloadRoutes(app: Express) {
-  app.get("/api/files/:fileId/download", async (req: Request, res: Response) => {
+  app.get("/api/files/:fileId/download", isAuthenticated, async (req: any, res: Response) => {
     const startTime = Date.now();
     const { fileId } = req.params;
     
     try {
-      // Check if user is authenticated via session
-      if (!req.session || !req.session.userId) {
+      // User is already authenticated via middleware
+      const user = req.user;
+      if (!user) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
-      console.log(`[DOWNLOAD] ${fileId} requested by user ${req.session.userId}`);
+      console.log(`[DOWNLOAD] ${fileId} requested by ${user.email} (${user.id})`);
 
       // Check cache first for file buffer
       let fileBuffer = getCachedFile(fileId);
@@ -114,10 +117,10 @@ export function registerDownloadRoutes(app: Express) {
                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW())
               `, [
                 fileRecord.id,
-                req.session?.userId || 'unknown',
-                'temp-user@example.com', // Temporary for auth
-                'Temp User',
-                'member',
+                user.id,
+                user.email || 'unknown@example.com',
+                `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'Unknown User',
+                user.role || 'member',
                 clientIp,
                 userAgent,
                 fileRecord.file_size || fileBuffer.length,
