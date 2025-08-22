@@ -65,8 +65,7 @@ export const isAuthenticated = async (req: AuthenticatedRequest, res: Response, 
           id: user.id,
           email: user.email,
           role: user.role,
-          firstName: user.firstName,
-          lastName: user.lastName,
+          name: user.name,
         };
         console.log("Database auth - user authenticated:", req.user.email);
         next();
@@ -114,8 +113,7 @@ export const isAdmin = async (req: AuthenticatedRequest, res: Response, next: Ne
           id: user.id,
           email: user.email,
           role: user.role,
-          firstName: user.firstName,
-          lastName: user.lastName,
+          name: user.name,
         };
         next();
       } else {
@@ -221,7 +219,7 @@ export const login = async (req: Request, res: Response) => {
 // Register handler
 export const register = async (req: Request, res: Response) => {
   try {
-    const { email, password, firstName, lastName } = req.body;
+    const { email, password, name } = req.body;
     
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password are required" });
@@ -250,13 +248,10 @@ export const register = async (req: Request, res: Response) => {
       id: nanoid(),
       email,
       password: hashedPassword,
-      firstName,
-      lastName,
+      name,
       role,
       isActive: isFirstUser, // Only admin is active by default
-      isVerified,
-      loginCount: isFirstUser ? 1 : 0,
-      lastLoginAt: isFirstUser ? new Date() : undefined,
+      lastLogin: isFirstUser ? new Date() : undefined,
     });
 
     // Only log in admin users immediately, others need verification
@@ -270,7 +265,7 @@ export const register = async (req: Request, res: Response) => {
         `${email} needs approval to access the platform`,
         newUser.id,
         newUser.email,
-        `${firstName} ${lastName}`,
+        name || 'Unknown User',
         "/users",
         "high"
       );
@@ -281,8 +276,7 @@ export const register = async (req: Request, res: Response) => {
       user: {
         id: newUser.id,
         email: newUser.email,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
+        name: newUser.name,
         role: newUser.role,
       },
       message: isFirstUser 
