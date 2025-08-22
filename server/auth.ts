@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import { storage } from "./storage";
-import { nanoid } from "nanoid";
 import { createAdminNotification } from "./routes-notifications";
 import { isDatabaseAvailable } from "./db";
 
@@ -243,9 +242,8 @@ export const register = async (req: Request, res: Response) => {
     // First user (admin) is auto-verified, others need verification
     const isVerified = isFirstUser;
 
-    // Create user
+    // Create user with database-generated UUID
     const newUser = await storage.createUser({
-      id: nanoid(),
       email,
       password: hashedPassword,
       name,
