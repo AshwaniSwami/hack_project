@@ -1,0 +1,269 @@
+-- Enable UUID extension for PostgreSQL
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Session storage table (Required for Replit Auth)
+CREATE TABLE IF NOT EXISTS sessions (
+    sid VARCHAR PRIMARY KEY,
+    sess JSONB NOT NULL,
+    expire TIMESTAMP NOT NULL
+);
+CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON sessions(expire);
+
+-- Users table (Required for Replit Auth)
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email VARCHAR UNIQUE,
+    name VARCHAR,
+    role VARCHAR DEFAULT 'member',
+    password VARCHAR,
+    avatar_url TEXT,
+    is_active BOOLEAN DEFAULT true,
+    last_login TIMESTAMP,
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP DEFAULT now()
+);
+
+-- OTP verification table
+CREATE TABLE IF NOT EXISTS otp_verifications (
+    id VARCHAR PRIMARY KEY NOT NULL,
+    user_id VARCHAR NOT NULL,
+    otp_code VARCHAR(6) NOT NULL,
+    purpose VARCHAR(50) NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    is_used BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT now()
+);
+
+-- Themes table
+CREATE TABLE IF NOT EXISTS themes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL UNIQUE,
+    description TEXT,
+    color_hex VARCHAR(7) NOT NULL DEFAULT '#3B82F6',
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP DEFAULT now()
+);
+
+-- Projects table
+CREATE TABLE IF NOT EXISTS projects (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    theme_id UUID,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP DEFAULT now()
+);
+
+-- Episodes table
+CREATE TABLE IF NOT EXISTS episodes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    project_id UUID NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP DEFAULT now()
+);
+
+-- Scripts table
+CREATE TABLE IF NOT EXISTS scripts (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    project_id UUID NOT NULL,
+    author_id VARCHAR NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'Draft',
+    language VARCHAR(10) NOT NULL DEFAULT 'en',
+    original_script_id UUID,
+    language_group VARCHAR(100),
+    is_original BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP DEFAULT now()
+);
+
+-- Create indexes for scripts
+CREATE INDEX IF NOT EXISTS idx_scripts_language ON scripts(language);
+CREATE INDEX IF NOT EXISTS idx_scripts_language_group ON scripts(language_group);
+CREATE INDEX IF NOT EXISTS idx_scripts_original ON scripts(original_script_id);
+CREATE INDEX IF NOT EXISTS idx_scripts_project_language ON scripts(project_id, language);
+
+-- Topics table
+CREATE TABLE IF NOT EXISTS topics (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT now()
+);
+
+-- Script-Topic junction table
+CREATE TABLE IF NOT EXISTS script_topics (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    script_id UUID NOT NULL,
+    topic_id UUID NOT NULL
+);
+
+-- Radio Stations table
+CREATE TABLE IF NOT EXISTS radio_stations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID,
+    name VARCHAR(255) NOT NULL,
+    contact_person VARCHAR(255),
+    email VARCHAR(255) NOT NULL,
+    phone VARCHAR(50),
+    address TEXT,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP DEFAULT now()
+);
+
+-- Free Project Access table
+CREATE TABLE IF NOT EXISTS free_project_access (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    radio_station_id UUID NOT NULL,
+    project_id UUID NOT NULL,
+    granted_by_user_id UUID,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT now()
+);
+
+-- File Folders table
+CREATE TABLE IF NOT EXISTS file_folders (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    parent_folder_id UUID,
+    entity_type VARCHAR(50) NOT NULL,
+    entity_id UUID NOT NULL,
+    folder_path TEXT,
+    sort_order INTEGER DEFAULT 0,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP DEFAULT now()
+);
+
+-- Create indexes for file folders
+CREATE INDEX IF NOT EXISTS idx_folders_entity ON file_folders(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_folders_parent ON file_folders(parent_folder_id);
+CREATE INDEX IF NOT EXISTS idx_folders_path ON file_folders(folder_path);
+
+-- Files table
+CREATE TABLE IF NOT EXISTS files (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    filename VARCHAR(255) NOT NULL,
+    original_name VARCHAR(255) NOT NULL,
+    mime_type VARCHAR(100) NOT NULL,
+    file_size INTEGER NOT NULL,
+    file_data TEXT NOT NULL,
+    entity_type VARCHAR(50) NOT NULL,
+    entity_id UUID,
+    folder_id UUID,
+    uploaded_by VARCHAR,
+    sort_order INTEGER DEFAULT 0,
+    tags TEXT[],
+    description TEXT,
+    version INTEGER DEFAULT 1,
+    is_archived BOOLEAN DEFAULT false,
+    is_active BOOLEAN DEFAULT true,
+    file_path TEXT,
+    checksum VARCHAR(64),
+    access_level VARCHAR(20) DEFAULT 'project',
+    download_count INTEGER DEFAULT 0,
+    last_accessed_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP DEFAULT now()
+);
+
+-- Create indexes for files
+CREATE INDEX IF NOT EXISTS idx_files_entity ON files(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_files_folder ON files(folder_id);
+CREATE INDEX IF NOT EXISTS idx_files_sort_order ON files(entity_type, entity_id, sort_order);
+CREATE INDEX IF NOT EXISTS idx_files_created_at ON files(created_at);
+CREATE INDEX IF NOT EXISTS idx_files_checksum ON files(checksum);
+CREATE INDEX IF NOT EXISTS idx_files_path ON files(file_path);
+CREATE INDEX IF NOT EXISTS idx_files_tags ON files USING GIN(tags);
+
+-- Download Logs table
+CREATE TABLE IF NOT EXISTS download_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    file_id UUID NOT NULL,
+    user_id VARCHAR NOT NULL,
+    user_email VARCHAR,
+    user_name VARCHAR,
+    user_role VARCHAR,
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    download_size INTEGER,
+    download_duration INTEGER,
+    download_status VARCHAR(20) DEFAULT 'completed',
+    entity_type VARCHAR(50),
+    entity_id UUID,
+    referer_page TEXT,
+    downloaded_at TIMESTAMP DEFAULT now()
+);
+
+-- Create indexes for download logs
+CREATE INDEX IF NOT EXISTS idx_downloads_file ON download_logs(file_id);
+CREATE INDEX IF NOT EXISTS idx_downloads_user ON download_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_downloads_date ON download_logs(downloaded_at);
+CREATE INDEX IF NOT EXISTS idx_downloads_entity ON download_logs(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_downloads_status ON download_logs(download_status);
+
+-- Notifications table
+CREATE TABLE IF NOT EXISTS notifications (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id VARCHAR NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    related_user_id VARCHAR,
+    related_user_email VARCHAR,
+    related_user_name VARCHAR,
+    is_read BOOLEAN DEFAULT false,
+    is_archived BOOLEAN DEFAULT false,
+    priority VARCHAR(20) DEFAULT 'normal',
+    action_url VARCHAR(500),
+    metadata JSONB,
+    created_at TIMESTAMP DEFAULT now(),
+    read_at TIMESTAMP
+);
+
+-- Create indexes for notifications
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_type ON notifications(type);
+CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(is_read);
+CREATE INDEX IF NOT EXISTS idx_notifications_created ON notifications(created_at);
+CREATE INDEX IF NOT EXISTS idx_notifications_priority ON notifications(priority);
+
+-- Onboarding Form Configuration table
+CREATE TABLE IF NOT EXISTS onboarding_form_config (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    version INTEGER DEFAULT 1,
+    is_active BOOLEAN DEFAULT true,
+    questions JSONB NOT NULL,
+    created_by VARCHAR NOT NULL,
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP DEFAULT now()
+);
+
+-- Create indexes for onboarding form config
+CREATE INDEX IF NOT EXISTS idx_onboarding_form_version ON onboarding_form_config(version);
+CREATE INDEX IF NOT EXISTS idx_onboarding_form_active ON onboarding_form_config(is_active);
+CREATE INDEX IF NOT EXISTS idx_onboarding_form_created ON onboarding_form_config(created_at);
+
+-- Onboarding Form Responses table
+CREATE TABLE IF NOT EXISTS onboarding_form_responses (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id VARCHAR NOT NULL,
+    form_config_id UUID NOT NULL,
+    question_id VARCHAR NOT NULL,
+    question_type VARCHAR(20) NOT NULL,
+    question_label TEXT NOT NULL,
+    response JSONB NOT NULL,
+    is_compulsory BOOLEAN DEFAULT false,
+    submitted_at TIMESTAMP DEFAULT now()
+);
+
+-- Create indexes for onboarding form responses
+CREATE INDEX IF NOT EXISTS idx_onboarding_responses_user ON onboarding_form_responses(user_id);
+CREATE INDEX IF NOT EXISTS idx_onboarding_responses_form ON onboarding_form_responses(form_config_id);
+CREATE INDEX IF NOT EXISTS idx_onboarding_responses_question ON onboarding_form_responses(question_id);
+CREATE INDEX IF NOT EXISTS idx_onboarding_responses_submitted ON onboarding_form_responses(submitted_at);

@@ -172,14 +172,16 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Check if user is active
+    // Check if user is active/verified (except for admin who is auto-verified)
+    // Note: We use isActive for both verification and account status
     if (!user.isActive) {
-      return res.status(403).json({ message: "Account has been suspended. Please contact an administrator." });
-    }
-
-    // Check if user is verified (except for admin who is auto-verified)
-    if (!user.isVerified && user.role !== 'admin') {
-      return res.status(403).json({ message: "Account pending verification. Please wait for admin approval." });
+      if (user.role === 'admin') {
+        // Admin accounts should always be active
+        return res.status(403).json({ message: "Account has been suspended. Please contact an administrator." });
+      } else {
+        // Member accounts that are not active are pending verification
+        return res.status(403).json({ message: "Account pending verification. Please wait for admin approval." });
+      }
     }
 
     // Check password
