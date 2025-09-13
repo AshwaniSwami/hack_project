@@ -7,10 +7,9 @@ import { isDatabaseAvailable } from "./db";
 export interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
-    email: string;
-    role: string;
-    firstName?: string;
-    lastName?: string;
+    email: string | null;
+    role: string | null;
+    name?: string | null;
   };
 }
 
@@ -47,8 +46,7 @@ export const isAuthenticated = async (req: AuthenticatedRequest, res: Response, 
             id: TEMP_ADMIN.id,
             email: TEMP_ADMIN.email,
             role: TEMP_ADMIN.role,
-            firstName: TEMP_ADMIN.firstName,
-            lastName: TEMP_ADMIN.lastName,
+            name: TEMP_ADMIN.firstName + ' ' + TEMP_ADMIN.lastName,
           };
           console.log("Demo auth - user authenticated:", req.user);
           return next();
@@ -95,8 +93,7 @@ export const isAdmin = async (req: AuthenticatedRequest, res: Response, next: Ne
             id: TEMP_ADMIN.id,
             email: TEMP_ADMIN.email,
             role: TEMP_ADMIN.role,
-            firstName: TEMP_ADMIN.firstName,
-            lastName: TEMP_ADMIN.lastName,
+            name: TEMP_ADMIN.firstName + ' ' + TEMP_ADMIN.lastName,
           };
           next();
         } else {
@@ -193,8 +190,7 @@ export const login = async (req: Request, res: Response) => {
 
     // Update login stats
     await storage.updateUser(user.id, {
-      loginCount: (user.loginCount || 0) + 1,
-      lastLoginAt: new Date(),
+      lastLogin: new Date(),
     });
 
     // Store user ID in session
@@ -206,8 +202,7 @@ export const login = async (req: Request, res: Response) => {
       user: {
         id: user.id,
         email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        name: user.name,
         role: user.role,
       }
     });
@@ -264,7 +259,7 @@ export const register = async (req: Request, res: Response) => {
         "User Verification Required",
         `${email} needs approval to access the platform`,
         newUser.id,
-        newUser.email,
+        newUser.email || email,
         name || 'Unknown User',
         "/users",
         "high"
@@ -318,8 +313,7 @@ export const getCurrentUser = async (req: AuthenticatedRequest, res: Response) =
         return res.json({
           id: TEMP_ADMIN.id,
           email: TEMP_ADMIN.email,
-          firstName: TEMP_ADMIN.firstName,
-          lastName: TEMP_ADMIN.lastName,
+          name: TEMP_ADMIN.firstName + ' ' + TEMP_ADMIN.lastName,
           role: TEMP_ADMIN.role,
         });
       } else {
@@ -339,8 +333,7 @@ export const getCurrentUser = async (req: AuthenticatedRequest, res: Response) =
     res.json({
       id: user.id,
       email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
+      name: user.name,
       role: user.role,
     });
   } catch (error) {

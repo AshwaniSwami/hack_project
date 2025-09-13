@@ -154,7 +154,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Emergency admin promotion for first user
   app.post('/api/auth/promote-first-admin', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id || (req.session as any)?.userId;
       const allUsers = await storage.getAllUsers();
 
       // Only allow if there are no admins in the system
