@@ -35,7 +35,7 @@ import {
   type Notification,
   type InsertNotification,
 } from "@shared/schema";
-import { db as getDb, isDatabaseAvailable, requireDatabase } from "./db";
+import { getDb, isDatabaseAvailable, requireDatabase } from "./db";
 import { eq, desc, and, sql, like, or, asc } from "drizzle-orm";
 
 export interface IStorage {
