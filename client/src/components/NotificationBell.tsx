@@ -28,14 +28,14 @@ interface NotificationBellProps {
 }
 
 export function NotificationBell({ userRole }: NotificationBellProps) {
-  const queryClient = useQueryClient();
-  const [open, setOpen] = useState(false);
-  const [location, navigate] = useLocation();
-
-  // Only show for admin users
+  // Only show for admin users - check before any hooks
   if (userRole !== 'admin') {
     return null;
   }
+
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [location, navigate] = useLocation();
 
   // Fetch unread notifications
   const { data: unreadData, isLoading } = useQuery({

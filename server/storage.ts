@@ -212,7 +212,7 @@ export class DatabaseStorage implements IStorage {
     return await dbInstance
       .select()
       .from(users)
-      .where(and(eq(users.isVerified, false), eq(users.role, "member")))
+      .where(and(eq(users.isActive, false), eq(users.role, "member")))
       .orderBy(desc(users.createdAt));
   }
 
@@ -220,7 +220,7 @@ export class DatabaseStorage implements IStorage {
     const dbInstance = requireDatabase();
     const [user] = await dbInstance
       .update(users)
-      .set({ isVerified: true, isActive: true, updatedAt: new Date() })
+      .set({ isActive: true, updatedAt: new Date() })
       .where(eq(users.id, id))
       .returning();
     return user;
