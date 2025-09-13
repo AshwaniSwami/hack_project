@@ -781,7 +781,7 @@ export class DatabaseStorage implements IStorage {
     await dbInstance.execute(sql`
       UPDATE download_logs 
       SET user_email = u.email, 
-          user_name = COALESCE(u.first_name || ' ' || u.last_name, u.username, u.email),
+          user_name = COALESCE(u.name, u.email),
           user_role = u.role
       FROM users u 
       WHERE download_logs.user_id = u.id 
@@ -795,10 +795,8 @@ export class FallbackStorage implements IStorage {
     {
       id: "temp-admin-001",
       email: "admin@example.com",
-      username: "admin",
+      name: "admin",
       password: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", // password: "password"
-      firstName: "Admin",
-      lastName: "User",
       role: "admin",
       isActive: true,
       profileImageUrl: null,
@@ -822,7 +820,7 @@ export class FallbackStorage implements IStorage {
     return this.tempUsers.find(u => u.id === id);
   }
   async getUserByUsername(username: string): Promise<User | undefined> { 
-    return this.tempUsers.find(u => u.username === username || u.email === username);
+    return this.tempUsers.find(u => u.name === username || u.email === username);
   }
   async upsertUser(user: UpsertUser): Promise<User> { return this.throwDatabaseError(); }
   async createUser(user: InsertUser): Promise<User> { return this.throwDatabaseError(); }

@@ -119,7 +119,7 @@ export function registerDownloadRoutes(app: Express) {
                 fileRecord.id,
                 user.id,
                 user.email || 'unknown@example.com',
-                `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'Unknown User',
+                user.name || user.email || 'Unknown User',
                 user.role || 'member',
                 clientIp,
                 userAgent,
@@ -135,7 +135,7 @@ export function registerDownloadRoutes(app: Express) {
               await logPool.query(`
                 UPDATE files 
                 SET download_count = COALESCE(download_count, 0) + 1,
-                    last_download_at = NOW()
+                    last_accessed_at = NOW()
                 WHERE id = $1
               `, [fileId]);
 
