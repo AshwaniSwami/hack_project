@@ -1,0 +1,68 @@
+
+🎯 Proposed Transformation Plan
+Entity Mapping (Minimal Backend Changes)
+Projects → Hackathons
+
+Keep same structure, just rename terminology
+themeId becomes categoryId (Web Dev, AI/ML, Blockchain, etc.)
+Episodes → Teams
+
+Each hackathon has multiple participating teams
+Add fields: teamSize, teamLeader, registrationStatus
+Perfect fit - maintains same parent-child relationship
+Scripts → Submissions
+
+Each team creates project submissions (code, docs, presentations)
+Keep authorId (team leader), content (project description)
+Repurpose language field → submissionType (code/documentation/presentation)
+status field perfect for (Draft/Submitted/UnderReview/Evaluated)
+Radio Stations → Colleges/Venues
+
+Organizations/colleges hosting or participating
+Keep same access control structure for hackathon access
+Themes → Categories/Tracks
+
+Hackathon categories (Web Dev, AI/ML, Mobile, etc.)
+User Roles Transformation
+Current	New	Permissions
+Admin	Organizer	Full access - create hackathons, manage teams, view all submissions, download all files
+Editor	Analyzer/Judge	View & download all submissions, evaluate teams, cannot create hackathons
+Member/Contributor	Participant	Upload files ONCE (no edit/delete after upload), view own team's submissions
+Critical Permission Changes Needed
+For Participants (most important change):
+
+canUpload: true (unlike current members)
+canEdit: false AFTER initial upload (new logic needed)
+canDelete: false (enforce submission finality)
+Can only access their own team's files
+For Organizers & Analyzers:
+
+Keep full download/view access across all teams
+Organizers can edit/delete, Analyzers view-only on submissions
+UI Terminology Changes (Quick Find & Replace)
+"Projects" → "Hackathons"
+"Episodes" → "Teams"
+"Scripts" → "Submissions"
+"Radio Stations" → "Colleges/Venues"
+"Create New Project" → "Create New Hackathon"
+"Episode Files" → "Team Files"
+"Script Editor" → "Submission Portal"
+Minimal New Features Needed
+Upload Lock System: Add uploadedAt timestamp - once set, participants can't edit that file
+Team Dashboard: Rename episode dashboard showing team members and their submission status
+Evaluation System: Repurpose script review comments for judge evaluations
+Submission Deadline: Add deadline field to hackathons (teams can't upload after deadline)
+What Stays Exactly the Same ✅
+File upload/download infrastructure
+Analytics & tracking system
+Notification system
+Folder organization
+Authentication flow
+Database structure (just rename tables/columns)
+Multi-file support per entity
+Implementation Strategy (Without Building from Scratch)
+Phase 1: Schema & Types (1 rename, backend stays same)
+
+Rename tables in SQL (ALTER TABLE)
+Update TypeScript types in schema.ts
+Update role names in permissions
