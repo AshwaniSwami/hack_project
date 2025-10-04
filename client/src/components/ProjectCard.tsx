@@ -12,7 +12,7 @@ import {
   FileText
 } from "lucide-react";
 import type { Hackathon } from "@shared/schema";
-import { useHackathonStats } from "@/hooks/useHackathonStats";
+import { useProjectStats } from "@/hooks/useProjectStats";
 
 interface HackathonCardProps {
   project: Hackathon;
@@ -30,7 +30,7 @@ interface HackathonCardProps {
 }
 
 export function HackathonCard({ project, theme, user, onView, onEdit, onDelete }: HackathonCardProps) {
-  const { episodeCount, scriptCount } = useHackathonStats(project.id);
+  const { episodeCount, scriptCount } = useProjectStats(project.id);
 
   return (
     <Card className="group hover:shadow-xl transition-all duration-300 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-gray-200/50 dark:border-gray-700/50 shadow-lg hover:scale-[1.02] hover:shadow-blue-500/10">

@@ -42,7 +42,7 @@ import {
 import { colors, getCardStyle, getGradientStyle } from "@/lib/colors";
 import type { Hackathon, Team, Submission } from "@shared/schema";
 import { HackathonDetailView } from "@/components/project-detail-view";
-import { HackathonCard } from "@/components/HackathonCard";
+import { HackathonCard } from "@/components/ProjectCard";
 
 const projectFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
