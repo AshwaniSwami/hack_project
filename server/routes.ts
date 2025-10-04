@@ -8,6 +8,9 @@ import { storage } from "./storage";
 import { registerProjectFileRoutes } from "./routes-projects-files";
 import { registerEpisodeFileRoutes } from "./routes-episodes-files";
 import { registerScriptFileRoutes } from "./routes-scripts-files";
+import { registerHackathonFileRoutes } from "./routes-hackathons-files";
+import { registerTeamFileRoutes } from "./routes-teams-files";
+import { registerSubmissionFileRoutes } from "./routes-submissions-files";
 import { registerNotificationRoutes } from "./routes-notifications";
 import { isDatabaseAvailable, resetDbConnection } from "./db";
 import { cacheMiddleware, performanceHeaders } from "./performance-middleware";
@@ -55,15 +58,21 @@ const getCurrentUser = async (req: any, res: any) => {
 import bcrypt from "bcryptjs";
 import {
   insertUserSchema,
+  insertCategorySchema,
+  insertHackathonSchema,
+  insertTeamSchema,
+  insertSubmissionSchema,
+  insertTopicSchema,
+  insertCollegeSchema,
+  insertFreeHackathonAccessSchema,
+  insertFileSchema,
+  insertFileFolderSchema,
   insertThemeSchema,
   insertProjectSchema,
   insertEpisodeSchema,
   insertScriptSchema,
-  insertTopicSchema,
   insertRadioStationSchema,
   insertFreeProjectAccessSchema,
-  insertFileSchema,
-  insertFileFolderSchema,
 } from "@shared/schema";
 import session from "express-session";
 
@@ -94,6 +103,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }));
 
   // Register file upload routes for organized content management
+  // New hackathon terminology routes
+  registerHackathonFileRoutes(app);
+  registerTeamFileRoutes(app);
+  registerSubmissionFileRoutes(app);
+  
+  // Old routes for backward compatibility
   registerProjectFileRoutes(app);
   registerEpisodeFileRoutes(app);
   registerScriptFileRoutes(app);
@@ -127,10 +142,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   } = await import("./routes-onboarding");
 
   app.get("/api/onboarding/form-config", getCurrentFormConfig);
-  app.put("/api/onboarding/form-config", isAuthenticated, isAdmin, updateFormConfig);
-  app.post("/api/onboarding/submit", isAuthenticated, submitOnboardingForm);
-  app.get("/api/onboarding/analytics", isAuthenticated, getOnboardingAnalytics);
-  app.get("/api/onboarding/status", isAuthenticated, checkOnboardingStatus);
+  app.put("/api/onboarding/form-config", isAuthenticated, isAdmin, updateFormConfig as any);
+  app.post("/api/onboarding/submit", isAuthenticated, submitOnboardingForm as any);
+  app.get("/api/onboarding/analytics", isAuthenticated, getOnboardingAnalytics as any);
+  app.get("/api/onboarding/status", isAuthenticated, checkOnboardingStatus as any);
 
   // Auth routes
   app.post('/api/auth/login', login);
@@ -606,24 +621,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/episodes", async (req, res) => {
     try {
-      // Create custom schema that excludes episodeNumber
-      const episodeCreationSchema = insertEpisodeSchema.extend({
-        episodeNumber: insertEpisodeSchema.shape.episodeNumber.optional()
-      });
-
-      const episodeData = episodeCreationSchema.parse(req.body);
-
-      // Auto-generate episode number based on project if not provided
-      let episodeNumber = episodeData.episodeNumber;
-      if (!episodeNumber) {
-        const projectEpisodes = await storage.getEpisodesByProject(episodeData.projectId);
-        episodeNumber = projectEpisodes.length + 1;
-      }
-
-      const episode = await storage.createEpisode({
-        ...episodeData,
-        episodeNumber: episodeNumber
-      });
+      const episodeData = insertEpisodeSchema.parse(req.body);
+      const episode = await storage.createEpisode(episodeData);
       res.status(201).json(episode);
     } catch (error) {
       console.error("Error creating episode:", error);
@@ -739,17 +738,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const scriptData = insertScriptSchema.parse(req.body);
 
-      // Auto-generate language group if not provided
-      let languageGroup = scriptData.languageGroup;
-      if (!languageGroup) {
-        languageGroup = `${scriptData.projectId}_${scriptData.title.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`;
+      // Auto-generate submission group if not provided
+      let submissionGroup = scriptData.submissionGroup;
+      if (!submissionGroup) {
+        submissionGroup = `${scriptData.hackathonId}_${scriptData.title.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`;
       }
 
       const script = await storage.createScript({
         ...scriptData,
-        authorId: req.user.id,
-        languageGroup,
-        isOriginal: !scriptData.originalScriptId // It's original if no originalScriptId is provided
+        submissionGroup,
+        isOriginal: !scriptData.originalSubmissionId
       });
       res.status(201).json(script);
     } catch (error) {
@@ -790,12 +788,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             for (const scriptData of scripts) {
               try {
                 const validatedData = insertScriptSchema.parse(scriptData);
-                const users = await storage.getAllUsers();
-                const authorId = users.length > 0 ? users[0].id : '00000000-0000-0000-0000-000000000000';
-                await storage.createScript({
-                  ...validatedData,
-                  authorId
-                });
+                await storage.createScript(validatedData);
                 importedCount++;
               } catch (error) {
                 console.error("Error creating script from file:", error);
@@ -1271,7 +1264,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/folders", isAuthenticated, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.id);
-      if (!requireFilePermission('canCreate', user)) {
+      if (!requireFilePermission('canUpload', user)) {
         return res.status(403).json({ message: "Insufficient permissions to create folders" });
       }
 
@@ -1329,11 +1322,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Store admin WebSocket connections
   const adminConnections = new Map<string, WebSocket>();
 
-  wss.on('connection', (ws: WebSocket, req) => {
+  wss.on('connection', (ws: any, req) => {
     console.log('WebSocket connection established');
 
     // Handle authentication for WebSocket connections
-    ws.on('message', async (message) => {
+    ws.on('message', async (message: any) => {
       try {
         const data = JSON.parse(message.toString());
 
@@ -1368,7 +1361,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     ws.on('close', () => {
       // Remove connection from admin connections when closed
-      for (const [userId, connection] of adminConnections.entries()) {
+      for (const [userId, connection] of Array.from(adminConnections.entries())) {
         if (connection === ws) {
           adminConnections.delete(userId);
           console.log(`Admin user ${userId} disconnected from WebSocket`);
@@ -1377,7 +1370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     });
 
-    ws.on('error', (error) => {
+    ws.on('error', (error: any) => {
       console.error('WebSocket error:', error);
     });
   });

@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import multer from "multer";
 import { storage } from "./storage";
+import { checkUploadOnceViolation } from "./filePermissions";
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -14,7 +15,7 @@ const upload = multer({
 
 export function registerEpisodeFileRoutes(app: Express) {
   // Upload files for specific episodes
-  app.post("/api/episodes/:episodeId/upload", upload.single("file"), async (req, res) => {
+  app.post("/api/episodes/:episodeId/upload", upload.single("file"), async (req: any, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
@@ -28,6 +29,19 @@ export function registerEpisodeFileRoutes(app: Express) {
         return res.status(404).json({ message: "Episode not found" });
       }
 
+      // Check upload-once restriction for participants
+      const userId = req.session?.userId || req.user?.id;
+      const user = userId ? await storage.getUser(userId) : undefined;
+      
+      // Get existing files for this episode
+      const existingFiles = await storage.getFilesByEntity('episodes', episodeId);
+      
+      // Check if user can upload (upload-once protection)
+      const uploadCheck = await checkUploadOnceViolation(user, 'episodes', episodeId, existingFiles);
+      if (!uploadCheck.allowed) {
+        return res.status(403).json({ message: uploadCheck.message });
+      }
+
       // Properly handle UTF-8 encoding for filenames
       const originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
       
@@ -39,7 +53,7 @@ export function registerEpisodeFileRoutes(app: Express) {
         fileData: req.file.buffer.toString('base64'),
         entityType: 'episodes',
         entityId: episodeId,
-        uploadedBy: null,
+        uploadedBy: userId,
       };
 
       const storedFile = await storage.createFile(fileData);

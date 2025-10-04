@@ -13,31 +13,31 @@ const upload = multer({
   },
 });
 
-export function registerScriptFileRoutes(app: Express) {
-  // Upload files for specific scripts
-  app.post("/api/scripts/:scriptId/upload", upload.single("file"), async (req: any, res) => {
+export function registerSubmissionFileRoutes(app: Express) {
+  // Upload files for specific submissions
+  app.post("/api/submissions/:submissionId/upload", upload.single("file"), async (req: any, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const scriptId = req.params.scriptId;
+      const submissionId = req.params.submissionId;
       
-      // Verify script exists
-      const script = await storage.getScript(scriptId);
-      if (!script) {
-        return res.status(404).json({ message: "Script not found" });
+      // Verify submission exists
+      const submission = await storage.getScript(submissionId);
+      if (!submission) {
+        return res.status(404).json({ message: "Submission not found" });
       }
 
       // Check upload-once restriction for participants
       const userId = req.session?.userId || req.user?.id;
       const user = userId ? await storage.getUser(userId) : undefined;
       
-      // Get existing files for this script
-      const existingFiles = await storage.getFilesByEntity('scripts', scriptId);
+      // Get existing files for this submission
+      const existingFiles = await storage.getFilesByEntity('submissions', submissionId);
       
       // Check if user can upload (upload-once protection)
-      const uploadCheck = await checkUploadOnceViolation(user, 'scripts', scriptId, existingFiles);
+      const uploadCheck = await checkUploadOnceViolation(user, 'submissions', submissionId, existingFiles);
       if (!uploadCheck.allowed) {
         return res.status(403).json({ message: uploadCheck.message });
       }
@@ -46,13 +46,13 @@ export function registerScriptFileRoutes(app: Express) {
       const originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
       
       const fileData = {
-        filename: `script_${scriptId}_${Date.now()}_${originalName}`,
+        filename: `submission_${submissionId}_${Date.now()}_${originalName}`,
         originalName: originalName,
         mimeType: req.file.mimetype,
         fileSize: req.file.size,
         fileData: req.file.buffer.toString('base64'),
-        entityType: 'scripts',
-        entityId: scriptId,
+        entityType: 'submissions',
+        entityId: submissionId,
         uploadedBy: userId,
       };
 
@@ -63,16 +63,16 @@ export function registerScriptFileRoutes(app: Express) {
         file: storedFile
       });
     } catch (error) {
-      console.error("Error uploading script file:", error);
+      console.error("Error uploading submission file:", error);
       res.status(500).json({ message: "Failed to upload file" });
     }
   });
 
-  // Get files for specific script
-  app.get("/api/scripts/:scriptId/files", async (req, res) => {
+  // Get files for specific submission
+  app.get("/api/submissions/:submissionId/files", async (req, res) => {
     try {
-      const scriptId = req.params.scriptId;
-      const files = await storage.getFilesByEntity('scripts', scriptId);
+      const submissionId = req.params.submissionId;
+      const files = await storage.getFilesByEntity('submissions', submissionId);
       
       const filesWithoutData = files.map(file => ({
         ...file,
@@ -81,7 +81,7 @@ export function registerScriptFileRoutes(app: Express) {
       
       res.json(filesWithoutData);
     } catch (error) {
-      console.error("Error fetching script files:", error);
+      console.error("Error fetching submission files:", error);
       res.status(500).json({ message: "Failed to fetch files" });
     }
   });
