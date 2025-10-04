@@ -6,8 +6,7 @@ import {
   uuid,
   integer,
   boolean,
-  date,
-  primaryKey,
+  decimal,
   jsonb,
   index,
 } from "drizzle-orm/pg-core";
@@ -32,7 +31,7 @@ export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   email: varchar("email").unique(),
   name: varchar("name"),
-  role: varchar("role").default("member"), // admin, editor, member
+  role: varchar("role").default("participant"), // organizer, analyzer, participant
   password: varchar("password"), // For custom users (not Replit users)
   avatarUrl: text("avatar_url"),
   isActive: boolean("is_active").default(true),
@@ -52,57 +51,78 @@ export const otpVerifications = pgTable("otp_verifications", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Themes table
-export const themes = pgTable("themes", {
+// Categories table (formerly Themes)
+export const categories = pgTable("categories", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name", { length: 255 }).notNull().unique(),
   description: text("description"),
-  colorHex: varchar("color_hex", { length: 7 }).notNull().default("#3B82F6"), // Hex color for theme
+  colorHex: varchar("color_hex", { length: 7 }).notNull().default("#3B82F6"), // Hex color for category
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Projects table
-export const projects = pgTable("projects", {
+// Hackathons table (formerly Projects)
+export const hackathons = pgTable("hackathons", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  themeId: uuid("theme_id"), // Reference to theme
+  categoryId: uuid("category_id"), // Reference to category
+  submissionDeadline: timestamp("submission_deadline"),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  maxTeamSize: integer("max_team_size").default(5),
+  minTeamSize: integer("min_team_size").default(1),
+  prizePool: varchar("prize_pool", { length: 255 }),
+  rulesDescription: text("rules_description"),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Episodes table
-export const episodes = pgTable("episodes", {
+// Teams table (formerly Episodes)
+export const teams = pgTable("teams", {
   id: uuid("id").primaryKey().defaultRandom(),
-  projectId: uuid("project_id").notNull(),
+  hackathonId: uuid("hackathon_id").notNull(),
   title: varchar("title", { length: 255 }).notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-// Scripts table
-export const scripts = pgTable("scripts", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  projectId: uuid("project_id").notNull(),
-  authorId: varchar("author_id").notNull(), // Changed from uuid to varchar to match users table
-  title: varchar("title", { length: 255 }).notNull(),
-  content: text("content").notNull(),
-  status: varchar("status", { length: 50 }).notNull().default("Draft"),
-  // Language support fields
-  language: varchar("language", { length: 10 }).notNull().default("en"), // ISO language code (en, es, fr, hi, etc.)
-  originalScriptId: uuid("original_script_id"), // Reference to the original script (for translations)
-  languageGroup: varchar("language_group", { length: 100 }), // Groups related scripts across languages
-  isOriginal: boolean("is_original").default(true), // Whether this is the original script or a translation
+  teamLeaderId: varchar("team_leader_id"),
+  teamSize: integer("team_size").default(1),
+  registrationStatus: varchar("registration_status", { length: 50 }).default("pending"),
+  collegeId: uuid("college_id"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
-  index("idx_scripts_language").on(table.language),
-  index("idx_scripts_language_group").on(table.languageGroup),
-  index("idx_scripts_original").on(table.originalScriptId),
-  index("idx_scripts_project_language").on(table.projectId, table.language),
+  index("idx_teams_hackathon").on(table.hackathonId),
+  index("idx_teams_college").on(table.collegeId),
+]);
+
+// Submissions table (formerly Scripts)
+export const submissions = pgTable("submissions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  hackathonId: uuid("hackathon_id").notNull(),
+  teamId: uuid("team_id"),
+  authorId: varchar("author_id").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  status: varchar("status", { length: 50 }).notNull().default("Draft"),
+  submissionType: varchar("submission_type", { length: 10 }).notNull().default("code"), // code, documentation, presentation
+  originalSubmissionId: uuid("original_submission_id"),
+  submissionGroup: varchar("submission_group", { length: 100 }),
+  isOriginal: boolean("is_original").default(true),
+  githubLink: varchar("github_link", { length: 500 }),
+  demoLink: varchar("demo_link", { length: 500 }),
+  evaluationScore: decimal("evaluation_score", { precision: 5, scale: 2 }),
+  evaluatorId: varchar("evaluator_id"),
+  evaluationComments: text("evaluation_comments"),
+  submittedAt: timestamp("submitted_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_submissions_type").on(table.submissionType),
+  index("idx_submissions_group").on(table.submissionGroup),
+  index("idx_submissions_original").on(table.originalSubmissionId),
+  index("idx_submissions_hackathon_type").on(table.hackathonId, table.submissionType),
+  index("idx_submissions_team").on(table.teamId),
 ]);
 
 // Topics table
@@ -112,15 +132,15 @@ export const topics = pgTable("topics", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Script-Topic junction table
-export const scriptTopics = pgTable("script_topics", {
+// Submission-Topic junction table (formerly Script-Topic)
+export const submissionTopics = pgTable("submission_topics", {
   id: uuid("id").primaryKey().defaultRandom(),
-  scriptId: uuid("script_id").notNull(),
+  submissionId: uuid("submission_id").notNull(),
   topicId: uuid("topic_id").notNull(),
 });
 
-// Radio Stations table
-export const radioStations = pgTable("radio_stations", {
+// Colleges table (formerly Radio Stations)
+export const colleges = pgTable("colleges", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id"),
   name: varchar("name", { length: 255 }).notNull(),
@@ -133,11 +153,11 @@ export const radioStations = pgTable("radio_stations", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Free Project Access table
-export const freeProjectAccess = pgTable("free_project_access", {
+// Free Hackathon Access table (formerly Free Project Access)
+export const freeHackathonAccess = pgTable("free_hackathon_access", {
   id: uuid("id").primaryKey().defaultRandom(),
-  radioStationId: uuid("radio_station_id").notNull(),
-  projectId: uuid("project_id").notNull(),
+  collegeId: uuid("college_id").notNull(),
+  hackathonId: uuid("hackathon_id").notNull(),
   grantedByUserId: uuid("granted_by_user_id"),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
@@ -149,7 +169,7 @@ export const fileFolders = pgTable("file_folders", {
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
   parentFolderId: uuid("parent_folder_id"), // For nested folders
-  entityType: varchar("entity_type", { length: 50 }).notNull(), // projects, episodes, scripts
+  entityType: varchar("entity_type", { length: 50 }).notNull(), // hackathons, teams, submissions
   entityId: uuid("entity_id").notNull(),
   folderPath: text("folder_path"), // Full path for optimization
   sortOrder: integer("sort_order").default(0),
@@ -170,7 +190,7 @@ export const files = pgTable("files", {
   mimeType: varchar("mime_type", { length: 100 }).notNull(),
   fileSize: integer("file_size").notNull(),
   fileData: text("file_data").notNull(), // Base64 encoded file data
-  entityType: varchar("entity_type", { length: 50 }).notNull(), // projects, episodes, scripts, radio-stations
+  entityType: varchar("entity_type", { length: 50 }).notNull(), // hackathons, teams, submissions, colleges
   entityId: uuid("entity_id"), // Link to specific entity
   folderId: uuid("folder_id"), // Optional: organize in folders
   uploadedBy: varchar("uploaded_by"), // User who uploaded (non-UUID user ID)
@@ -182,7 +202,7 @@ export const files = pgTable("files", {
   isActive: boolean("is_active").default(true), // For soft delete
   filePath: text("file_path"), // Virtual file path for organization
   checksum: varchar("checksum", { length: 64 }), // For duplicate detection
-  accessLevel: varchar("access_level", { length: 20 }).default("project"), // project, public, private
+  accessLevel: varchar("access_level", { length: 20 }).default("hackathon"), // hackathon, public, private
   downloadCount: integer("download_count").default(0),
   lastAccessedAt: timestamp("last_accessed_at"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -210,7 +230,7 @@ export const downloadLogs = pgTable("download_logs", {
   downloadSize: integer("download_size"), // File size at time of download
   downloadDuration: integer("download_duration"), // Time taken in milliseconds
   downloadStatus: varchar("download_status", { length: 20 }).default("completed"), // completed, failed, interrupted
-  entityType: varchar("entity_type", { length: 50 }), // context: project, episode, script
+  entityType: varchar("entity_type", { length: 50 }), // context: hackathon, team, submission
   entityId: uuid("entity_id"), // context entity
   refererPage: text("referer_page"), // Which page initiated the download
   downloadedAt: timestamp("downloaded_at").defaultNow(),
@@ -222,10 +242,10 @@ export const downloadLogs = pgTable("download_logs", {
   index("idx_downloads_status").on(table.downloadStatus),
 ]);
 
-// Notifications table for admin notifications
+// Notifications table for organizer notifications
 export const notifications = pgTable("notifications", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: varchar("user_id").notNull(), // Admin user who receives the notification
+  userId: varchar("user_id").notNull(), // Organizer user who receives the notification
   type: varchar("type", { length: 50 }).notNull(), // 'user_verification_request', 'user_registered', etc.
   title: varchar("title", { length: 255 }).notNull(),
   message: text("message").notNull(),
@@ -253,7 +273,7 @@ export const onboardingFormConfig = pgTable("onboarding_form_config", {
   version: integer("version").default(1),
   isActive: boolean("is_active").default(true),
   questions: jsonb("questions").notNull(), // Array of question objects
-  createdBy: varchar("created_by").notNull(), // Admin who created the form
+  createdBy: varchar("created_by").notNull(), // Organizer who created the form
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
@@ -282,9 +302,9 @@ export const onboardingFormResponses = pgTable("onboarding_form_responses", {
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
-  scripts: many(scripts),
-  radioStations: many(radioStations),
-  grantedAccess: many(freeProjectAccess),
+  submissions: many(submissions),
+  colleges: many(colleges),
+  grantedAccess: many(freeHackathonAccess),
   otpVerifications: many(otpVerifications),
   notifications: many(notifications),
   onboardingResponses: many(onboardingFormResponses),
@@ -297,79 +317,89 @@ export const otpVerificationsRelations = relations(otpVerifications, ({ one }) =
   }),
 }));
 
-export const themesRelations = relations(themes, ({ many }) => ({
-  projects: many(projects),
+export const categoriesRelations = relations(categories, ({ many }) => ({
+  hackathons: many(hackathons),
 }));
 
-export const projectsRelations = relations(projects, ({ one, many }) => ({
-  theme: one(themes, {
-    fields: [projects.themeId],
-    references: [themes.id],
+export const hackathonsRelations = relations(hackathons, ({ one, many }) => ({
+  category: one(categories, {
+    fields: [hackathons.categoryId],
+    references: [categories.id],
   }),
-  episodes: many(episodes),
-  scripts: many(scripts),
-  freeAccess: many(freeProjectAccess),
+  teams: many(teams),
+  submissions: many(submissions),
+  freeAccess: many(freeHackathonAccess),
   folders: many(fileFolders),
 }));
 
-export const episodesRelations = relations(episodes, ({ one }) => ({
-  project: one(projects, {
-    fields: [episodes.projectId],
-    references: [projects.id],
+export const teamsRelations = relations(teams, ({ one, many }) => ({
+  hackathon: one(hackathons, {
+    fields: [teams.hackathonId],
+    references: [hackathons.id],
   }),
+  college: one(colleges, {
+    fields: [teams.collegeId],
+    references: [colleges.id],
+  }),
+  submissions: many(submissions),
 }));
 
-export const scriptsRelations = relations(scripts, ({ one, many }) => ({
-  project: one(projects, {
-    fields: [scripts.projectId],
-    references: [projects.id],
+export const submissionsRelations = relations(submissions, ({ one, many }) => ({
+  hackathon: one(hackathons, {
+    fields: [submissions.hackathonId],
+    references: [hackathons.id],
+  }),
+  team: one(teams, {
+    fields: [submissions.teamId],
+    references: [teams.id],
   }),
   author: one(users, {
-    fields: [scripts.authorId],
+    fields: [submissions.authorId],
     references: [users.id],
   }),
-  scriptTopics: many(scriptTopics),
-  originalScript: one(scripts, {
-    fields: [scripts.originalScriptId],
-    references: [scripts.id],
+  submissionTopics: many(submissionTopics),
+  originalSubmission: one(submissions, {
+    fields: [submissions.originalSubmissionId],
+    references: [submissions.id],
   }),
-  translations: many(scripts),
+  relatedSubmissions: many(submissions),
 }));
 
 export const topicsRelations = relations(topics, ({ many }) => ({
-  scriptTopics: many(scriptTopics),
+  submissionTopics: many(submissionTopics),
 }));
 
-export const scriptTopicsRelations = relations(scriptTopics, ({ one }) => ({
-  script: one(scripts, {
-    fields: [scriptTopics.scriptId],
-    references: [scripts.id],
+export const submissionTopicsRelations = relations(submissionTopics, ({ one }) => ({
+  submission: one(submissions, {
+    fields: [submissionTopics.submissionId],
+    references: [submissions.id],
   }),
   topic: one(topics, {
-    fields: [scriptTopics.topicId],
+    fields: [submissionTopics.topicId],
     references: [topics.id],
   }),
 }));
 
-export const radioStationsRelations = relations(radioStations, ({ one, many }) => ({
+export const collegesRelations = relations(colleges, ({ one, many }) => ({
   associatedUser: one(users, {
-    fields: [radioStations.userId],
+    fields: [colleges.userId],
     references: [users.id],
   }),
-  freeAccess: many(freeProjectAccess),
+  freeAccess: many(freeHackathonAccess),
+  teams: many(teams),
 }));
 
-export const freeProjectAccessRelations = relations(freeProjectAccess, ({ one }) => ({
-  radioStation: one(radioStations, {
-    fields: [freeProjectAccess.radioStationId],
-    references: [radioStations.id],
+export const freeHackathonAccessRelations = relations(freeHackathonAccess, ({ one }) => ({
+  college: one(colleges, {
+    fields: [freeHackathonAccess.collegeId],
+    references: [colleges.id],
   }),
-  project: one(projects, {
-    fields: [freeProjectAccess.projectId],
-    references: [projects.id],
+  hackathon: one(hackathons, {
+    fields: [freeHackathonAccess.hackathonId],
+    references: [hackathons.id],
   }),
   grantedBy: one(users, {
-    fields: [freeProjectAccess.grantedByUserId],
+    fields: [freeHackathonAccess.grantedByUserId],
     references: [users.id],
   }),
 }));
@@ -453,25 +483,25 @@ export const upsertUserSchema = createInsertSchema(users).omit({
   updatedAt: true,
 });
 
-export const insertThemeSchema = createInsertSchema(themes).omit({
+export const insertCategorySchema = createInsertSchema(categories).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 
-export const insertProjectSchema = createInsertSchema(projects).omit({
+export const insertHackathonSchema = createInsertSchema(hackathons).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 
-export const insertEpisodeSchema = createInsertSchema(episodes).omit({
+export const insertTeamSchema = createInsertSchema(teams).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 
-export const insertScriptSchema = createInsertSchema(scripts).omit({
+export const insertSubmissionSchema = createInsertSchema(submissions).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -483,13 +513,13 @@ export const insertTopicSchema = createInsertSchema(topics).omit({
   createdAt: true,
 });
 
-export const insertRadioStationSchema = createInsertSchema(radioStations).omit({
+export const insertCollegeSchema = createInsertSchema(colleges).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 
-export const insertFreeProjectAccessSchema = createInsertSchema(freeProjectAccess).omit({
+export const insertFreeHackathonAccessSchema = createInsertSchema(freeHackathonAccess).omit({
   id: true,
   createdAt: true,
 });
@@ -537,26 +567,26 @@ export type User = typeof users.$inferSelect;
 export type InsertUser = typeof insertUserSchema._type;
 export type UpsertUser = typeof upsertUserSchema._type;
 
-export type Theme = typeof themes.$inferSelect;
-export type InsertTheme = typeof insertThemeSchema._type;
+export type Category = typeof categories.$inferSelect;
+export type InsertCategory = typeof insertCategorySchema._type;
 
-export type Project = typeof projects.$inferSelect;
-export type InsertProject = typeof insertProjectSchema._type;
+export type Hackathon = typeof hackathons.$inferSelect;
+export type InsertHackathon = typeof insertHackathonSchema._type;
 
-export type Episode = typeof episodes.$inferSelect;
-export type InsertEpisode = typeof insertEpisodeSchema._type;
+export type Team = typeof teams.$inferSelect;
+export type InsertTeam = typeof insertTeamSchema._type;
 
-export type Script = typeof scripts.$inferSelect;
-export type InsertScript = typeof insertScriptSchema._type;
+export type Submission = typeof submissions.$inferSelect;
+export type InsertSubmission = typeof insertSubmissionSchema._type;
 
 export type Topic = typeof topics.$inferSelect;
 export type InsertTopic = typeof insertTopicSchema._type;
 
-export type RadioStation = typeof radioStations.$inferSelect;
-export type InsertRadioStation = typeof insertRadioStationSchema._type;
+export type College = typeof colleges.$inferSelect;
+export type InsertCollege = typeof insertCollegeSchema._type;
 
-export type FreeProjectAccess = typeof freeProjectAccess.$inferSelect;
-export type InsertFreeProjectAccess = typeof insertFreeProjectAccessSchema._type;
+export type FreeHackathonAccess = typeof freeHackathonAccess.$inferSelect;
+export type InsertFreeHackathonAccess = typeof insertFreeHackathonAccessSchema._type;
 
 export type File = typeof files.$inferSelect;
 export type InsertFile = typeof insertFileSchema._type;
@@ -572,3 +602,32 @@ export type InsertDownloadLog = typeof insertDownloadLogSchema._type;
 
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = typeof insertNotificationSchema._type;
+
+// Backward compatibility exports (deprecated - use new names)
+export const themes = categories;
+export const projects = hackathons;
+export const episodes = teams;
+export const scripts = submissions;
+export const radioStations = colleges;
+export const freeProjectAccess = freeHackathonAccess;
+export const scriptTopics = submissionTopics;
+
+export type Theme = Category;
+export type Project = Hackathon;
+export type Episode = Team;
+export type Script = Submission;
+export type RadioStation = College;
+export type FreeProjectAccess = FreeHackathonAccess;
+
+export const insertThemeSchema = insertCategorySchema;
+export const insertProjectSchema = insertHackathonSchema;
+export const insertEpisodeSchema = insertTeamSchema;
+export const insertScriptSchema = insertSubmissionSchema;
+export const insertRadioStationSchema = insertCollegeSchema;
+export const insertFreeProjectAccessSchema = insertFreeHackathonAccessSchema;
+
+export type InsertTheme = InsertCategory;
+export type InsertProject = InsertHackathon;
+export type InsertEpisode = InsertTeam;
+export type InsertScript = InsertSubmission;
+export type InsertRadioStation = InsertCollege;
