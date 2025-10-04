@@ -8,10 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { Upload, FileText, Download, Trash2, File as FileIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useFilePermissions } from "@/hooks/useFilePermissions";
-import type { Script } from "@shared/schema";
+import type { Submission } from "@shared/schema";
 
-interface ScriptFileManagerProps {
-  script: Script;
+interface SubmissionFileManagerProps {
+  script: Submission;
 }
 
 interface FileData {
@@ -41,7 +41,7 @@ function getFileIcon(mimeType: string) {
   return <FileIcon className="h-4 w-4" />;
 }
 
-export function ScriptFileManager({ script }: ScriptFileManagerProps) {
+export function SubmissionFileManager({ script }: SubmissionFileManagerProps) {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
@@ -143,7 +143,7 @@ export function ScriptFileManager({ script }: ScriptFileManagerProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Upload className="h-5 w-5" />
-          Script Files
+          Submission Files
           <Badge variant="secondary">{scriptFiles.length} files</Badge>
         </CardTitle>
       </CardHeader>

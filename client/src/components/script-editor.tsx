@@ -33,23 +33,23 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/api";
 import { FileText, Sparkles, CheckCircle, AlertCircle, PlayCircle, Edit as EditIcon } from "lucide-react";
-import type { Script, Episode, Project } from "@shared/schema";
+import type { Submission, Team, Hackathon } from "@shared/schema";
 
 const scriptFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
-  projectId: z.string().min(1, "Project is required"),
+  projectId: z.string().min(1, "Hackathon is required"),
   episodeId: z.string().optional(),
   content: z.string().min(1, "Content is required"),
   status: z.enum(["Draft", "Under Review", "Approved", "Published"]).default("Draft"),
 });
 
-type ScriptFormData = z.infer<typeof scriptFormSchema>;
+type SubmissionFormData = z.infer<typeof scriptFormSchema>;
 
-interface ScriptEditorProps {
+interface SubmissionEditorProps {
   isOpen: boolean;
   onClose: () => void;
-  script?: Script;
+  script?: Submission;
   readOnly?: boolean;
   onSave?: () => void;
 }
@@ -68,21 +68,21 @@ const statusIcons = {
   "Published": PlayCircle
 };
 
-export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave }: ScriptEditorProps) {
+export function SubmissionEditor({ isOpen, onClose, script, readOnly = false, onSave }: SubmissionEditorProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [content, setContent] = useState("");
-  const [selectedProject, setSelectedProject] = useState<string>("");
+  const [selectedHackathon, setSelectedHackathon] = useState<string>("");
 
-  const { data: projects = [] } = useQuery<Project[]>({
+  const { data: projects = [] } = useQuery<Hackathon[]>({
     queryKey: ["/api/projects"],
   });
 
-  const { data: episodes = [] } = useQuery<Episode[]>({
+  const { data: episodes = [] } = useQuery<Team[]>({
     queryKey: ["/api/episodes"],
   });
 
-  const form = useForm<ScriptFormData>({
+  const form = useForm<SubmissionFormData>({
     resolver: zodResolver(scriptFormSchema),
     defaultValues: script ? {
       projectId: script.projectId,
@@ -126,7 +126,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
       };
       form.reset(scriptData);
       setContent(script.content || "");
-      setSelectedProject(script.projectId || "");
+      setSelectedHackathon(script.projectId || "");
     } else {
       const defaultData = {
         title: "",
@@ -138,12 +138,12 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
       };
       form.reset(defaultData);
       setContent("");
-      setSelectedProject("");
+      setSelectedHackathon("");
     }
   }, [script, form]);
 
   const mutation = useMutation({
-    mutationFn: async (data: ScriptFormData) => {
+    mutationFn: async (data: SubmissionFormData) => {
       const submitData = { 
         ...data, 
         content: content.trim(),
@@ -161,7 +161,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
       queryClient.invalidateQueries({ queryKey: ["/api/scripts"] });
       toast({
         title: "Success", 
-        description: `Script ${script ? "updated" : "created"} successfully`,
+        description: `Submission ${script ? "updated" : "created"} successfully`,
       });
       if (onSave) {
         onSave();
@@ -174,7 +174,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
       }
     },
     onError: (error) => {
-      console.error("Script save error:", error);
+      console.error("Submission save error:", error);
       toast({
         title: "Error",
         description: `Failed to ${script ? "update" : "create"} script`,
@@ -183,13 +183,13 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
     },
   });
 
-  const onSubmit = (data: ScriptFormData) => {
+  const onSubmit = (data: SubmissionFormData) => {
     const cleanContent = content.replace(/<p><br><\/p>/g, '').trim();
 
     if (!cleanContent || cleanContent === '<p></p>' || cleanContent === '<p><br></p>') {
       toast({
         title: "Error",
-        description: "Script content is required",
+        description: "Submission content is required",
         variant: "destructive",
       });
       return;
@@ -205,18 +205,18 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
   };
 
   // Filter episodes based on selected project
-  const filteredEpisodes = selectedProject 
-    ? episodes.filter(episode => episode.projectId === selectedProject)
+  const filteredTeams = selectedHackathon 
+    ? episodes.filter(episode => episode.projectId === selectedHackathon)
     : episodes;
 
-  const selectedProjectData = projects.find(p => p.id === selectedProject);
-  const selectedEpisodeData = episodes.find(e => e.id === form.watch("episodeId"));
+  const selectedHackathonData = projects.find(p => p.id === selectedHackathon);
+  const selectedTeamData = episodes.find(e => e.id === form.watch("episodeId"));
   const StatusIcon = script ? statusIcons[script.status as keyof typeof statusIcons] : EditIcon;
 
   if (readOnly && script) {
     return (
       <div className="space-y-6">
-        {/* Script Info Header */}
+        {/* Submission Info Header */}
         <div className="bg-gradient-to-r from-blue-50 to-emerald-50 dark:from-blue-900/20 dark:to-emerald-900/20 rounded-lg p-6 border border-blue-100 dark:border-blue-800">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-4">
@@ -237,24 +237,24 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
           </div>
 
           <div className="grid grid-cols-1 gap-4">
-            {selectedProjectData && (
+            {selectedHackathonData && (
               <div className="p-4 bg-blue-50/80 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
-                <div className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Project: {selectedProjectData.name}</div>
-                {selectedProjectData.description && (
+                <div className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Hackathon: {selectedHackathonData.name}</div>
+                {selectedHackathonData.description && (
                   <div className="text-sm text-blue-700 dark:text-blue-300 bg-white/60 dark:bg-gray-800/60 p-2 rounded">
                     <span className="font-medium">Description: </span>
-                    {selectedProjectData.description}
+                    {selectedHackathonData.description}
                   </div>
                 )}
               </div>
             )}
-            {selectedEpisodeData && (
+            {selectedTeamData && (
               <div className="p-4 bg-emerald-50/80 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-700">
-                <div className="font-semibold text-emerald-800 dark:text-emerald-300 mb-2">Episode: {selectedEpisodeData.title}</div>
-                {selectedEpisodeData.description && (
+                <div className="font-semibold text-emerald-800 dark:text-emerald-300 mb-2">Team: {selectedTeamData.title}</div>
+                {selectedTeamData.description && (
                   <div className="text-sm text-emerald-700 dark:text-emerald-300 bg-white/60 dark:bg-gray-800/60 p-2 rounded">
                     <span className="font-medium">Description: </span>
-                    {selectedEpisodeData.description}
+                    {selectedTeamData.description}
                   </div>
                 )}
               </div>
@@ -262,9 +262,9 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
           </div>
         </div>
 
-        {/* Script Content */}
+        {/* Submission Content */}
         <div className="space-y-3">
-          <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Script Content</h4>
+          <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Submission Content</h4>
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
             <div 
               className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 leading-relaxed dark:prose-invert"
@@ -284,7 +284,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
             <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
               <Sparkles className="h-5 w-5 text-white" />
             </div>
-            {script ? "Edit Script" : "Create New Script"}
+            {script ? "Edit Submission" : "Create New Submission"}
           </DialogTitle>
         </DialogHeader>
 
@@ -332,17 +332,17 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
                 />
               </div>
 
-              {/* Project and Episode */}
+              {/* Hackathon and Team */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
                   name="projectId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Project</FormLabel>
+                      <FormLabel>Hackathon</FormLabel>
                       <Select onValueChange={(value) => {
                         field.onChange(value);
-                        setSelectedProject(value);
+                        setSelectedHackathon(value);
                         // Clear episode selection when project changes
                         form.setValue("episodeId", "none");
                       }} defaultValue={field.value}>
@@ -369,7 +369,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
                   name="episodeId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Episode (Optional)</FormLabel>
+                      <FormLabel>Team (Optional)</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -378,7 +378,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="none">No episode</SelectItem>
-                          {filteredEpisodes.map((episode) => (
+                          {filteredTeams.map((episode) => (
                             <SelectItem key={episode.id} value={episode.id}>
                               {episode.title}
                             </SelectItem>
@@ -393,10 +393,10 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
 
               
 
-              {/* Script Content */}
+              {/* Submission Content */}
               <div className="space-y-2">
                 <label className="text-sm font-medium leading-none">
-                  Script Content *
+                  Submission Content *
                 </label>
                 <div className="rounded-md overflow-hidden border border-gray-200">
                   <ReactQuill
@@ -410,7 +410,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
                   />
                 </div>
                 {(!content.trim() || content === '<p></p>' || content === '<p><br></p>') && (
-                  <p className="text-sm text-red-500">Script content is required</p>
+                  <p className="text-sm text-red-500">Submission content is required</p>
                 )}
               </div>
 
@@ -424,7 +424,7 @@ export function ScriptEditor({ isOpen, onClose, script, readOnly = false, onSave
                   disabled={mutation.isPending || !content.trim() || content === '<p></p>' || content === '<p><br></p>'}
                   className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-lg"
                 >
-                  {mutation.isPending ? "Saving..." : (script ? "Update Script" : "Create Script")}
+                  {mutation.isPending ? "Saving..." : (script ? "Update Submission" : "Create Submission")}
                 </Button>
               </div>
             </form>

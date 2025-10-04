@@ -67,7 +67,7 @@ export default function Landing() {
             <CardHeader>
               <div className="flex items-center space-x-3">
                 <Users className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
-                <CardTitle>Station Access</CardTitle>
+                <CardTitle>College Access</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
@@ -87,7 +87,7 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="text-center">
               <div className="text-4xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">
-                Projects
+                Hackathons
               </div>
               <div className="text-gray-600 dark:text-gray-300">
                 Organize content by radio shows and series
@@ -95,7 +95,7 @@ export default function Landing() {
             </div>
             <div className="text-center">
               <div className="text-4xl font-bold text-purple-600 dark:text-purple-400 mb-2">
-                Episodes
+                Teams
               </div>
               <div className="text-gray-600 dark:text-gray-300">
                 Track individual episodes with metadata
@@ -103,7 +103,7 @@ export default function Landing() {
             </div>
             <div className="text-center">
               <div className="text-4xl font-bold text-emerald-600 dark:text-emerald-400 mb-2">
-                Scripts
+                Submissions
               </div>
               <div className="text-gray-600 dark:text-gray-300">
                 Rich text editing with workflow status
@@ -111,7 +111,7 @@ export default function Landing() {
             </div>
             <div className="text-center">
               <div className="text-4xl font-bold text-pink-600 dark:text-pink-400 mb-2">
-                Stations
+                Colleges
               </div>
               <div className="text-gray-600 dark:text-gray-300">
                 Manage radio station partnerships

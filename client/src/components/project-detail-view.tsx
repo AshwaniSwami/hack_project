@@ -33,13 +33,13 @@ import {
   Globe
 } from "lucide-react";
 import { getLanguageName, getLanguageFlag } from "@shared/languages";
-import type { Project, Episode, Script } from "@shared/schema";
+import type { Hackathon, Team, Submission } from "@shared/schema";
 
-interface ProjectDetailViewProps {
-  project: Project;
+interface HackathonDetailViewProps {
+  project: Hackathon;
 }
 
-const downloadScript = (script: Script) => {
+const downloadSubmission = (script: Submission) => {
   const content = `# ${script.title}
 
 **Language:** ${script.language}
@@ -59,17 +59,17 @@ ${script.description ? `**Description:** ${script.description}\n\n` : ''}${scrip
   URL.revokeObjectURL(url);
 };
 
-export function ProjectDetailView({ project }: ProjectDetailViewProps) {
+export function HackathonDetailView({ project }: HackathonDetailViewProps) {
   const queryClient = useQueryClient();
   const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
-  const [selectedScriptVersions, setSelectedScriptVersions] = useState<Record<string, Script>>({});
+  const [selectedSubmissionVersions, setSelectedSubmissionVersions] = useState<Record<string, Submission>>({});
 
-  const { data: episodes = [] } = useQuery<Episode[]>({
+  const { data: episodes = [] } = useQuery<Team[]>({
     queryKey: ["/api/episodes"],
     select: (data) => data.filter(episode => episode.projectId === project.id)
   });
 
-  const { data: scripts = [] } = useQuery<Script[]>({
+  const { data: scripts = [] } = useQuery<Submission[]>({
     queryKey: ["/api/scripts"],
     select: (data) => data.filter(script => script.projectId === project.id)
   });
@@ -78,34 +78,34 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
   const availableLanguages = Array.from(new Set(scripts.map(script => script.language).filter(Boolean)));
 
   // Group scripts by title (name) - this is the key change for the requested feature
-  const groupedScripts = scripts.reduce((acc, script) => {
+  const groupedSubmissions = scripts.reduce((acc, script) => {
     const key = script.title;
     if (!acc[key]) {
       acc[key] = [];
     }
     acc[key].push(script);
     return acc;
-  }, {} as Record<string, Script[]>);
+  }, {} as Record<string, Submission[]>);
 
   // Filter grouped scripts by selected language
-  const filteredGroupedScripts = selectedLanguage === "all" 
-    ? groupedScripts 
-    : Object.entries(groupedScripts).reduce((acc, [title, scripts]) => {
+  const filteredGroupedSubmissions = selectedLanguage === "all" 
+    ? groupedSubmissions 
+    : Object.entries(groupedSubmissions).reduce((acc, [title, scripts]) => {
         const filtered = scripts.filter(script => script.language === selectedLanguage);
         if (filtered.length > 0) {
           acc[title] = filtered;
         }
         return acc;
-      }, {} as Record<string, Script[]>);
+      }, {} as Record<string, Submission[]>);
 
   // Get all script language versions for a specific title
-  const getScriptLanguageVersions = (script: Script) => {
+  const getSubmissionLanguageVersions = (script: Submission) => {
     if (!script.languageGroup) return [script];
     return scripts.filter(s => s.languageGroup === script.languageGroup);
   };
 
   // Get project-level files to count episodes and scripts
-  const { data: projectEpisodeFilesResponse = { files: [] } } = useQuery({
+  const { data: projectTeamFilesResponse = { files: [] } } = useQuery({
     queryKey: ['/api/files', 'episodes', project.id],
     queryFn: async () => {
       const response = await fetch(`/api/files?entityType=episodes&entityId=${project.id}`);
@@ -115,7 +115,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
     }
   });
 
-  const { data: projectScriptFilesResponse = { files: [] } } = useQuery({
+  const { data: projectSubmissionFilesResponse = { files: [] } } = useQuery({
     queryKey: ['/api/files', 'scripts', project.id],
     queryFn: async () => {
       const response = await fetch(`/api/files?entityType=scripts&entityId=${project.id}`);
@@ -125,12 +125,12 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
     }
   });
 
-  const projectEpisodeFiles = projectEpisodeFilesResponse?.files || [];
-  const projectScriptFiles = projectScriptFilesResponse?.files || [];
+  const projectTeamFiles = projectTeamFilesResponse?.files || [];
+  const projectSubmissionFiles = projectSubmissionFilesResponse?.files || [];
 
   return (
     <div className="space-y-6">
-      {/* Modern Project Header */}
+      {/* Modern Hackathon Header */}
       <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-6 shadow-sm">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -141,10 +141,10 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
               <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{project.name}</h1>
               <div className="flex items-center gap-4 mt-1">
                 <Badge variant="outline" className="bg-white/80 dark:bg-gray-800/80">
-                  {scripts.length + projectScriptFiles.length} scripts
+                  {scripts.length + projectSubmissionFiles.length} scripts
                 </Badge>
                 <Badge variant="outline" className="bg-white/80 dark:bg-gray-800/80">
-                  {episodes.length + projectEpisodeFiles.length} episodes
+                  {episodes.length + projectTeamFiles.length} episodes
                 </Badge>
               </div>
             </div>
@@ -164,8 +164,8 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
 
       <Tabs defaultValue="scripts" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="scripts">Scripts</TabsTrigger>
-          <TabsTrigger value="episodes">Episodes</TabsTrigger>
+          <TabsTrigger value="scripts">Submissions</TabsTrigger>
+          <TabsTrigger value="episodes">Teams</TabsTrigger>
         </TabsList>
 
 
@@ -176,7 +176,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
               <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
                 <FileText className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Scripts</h3>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Submissions</h3>
             </div>
             
             {/* Language Filter */}
@@ -204,8 +204,8 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
           </div>
           
           <div className="grid gap-6">
-            {Object.entries(filteredGroupedScripts).map(([scriptTitle, scriptVersions]) => {
-              const script = selectedScriptVersions[scriptTitle] || scriptVersions[0];
+            {Object.entries(filteredGroupedSubmissions).map(([scriptTitle, scriptVersions]) => {
+              const script = selectedSubmissionVersions[scriptTitle] || scriptVersions[0];
               const hasMultipleLanguages = scriptVersions.length > 1;
               
               // Get status color
@@ -235,11 +235,11 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                             <Select 
                               value={script.id} 
                               onValueChange={(scriptId) => {
-                                const selectedScript = scriptVersions.find(s => s.id === scriptId);
-                                if (selectedScript) {
-                                  setSelectedScriptVersions(prev => ({
+                                const selectedSubmission = scriptVersions.find(s => s.id === scriptId);
+                                if (selectedSubmission) {
+                                  setSelectedSubmissionVersions(prev => ({
                                     ...prev,
-                                    [scriptTitle]: selectedScript
+                                    [scriptTitle]: selectedSubmission
                                   }));
                                 }
                               }}
@@ -253,11 +253,11 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                                 </SelectValue>
                               </SelectTrigger>
                               <SelectContent>
-                                {scriptVersions.map(langScript => (
-                                  <SelectItem key={langScript.id} value={langScript.id}>
+                                {scriptVersions.map(langSubmission => (
+                                  <SelectItem key={langSubmission.id} value={langSubmission.id}>
                                     <div className="flex items-center gap-2">
-                                      <span>{getLanguageFlag(langScript.language || 'en')}</span>
-                                      <span>{getLanguageName(langScript.language || 'en')}</span>
+                                      <span>{getLanguageFlag(langSubmission.language || 'en')}</span>
+                                      <span>{getLanguageName(langSubmission.language || 'en')}</span>
                                     </div>
                                   </SelectItem>
                                 ))}
@@ -270,7 +270,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                         
                         {script.content && (
                           <div className="mb-3 p-3 bg-emerald-50/80 rounded-md border border-emerald-200">
-                            <p className="text-xs font-medium text-emerald-600 mb-1">Script Content</p>
+                            <p className="text-xs font-medium text-emerald-600 mb-1">Submission Content</p>
                             <p className="text-sm text-emerald-700 leading-relaxed">{script.content}</p>
                           </div>
                         )}
@@ -284,7 +284,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          onClick={() => downloadScript(script)}
+                          onClick={() => downloadSubmission(script)}
                           className="h-8 w-8 p-0 hover:bg-green-50 dark:hover:bg-green-900/30"
                         >
                           <Download className="h-4 w-4 text-green-600" />
@@ -314,14 +314,14 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
             })}
             
             {/* Show project-level script files only if there are any */}
-            {projectScriptFiles.length > 0 && (
+            {projectSubmissionFiles.length > 0 && (
               <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-xl p-6 border border-emerald-200/50 dark:border-emerald-800/50">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
                     <FolderOpen className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-gray-100">Project Script Files</h4>
+                    <h4 className="font-semibold text-gray-900 dark:text-gray-100">Hackathon Submission Files</h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Document files uploaded to this project</p>
                   </div>
                 </div>
@@ -333,7 +333,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
               </div>
             )}
             
-            {Object.keys(filteredGroupedScripts).length === 0 && projectScriptFiles.length === 0 && (
+            {Object.keys(filteredGroupedSubmissions).length === 0 && projectSubmissionFiles.length === 0 && (
               <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-12 text-center border border-gray-200 dark:border-gray-700">
                 <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-full w-fit mx-auto mb-4">
                   <FileText className="h-8 w-8 text-gray-400 dark:text-gray-500" />
@@ -342,7 +342,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                   {selectedLanguage === "all" ? "No scripts yet" : `No scripts in ${getLanguageName(selectedLanguage)}`}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  {selectedLanguage === "all" ? "Scripts can be created from the Scripts page" : "Try selecting a different language or create a new script"}
+                  {selectedLanguage === "all" ? "Submissions can be created from the Submissions page" : "Try selecting a different language or create a new script"}
                 </p>
               </div>
             )}
@@ -354,7 +354,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
             <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
               <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Episodes</h3>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Teams</h3>
           </div>
           
           <div className="grid gap-6">
@@ -366,7 +366,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                       <div className="flex items-center gap-3 mb-2">
                         <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{episode.title}</h4>
                         <Badge variant="outline" className="text-xs">
-                          Episode #{episode.episodeNumber}
+                          Team #{episode.episodeNumber}
                         </Badge>
                         {episode.isPremium && (
                           <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
@@ -377,7 +377,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                       
                       {episode.description && (
                         <div className="mb-3 p-3 bg-blue-50/80 rounded-md border border-blue-200">
-                          <p className="text-xs font-medium text-blue-600 mb-1">Episode Description</p>
+                          <p className="text-xs font-medium text-blue-600 mb-1">Team Description</p>
                           <p className="text-sm text-blue-700 leading-relaxed">{episode.description}</p>
                         </div>
                       )}
@@ -393,7 +393,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
                       <FileList 
                         entityType="episodes" 
                         entityId={episode.id}
-                        title={`Episode ${episode.episodeNumber} Files`}
+                        title={`Team ${episode.episodeNumber} Files`}
                       />
                     </div>
                   </div>
@@ -402,14 +402,14 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
             ))}
             
             {/* Show project-level episode files only if there are any */}
-            {projectEpisodeFiles.length > 0 && (
+            {projectTeamFiles.length > 0 && (
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-xl p-6 border border-blue-200/50 dark:border-blue-800/50">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                     <FolderOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-gray-100">Project Episode Files</h4>
+                    <h4 className="font-semibold text-gray-900 dark:text-gray-100">Hackathon Team Files</h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Audio/video files uploaded to this project</p>
                   </div>
                 </div>
@@ -421,13 +421,13 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
               </div>
             )}
             
-            {episodes.length === 0 && projectEpisodeFiles.length === 0 && (
+            {episodes.length === 0 && projectTeamFiles.length === 0 && (
               <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-12 text-center border border-gray-200 dark:border-gray-700">
                 <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-full w-fit mx-auto mb-4">
                   <Calendar className="h-8 w-8 text-gray-400 dark:text-gray-500" />
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No episodes yet</h3>
-                <p className="text-gray-600 dark:text-gray-400">Episodes can be created from the Episodes page</p>
+                <p className="text-gray-600 dark:text-gray-400">Teams can be created from the Teams page</p>
               </div>
             )}
           </div>

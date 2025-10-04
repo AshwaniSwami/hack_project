@@ -43,9 +43,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/api";
 import { colors, getCardStyle, getGradientStyle } from "@/lib/colors";
 import { Plus, Edit, Trash2, Radio, Phone, Mail, MapPin, Sparkles, Waves, Antenna, Clock, CheckCircle, XCircle, Search, Eye, MoreHorizontal, Filter } from "lucide-react";
-import type { RadioStation } from "@shared/schema";
+import type { RadioCollege } from "@shared/schema";
 
-const radioStationFormSchema = z.object({
+const radioCollegeFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   contactPerson: z.string().optional(),
   email: z.string().email("Invalid email address"),
@@ -54,11 +54,11 @@ const radioStationFormSchema = z.object({
   isActive: z.boolean().default(true),
 });
 
-type RadioStationFormData = z.infer<typeof radioStationFormSchema>;
+type RadioCollegeFormData = z.infer<typeof radioCollegeFormSchema>;
 
-export default function RadioStations() {
+export default function RadioColleges() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [editingStation, setEditingStation] = useState<RadioStation | null>(null);
+  const [editingCollege, setEditingCollege] = useState<RadioCollege | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
   const { user } = useAuth();
@@ -66,12 +66,12 @@ export default function RadioStations() {
 
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  const { data: radioStations = [], isLoading } = useQuery<RadioStation[]>({
+  const { data: radioColleges = [], isLoading } = useQuery<RadioCollege[]>({
     queryKey: ["/api/radio-stations"],
   });
 
-  const form = useForm<RadioStationFormData>({
-    resolver: zodResolver(radioStationFormSchema),
+  const form = useForm<RadioCollegeFormData>({
+    resolver: zodResolver(radioCollegeFormSchema),
     defaultValues: {
       name: "",
       contactPerson: "",
@@ -83,7 +83,7 @@ export default function RadioStations() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: RadioStationFormData) => {
+    mutationFn: async (data: RadioCollegeFormData) => {
       const payload = {
         ...data,
         contactPerson: data.contactPerson || undefined,
@@ -111,15 +111,15 @@ export default function RadioStations() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: RadioStationFormData) => {
-      if (!editingStation) throw new Error("No station selected for editing");
+    mutationFn: async (data: RadioCollegeFormData) => {
+      if (!editingCollege) throw new Error("No station selected for editing");
       const payload = {
         ...data,
         contactPerson: data.contactPerson || undefined,
         phone: data.phone || undefined,  
         address: data.address || undefined,
       };
-      return apiRequest("PUT", `/api/radio-stations/${editingStation.id}`, payload);
+      return apiRequest("PUT", `/api/radio-stations/${editingCollege.id}`, payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/radio-stations"] });
@@ -127,7 +127,7 @@ export default function RadioStations() {
         title: "Success",
         description: "Radio station updated successfully",
       });
-      setEditingStation(null);
+      setEditingCollege(null);
       form.reset();
     },
     onError: () => {
@@ -159,7 +159,7 @@ export default function RadioStations() {
     },
   });
 
-  const filteredStations = radioStations.filter(station => {
+  const filteredColleges = radioColleges.filter(station => {
     const matchesSearch = station.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       station.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (station.contactPerson && station.contactPerson.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -171,16 +171,16 @@ export default function RadioStations() {
     return matchesSearch && matchesStatus;
   });
 
-  const onSubmit = (data: RadioStationFormData) => {
-    if (editingStation) {
+  const onSubmit = (data: RadioCollegeFormData) => {
+    if (editingCollege) {
       updateMutation.mutate(data);
     } else {
       createMutation.mutate(data);
     }
   };
 
-  const handleEdit = (station: RadioStation) => {
-    setEditingStation(station);
+  const handleEdit = (station: RadioCollege) => {
+    setEditingCollege(station);
     form.reset({
       name: station.name,
       contactPerson: station.contactPerson || "",
@@ -215,7 +215,7 @@ export default function RadioStations() {
                 </div>
                 <div>
                   <h1 className={`text-2xl font-bold ${colors.text.primary} mb-1 ${colors.gradients.text}`}>
-                    Radio Stations
+                    Colleges
                   </h1>
                   <p className="text-slate-600 dark:text-gray-400 text-sm">Manage your radio station partnerships and contacts</p>
                 </div>
@@ -226,7 +226,7 @@ export default function RadioStations() {
                   <DialogTrigger asChild>
                     <Button size="lg" className={colors.button.primary}>
                       <Plus className="h-5 w-5 mr-3" />
-                      New Station
+                      New College
                     </Button>
                   </DialogTrigger>
                 <DialogContent className="max-w-3xl">
@@ -235,7 +235,7 @@ export default function RadioStations() {
                       <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
                         <Sparkles className="h-5 w-5 text-white" />
                       </div>
-                      {editingStation ? "Edit Radio Station" : "Create New Radio Station"}
+                      {editingCollege ? "Edit College" : "Create New College"}
                     </DialogTitle>
                   </DialogHeader>
                   <Form {...form}>
@@ -246,7 +246,7 @@ export default function RadioStations() {
                           name="name"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Station Name</FormLabel>
+                              <FormLabel>College Name</FormLabel>
                               <FormControl>
                                 <Input placeholder="Enter station name" {...field} />
                               </FormControl>
@@ -346,7 +346,7 @@ export default function RadioStations() {
                           variant="outline" 
                           onClick={() => {
                             setIsCreateDialogOpen(false);
-                            setEditingStation(null);
+                            setEditingCollege(null);
                             form.reset();
                           }}
                         >
@@ -357,7 +357,7 @@ export default function RadioStations() {
                           disabled={createMutation.isPending || updateMutation.isPending}
                           className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-lg"
                         >
-                          {createMutation.isPending || updateMutation.isPending ? "Saving..." : "Save Station"}
+                          {createMutation.isPending || updateMutation.isPending ? "Saving..." : "Save College"}
                         </Button>
                       </div>
                     </form>
@@ -400,7 +400,7 @@ export default function RadioStations() {
                     </select>
                   </div>
                   <Badge variant="outline" className="bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                    {filteredStations.length} stations
+                    {filteredColleges.length} stations
                   </Badge>
                 </div>
               </div>
@@ -408,7 +408,7 @@ export default function RadioStations() {
           </Card>
         </div>
 
-        {/* Radio Stations Table */}
+        {/* Colleges Table */}
         {isLoading ? (
           <Card className="bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-xl">
             <CardContent className="p-8">
@@ -424,7 +424,7 @@ export default function RadioStations() {
               </div>
             </CardContent>
           </Card>
-        ) : filteredStations.length === 0 ? (
+        ) : filteredColleges.length === 0 ? (
           <Card className="bg-white/80 backdrop-blur-md border-0 shadow-2xl">
             <CardContent className="text-center py-20">
               <div className="relative mb-8">
@@ -449,7 +449,7 @@ export default function RadioStations() {
                   className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 hover:scale-105 px-8 py-3"
                 >
                   <Plus className="h-6 w-6 mr-3" />
-                  Add Your First Station
+                  Add Your First College
                 </Button>
               )}
             </CardContent>
@@ -460,7 +460,7 @@ export default function RadioStations() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 border-b-2 border-gray-200 dark:border-gray-600">
-                    <TableHead className="font-semibold text-gray-700 dark:text-gray-200">Station</TableHead>
+                    <TableHead className="font-semibold text-gray-700 dark:text-gray-200">College</TableHead>
                     <TableHead className="font-semibold text-gray-700 dark:text-gray-200">Contact</TableHead>
                     <TableHead className="font-semibold text-gray-700 dark:text-gray-200">Email</TableHead>
                     <TableHead className="font-semibold text-gray-700 dark:text-gray-200">Phone</TableHead>
@@ -470,7 +470,7 @@ export default function RadioStations() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredStations.map((station) => (
+                  {filteredColleges.map((station) => (
                     <TableRow 
                       key={station.id} 
                       className="hover:bg-blue-50/50 dark:hover:bg-gray-700/50 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700"
@@ -558,14 +558,14 @@ export default function RadioStations() {
                             <DropdownMenuContent align="end" className="w-48">
                               <DropdownMenuItem onClick={() => handleEdit(station)}>
                                 <Edit className="h-4 w-4 mr-2" />
-                                Edit Station
+                                Edit College
                               </DropdownMenuItem>
                               <DropdownMenuItem 
                                 onClick={() => handleDelete(station.id)}
                                 className="text-red-600 focus:text-red-600"
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
-                                Delete Station
+                                Delete College
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -585,14 +585,14 @@ export default function RadioStations() {
       </div>
 
       {/* Edit Dialog */}
-      <Dialog open={!!editingStation} onOpenChange={() => setEditingStation(null)}>
+      <Dialog open={!!editingCollege} onOpenChange={() => setEditingCollege(null)}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3 text-xl">
               <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
                 <Edit className="h-5 w-5 text-white" />
               </div>
-              Edit Radio Station
+              Edit College
             </DialogTitle>
           </DialogHeader>
           <Form {...form}>
@@ -603,7 +603,7 @@ export default function RadioStations() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Station Name</FormLabel>
+                      <FormLabel>College Name</FormLabel>
                       <FormControl>
                         <Input placeholder="Enter station name" {...field} />
                       </FormControl>
@@ -701,7 +701,7 @@ export default function RadioStations() {
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={() => setEditingStation(null)}
+                  onClick={() => setEditingCollege(null)}
                 >
                   Cancel
                 </Button>
@@ -710,7 +710,7 @@ export default function RadioStations() {
                   disabled={updateMutation.isPending}
                   className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-lg"
                 >
-                  {updateMutation.isPending ? "Updating..." : "Update Station"}
+                  {updateMutation.isPending ? "Updating..." : "Update College"}
                 </Button>
               </div>
             </form>

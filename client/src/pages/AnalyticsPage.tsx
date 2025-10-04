@@ -3,9 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { 
   useRealTimeAnalytics, 
   useAnalyticsQuery, 
-  useProjectsAnalytics,
-  useEpisodesAnalytics,
-  useScriptsAnalytics,
+  useHackathonsAnalytics,
+  useTeamsAnalytics,
+  useSubmissionsAnalytics,
   useUsersAnalytics,
   useFilesAnalytics
 } from "@/hooks/useRealTimeAnalytics";
@@ -131,9 +131,9 @@ export function AnalyticsPage() {
   );
 
   // Analytics hooks for different sections
-  const { data: projectStats = [], isLoading: projectsLoading } = useProjectsAnalytics();
-  const { data: episodeStats = { episodes: [], episodeDownloadsByProject: [] }, isLoading: episodesLoading } = useEpisodesAnalytics();
-  const { data: scriptStats = { scripts: [], scriptDownloadsByProject: [] }, isLoading: scriptsLoading } = useScriptsAnalytics();
+  const { data: projectStats = [], isLoading: projectsLoading } = useHackathonsAnalytics();
+  const { data: episodeStats = { episodes: [], episodeDownloadsByHackathon: [] }, isLoading: episodesLoading } = useTeamsAnalytics();
+  const { data: scriptStats = { scripts: [], scriptDownloadsByHackathon: [] }, isLoading: scriptsLoading } = useSubmissionsAnalytics();
   const { data: userStatsResponse = { users: [] }, isLoading: usersLoading2 } = useUsersAnalytics();
   const userStats = userStatsResponse?.users || [];
   const { data: fileStats2 = [], isLoading: filesLoading2 } = useFilesAnalytics();
@@ -190,9 +190,9 @@ export function AnalyticsPage() {
         <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="charts">Charts</TabsTrigger>
-          <TabsTrigger value="projects">Projects</TabsTrigger>
-          <TabsTrigger value="episodes">Episodes</TabsTrigger>
-          <TabsTrigger value="scripts">Scripts</TabsTrigger>
+          <TabsTrigger value="projects">Hackathons</TabsTrigger>
+          <TabsTrigger value="episodes">Teams</TabsTrigger>
+          <TabsTrigger value="scripts">Submissions</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="files">Files</TabsTrigger>
         </TabsList>
@@ -459,14 +459,14 @@ export function AnalyticsPage() {
           </div>
         </TabsContent>
 
-        {/* Projects Tab */}
+        {/* Hackathons Tab */}
         <TabsContent value="projects" className="space-y-6">
-          {/* Project Statistics Overview */}
+          {/* Hackathon Statistics Overview */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FolderOpen className="h-5 w-5" />
-                Project Download Analytics
+                Hackathon Download Analytics
               </CardTitle>
               <CardDescription>
                 Track download activity by project to understand content popularity
@@ -489,7 +489,7 @@ export function AnalyticsPage() {
                           <FolderOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div>
-                          <p className="font-medium">{project.title || 'Unknown Project'}</p>
+                          <p className="font-medium">{project.title || 'Unknown Hackathon'}</p>
                           <div className="flex items-center gap-2 text-sm text-gray-500">
                             <span>{project.fileCount || 0} files</span>
                             <span>•</span>
@@ -519,15 +519,15 @@ export function AnalyticsPage() {
             </CardContent>
           </Card>
 
-          {/* Project Analytics Charts */}
+          {/* Hackathon Analytics Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Project Downloads Bar Chart */}
+            {/* Hackathon Downloads Bar Chart */}
             {Array.isArray(projectStats) && projectStats.length > 0 && (
               <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <BarChart3 className="h-5 w-5 text-blue-600" />
-                    Downloads by Project
+                    Downloads by Hackathon
                   </CardTitle>
                   <CardDescription>Comparison of download activity across projects</CardDescription>
                 </CardHeader>
@@ -565,7 +565,7 @@ export function AnalyticsPage() {
               </Card>
             )}
 
-            {/* Project Distribution Pie Chart */}
+            {/* Hackathon Distribution Pie Chart */}
             {Array.isArray(projectStats) && projectStats.length > 0 && (
               <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20">
                 <CardHeader>
@@ -581,7 +581,7 @@ export function AnalyticsPage() {
                       <PieChart>
                         <Pie
                           data={projectStats.map((project: any, index: number) => ({
-                            name: project.title || 'Unknown Project',
+                            name: project.title || 'Unknown Hackathon',
                             value: project.downloadCount || 0,
                             fill: [
                               '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444',
@@ -621,14 +621,14 @@ export function AnalyticsPage() {
 
         </TabsContent>
 
-        {/* Episodes Tab */}
+        {/* Teams Tab */}
         <TabsContent value="episodes" className="space-y-6">
-          {/* Episode Statistics Overview */}
+          {/* Team Statistics Overview */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Eye className="h-5 w-5" />
-                Episode Download Analytics
+                Team Download Analytics
               </CardTitle>
               <CardDescription>
                 Track download activity by episode to understand content popularity
@@ -651,9 +651,9 @@ export function AnalyticsPage() {
                           <Eye className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                         </div>
                         <div>
-                          <p className="font-medium">{episode.episodeTitle || 'Unknown Episode'}</p>
+                          <p className="font-medium">{episode.episodeTitle || 'Unknown Team'}</p>
                           <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <span>Project: {episode.projectName || 'Unknown'}</span>
+                            <span>Hackathon: {episode.projectName || 'Unknown'}</span>
                             <span>•</span>
                             <span>{episode.filesCount || 0} files</span>
                             <span>•</span>
@@ -683,13 +683,13 @@ export function AnalyticsPage() {
             </CardContent>
           </Card>
 
-          {/* Individual Episode Performance */}
+          {/* Individual Team Performance */}
           {episodeStats?.episodes && episodeStats.episodes.length > 0 && (
             <Card className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-orange-600" />
-                  Top Episode Performance
+                  Top Team Performance
                 </CardTitle>
                 <CardDescription>Individual episode download performance</CardDescription>
               </CardHeader>
@@ -699,7 +699,7 @@ export function AnalyticsPage() {
                     <PieChart>
                       <Pie
                         data={episodeStats.episodes.slice(0, 8).map((episode: any, index: number) => ({
-                          name: episode.episodeTitle || 'Unknown Episode',
+                          name: episode.episodeTitle || 'Unknown Team',
                           value: episode.downloadCount || 0,
                           fill: [
                             '#F59E0B', '#EF4444', '#EC4899', '#8B5CF6', '#6366F1',
@@ -735,22 +735,22 @@ export function AnalyticsPage() {
             </Card>
           )}
 
-          {/* Episode Project Distribution */}
-          {episodeStats?.episodeDownloadsByProject && episodeStats.episodeDownloadsByProject.length > 0 && (
+          {/* Team Hackathon Distribution */}
+          {episodeStats?.episodeDownloadsByHackathon && episodeStats.episodeDownloadsByHackathon.length > 0 && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Episode Downloads by Project Bar Chart */}
+              {/* Team Downloads by Hackathon Bar Chart */}
               <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <BarChart3 className="h-5 w-5 text-purple-600" />
-                    Episode Downloads by Project
+                    Team Downloads by Hackathon
                   </CardTitle>
-                  <CardDescription>Episode download distribution across projects</CardDescription>
+                  <CardDescription>Team download distribution across projects</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={episodeStats.episodeDownloadsByProject}>
+                      <BarChart data={episodeStats.episodeDownloadsByHackathon}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                         <XAxis 
                           dataKey="projectName" 
@@ -764,7 +764,7 @@ export function AnalyticsPage() {
                         <Tooltip 
                           formatter={(value, name) => [
                             `${value} ${name === 'downloadCount' ? 'downloads' : name === 'episodeCount' ? 'episodes' : 'users'}`,
-                            name === 'downloadCount' ? 'Downloads' : name === 'episodeCount' ? 'Episodes' : 'Unique Users'
+                            name === 'downloadCount' ? 'Downloads' : name === 'episodeCount' ? 'Teams' : 'Unique Users'
                           ]}
                           contentStyle={{
                             backgroundColor: '#f8fafc',
@@ -780,12 +780,12 @@ export function AnalyticsPage() {
                 </CardContent>
               </Card>
 
-              {/* Episode Project Distribution Pie Chart */}
+              {/* Team Hackathon Distribution Pie Chart */}
               <Card className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-950/20 dark:to-blue-950/20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <TrendingUp className="h-5 w-5 text-cyan-600" />
-                    Episode Project Distribution
+                    Team Hackathon Distribution
                   </CardTitle>
                   <CardDescription>Percentage breakdown of episode downloads by project</CardDescription>
                 </CardHeader>
@@ -794,8 +794,8 @@ export function AnalyticsPage() {
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
-                          data={episodeStats.episodeDownloadsByProject.map((project: any, index: number) => ({
-                            name: project.projectName || 'Unknown Project',
+                          data={episodeStats.episodeDownloadsByHackathon.map((project: any, index: number) => ({
+                            name: project.projectName || 'Unknown Hackathon',
                             value: project.downloadCount || 0,
                             fill: [
                               '#8B5CF6', '#06B6D4', '#10B981', '#F59E0B', '#EF4444',
@@ -809,7 +809,7 @@ export function AnalyticsPage() {
                           label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
                           labelLine={false}
                         >
-                          {episodeStats.episodeDownloadsByProject.map((entry: any, index: number) => (
+                          {episodeStats.episodeDownloadsByHackathon.map((entry: any, index: number) => (
                             <Cell key={`cell-${index}`} fill={[
                               '#8B5CF6', '#06B6D4', '#10B981', '#F59E0B', '#EF4444',
                               '#EC4899', '#6366F1', '#3B82F6', '#84CC16', '#F97316'
@@ -833,16 +833,16 @@ export function AnalyticsPage() {
           )}
         </TabsContent>
 
-        {/* Scripts Tab */}
+        {/* Submissions Tab */}
         <TabsContent value="scripts" className="space-y-6">
-          {/* Script Downloads by Project - Enhanced Visual */}
+          {/* Submission Downloads by Hackathon - Enhanced Visual */}
           <Card className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/20 dark:via-indigo-950/20 dark:to-purple-950/20 border-blue-200 dark:border-blue-800">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-3 text-xl">
                 <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
                   <FolderOpen className="h-6 w-6 text-white" />
                 </div>
-                Script Downloads by Project
+                Submission Downloads by Hackathon
               </CardTitle>
               <CardDescription className="text-base">
                 Visual breakdown of which projects have the most script downloads
@@ -853,15 +853,15 @@ export function AnalyticsPage() {
                 <div className="text-center py-12 text-gray-500">
                   <div className="animate-pulse">Loading project analytics...</div>
                 </div>
-              ) : scriptStats?.scriptDownloadsByProject?.length === 0 ? (
+              ) : scriptStats?.scriptDownloadsByHackathon?.length === 0 ? (
                 <div className="text-center py-12 text-gray-500">
                   <FolderOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>No script downloads found for the selected timeframe</p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {scriptStats?.scriptDownloadsByProject?.map((project: any, index: number) => {
-                    const maxDownloads = Math.max(...(scriptStats?.scriptDownloadsByProject?.map((p: any) => p.downloadCount) || [1]));
+                  {scriptStats?.scriptDownloadsByHackathon?.map((project: any, index: number) => {
+                    const maxDownloads = Math.max(...(scriptStats?.scriptDownloadsByHackathon?.map((p: any) => p.downloadCount) || [1]));
                     const percentage = ((project.downloadCount || 0) / maxDownloads) * 100;
                     const colors = [
                       'from-blue-500 to-blue-600',
@@ -895,7 +895,7 @@ export function AnalyticsPage() {
                             </div>
                             <div>
                               <h3 className="font-bold text-xl text-gray-900 dark:text-gray-100">
-                                {project.projectName || 'Unknown Project'}
+                                {project.projectName || 'Unknown Hackathon'}
                               </h3>
                               <div className="flex items-center gap-3 mt-1">
                                 <Badge variant="outline" className="text-sm font-medium bg-white/50 dark:bg-black/20">
@@ -939,20 +939,20 @@ export function AnalyticsPage() {
 
           {/* Enhanced Visual Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Bar Chart for Project Downloads */}
-            {scriptStats?.scriptDownloadsByProject && scriptStats.scriptDownloadsByProject.length > 0 && (
+            {/* Bar Chart for Hackathon Downloads */}
+            {scriptStats?.scriptDownloadsByHackathon && scriptStats.scriptDownloadsByHackathon.length > 0 && (
               <Card className="bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-950/20 dark:to-teal-950/20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <BarChart3 className="h-5 w-5 text-green-600" />
-                    Downloads by Project
+                    Downloads by Hackathon
                   </CardTitle>
                   <CardDescription>Comparison of script downloads across projects</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={scriptStats.scriptDownloadsByProject}>
+                      <BarChart data={scriptStats.scriptDownloadsByHackathon}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                         <XAxis 
                           dataKey="projectName" 
@@ -966,7 +966,7 @@ export function AnalyticsPage() {
                         <Tooltip 
                           formatter={(value, name) => [
                             `${value} ${name === 'downloadCount' ? 'downloads' : 'scripts'}`,
-                            name === 'downloadCount' ? 'Script Downloads' : 'Total Scripts'
+                            name === 'downloadCount' ? 'Submission Downloads' : 'Total Submissions'
                           ]}
                           contentStyle={{
                             backgroundColor: '#f8fafc',
@@ -983,13 +983,13 @@ export function AnalyticsPage() {
               </Card>
             )}
 
-            {/* Pie Chart for Project Distribution */}
-            {scriptStats?.scriptDownloadsByProject && scriptStats.scriptDownloadsByProject.length > 0 && (
+            {/* Pie Chart for Hackathon Distribution */}
+            {scriptStats?.scriptDownloadsByHackathon && scriptStats.scriptDownloadsByHackathon.length > 0 && (
               <Card className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <TrendingUp className="h-5 w-5 text-orange-600" />
-                    Project Distribution
+                    Hackathon Distribution
                   </CardTitle>
                   <CardDescription>Percentage breakdown of script downloads by project</CardDescription>
                 </CardHeader>
@@ -998,7 +998,7 @@ export function AnalyticsPage() {
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
-                          data={scriptStats.scriptDownloadsByProject.map((project: any, index: number) => ({
+                          data={scriptStats.scriptDownloadsByHackathon.map((project: any, index: number) => ({
                             name: project.projectName,
                             value: project.downloadCount,
                             fill: [
@@ -1013,7 +1013,7 @@ export function AnalyticsPage() {
                           label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
                           labelLine={false}
                         >
-                          {scriptStats.scriptDownloadsByProject.map((entry: any, index: number) => (
+                          {scriptStats.scriptDownloadsByHackathon.map((entry: any, index: number) => (
                             <Cell key={`cell-${index}`} fill={[
                               '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444',
                               '#06B6D4', '#84CC16', '#F97316', '#EC4899', '#6366F1'
@@ -1036,12 +1036,12 @@ export function AnalyticsPage() {
             )}
           </div>
 
-          {/* Individual Script Downloads with Enhanced Project Visibility */}
+          {/* Individual Submission Downloads with Enhanced Hackathon Visibility */}
           <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-amber-600" />
-                Individual Script Downloads by Project
+                Individual Submission Downloads by Hackathon
               </CardTitle>
               <CardDescription>
                 Detailed breakdown showing exactly which project each downloaded script belongs to
@@ -1080,17 +1080,17 @@ export function AnalyticsPage() {
                           </div>
                           <div>
                             <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100">
-                              {script.scriptTitle || 'Untitled Script'}
+                              {script.scriptTitle || 'Untitled Submission'}
                             </h4>
                             <div className="flex items-center gap-3 mt-1">
                               <Badge variant="outline" className={`text-sm font-medium ${colorScheme.text} bg-white/50 dark:bg-black/20`}>
-                                📁 {script.projectName || 'No Project'}
+                                📁 {script.projectName || 'No Hackathon'}
                               </Badge>
                               <span className="text-xs text-gray-500 dark:text-gray-400 bg-white/30 dark:bg-black/20 px-2 py-1 rounded">
-                                Script ID: {script.scriptId?.slice(-8)}
+                                Submission ID: {script.scriptId?.slice(-8)}
                               </span>
                               <span className="text-xs text-gray-500 dark:text-gray-400 bg-white/30 dark:bg-black/20 px-2 py-1 rounded">
-                                Project ID: {script.projectId?.slice(-8)}
+                                Hackathon ID: {script.projectId?.slice(-8)}
                               </span>
                             </div>
                           </div>
@@ -1255,9 +1255,9 @@ export function AnalyticsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="projects">Projects</SelectItem>
-                    <SelectItem value="episodes">Episodes</SelectItem>
-                    <SelectItem value="scripts">Scripts</SelectItem>
+                    <SelectItem value="projects">Hackathons</SelectItem>
+                    <SelectItem value="episodes">Teams</SelectItem>
+                    <SelectItem value="scripts">Submissions</SelectItem>
                   </SelectContent>
                 </Select>
                 

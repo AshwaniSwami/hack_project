@@ -14,34 +14,34 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useFilePermissions } from "@/hooks/useFilePermissions";
-import type { Project, Episode, Script } from "@shared/schema";
+import type { Hackathon, Team, Submission } from "@shared/schema";
 
-export function ScriptFileUpload() {
+export function SubmissionFileUpload() {
   const [file, setFile] = useState<File | null>(null);
-  const [selectedProject, setSelectedProject] = useState<string>("");
-  const [selectedEpisode, setSelectedEpisode] = useState<string>("none");
-  const [selectedScript, setSelectedScript] = useState<string>("none");
+  const [selectedHackathon, setSelectedHackathon] = useState<string>("");
+  const [selectedTeam, setSelectedTeam] = useState<string>("none");
+  const [selectedSubmission, setSelectedSubmission] = useState<string>("none");
 
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { permissions, isLoading: permissionsLoading } = useFilePermissions();
 
-  const { data: projects = [] } = useQuery<Project[]>({
+  const { data: projects = [] } = useQuery<Hackathon[]>({
     queryKey: ["/api/projects"],
   });
 
-  const { data: episodes = [] } = useQuery<Episode[]>({
+  const { data: episodes = [] } = useQuery<Team[]>({
     queryKey: ["/api/episodes"],
-    select: (data) => selectedProject 
-      ? data.filter(episode => episode.projectId === selectedProject)
+    select: (data) => selectedHackathon 
+      ? data.filter(episode => episode.projectId === selectedHackathon)
       : data
   });
 
-  const { data: scripts = [] } = useQuery<Script[]>({
+  const { data: scripts = [] } = useQuery<Submission[]>({
     queryKey: ["/api/scripts"],
-    select: (data) => selectedProject 
-      ? data.filter(script => script.projectId === selectedProject)
+    select: (data) => selectedHackathon 
+      ? data.filter(script => script.projectId === selectedHackathon)
       : data
   });
 
@@ -60,7 +60,7 @@ export function ScriptFileUpload() {
       return;
     }
 
-    if (!selectedProject) {
+    if (!selectedHackathon) {
       toast({
         title: "No project selected",
         description: "Please select a project for the script",
@@ -72,19 +72,19 @@ export function ScriptFileUpload() {
     setIsUploading(true);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("projectId", selectedProject);
-    if (selectedEpisode && selectedEpisode !== "none") {
-      formData.append("episodeId", selectedEpisode);
+    formData.append("projectId", selectedHackathon);
+    if (selectedTeam && selectedTeam !== "none") {
+      formData.append("episodeId", selectedTeam);
     }
-    if (selectedScript && selectedScript !== "none") {
-      formData.append("scriptId", selectedScript);
+    if (selectedSubmission && selectedSubmission !== "none") {
+      formData.append("scriptId", selectedSubmission);
     }
 
     try {
       // Choose endpoint based on what's selected
-      let endpoint = `/api/projects/${selectedProject}/upload`;
-      if (selectedScript && selectedScript !== "none") {
-        endpoint = `/api/scripts/${selectedScript}/upload`;
+      let endpoint = `/api/projects/${selectedHackathon}/upload`;
+      if (selectedSubmission && selectedSubmission !== "none") {
+        endpoint = `/api/scripts/${selectedSubmission}/upload`;
       }
 
       const response = await fetch(endpoint, {
@@ -103,9 +103,9 @@ export function ScriptFileUpload() {
       });
 
       setFile(null);
-      setSelectedProject("");
-      setSelectedEpisode("none");
-      setSelectedScript("none");
+      setSelectedHackathon("");
+      setSelectedTeam("none");
+      setSelectedSubmission("none");
       
       // Invalidate all related queries to update project stats
       queryClient.invalidateQueries({ queryKey: ['/api/files'] });
@@ -135,7 +135,7 @@ export function ScriptFileUpload() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Upload className="h-5 w-5" />
-            Upload Script Files
+            Upload Submission Files
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -152,17 +152,17 @@ export function ScriptFileUpload() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Upload className="h-5 w-5" />
-          Upload Script Files
+          Upload Submission Files
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="project-select">Project *</Label>
-            <Select value={selectedProject} onValueChange={(value) => {
-              setSelectedProject(value);
-              setSelectedEpisode("none");
-              setSelectedScript("none");
+            <Label htmlFor="project-select">Hackathon *</Label>
+            <Select value={selectedHackathon} onValueChange={(value) => {
+              setSelectedHackathon(value);
+              setSelectedTeam("none");
+              setSelectedSubmission("none");
             }}>
               <SelectTrigger>
                 <SelectValue placeholder="Select project" />
@@ -178,11 +178,11 @@ export function ScriptFileUpload() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="episode-select">Episode (Optional)</Label>
+            <Label htmlFor="episode-select">Team (Optional)</Label>
             <Select 
-              value={selectedEpisode} 
-              onValueChange={setSelectedEpisode}
-              disabled={!selectedProject}
+              value={selectedTeam} 
+              onValueChange={setSelectedTeam}
+              disabled={!selectedHackathon}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select episode" />
@@ -191,7 +191,7 @@ export function ScriptFileUpload() {
                 <SelectItem value="none">No specific episode</SelectItem>
                 {episodes.map((episode) => (
                   <SelectItem key={episode.id} value={episode.id}>
-                    Episode {episode.episodeNumber}: {episode.title}
+                    Team {episode.episodeNumber}: {episode.title}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -199,11 +199,11 @@ export function ScriptFileUpload() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="script-select">Script (Optional)</Label>
+            <Label htmlFor="script-select">Submission (Optional)</Label>
             <Select 
-              value={selectedScript} 
-              onValueChange={setSelectedScript}
-              disabled={!selectedProject}
+              value={selectedSubmission} 
+              onValueChange={setSelectedSubmission}
+              disabled={!selectedHackathon}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select script" />
@@ -246,15 +246,15 @@ export function ScriptFileUpload() {
 
         <Button 
           onClick={handleUpload} 
-          disabled={!file || !selectedProject || isUploading}
+          disabled={!file || !selectedHackathon || isUploading}
           className="w-full"
         >
-          {isUploading ? "Uploading..." : "Upload Script File"}
+          {isUploading ? "Uploading..." : "Upload Submission File"}
         </Button>
         
-        {selectedScript !== "none" && (
+        {selectedSubmission !== "none" && (
           <p className="text-sm text-blue-600 bg-blue-50 p-2 rounded">
-            File will be associated with the selected script: <strong>{scripts.find(s => s.id === selectedScript)?.title}</strong>
+            File will be associated with the selected script: <strong>{scripts.find(s => s.id === selectedSubmission)?.title}</strong>
           </p>
         )}
       </CardContent>

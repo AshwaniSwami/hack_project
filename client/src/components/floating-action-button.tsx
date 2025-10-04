@@ -8,9 +8,9 @@ import { QuickCreateModals } from '@/components/quick-create-modals';
 export function FloatingActionButton() {
   const { user } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
-  const [isEpisodeModalOpen, setIsEpisodeModalOpen] = useState(false);
-  const [isScriptModalOpen, setIsScriptModalOpen] = useState(false);
+  const [isHackathonModalOpen, setIsHackathonModalOpen] = useState(false);
+  const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
+  const [isSubmissionModalOpen, setIsSubmissionModalOpen] = useState(false);
 
   // Only show for organizer and analyzer roles
   if (!user || (user.role !== 'organizer' && user.role !== 'analyzer')) {
@@ -19,28 +19,28 @@ export function FloatingActionButton() {
 
   const actions = [
     {
-      label: 'New Project',
+      label: 'New Hackathon',
       icon: <FolderOpen className="h-4 w-4" />,
       onClick: () => {
-        setIsProjectModalOpen(true);
+        setIsHackathonModalOpen(true);
         setIsExpanded(false);
       },
       color: 'bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700'
     },
     {
-      label: 'New Episode',
+      label: 'New Team',
       icon: <RadioTower className="h-4 w-4" />,
       onClick: () => {
-        setIsEpisodeModalOpen(true);
+        setIsTeamModalOpen(true);
         setIsExpanded(false);
       },
       color: 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700'
     },
     {
-      label: 'New Script',
+      label: 'New Submission',
       icon: <Mic className="h-4 w-4" />,
       onClick: () => {
-        setIsScriptModalOpen(true);
+        setIsSubmissionModalOpen(true);
         setIsExpanded(false);
       },
       color: 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700'
@@ -102,12 +102,12 @@ export function FloatingActionButton() {
 
       {/* Quick Create Modals */}
       <QuickCreateModals
-        isProjectOpen={isProjectModalOpen}
-        isEpisodeOpen={isEpisodeModalOpen}
-        isScriptOpen={isScriptModalOpen}
-        onProjectClose={() => setIsProjectModalOpen(false)}
-        onEpisodeClose={() => setIsEpisodeModalOpen(false)}
-        onScriptClose={() => setIsScriptModalOpen(false)}
+        isHackathonOpen={isHackathonModalOpen}
+        isTeamOpen={isTeamModalOpen}
+        isSubmissionOpen={isSubmissionModalOpen}
+        onHackathonClose={() => setIsHackathonModalOpen(false)}
+        onTeamClose={() => setIsTeamModalOpen(false)}
+        onSubmissionClose={() => setIsSubmissionModalOpen(false)}
       />
     </>
   );

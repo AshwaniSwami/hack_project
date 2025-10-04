@@ -14,26 +14,26 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useFilePermissions } from "@/hooks/useFilePermissions";
-import type { Project, Episode } from "@shared/schema";
+import type { Hackathon, Team } from "@shared/schema";
 
-export function EpisodeFileUpload() {
+export function TeamFileUpload() {
   const [file, setFile] = useState<File | null>(null);
-  const [selectedProject, setSelectedProject] = useState<string>("");
-  const [selectedEpisode, setSelectedEpisode] = useState<string>("none");
+  const [selectedHackathon, setSelectedHackathon] = useState<string>("");
+  const [selectedTeam, setSelectedTeam] = useState<string>("none");
 
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { permissions, isLoading: permissionsLoading } = useFilePermissions();
 
-  const { data: projects = [] } = useQuery<Project[]>({
+  const { data: projects = [] } = useQuery<Hackathon[]>({
     queryKey: ["/api/projects"],
   });
 
-  const { data: episodes = [] } = useQuery<Episode[]>({
+  const { data: episodes = [] } = useQuery<Team[]>({
     queryKey: ["/api/episodes"],
-    select: (data) => selectedProject 
-      ? data.filter(episode => episode.projectId === selectedProject)
+    select: (data) => selectedHackathon 
+      ? data.filter(episode => episode.projectId === selectedHackathon)
       : data
   });
 
@@ -52,7 +52,7 @@ export function EpisodeFileUpload() {
       return;
     }
 
-    if (!selectedProject) {
+    if (!selectedHackathon) {
       toast({
         title: "No project selected",
         description: "Please select a project for the episode file",
@@ -64,15 +64,15 @@ export function EpisodeFileUpload() {
     setIsUploading(true);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("projectId", selectedProject);
-    if (selectedEpisode && selectedEpisode !== "none") {
-      formData.append("episodeId", selectedEpisode);
+    formData.append("projectId", selectedHackathon);
+    if (selectedTeam && selectedTeam !== "none") {
+      formData.append("episodeId", selectedTeam);
     }
 
     try {
-      let endpoint = `/api/projects/${selectedProject}/upload`;
-      if (selectedEpisode && selectedEpisode !== "none") {
-        endpoint = `/api/episodes/${selectedEpisode}/upload`;
+      let endpoint = `/api/projects/${selectedHackathon}/upload`;
+      if (selectedTeam && selectedTeam !== "none") {
+        endpoint = `/api/episodes/${selectedTeam}/upload`;
       }
 
       const response = await fetch(endpoint, {
@@ -91,8 +91,8 @@ export function EpisodeFileUpload() {
       });
 
       setFile(null);
-      setSelectedProject("");
-      setSelectedEpisode("none");
+      setSelectedHackathon("");
+      setSelectedTeam("none");
       
       // Invalidate all related queries to update project stats
       queryClient.invalidateQueries({ queryKey: ['/api/files'] });
@@ -122,7 +122,7 @@ export function EpisodeFileUpload() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Upload className="h-5 w-5" />
-            Upload Episode Files
+            Upload Team Files
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -139,16 +139,16 @@ export function EpisodeFileUpload() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
           <Upload className="h-5 w-5" />
-          Upload Episode Files
+          Upload Team Files
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="project-select" className="text-gray-900 dark:text-gray-100">Project *</Label>
-            <Select value={selectedProject} onValueChange={(value) => {
-              setSelectedProject(value);
-              setSelectedEpisode("none");
+            <Label htmlFor="project-select" className="text-gray-900 dark:text-gray-100">Hackathon *</Label>
+            <Select value={selectedHackathon} onValueChange={(value) => {
+              setSelectedHackathon(value);
+              setSelectedTeam("none");
             }}>
               <SelectTrigger>
                 <SelectValue placeholder="Select project" />
@@ -164,11 +164,11 @@ export function EpisodeFileUpload() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="episode-select" className="text-gray-900 dark:text-gray-100">Specific Episode (Optional)</Label>
+            <Label htmlFor="episode-select" className="text-gray-900 dark:text-gray-100">Specific Team (Optional)</Label>
             <Select 
-              value={selectedEpisode} 
-              onValueChange={setSelectedEpisode}
-              disabled={!selectedProject}
+              value={selectedTeam} 
+              onValueChange={setSelectedTeam}
+              disabled={!selectedHackathon}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select episode" />
@@ -177,7 +177,7 @@ export function EpisodeFileUpload() {
                 <SelectItem value="none">General project files</SelectItem>
                 {episodes.map((episode) => (
                   <SelectItem key={episode.id} value={episode.id}>
-                    Episode {episode.episodeNumber}: {episode.title}
+                    Team {episode.episodeNumber}: {episode.title}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -211,10 +211,10 @@ export function EpisodeFileUpload() {
 
         <Button 
           onClick={handleUpload} 
-          disabled={!file || !selectedProject || isUploading}
+          disabled={!file || !selectedHackathon || isUploading}
           className="w-full"
         >
-          {isUploading ? "Uploading..." : "Upload Episode File"}
+          {isUploading ? "Uploading..." : "Upload Team File"}
         </Button>
       </CardContent>
     </Card>

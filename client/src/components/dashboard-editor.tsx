@@ -24,22 +24,22 @@ import {
   Zap,
   PieChart
 } from "lucide-react";
-import type { Script, Project, Episode } from "@shared/schema";
+import type { Submission, Hackathon, Team } from "@shared/schema";
 import { useAuth } from "@/hooks/useAuth";
 
-export function EditorDashboard() {
+export function analyzerDashboard() {
   const { user } = useAuth();
   const [showStats, setShowStats] = useState(true);
   
-  const { data: scripts = [] } = useQuery<Script[]>({
+  const { data: scripts = [] } = useQuery<Submission[]>({
     queryKey: ["/api/scripts"],
   });
 
-  const { data: projects = [] } = useQuery<Project[]>({
+  const { data: projects = [] } = useQuery<Hackathon[]>({
     queryKey: ["/api/projects"],
   });
 
-  const { data: episodes = [] } = useQuery<Episode[]>({
+  const { data: episodes = [] } = useQuery<Team[]>({
     queryKey: ["/api/episodes"],
   });
 
@@ -48,15 +48,15 @@ export function EditorDashboard() {
     enabled: false, // Disable for now to prevent 403 errors
   });
 
-  // Scripts awaiting review (assigned to this editor or general review)
+  // Submissions awaiting review (assigned to this analyzer or general review)
   const scriptsAwaitingReview = scripts.filter(script => 
     script.status === 'Under Review' || script.status === 'Submitted'
   );
 
-  // Projects with pending items
+  // Hackathons with pending items
   const projectsWithPending = projects.filter(project => {
-    const projectScripts = scripts.filter(script => script.projectId === project.id);
-    return projectScripts.some(script => 
+    const projectSubmissions = scripts.filter(script => script.projectId === project.id);
+    return projectSubmissions.some(script => 
       script.status === 'Draft' || script.status === 'Under Review' || script.status === 'Needs Revision'
     );
   });
@@ -78,7 +78,7 @@ export function EditorDashboard() {
       author: script.authorId,
       status: script.status,
       time: script.createdAt,
-      project: projects.find(p => p.id === script.projectId)?.title || 'Unknown Project'
+      project: projects.find(p => p.id === script.projectId)?.title || 'Unknown Hackathon'
     }))
     .slice(0, 5);
 
@@ -125,8 +125,8 @@ export function EditorDashboard() {
     totalDownloads: 0 // Mock data for now
   };
 
-  // Editor performance metrics
-  const editorMetrics = {
+  // analyzer performance metrics
+  const analyzerMetrics = {
     productivity: weeklyStats.scriptsReviewed,
     efficiency: scripts.length > 0 ? Math.round((workflowStats.approved / scripts.length) * 100) : 0,
     responsiveness: scriptsAwaitingReview.length === 0 ? 100 : Math.max(0, 100 - (scriptsAwaitingReview.length * 10))
@@ -173,7 +173,7 @@ export function EditorDashboard() {
         </div>
       </div>
 
-      {/* Editor Performance Stats */}
+      {/* analyzer Performance Stats */}
       {showStats && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="bg-gradient-to-br from-green-50 to-emerald-100 border-green-200">
@@ -182,7 +182,7 @@ export function EditorDashboard() {
                 <div>
                   <p className="text-sm font-medium text-green-600">Weekly Productivity</p>
                   <p className="text-3xl font-bold text-green-900">{weeklyStats.scriptsReviewed}</p>
-                  <p className="text-sm text-green-700">Scripts reviewed</p>
+                  <p className="text-sm text-green-700">Submissions reviewed</p>
                 </div>
                 <Zap className="h-12 w-12 text-green-600" />
               </div>
@@ -198,14 +198,14 @@ export function EditorDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-blue-600">Team Efficiency</p>
-                  <p className="text-3xl font-bold text-blue-900">{editorMetrics.efficiency}%</p>
+                  <p className="text-3xl font-bold text-blue-900">{analyzerMetrics.efficiency}%</p>
                   <p className="text-sm text-blue-700">Approval rate</p>
                 </div>
                 <Target className="h-12 w-12 text-blue-600" />
               </div>
               <div className="mt-4">
-                <Progress value={editorMetrics.efficiency} className="h-2" />
-                <p className="text-xs text-blue-600 mt-1">Scripts approved vs total</p>
+                <Progress value={analyzerMetrics.efficiency} className="h-2" />
+                <p className="text-xs text-blue-600 mt-1">Submissions approved vs total</p>
               </div>
             </CardContent>
           </Card>
@@ -231,12 +231,12 @@ export function EditorDashboard() {
         </div>
       )}
 
-      {/* Scripts Awaiting Review - Highly Prominent */}
+      {/* Submissions Awaiting Review - Highly Prominent */}
       <Card className="border-2 border-yellow-200 bg-gradient-to-r from-yellow-50 to-amber-50">
         <CardHeader>
           <CardTitle className="flex items-center text-yellow-800">
             <Clock className="h-6 w-6 mr-2" />
-            Scripts Awaiting My Review
+            Submissions Awaiting My Review
             <Badge className="ml-2 bg-yellow-200 text-yellow-800">{scriptsAwaitingReview.length}</Badge>
           </CardTitle>
         </CardHeader>
@@ -250,7 +250,7 @@ export function EditorDashboard() {
                     <div>
                       <h4 className="font-medium text-gray-900">{script.title}</h4>
                       <p className="text-sm text-gray-500">
-                        Project: {projects.find(p => p.id === script.projectId)?.title || 'Unknown'}
+                        Hackathon: {projects.find(p => p.id === script.projectId)?.title || 'Unknown'}
                       </p>
                     </div>
                   </div>
@@ -271,7 +271,7 @@ export function EditorDashboard() {
                 <div className="text-center pt-2">
                   <Link href="/scripts">
                     <Button variant="outline">
-                      View All {scriptsAwaitingReview.length} Scripts
+                      View All {scriptsAwaitingReview.length} Submissions
                     </Button>
                   </Link>
                 </div>
@@ -287,21 +287,21 @@ export function EditorDashboard() {
         </CardContent>
       </Card>
 
-      {/* Projects with Pending Items & Content Workflow */}
+      {/* Hackathons with Pending Items & Content Workflow */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
               <AlertCircle className="h-5 w-5 mr-2 text-orange-500" />
-              Projects with Pending Items
+              Hackathons with Pending Items
             </CardTitle>
           </CardHeader>
           <CardContent>
             {projectsWithPending.length > 0 ? (
               <div className="space-y-3">
                 {projectsWithPending.slice(0, 5).map((project) => {
-                  const projectScripts = scripts.filter(script => script.projectId === project.id);
-                  const pendingCount = projectScripts.filter(script => 
+                  const projectSubmissions = scripts.filter(script => script.projectId === project.id);
+                  const pendingCount = projectSubmissions.filter(script => 
                     script.status === 'Draft' || script.status === 'Under Review' || script.status === 'Needs Revision'
                   ).length;
                   
@@ -407,7 +407,7 @@ export function EditorDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Star className="h-5 w-5 mr-2 text-amber-500" />
-              Top Performance Overview (Editor's Pick)
+              Top Performance Overview (analyzer's Pick)
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -418,7 +418,7 @@ export function EditorDashboard() {
                     <div>
                       <h4 className="font-medium text-amber-900">{script.title}</h4>
                       <p className="text-sm text-amber-700">
-                        Project: {projects.find(p => p.id === script.projectId)?.title || 'Unknown'}
+                        Hackathon: {projects.find(p => p.id === script.projectId)?.title || 'Unknown'}
                       </p>
                     </div>
                     <div className="flex items-center">
@@ -428,7 +428,7 @@ export function EditorDashboard() {
                   </div>
                   <Link href={`/scripts`}>
                     <Button variant="outline" size="sm" className="mt-2 border-amber-300">
-                      View Script
+                      View Submission
                     </Button>
                   </Link>
                 </div>

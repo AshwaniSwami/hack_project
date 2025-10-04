@@ -21,20 +21,20 @@ import {
   Server
 } from "lucide-react";
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import type { Script, Project, Episode, User } from "@shared/schema";
+import type { Submission, Hackathon, Team, User } from "@shared/schema";
 import { useAuth } from "@/hooks/useAuth";
 
-export function AdminDashboard() {
+export function OrganizerDashboard() {
   const { user } = useAuth();
-  const { data: projects = [] } = useQuery<Project[]>({
+  const { data: projects = [] } = useQuery<Hackathon[]>({
     queryKey: ["/api/projects"],
   });
 
-  const { data: episodes = [] } = useQuery<Episode[]>({
+  const { data: episodes = [] } = useQuery<Team[]>({
     queryKey: ["/api/episodes"],
   });
 
-  const { data: scripts = [] } = useQuery<Script[]>({
+  const { data: scripts = [] } = useQuery<Submission[]>({
     queryKey: ["/api/scripts"],
   });
 
@@ -44,21 +44,21 @@ export function AdminDashboard() {
 
   // Calculate simple metrics
   const stats = {
-    totalProjects: projects.length,
-    totalEpisodes: episodes.length,
-    totalScripts: scripts.length,
+    totalHackathons: projects.length,
+    totalTeams: episodes.length,
+    totalSubmissions: scripts.length,
     totalUsers: users.length,
     activeUsers: users.filter(user => user.status === 'verified').length
   };
 
-  // Optimized member role distribution - prevents separate blocks
+  // Optimized participant role distribution - prevents separate blocks
   const roleCount = users.reduce((acc, user) => {
-    const role = user.role || 'member';
+    const role = user.role || 'participant';
     acc[role] = (acc[role] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
-  const memberRoleData = [
+  const participantRoleData = [
     { name: 'Organizer', value: roleCount.organizer || 0, color: '#ef4444' },
     { name: 'Analyzer', value: roleCount.analyzer || 0, color: '#3b82f6' },
     { name: 'Participant', value: roleCount.participant || 0, color: '#10b981' },
@@ -81,16 +81,16 @@ export function AdminDashboard() {
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
                   <Sparkles className="h-4 w-4" />
                 </div>
-                <span className="text-xs font-medium uppercase tracking-wider text-blue-200">Admin Dashboard</span>
+                <span className="text-xs font-medium uppercase tracking-wider text-blue-200">Organizer Dashboard</span>
               </div>
               <h1 className="mb-3 text-3xl font-bold leading-tight">
                 Welcome back, 
                 <span className="bg-gradient-to-r from-cyan-200 to-white bg-clip-text text-transparent">
-                  {user?.firstName || user?.email?.split('@')[0] || 'Admin'}
+                  {user?.firstName || user?.email?.split('@')[0] || 'Organizer'}
                 </span>
               </h1>
               <p className="text-lg text-blue-100/90 font-medium">
-                Transform communities through powerful radio content
+                Transform communities through powerful hackathon innovation
               </p>
             </div>
             
@@ -101,7 +101,7 @@ export function AdminDashboard() {
               </div>
               <div className="flex items-center space-x-2 bg-white/10 rounded-lg px-3 py-2">
                 <Users className="h-4 w-4 text-green-300" />
-                <span className="text-sm">{stats.totalUsers} Team Members</span>
+                <span className="text-sm">{stats.totalUsers} Team participants</span>
               </div>
             </div>
           </div>
@@ -117,8 +117,8 @@ export function AdminDashboard() {
                 <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Projects</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalProjects}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Hackathons</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalHackathons}</p>
               </div>
             </div>
           </CardContent>
@@ -131,8 +131,8 @@ export function AdminDashboard() {
                 <Radio className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Episodes</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalEpisodes}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Teams</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalTeams}</p>
               </div>
             </div>
           </CardContent>
@@ -145,8 +145,8 @@ export function AdminDashboard() {
                 <FileText className="h-5 w-5 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Scripts</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalScripts}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Submissions</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalSubmissions}</p>
               </div>
             </div>
           </CardContent>
@@ -187,31 +187,31 @@ export function AdminDashboard() {
                   <div className="flex items-center space-x-3">
                     <FileText className="h-6 w-6 text-blue-600" />
                     <div>
-                      <span className="font-medium text-gray-700 dark:text-gray-300 block">Projects</span>
+                      <span className="font-medium text-gray-700 dark:text-gray-300 block">Hackathons</span>
                       <span className="text-xs text-gray-500 dark:text-gray-400">Content containers</span>
                     </div>
                   </div>
-                  <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.totalProjects}</span>
+                  <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.totalHackathons}</span>
                 </div>
                 <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 border border-emerald-200/50 dark:border-emerald-700/50">
                   <div className="flex items-center space-x-3">
                     <Radio className="h-6 w-6 text-emerald-600" />
                     <div>
-                      <span className="font-medium text-gray-700 dark:text-gray-300 block">Episodes</span>
+                      <span className="font-medium text-gray-700 dark:text-gray-300 block">Teams</span>
                       <span className="text-xs text-gray-500 dark:text-gray-400">Audio content</span>
                     </div>
                   </div>
-                  <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{stats.totalEpisodes}</span>
+                  <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{stats.totalTeams}</span>
                 </div>
                 <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border border-purple-200/50 dark:border-purple-700/50">
                   <div className="flex items-center space-x-3">
                     <FileText className="h-6 w-6 text-purple-600" />
                     <div>
-                      <span className="font-medium text-gray-700 dark:text-gray-300 block">Scripts</span>
+                      <span className="font-medium text-gray-700 dark:text-gray-300 block">Submissions</span>
                       <span className="text-xs text-gray-500 dark:text-gray-400">Written content</span>
                     </div>
                   </div>
-                  <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">{stats.totalScripts}</span>
+                  <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">{stats.totalSubmissions}</span>
                 </div>
               </div>
             </div>
@@ -238,7 +238,7 @@ export function AdminDashboard() {
                     <ResponsiveContainer width={180} height={180}>
                       <PieChart>
                         <Pie
-                          data={memberRoleData}
+                          data={participantRoleData}
                           cx="50%"
                           cy="50%"
                           innerRadius={40}
@@ -246,7 +246,7 @@ export function AdminDashboard() {
                           paddingAngle={2}
                           dataKey="value"
                         >
-                          {memberRoleData.map((entry, index) => (
+                          {participantRoleData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
@@ -265,7 +265,7 @@ export function AdminDashboard() {
                   
                   {/* Enhanced Legend */}
                   <div className="flex flex-col space-y-4">
-                    {memberRoleData.map((item, index) => (
+                    {participantRoleData.map((item, index) => (
                       <div key={index} className="flex items-center space-x-3">
                         <div 
                           className="w-4 h-4 rounded-full shadow-sm" 
@@ -274,7 +274,7 @@ export function AdminDashboard() {
                         <div className="flex flex-col">
                           <span className="text-sm font-medium text-gray-900 dark:text-white">{item.name}</span>
                           <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {item.value} member{item.value !== 1 ? 's' : ''} ({Math.round((item.value / stats.totalUsers) * 100)}%)
+                            {item.value} participant{item.value !== 1 ? 's' : ''} ({Math.round((item.value / stats.totalUsers) * 100)}%)
                           </span>
                         </div>
                       </div>

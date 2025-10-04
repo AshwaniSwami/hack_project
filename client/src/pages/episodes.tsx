@@ -60,44 +60,44 @@ import {
   Archive,
   RefreshCw
 } from "lucide-react";
-import { EpisodeFileUpload } from "@/components/episode-file-upload";
+import { TeamFileUpload } from "@/components/episode-file-upload";
 import { FileList } from "@/components/file-list";
 import { colors, getCardStyle, getGradientStyle } from "@/lib/colors";
-import type { Episode, Project } from "@shared/schema";
+import type { Team, Hackathon } from "@shared/schema";
 
 const episodeFormSchema = z.object({
-  projectId: z.string().min(1, "Project is required"),
+  projectId: z.string().min(1, "Hackathon is required"),
   title: z.string().min(1, "Title is required"),
-  episodeNumber: z.coerce.number().min(1, "Episode number must be at least 1"),
+  episodeNumber: z.coerce.number().min(1, "Team number must be at least 1"),
   description: z.string().optional(),
   broadcastDate: z.string().optional(),
   isPremium: z.boolean().default(false),
 });
 
-type EpisodeFormData = z.infer<typeof episodeFormSchema>;
+type TeamFormData = z.infer<typeof episodeFormSchema>;
 
-export default function Episodes() {
+export default function Teams() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [editingEpisode, setEditingEpisode] = useState<Episode | null>(null);
+  const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
-  const [projectFilter, setProjectFilter] = useState('all');
+  const [projectFilter, setHackathonFilter] = useState('all');
   const [sortBy, setSortBy] = useState<'title' | 'date' | 'episode'>('episode');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [selectedEpisodes, setSelectedEpisodes] = useState<string[]>([]);
+  const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: episodes = [], isLoading } = useQuery<Episode[]>({
+  const { data: episodes = [], isLoading } = useQuery<Team[]>({
     queryKey: ["/api/episodes"],
   });
 
-  const { data: projects = [] } = useQuery<Project[]>({
+  const { data: projects = [] } = useQuery<Hackathon[]>({
     queryKey: ["/api/projects"],
   });
 
-  const form = useForm<EpisodeFormData>({
+  const form = useForm<TeamFormData>({
     resolver: zodResolver(episodeFormSchema),
     defaultValues: {
       projectId: "",
@@ -110,7 +110,7 @@ export default function Episodes() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: EpisodeFormData) => {
+    mutationFn: async (data: TeamFormData) => {
       const payload = {
         ...data,
         broadcastDate: data.broadcastDate || null,
@@ -121,7 +121,7 @@ export default function Episodes() {
       queryClient.invalidateQueries({ queryKey: ["/api/episodes"] });
       toast({
         title: "Success",
-        description: "Episode created successfully",
+        description: "Team created successfully",
       });
       setIsCreateDialogOpen(false);
       form.reset();
@@ -136,7 +136,7 @@ export default function Episodes() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: EpisodeFormData & { id: string }) => {
+    mutationFn: async (data: TeamFormData & { id: string }) => {
       const { id, ...payload } = data;
       return apiRequest("PUT", `/api/episodes/${id}`, {
         ...payload,
@@ -147,9 +147,9 @@ export default function Episodes() {
       queryClient.invalidateQueries({ queryKey: ["/api/episodes"] });
       toast({
         title: "Success",
-        description: "Episode updated successfully",
+        description: "Team updated successfully",
       });
-      setEditingEpisode(null);
+      setEditingTeam(null);
       form.reset();
     },
     onError: () => {
@@ -169,7 +169,7 @@ export default function Episodes() {
       queryClient.invalidateQueries({ queryKey: ["/api/episodes"] });
       toast({
         title: "Success",
-        description: "Episode deleted successfully",
+        description: "Team deleted successfully",
       });
     },
     onError: () => {
@@ -181,18 +181,18 @@ export default function Episodes() {
     },
   });
 
-  const onSubmit = (data: EpisodeFormData) => {
+  const onSubmit = (data: TeamFormData) => {
     createMutation.mutate(data);
   };
 
-  const onUpdateSubmit = (data: EpisodeFormData) => {
-    if (editingEpisode) {
-      updateMutation.mutate({ ...data, id: editingEpisode.id });
+  const onUpdateSubmit = (data: TeamFormData) => {
+    if (editingTeam) {
+      updateMutation.mutate({ ...data, id: editingTeam.id });
     }
   };
 
-  const handleEdit = (episode: Episode) => {
-    setEditingEpisode(episode);
+  const handleEdit = (episode: Team) => {
+    setEditingTeam(episode);
     form.reset({
       projectId: episode.projectId,
       title: episode.title,
@@ -210,22 +210,22 @@ export default function Episodes() {
   };
 
   const handleBulkDelete = () => {
-    if (selectedEpisodes.length === 0) return;
-    if (window.confirm(`Are you sure you want to delete ${selectedEpisodes.length} episodes?`)) {
-      selectedEpisodes.forEach(id => deleteMutation.mutate(id));
-      setSelectedEpisodes([]);
+    if (selectedTeams.length === 0) return;
+    if (window.confirm(`Are you sure you want to delete ${selectedTeams.length} episodes?`)) {
+      selectedTeams.forEach(id => deleteMutation.mutate(id));
+      setSelectedTeams([]);
     }
   };
 
-  const toggleEpisodeSelection = (id: string) => {
-    setSelectedEpisodes(prev => 
+  const toggleTeamSelection = (id: string) => {
+    setSelectedTeams(prev => 
       prev.includes(id) ? prev.filter(eid => eid !== id) : [...prev, id]
     );
   };
 
 
 
-  const filteredAndSortedEpisodes = episodes
+  const filteredAndSortedTeams = episodes
     .filter((episode) => {
       const project = projects.find(p => p.id === episode.projectId);
       const searchLower = searchQuery.toLowerCase();
@@ -233,8 +233,8 @@ export default function Episodes() {
         (episode.description && episode.description.toLowerCase().includes(searchLower)) ||
         (project?.name.toLowerCase().includes(searchLower)) ||
         episode.episodeNumber.toString().includes(searchLower);
-      const matchesProject = projectFilter === 'all' || episode.projectId === projectFilter;
-      return matchesSearch && matchesProject;
+      const matchesHackathon = projectFilter === 'all' || episode.projectId === projectFilter;
+      return matchesSearch && matchesHackathon;
     })
     .sort((a, b) => {
       let compareValue = 0;
@@ -272,7 +272,7 @@ export default function Episodes() {
                 </div>
                 <div>
                   <h1 className={`text-2xl font-bold ${colors.text.primary} mb-1 ${colors.gradients.text}`}>
-                    Episodes
+                    Teams
                   </h1>
                   <p className="text-slate-600 dark:text-gray-400 text-sm">Manage your radio episodes and audio content</p>
                 </div>
@@ -283,7 +283,7 @@ export default function Episodes() {
                   <DialogTrigger asChild>
                     <Button size="lg" className={colors.button.primary}>
                       <Plus className="h-5 w-5 mr-3" />
-                      New Episode
+                      New Team
                     </Button>
                   </DialogTrigger>
                 <DialogContent className="max-w-2xl">
@@ -292,7 +292,7 @@ export default function Episodes() {
                       <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
                         <Sparkles className="h-5 w-5 text-white" />
                       </div>
-                      Create New Episode
+                      Create New Team
                     </DialogTitle>
                   </DialogHeader>
                   <Form {...form}>
@@ -302,7 +302,7 @@ export default function Episodes() {
                         name="projectId"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Project</FormLabel>
+                            <FormLabel>Hackathon</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
                                 <SelectTrigger>
@@ -341,7 +341,7 @@ export default function Episodes() {
                         name="episodeNumber"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Episode Number</FormLabel>
+                            <FormLabel>Team Number</FormLabel>
                             <FormControl>
                               <Input 
                                 type="number" 
@@ -401,7 +401,7 @@ export default function Episodes() {
                           disabled={createMutation.isPending}
                           className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-lg"
                         >
-                          {createMutation.isPending ? "Creating..." : "Create Episode"}
+                          {createMutation.isPending ? "Creating..." : "Create Team"}
                         </Button>
                       </div>
                     </form>
@@ -420,7 +420,7 @@ export default function Episodes() {
           <TabsList className="grid w-full grid-cols-3 lg:w-[450px] bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-1">
             <TabsTrigger value="episodes" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-rose-500 data-[state=active]:text-white transition-all duration-300 text-gray-700 dark:text-gray-300">
               <Play className="h-4 w-4" />
-              Episodes
+              Teams
             </TabsTrigger>
             <TabsTrigger value="upload" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-rose-500 data-[state=active]:text-white transition-all duration-300 text-gray-700 dark:text-gray-300">
               <Upload className="h-4 w-4" />
@@ -448,12 +448,12 @@ export default function Episodes() {
                         className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:border-sky-500 text-gray-900 dark:text-gray-100"
                       />
                     </div>
-                    <Select value={projectFilter} onValueChange={setProjectFilter}>
+                    <Select value={projectFilter} onValueChange={setHackathonFilter}>
                       <SelectTrigger className="w-48">
-                        <SelectValue placeholder="All Projects" />
+                        <SelectValue placeholder="All Hackathons" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Projects</SelectItem>
+                        <SelectItem value="all">All Hackathons</SelectItem>
                         {projects.map((project) => (
                           <SelectItem key={project.id} value={project.id}>
                             {project.name}
@@ -469,7 +469,7 @@ export default function Episodes() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="episode">Episode #</SelectItem>
+                          <SelectItem value="episode">Team #</SelectItem>
                           <SelectItem value="title">Title</SelectItem>
                           <SelectItem value="date">Date</SelectItem>
                         </SelectContent>
@@ -487,9 +487,9 @@ export default function Episodes() {
                   
                   {/* Action Controls */}
                   <div className="flex items-center gap-2">
-                    {selectedEpisodes.length > 0 && (user?.role === 'organizer' || user?.role === 'analyzer') && (
+                    {selectedTeams.length > 0 && (user?.role === 'organizer' || user?.role === 'analyzer') && (
                       <div className="flex items-center gap-2 mr-4">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">{selectedEpisodes.length} selected</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">{selectedTeams.length} selected</span>
                         <Button
                           variant="destructive"
                           size="sm"
@@ -534,7 +534,7 @@ export default function Episodes() {
                 <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
                   <div className="flex items-center gap-4">
                     <div className="text-sm text-gray-600 dark:text-gray-400">
-                      Showing {filteredAndSortedEpisodes.length} of {episodes.length} episodes
+                      Showing {filteredAndSortedTeams.length} of {episodes.length} episodes
                     </div>
                   </div>
                   {(searchQuery || projectFilter !== 'all') && (
@@ -543,7 +543,7 @@ export default function Episodes() {
                       size="sm"
                       onClick={() => {
                         setSearchQuery('');
-                        setProjectFilter('all');
+                        setHackathonFilter('all');
                       }}
                       className="text-xs"
                     >
@@ -566,7 +566,7 @@ export default function Episodes() {
                   </Card>
                 ))}
               </div>
-            ) : filteredAndSortedEpisodes.length === 0 ? (
+            ) : filteredAndSortedTeams.length === 0 ? (
               <Card className="bg-white/80 backdrop-blur-md border-0 shadow-xl">
                 <CardContent className="text-center py-16">
                   <div className="relative mb-6">
@@ -588,14 +588,14 @@ export default function Episodes() {
                       className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-xl hover:shadow-blue-500/25 transition-all duration-300 hover:scale-105"
                     >
                       <Plus className="h-5 w-5 mr-2" />
-                      Create Your First Episode
+                      Create Your First Team
                     </Button>
                   )}
                 </CardContent>
               </Card>
             ) : viewMode === 'grid' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {filteredAndSortedEpisodes.map((episode) => {
+                {filteredAndSortedTeams.map((episode) => {
                   const project = projects.find(p => p.id === episode.projectId);
                   return (
                     <Card key={episode.id} className="group hover:shadow-lg transition-all duration-300 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-600/50 hover:scale-[1.02] hover:border-blue-300 dark:hover:border-blue-500">
@@ -605,8 +605,8 @@ export default function Episodes() {
                             {(user?.role === 'organizer' || user?.role === 'analyzer') && (
                               <input
                                 type="checkbox"
-                                checked={selectedEpisodes.includes(episode.id)}
-                                onChange={() => toggleEpisodeSelection(episode.id)}
+                                checked={selectedTeams.includes(episode.id)}
+                                onChange={() => toggleTeamSelection(episode.id)}
                                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                               />
                             )}
@@ -677,7 +677,7 @@ export default function Episodes() {
               </div>
             ) : (
               <div className="space-y-3">
-                {filteredAndSortedEpisodes.map((episode) => {
+                {filteredAndSortedTeams.map((episode) => {
                   const project = projects.find(p => p.id === episode.projectId);
                   return (
                     <Card key={episode.id} className="group hover:shadow-md transition-all duration-300 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-600/50 hover:border-blue-300 dark:hover:border-blue-500">
@@ -688,8 +688,8 @@ export default function Episodes() {
                               {(user?.role === 'organizer' || user?.role === 'analyzer') && (
                                 <input
                                   type="checkbox"
-                                  checked={selectedEpisodes.includes(episode.id)}
-                                  onChange={() => toggleEpisodeSelection(episode.id)}
+                                  checked={selectedTeams.includes(episode.id)}
+                                  onChange={() => toggleTeamSelection(episode.id)}
                                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                 />
                               )}
@@ -758,11 +758,11 @@ export default function Episodes() {
                   <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
                     <FileAudio className="h-6 w-6 text-white" />
                   </div>
-                  Upload Episode Files
+                  Upload Team Files
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <EpisodeFileUpload />
+                <TeamFileUpload />
               </CardContent>
             </Card>
           </TabsContent>
@@ -774,13 +774,13 @@ export default function Episodes() {
                   <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
                     <FolderOpen className="h-6 w-6 text-white" />
                   </div>
-                  Episode Files by Project
+                  Team Files by Hackathon
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
                   {projects.map((project) => {
-                    const projectEpisodes = episodes.filter(ep => ep.projectId === project.id);
+                    const projectTeams = episodes.filter(ep => ep.projectId === project.id);
                     return (
                       <Card key={project.id} className="bg-gradient-to-br from-gray-50 to-blue-50/50 dark:from-gray-800 dark:to-blue-900/20 border border-gray-200 dark:border-gray-600 shadow-lg">
                         <CardHeader className="pb-4">
@@ -795,7 +795,7 @@ export default function Episodes() {
                           <div>
                             <h5 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300 flex items-center gap-3 p-2 bg-blue-50/80 dark:bg-blue-900/20 rounded-lg">
                               <FileAudio className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                              Project Episode Files
+                              Hackathon Team Files
                             </h5>
                             <FileList 
                               entityType="episodes" 
@@ -804,11 +804,11 @@ export default function Episodes() {
                             />
                           </div>
                           
-                          {projectEpisodes.map((episode) => (
+                          {projectTeams.map((episode) => (
                             <div key={episode.id} className="pl-6 border-l-2 border-emerald-200 dark:border-emerald-700 bg-emerald-50/30 dark:bg-emerald-900/20 rounded-r-lg">
                               <h5 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300 flex items-center gap-3 p-2">
                                 <Hash className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                                Episode {episode.episodeNumber}: {episode.title}
+                                Team {episode.episodeNumber}: {episode.title}
                               </h5>
                               <FileList 
                                 entityType="episodes" 
@@ -829,14 +829,14 @@ export default function Episodes() {
       </div>
 
       {/* Edit Dialog */}
-      <Dialog open={!!editingEpisode} onOpenChange={() => setEditingEpisode(null)}>
+      <Dialog open={!!editingTeam} onOpenChange={() => setEditingTeam(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3 text-xl">
               <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
                 <Edit className="h-5 w-5 text-white" />
               </div>
-              Edit Episode
+              Edit Team
             </DialogTitle>
           </DialogHeader>
           <Form {...form}>
@@ -846,7 +846,7 @@ export default function Episodes() {
                 name="projectId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Project</FormLabel>
+                    <FormLabel>Hackathon</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -885,7 +885,7 @@ export default function Episodes() {
                 name="episodeNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Episode Number</FormLabel>
+                    <FormLabel>Team Number</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
@@ -936,7 +936,7 @@ export default function Episodes() {
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={() => setEditingEpisode(null)}
+                  onClick={() => setEditingTeam(null)}
                 >
                   Cancel
                 </Button>
@@ -945,7 +945,7 @@ export default function Episodes() {
                   disabled={updateMutation.isPending}
                   className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-lg"
                 >
-                  {updateMutation.isPending ? "Updating..." : "Update Episode"}
+                  {updateMutation.isPending ? "Updating..." : "Update Team"}
                 </Button>
               </div>
             </form>

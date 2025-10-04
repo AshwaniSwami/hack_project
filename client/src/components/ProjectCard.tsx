@@ -11,11 +11,11 @@ import {
   Mic,
   FileText
 } from "lucide-react";
-import type { Project } from "@shared/schema";
-import { useProjectStats } from "@/hooks/useProjectStats";
+import type { Hackathon } from "@shared/schema";
+import { useHackathonStats } from "@/hooks/useHackathonStats";
 
-interface ProjectCardProps {
-  project: Project;
+interface HackathonCardProps {
+  project: Hackathon;
   theme?: {
     id: string;
     name: string;
@@ -24,13 +24,13 @@ interface ProjectCardProps {
   user?: {
     role: string;
   };
-  onView: (project: Project) => void;
-  onEdit: (project: Project) => void;
+  onView: (project: Hackathon) => void;
+  onEdit: (project: Hackathon) => void;
   onDelete: (projectId: string) => void;
 }
 
-export function ProjectCard({ project, theme, user, onView, onEdit, onDelete }: ProjectCardProps) {
-  const { episodeCount, scriptCount } = useProjectStats(project.id);
+export function HackathonCard({ project, theme, user, onView, onEdit, onDelete }: HackathonCardProps) {
+  const { episodeCount, scriptCount } = useHackathonStats(project.id);
 
   return (
     <Card className="group hover:shadow-xl transition-all duration-300 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-gray-200/50 dark:border-gray-700/50 shadow-lg hover:scale-[1.02] hover:shadow-blue-500/10">
@@ -106,12 +106,12 @@ export function ProjectCard({ project, theme, user, onView, onEdit, onDelete }: 
             <div className="text-center p-2 bg-emerald-50/80 dark:bg-emerald-900/20 rounded-lg border border-emerald-100 dark:border-emerald-700/50">
               <FileText className="h-4 w-4 mx-auto text-emerald-600 dark:text-emerald-400 mb-1" />
               <div className="text-base font-bold text-emerald-700 dark:text-emerald-300">{scriptCount}</div>
-              <div className="text-xs text-emerald-600 dark:text-emerald-400">Scripts</div>
+              <div className="text-xs text-emerald-600 dark:text-emerald-400">Submissions</div>
             </div>
             <div className="text-center p-2 bg-blue-50/80 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-700/50">
               <Mic className="h-4 w-4 mx-auto text-blue-600 dark:text-blue-400 mb-1" />
               <div className="text-base font-bold text-blue-700 dark:text-blue-300">{episodeCount}</div>
-              <div className="text-xs text-blue-600 dark:text-blue-400">Episodes</div>
+              <div className="text-xs text-blue-600 dark:text-blue-400">Teams</div>
             </div>
           </div>
           

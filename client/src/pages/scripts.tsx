@@ -35,7 +35,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/api";
 import { LanguageSelector } from "@/components/language-selector";
-import { insertScriptSchema } from "@shared/schema";
+import { insertSubmissionSchema } from "@shared/schema";
 import { 
   Plus, 
   Edit, 
@@ -66,18 +66,18 @@ import {
   BookOpen,
   Target
 } from "lucide-react";
-import { ScriptEditor } from "@/components/script-editor";
-import { ScriptFileUpload } from "@/components/script-file-upload";
+import { SubmissionEditor } from "@/components/script-editor";
+import { SubmissionFileUpload } from "@/components/script-file-upload";
 import { FileList } from "@/components/file-list";
 import { LanguageBadge } from "@/components/language-selector";
 import { colors, getStatusColor, getCardStyle, getGradientStyle } from "@/lib/colors";
-import type { Script, Project } from "@shared/schema";
+import type { Submission, Hackathon } from "@shared/schema";
 import { DEFAULT_LANGUAGE, getLanguageName, getLanguageFlag } from "@shared/languages";
 
 // Use the same schema as the working FAB component
-const scriptFormSchema = insertScriptSchema;
+const scriptFormSchema = insertSubmissionSchema;
 
-type ScriptFormData = z.infer<typeof scriptFormSchema>;
+type SubmissionFormData = z.infer<typeof scriptFormSchema>;
 
 
 
@@ -88,31 +88,31 @@ const statusIcons = {
   "Published": PlayCircle
 } as const;
 
-export default function Scripts() {
+export default function Submissions() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [editingScript, setEditingScript] = useState<Script | null>(null);
-  const [viewingScript, setViewingScript] = useState<Script | null>(null);
+  const [editingSubmission, setEditingSubmission] = useState<Submission | null>(null);
+  const [viewingSubmission, setViewingSubmission] = useState<Submission | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [projectFilter, setProjectFilter] = useState('all');
+  const [projectFilter, setHackathonFilter] = useState('all');
   const [languageFilter, setLanguageFilter] = useState('all');
   const [sortBy, setSortBy] = useState<'title' | 'date' | 'status'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [selectedScripts, setSelectedScripts] = useState<string[]>([]);
+  const [selectedSubmissions, setSelectedSubmissions] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: scripts = [], isLoading } = useQuery<Script[]>({
+  const { data: scripts = [], isLoading } = useQuery<Submission[]>({
     queryKey: ["/api/scripts"],
   });
 
-  const { data: projects = [] } = useQuery<Project[]>({
+  const { data: projects = [] } = useQuery<Hackathon[]>({
     queryKey: ["/api/projects"],
   });
 
-  const form = useForm<ScriptFormData>({
+  const form = useForm<SubmissionFormData>({
     resolver: zodResolver(scriptFormSchema),
     defaultValues: {
       projectId: "",
@@ -124,14 +124,14 @@ export default function Scripts() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: ScriptFormData) => {
+    mutationFn: async (data: SubmissionFormData) => {
       return apiRequest("POST", "/api/scripts", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/scripts"] });
       toast({
         title: "Success",
-        description: "Script created successfully",
+        description: "Submission created successfully",
       });
       setIsCreateDialogOpen(false);
       form.reset();
@@ -146,17 +146,17 @@ export default function Scripts() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: ScriptFormData) => {
-      if (!editingScript) throw new Error("No script selected for editing");
-      return apiRequest("PUT", `/api/scripts/${editingScript.id}`, data);
+    mutationFn: async (data: SubmissionFormData) => {
+      if (!editingSubmission) throw new Error("No script selected for editing");
+      return apiRequest("PUT", `/api/scripts/${editingSubmission.id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/scripts"] });
       toast({
         title: "Success",
-        description: "Script updated successfully",
+        description: "Submission updated successfully",
       });
-      setEditingScript(null);
+      setEditingSubmission(null);
       form.reset();
     },
     onError: () => {
@@ -176,7 +176,7 @@ export default function Scripts() {
       queryClient.invalidateQueries({ queryKey: ["/api/scripts"] });
       toast({
         title: "Success",
-        description: "Script deleted successfully",
+        description: "Submission deleted successfully",
       });
     },
     onError: () => {
@@ -188,12 +188,12 @@ export default function Scripts() {
     },
   });
 
-  const onSubmit = (data: ScriptFormData) => {
+  const onSubmit = (data: SubmissionFormData) => {
     // Ensure content is provided for new scripts
-    if (!editingScript && (!data.content || data.content.trim() === '')) {
+    if (!editingSubmission && (!data.content || data.content.trim() === '')) {
       toast({
         title: "Error",
-        description: "Script content is required",
+        description: "Submission content is required",
         variant: "destructive",
       });
       return;
@@ -204,15 +204,15 @@ export default function Scripts() {
       content: data.content || ''
     };
 
-    if (editingScript) {
+    if (editingSubmission) {
       updateMutation.mutate(submitData);
     } else {
       createMutation.mutate(submitData);
     }
   };
 
-  const handleEdit = (script: Script) => {
-    setEditingScript(script);
+  const handleEdit = (script: Submission) => {
+    setEditingSubmission(script);
     form.reset({
       projectId: script.projectId,
       title: script.title,
@@ -229,22 +229,22 @@ export default function Scripts() {
   };
 
   const handleBulkDelete = () => {
-    if (selectedScripts.length === 0) return;
-    if (window.confirm(`Are you sure you want to delete ${selectedScripts.length} scripts?`)) {
-      selectedScripts.forEach(id => deleteMutation.mutate(id));
-      setSelectedScripts([]);
+    if (selectedSubmissions.length === 0) return;
+    if (window.confirm(`Are you sure you want to delete ${selectedSubmissions.length} scripts?`)) {
+      selectedSubmissions.forEach(id => deleteMutation.mutate(id));
+      setSelectedSubmissions([]);
     }
   };
 
-  const toggleScriptSelection = (id: string) => {
-    setSelectedScripts(prev => 
+  const toggleSubmissionSelection = (id: string) => {
+    setSelectedSubmissions(prev => 
       prev.includes(id) ? prev.filter(sid => sid !== id) : [...prev, id]
     );
   };
 
 
 
-  const filteredAndSortedScripts = scripts
+  const filteredAndSortedSubmissions = scripts
     .filter((script) => {
       const project = projects.find(p => p.id === script.projectId);
       const searchLower = searchTerm.toLowerCase();
@@ -252,9 +252,9 @@ export default function Scripts() {
         (script.content && script.content.toLowerCase().includes(searchLower)) ||
         (project?.name.toLowerCase().includes(searchLower));
       const matchesStatus = statusFilter === "all" || script.status === statusFilter;
-      const matchesProject = projectFilter === 'all' || script.projectId === projectFilter;
+      const matchesHackathon = projectFilter === 'all' || script.projectId === projectFilter;
       const matchesLanguage = languageFilter === 'all' || script.language === languageFilter;
-      return matchesSearch && matchesStatus && matchesProject && matchesLanguage;
+      return matchesSearch && matchesStatus && matchesHackathon && matchesLanguage;
     })
     .sort((a, b) => {
       let compareValue = 0;
@@ -293,7 +293,7 @@ export default function Scripts() {
                 </div>
                 <div>
                   <h1 className={`text-2xl font-bold ${colors.text.primary} mb-1 ${colors.gradients.text}`}>
-                    Scripts
+                    Submissions
                   </h1>
                   <p className="text-slate-600 dark:text-gray-400 text-sm">Create and manage your radio scripts and content</p>
                 </div>
@@ -304,7 +304,7 @@ export default function Scripts() {
                   <DialogTrigger asChild>
                     <Button size="lg" className={colors.button.primary}>
                       <Plus className="h-5 w-5 mr-3" />
-                      New Script
+                      New Submission
                     </Button>
                   </DialogTrigger>
                 <DialogContent className="max-w-3xl">
@@ -313,7 +313,7 @@ export default function Scripts() {
                       <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
                         <Sparkles className="h-5 w-5 text-white" />
                       </div>
-                      Create New Script
+                      Create New Submission
                     </DialogTitle>
                   </DialogHeader>
                   <Form {...form}>
@@ -324,7 +324,7 @@ export default function Scripts() {
                           name="projectId"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Project</FormLabel>
+                              <FormLabel>Hackathon</FormLabel>
                               <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
@@ -429,7 +429,7 @@ export default function Scripts() {
                           disabled={createMutation.isPending}
                           className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-lg"
                         >
-                          {createMutation.isPending ? "Creating..." : "Create Script"}
+                          {createMutation.isPending ? "Creating..." : "Create Submission"}
                         </Button>
                       </div>
                     </form>
@@ -448,7 +448,7 @@ export default function Scripts() {
           <TabsList className="grid w-full grid-cols-3 lg:w-[450px] bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-1">
             <TabsTrigger value="scripts" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-rose-500 data-[state=active]:text-white transition-all duration-300 text-gray-700 dark:text-gray-300">
               <FileText className="h-4 w-4" />
-              Scripts
+              Submissions
             </TabsTrigger>
             <TabsTrigger value="upload" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-rose-500 data-[state=active]:text-white transition-all duration-300 text-gray-700 dark:text-gray-300">
               <Upload className="h-4 w-4" />
@@ -490,12 +490,12 @@ export default function Scripts() {
                       </SelectContent>
                     </Select>
 
-                    <Select value={projectFilter} onValueChange={setProjectFilter}>
+                    <Select value={projectFilter} onValueChange={setHackathonFilter}>
                       <SelectTrigger className="w-48">
-                        <SelectValue placeholder="All Projects" />
+                        <SelectValue placeholder="All Hackathons" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Projects</SelectItem>
+                        <SelectItem value="all">All Hackathons</SelectItem>
                         {projects.map((project) => (
                           <SelectItem key={project.id} value={project.id}>
                             {project.name}
@@ -546,9 +546,9 @@ export default function Scripts() {
 
                   {/* Action Controls */}
                   <div className="flex items-center gap-2">
-                    {selectedScripts.length > 0 && (user?.role === 'organizer' || user?.role === 'analyzer') && (
+                    {selectedSubmissions.length > 0 && (user?.role === 'organizer' || user?.role === 'analyzer') && (
                       <div className="flex items-center gap-2 mr-4">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">{selectedScripts.length} selected</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">{selectedSubmissions.length} selected</span>
                         <Button
                           variant="destructive"
                           size="sm"
@@ -593,7 +593,7 @@ export default function Scripts() {
                 <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
                   <div className="flex items-center gap-4">
                     <div className="text-sm text-gray-600 dark:text-gray-400">
-                      Showing {filteredAndSortedScripts.length} of {scripts.length} scripts
+                      Showing {filteredAndSortedSubmissions.length} of {scripts.length} scripts
                     </div>
                   </div>
                   {(searchTerm || statusFilter !== 'all' || projectFilter !== 'all') && (
@@ -603,7 +603,7 @@ export default function Scripts() {
                       onClick={() => {
                         setSearchTerm('');
                         setStatusFilter('all');
-                        setProjectFilter('all');
+                        setHackathonFilter('all');
                       }}
                       className="text-xs"
                     >
@@ -614,7 +614,7 @@ export default function Scripts() {
               </CardContent>
             </Card>
 
-            {/* Scripts List */}
+            {/* Submissions List */}
             {isLoading ? (
               <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" : "space-y-3"}>
                 {[...Array(8)].map((_, i) => (
@@ -627,7 +627,7 @@ export default function Scripts() {
                   </Card>
                 ))}
               </div>
-            ) : filteredAndSortedScripts.length === 0 ? (
+            ) : filteredAndSortedSubmissions.length === 0 ? (
               <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-0 shadow-xl">
                 <CardContent className="text-center py-16">
                   <div className="relative mb-6">
@@ -651,14 +651,14 @@ export default function Scripts() {
                       className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-xl hover:shadow-blue-500/25 transition-all duration-300 hover:scale-105"
                     >
                       <Plus className="h-5 w-5 mr-2" />
-                      Create Your First Script
+                      Create Your First Submission
                     </Button>
                   )}
                 </CardContent>
               </Card>
             ) : viewMode === 'grid' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {filteredAndSortedScripts.map((script) => {
+                {filteredAndSortedSubmissions.map((script) => {
                   const project = projects.find(p => p.id === script.projectId);
                   const StatusIcon = statusIcons[script.status as keyof typeof statusIcons];
                   return (
@@ -669,8 +669,8 @@ export default function Scripts() {
                             {(user?.role === 'organizer' || user?.role === 'analyzer') && (
                               <input
                                 type="checkbox"
-                                checked={selectedScripts.includes(script.id)}
-                                onChange={() => toggleScriptSelection(script.id)}
+                                checked={selectedSubmissions.includes(script.id)}
+                                onChange={() => toggleSubmissionSelection(script.id)}
                                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                               />
                             )}
@@ -683,7 +683,7 @@ export default function Scripts() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => setViewingScript(script)}
+                              onClick={() => setViewingSubmission(script)}
                               className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-7 w-7 p-0 hover:bg-green-50 dark:hover:bg-green-900/30"
                             >
                               <Eye className="h-3 w-3 text-green-600" />
@@ -750,7 +750,7 @@ export default function Scripts() {
               </div>
             ) : (
               <div className="space-y-3">
-                {filteredAndSortedScripts.map((script) => {
+                {filteredAndSortedSubmissions.map((script) => {
                   const project = projects.find(p => p.id === script.projectId);
                   const StatusIcon = statusIcons[script.status as keyof typeof statusIcons];
                   return (
@@ -762,8 +762,8 @@ export default function Scripts() {
                               {(user?.role === 'organizer' || user?.role === 'analyzer') && (
                                 <input
                                   type="checkbox"
-                                  checked={selectedScripts.includes(script.id)}
-                                  onChange={() => toggleScriptSelection(script.id)}
+                                  checked={selectedSubmissions.includes(script.id)}
+                                  onChange={() => toggleSubmissionSelection(script.id)}
                                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                 />
                               )}
@@ -799,7 +799,7 @@ export default function Scripts() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => setViewingScript(script)}
+                              onClick={() => setViewingSubmission(script)}
                               className="opacity-0 group-hover:opacity-100 transition-all duration-200 h-8 w-8 p-0 hover:bg-green-50 dark:hover:bg-green-900/30"
                             >
                               <Eye className="h-4 w-4 text-green-600" />
@@ -841,11 +841,11 @@ export default function Scripts() {
                   <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
                     <Upload className="h-6 w-6 text-white" />
                   </div>
-                  Upload Script Files
+                  Upload Submission Files
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ScriptFileUpload />
+                <SubmissionFileUpload />
               </CardContent>
             </Card>
           </TabsContent>
@@ -857,13 +857,13 @@ export default function Scripts() {
                   <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
                     <FolderOpen className="h-6 w-6 text-white" />
                   </div>
-                  Script Files by Project
+                  Submission Files by Hackathon
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
                   {projects.map((project) => {
-                    const projectScripts = scripts.filter(script => script.projectId === project.id);
+                    const projectSubmissions = scripts.filter(script => script.projectId === project.id);
                     return (
                       <Card key={project.id} className="bg-gradient-to-br from-gray-50 to-blue-50/50 dark:from-gray-800 dark:to-blue-900/20 border border-gray-200 dark:border-gray-700 shadow-lg">
                         <CardHeader className="pb-4">
@@ -878,7 +878,7 @@ export default function Scripts() {
                           <div>
                             <h5 className="text-sm font-semibold mb-3 text-gray-800 dark:text-gray-200 flex items-center gap-3 p-2 bg-blue-50/80 dark:bg-blue-900/20 rounded-lg">
                               <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                              Project Script Files
+                              Hackathon Submission Files
                             </h5>
                             <FileList 
                               entityType="projects" 
@@ -887,7 +887,7 @@ export default function Scripts() {
                             />
                           </div>
 
-                          {projectScripts.map((script) => (
+                          {projectSubmissions.map((script) => (
                             <div key={script.id} className="pl-6 border-l-2 border-emerald-200 dark:border-emerald-700 bg-emerald-50/30 dark:bg-emerald-900/20 rounded-r-lg">
                               <h5 className="text-sm font-semibold mb-3 text-gray-800 dark:text-gray-200 flex items-center gap-3 p-2">
                                 <Zap className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
@@ -912,14 +912,14 @@ export default function Scripts() {
       </div>
 
       {/* Edit Dialog */}
-      <Dialog open={!!editingScript} onOpenChange={() => setEditingScript(null)}>
+      <Dialog open={!!editingSubmission} onOpenChange={() => setEditingSubmission(null)}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3 text-xl">
               <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
                 <Edit className="h-5 w-5 text-white" />
               </div>
-              Edit Script
+              Edit Submission
             </DialogTitle>
           </DialogHeader>
           <Form {...form}>
@@ -930,7 +930,7 @@ export default function Scripts() {
                   name="projectId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Project</FormLabel>
+                      <FormLabel>Hackathon</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -1026,7 +1026,7 @@ export default function Scripts() {
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={() => setEditingScript(null)}
+                  onClick={() => setEditingSubmission(null)}
                 >
                   Cancel
                 </Button>
@@ -1035,7 +1035,7 @@ export default function Scripts() {
                   disabled={updateMutation.isPending}
                   className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-lg"
                 >
-                  {updateMutation.isPending ? "Updating..." : "Update Script"}
+                  {updateMutation.isPending ? "Updating..." : "Update Submission"}
                 </Button>
               </div>
             </form>
@@ -1043,23 +1043,23 @@ export default function Scripts() {
         </DialogContent>
       </Dialog>
 
-      {/* View Script Dialog */}
-      <Dialog open={!!viewingScript} onOpenChange={() => setViewingScript(null)}>
+      {/* View Submission Dialog */}
+      <Dialog open={!!viewingSubmission} onOpenChange={() => setViewingSubmission(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
               <FileText className="h-5 w-5 text-blue-600" />
-              {viewingScript?.title}
+              {viewingSubmission?.title}
             </DialogTitle>
           </DialogHeader>
           <div className="overflow-y-auto max-h-[80vh] p-6">
-            {viewingScript && (
-              <ScriptEditor 
+            {viewingSubmission && (
+              <SubmissionEditor 
                 isOpen={false}
                 onClose={() => {}}
-                script={viewingScript} 
+                script={viewingSubmission} 
                 readOnly={true}
-                onSave={() => setViewingScript(null)}
+                onSave={() => setViewingSubmission(null)}
               />
             )}
           </div>

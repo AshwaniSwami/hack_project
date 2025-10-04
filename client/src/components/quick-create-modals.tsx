@@ -26,7 +26,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { FolderOpen, RadioTower, Mic, Loader2 } from "lucide-react";
 import { LanguageSelector } from "@/components/language-selector";
-import type { Project } from "@shared/schema";
+import type { Hackathon } from "@shared/schema";
 
 // Schemas for form validation
 const projectSchema = z.object({
@@ -38,39 +38,39 @@ const projectSchema = z.object({
 const episodeSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
-  projectId: z.string().min(1, "Project is required"),
+  projectId: z.string().min(1, "Hackathon is required"),
   status: z.enum(["Draft", "Published", "Archived"]).default("Draft"),
 });
 
 const scriptSchema = z.object({
   title: z.string().min(1, "Title is required"),
   content: z.string().optional(),
-  projectId: z.string().min(1, "Project is required"),
+  projectId: z.string().min(1, "Hackathon is required"),
   status: z.enum(["Draft", "Under Review", "Approved", "Needs Revision"]).default("Draft"),
   language: z.string().default("en"),
 });
 
 interface QuickCreateModalsProps {
-  isProjectOpen: boolean;
-  isEpisodeOpen: boolean;
-  isScriptOpen: boolean;
-  onProjectClose: () => void;
-  onEpisodeClose: () => void;
-  onScriptClose: () => void;
+  isHackathonOpen: boolean;
+  isTeamOpen: boolean;
+  isSubmissionOpen: boolean;
+  onHackathonClose: () => void;
+  onTeamClose: () => void;
+  onSubmissionClose: () => void;
 }
 
 export function QuickCreateModals({
-  isProjectOpen,
-  isEpisodeOpen,
-  isScriptOpen,
-  onProjectClose,
-  onEpisodeClose,
-  onScriptClose,
+  isHackathonOpen,
+  isTeamOpen,
+  isSubmissionOpen,
+  onHackathonClose,
+  onTeamClose,
+  onSubmissionClose,
 }: QuickCreateModalsProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: projects = [] } = useQuery<Project[]>({
+  const { data: projects = [] } = useQuery<Hackathon[]>({
     queryKey: ["/api/projects"],
   });
 
@@ -78,7 +78,7 @@ export function QuickCreateModals({
     queryKey: ["/api/themes"],
   });
 
-  // Project form
+  // Hackathon form
   const projectForm = useForm<z.infer<typeof projectSchema>>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
@@ -88,7 +88,7 @@ export function QuickCreateModals({
     },
   });
 
-  // Episode form
+  // Team form
   const episodeForm = useForm<z.infer<typeof episodeSchema>>({
     resolver: zodResolver(episodeSchema),
     defaultValues: {
@@ -99,7 +99,7 @@ export function QuickCreateModals({
     },
   });
 
-  // Script form
+  // Submission form
   const scriptForm = useForm<z.infer<typeof scriptSchema>>({
     resolver: zodResolver(scriptSchema),
     defaultValues: {
@@ -112,20 +112,20 @@ export function QuickCreateModals({
   });
 
   // Mutations
-  const createProjectMutation = useMutation({
+  const createHackathonMutation = useMutation({
     mutationFn: (data: z.infer<typeof projectSchema>) => 
       apiRequest("POST", "/api/projects", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       projectForm.reset();
-      onProjectClose();
+      onHackathonClose();
       toast({
-        title: "Project created",
+        title: "Hackathon created",
         description: "Your project has been created successfully.",
       });
     },
     onError: (error: any) => {
-      console.error("Project creation error:", error);
+      console.error("Hackathon creation error:", error);
       toast({
         title: "Error",
         description: "Failed to create project. Please try again.",
@@ -134,20 +134,20 @@ export function QuickCreateModals({
     },
   });
 
-  const createEpisodeMutation = useMutation({
+  const createTeamMutation = useMutation({
     mutationFn: (data: z.infer<typeof episodeSchema>) => 
       apiRequest("POST", "/api/episodes", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/episodes"] });
       episodeForm.reset();
-      onEpisodeClose();
+      onTeamClose();
       toast({
-        title: "Episode created",
+        title: "Team created",
         description: "Your episode has been created successfully.",
       });
     },
     onError: (error: any) => {
-      console.error("Episode creation error:", error);
+      console.error("Team creation error:", error);
       toast({
         title: "Error",
         description: "Failed to create episode. Please try again.",
@@ -156,20 +156,20 @@ export function QuickCreateModals({
     },
   });
 
-  const createScriptMutation = useMutation({
+  const createSubmissionMutation = useMutation({
     mutationFn: (data: z.infer<typeof scriptSchema>) => 
       apiRequest("POST", "/api/scripts", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/scripts"] });
       scriptForm.reset();
-      onScriptClose();
+      onSubmissionClose();
       toast({
-        title: "Script created",
+        title: "Submission created",
         description: "Your script has been created successfully.",
       });
     },
     onError: (error: any) => {
-      console.error("Script creation error:", error);
+      console.error("Submission creation error:", error);
       toast({
         title: "Error",
         description: "Failed to create script. Please try again.",
@@ -180,26 +180,26 @@ export function QuickCreateModals({
 
   return (
     <>
-      {/* Project Creation Modal */}
-      <Dialog open={isProjectOpen} onOpenChange={onProjectClose}>
+      {/* Hackathon Creation Modal */}
+      <Dialog open={isHackathonOpen} onOpenChange={onHackathonClose}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle className="flex items-center">
               <FolderOpen className="h-5 w-5 mr-2 text-blue-600" />
-              Create New Project
+              Create New Hackathon
             </DialogTitle>
             <DialogDescription>
               Create a new project to organize your radio content.
             </DialogDescription>
           </DialogHeader>
           <Form {...projectForm}>
-            <form onSubmit={projectForm.handleSubmit((data) => createProjectMutation.mutate(data))} className="space-y-6">
+            <form onSubmit={projectForm.handleSubmit((data) => createHackathonMutation.mutate(data))} className="space-y-6">
               <FormField
                 control={projectForm.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Project Name</FormLabel>
+                    <FormLabel>Hackathon Name</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter project name..." {...field} />
                     </FormControl>
@@ -249,12 +249,12 @@ export function QuickCreateModals({
                 )}
               />
               <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={onProjectClose}>
+                <Button type="button" variant="outline" onClick={onHackathonClose}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={createProjectMutation.isPending}>
-                  {createProjectMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  Create Project
+                <Button type="submit" disabled={createHackathonMutation.isPending}>
+                  {createHackathonMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Create Hackathon
                 </Button>
               </div>
             </form>
@@ -262,26 +262,26 @@ export function QuickCreateModals({
         </DialogContent>
       </Dialog>
 
-      {/* Episode Creation Modal */}
-      <Dialog open={isEpisodeOpen} onOpenChange={onEpisodeClose}>
+      {/* Team Creation Modal */}
+      <Dialog open={isTeamOpen} onOpenChange={onTeamClose}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle className="flex items-center">
               <RadioTower className="h-5 w-5 mr-2 text-green-600" />
-              Create New Episode
+              Create New Team
             </DialogTitle>
             <DialogDescription>
               Create a new episode for one of your projects.
             </DialogDescription>
           </DialogHeader>
           <Form {...episodeForm}>
-            <form onSubmit={episodeForm.handleSubmit((data) => createEpisodeMutation.mutate(data))} className="space-y-6">
+            <form onSubmit={episodeForm.handleSubmit((data) => createTeamMutation.mutate(data))} className="space-y-6">
               <FormField
                 control={episodeForm.control}
                 name="projectId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Project</FormLabel>
+                    <FormLabel>Hackathon</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -305,7 +305,7 @@ export function QuickCreateModals({
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Episode Title</FormLabel>
+                    <FormLabel>Team Title</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter episode title..." {...field} />
                     </FormControl>
@@ -353,12 +353,12 @@ export function QuickCreateModals({
                 )}
               />
               <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={onEpisodeClose}>
+                <Button type="button" variant="outline" onClick={onTeamClose}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={createEpisodeMutation.isPending}>
-                  {createEpisodeMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  Create Episode
+                <Button type="submit" disabled={createTeamMutation.isPending}>
+                  {createTeamMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Create Team
                 </Button>
               </div>
             </form>
@@ -366,26 +366,26 @@ export function QuickCreateModals({
         </DialogContent>
       </Dialog>
 
-      {/* Script Creation Modal */}
-      <Dialog open={isScriptOpen} onOpenChange={onScriptClose}>
+      {/* Submission Creation Modal */}
+      <Dialog open={isSubmissionOpen} onOpenChange={onSubmissionClose}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle className="flex items-center">
               <Mic className="h-5 w-5 mr-2 text-purple-600" />
-              Create New Script
+              Create New Submission
             </DialogTitle>
             <DialogDescription>
               Create a new script for one of your projects.
             </DialogDescription>
           </DialogHeader>
           <Form {...scriptForm}>
-            <form onSubmit={scriptForm.handleSubmit((data) => createScriptMutation.mutate(data))} className="space-y-6">
+            <form onSubmit={scriptForm.handleSubmit((data) => createSubmissionMutation.mutate(data))} className="space-y-6">
               <FormField
                 control={scriptForm.control}
                 name="projectId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Project</FormLabel>
+                    <FormLabel>Hackathon</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -409,7 +409,7 @@ export function QuickCreateModals({
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Script Title</FormLabel>
+                    <FormLabel>Submission Title</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter script title..." {...field} />
                     </FormControl>
@@ -472,12 +472,12 @@ export function QuickCreateModals({
                 )}
               />
               <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={onScriptClose}>
+                <Button type="button" variant="outline" onClick={onSubmissionClose}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={createScriptMutation.isPending}>
-                  {createScriptMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  Create Script
+                <Button type="submit" disabled={createSubmissionMutation.isPending}>
+                  {createSubmissionMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Create Submission
                 </Button>
               </div>
             </form>

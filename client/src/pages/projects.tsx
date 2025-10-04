@@ -40,9 +40,9 @@ import {
   Mic
 } from "lucide-react";
 import { colors, getCardStyle, getGradientStyle } from "@/lib/colors";
-import type { Project, Episode, Script } from "@shared/schema";
-import { ProjectDetailView } from "@/components/project-detail-view";
-import { ProjectCard } from "@/components/ProjectCard";
+import type { Hackathon, Team, Submission } from "@shared/schema";
+import { HackathonDetailView } from "@/components/project-detail-view";
+import { HackathonCard } from "@/components/HackathonCard";
 
 const projectFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -55,7 +55,7 @@ const themeFormSchema = z.object({
   colorHex: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Must be a valid hex color"),
 });
 
-type ProjectFormData = z.infer<typeof projectFormSchema>;
+type HackathonFormData = z.infer<typeof projectFormSchema>;
 type ThemeFormData = z.infer<typeof themeFormSchema>;
 
 interface Theme {
@@ -68,19 +68,19 @@ interface Theme {
   updatedAt: string;
 }
 
-export default function Projects() {
+export default function Hackathons() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isThemeDialogOpen, setIsThemeDialogOpen] = useState(false);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [editingHackathon, setEditingHackathon] = useState<Hackathon | null>(null);
   const [editingTheme, setEditingTheme] = useState<Theme | null>(null);
-  const [viewingProject, setViewingProject] = useState<Project | null>(null);
+  const [viewingHackathon, setViewingHackathon] = useState<Hackathon | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedThemeFilter, setSelectedThemeFilter] = useState<string>("all");
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: projects = [], isLoading } = useQuery<Project[]>({
+  const { data: projects = [], isLoading } = useQuery<Hackathon[]>({
     queryKey: ["/api/projects"],
   });
 
@@ -88,11 +88,11 @@ export default function Projects() {
     queryKey: ["/api/themes"],
   });
 
-  const { data: episodes = [] } = useQuery<Episode[]>({
+  const { data: episodes = [] } = useQuery<Team[]>({
     queryKey: ["/api/episodes"],
   });
 
-  const { data: scripts = [] } = useQuery<Script[]>({
+  const { data: scripts = [] } = useQuery<Submission[]>({
     queryKey: ["/api/scripts"],
   });
 
@@ -105,7 +105,7 @@ export default function Projects() {
     }
   });
 
-  const form = useForm<ProjectFormData>({
+  const form = useForm<HackathonFormData>({
     resolver: zodResolver(projectFormSchema),
     defaultValues: {
       name: "",
@@ -123,14 +123,14 @@ export default function Projects() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: ProjectFormData) => {
+    mutationFn: async (data: HackathonFormData) => {
       return apiRequest("POST", "/api/projects", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       toast({
         title: "Success",
-        description: "Project created successfully",
+        description: "Hackathon created successfully",
       });
       setIsCreateDialogOpen(false);
       form.reset();
@@ -145,17 +145,17 @@ export default function Projects() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: ProjectFormData) => {
-      if (!editingProject) throw new Error("No project selected for editing");
-      return apiRequest("PUT", `/api/projects/${editingProject.id}`, data);
+    mutationFn: async (data: HackathonFormData) => {
+      if (!editingHackathon) throw new Error("No project selected for editing");
+      return apiRequest("PUT", `/api/projects/${editingHackathon.id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       toast({
         title: "Success",
-        description: "Project updated successfully",
+        description: "Hackathon updated successfully",
       });
-      setEditingProject(null);
+      setEditingHackathon(null);
       form.reset();
     },
     onError: () => {
@@ -175,7 +175,7 @@ export default function Projects() {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       toast({
         title: "Success",
-        description: "Project deleted successfully",
+        description: "Hackathon deleted successfully",
       });
     },
     onError: () => {
@@ -252,8 +252,8 @@ export default function Projects() {
     },
   });
 
-  const onSubmit = (data: ProjectFormData) => {
-    if (editingProject) {
+  const onSubmit = (data: HackathonFormData) => {
+    if (editingHackathon) {
       updateMutation.mutate(data);
     } else {
       createMutation.mutate(data);
@@ -286,8 +286,8 @@ export default function Projects() {
     setIsThemeDialogOpen(true);
   };
 
-  const handleEdit = (project: Project) => {
-    setEditingProject(project);
+  const handleEdit = (project: Hackathon) => {
+    setEditingHackathon(project);
     form.reset({
       name: project.name,
       description: project.description || "",
@@ -301,7 +301,7 @@ export default function Projects() {
     }
   };
 
-  const filteredProjects = projects.filter((project) => {
+  const filteredHackathons = projects.filter((project) => {
     const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (project.description?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
     
@@ -332,7 +332,7 @@ export default function Projects() {
                 </div>
                 <div>
                   <h1 className={`text-2xl font-bold ${colors.text.primary} mb-1 ${colors.gradients.text}`}>
-                    Projects
+                    Hackathons
                   </h1>
                   <p className="text-slate-600 dark:text-gray-400 text-sm">Organize and manage your radio content projects</p>
                 </div>
@@ -343,7 +343,7 @@ export default function Projects() {
                   <DialogTrigger asChild>
                     <Button size="lg" className={colors.button.primary}>
                       <Plus className="h-5 w-5 mr-3" />
-                      New Project
+                      New Hackathon
                     </Button>
                   </DialogTrigger>
                 <DialogContent className="max-w-2xl">
@@ -352,7 +352,7 @@ export default function Projects() {
                       <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
                         <Sparkles className="h-5 w-5 text-white" />
                       </div>
-                      Create New Project
+                      Create New Hackathon
                     </DialogTitle>
                   </DialogHeader>
                   <Form {...form}>
@@ -425,7 +425,7 @@ export default function Projects() {
                           disabled={createMutation.isPending}
                           className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-lg"
                         >
-                          {createMutation.isPending ? "Creating..." : "Create Project"}
+                          {createMutation.isPending ? "Creating..." : "Create Hackathon"}
                         </Button>
                       </div>
                     </form>
@@ -491,10 +491,10 @@ export default function Projects() {
                   }`}
                   onClick={() => setSelectedThemeFilter("all")}
                 >
-                  All Projects ({projects.length})
+                  All Hackathons ({projects.length})
                 </Badge>
                 {themes.map((theme) => {
-                  const themeProjectCount = projects.filter(p => p.themeId === theme.id).length;
+                  const themeHackathonCount = projects.filter(p => p.themeId === theme.id).length;
                   return (
                     <Badge
                       key={theme.id}
@@ -511,7 +511,7 @@ export default function Projects() {
                       }}
                       onClick={() => setSelectedThemeFilter(theme.id)}
                     >
-                      {theme.name} ({themeProjectCount})
+                      {theme.name} ({themeHackathonCount})
                     </Badge>
                   );
                 })}
@@ -531,7 +531,7 @@ export default function Projects() {
           </Card>
         </div>
 
-        {/* Projects List */}
+        {/* Hackathons List */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[...Array(6)].map((_, i) => (
@@ -544,7 +544,7 @@ export default function Projects() {
               </Card>
             ))}
           </div>
-        ) : filteredProjects.length === 0 ? (
+        ) : filteredHackathons.length === 0 ? (
           <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-0 shadow-2xl">
             <CardContent className="text-center py-20">
               <div className="relative mb-8">
@@ -571,23 +571,23 @@ export default function Projects() {
                   className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 hover:scale-105 px-8 py-3"
                 >
                   <Plus className="h-6 w-6 mr-3" />
-                  Create Your First Project
+                  Create Your First Hackathon
                 </Button>
               )}
             </CardContent>
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProjects.map((project) => {
+            {filteredHackathons.map((project) => {
               const projectTheme = themes.find(theme => theme.id === project.themeId);
               
               return (
-                <ProjectCard
+                <HackathonCard
                   key={project.id}
                   project={project}
                   theme={projectTheme}
                   user={user}
-                  onView={setViewingProject}
+                  onView={setViewingHackathon}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                 />
@@ -598,14 +598,14 @@ export default function Projects() {
       </div>
 
       {/* Edit Dialog */}
-      <Dialog open={!!editingProject} onOpenChange={() => setEditingProject(null)}>
+      <Dialog open={!!editingHackathon} onOpenChange={() => setEditingHackathon(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3 text-xl">
               <div className="p-2 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg">
                 <Edit className="h-5 w-5 text-white" />
               </div>
-              Edit Project
+              Edit Hackathon
             </DialogTitle>
           </DialogHeader>
           <Form {...form}>
@@ -669,7 +669,7 @@ export default function Projects() {
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={() => setEditingProject(null)}
+                  onClick={() => setEditingHackathon(null)}
                 >
                   Cancel
                 </Button>
@@ -678,7 +678,7 @@ export default function Projects() {
                   disabled={updateMutation.isPending}
                   className="bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 shadow-lg"
                 >
-                  {updateMutation.isPending ? "Updating..." : "Update Project"}
+                  {updateMutation.isPending ? "Updating..." : "Update Hackathon"}
                 </Button>
               </div>
             </form>
@@ -830,14 +830,14 @@ export default function Projects() {
         </DialogContent>
       </Dialog>
 
-      {/* Project Details Dialog */}
-      <Dialog open={!!viewingProject} onOpenChange={() => setViewingProject(null)}>
+      {/* Hackathon Details Dialog */}
+      <Dialog open={!!viewingHackathon} onOpenChange={() => setViewingHackathon(null)}>
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
-            <DialogTitle>Project Details: {viewingProject?.name}</DialogTitle>
+            <DialogTitle>Hackathon Details: {viewingHackathon?.name}</DialogTitle>
           </DialogHeader>
           <div className="overflow-y-auto max-h-[80vh]">
-            {viewingProject && <ProjectDetailView project={viewingProject} />}
+            {viewingHackathon && <HackathonDetailView project={viewingHackathon} />}
           </div>
         </DialogContent>
       </Dialog>

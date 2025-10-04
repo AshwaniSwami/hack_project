@@ -38,21 +38,21 @@ export function ProgressModal({ isOpen, onClose, currentLevel, currentProgress, 
   const actions = [
     {
       icon: Radio,
-      title: "Explore Projects",
+      title: "Explore Hackathons",
       description: "Browse and engage with radio projects",
       points: "+1 per project explored",
       color: "text-blue-600"
     },
     {
       icon: Podcast,
-      title: "Listen to Episodes", 
+      title: "Listen to Teams", 
       description: "Listen to podcast episodes and shows",
       points: "+1 per episode completed",
       color: "text-green-600"
     },
     {
       icon: BookOpen,
-      title: "Read Scripts",
+      title: "Read Submissions",
       description: "Read approved scripts and content",
       points: "+1 per script viewed",
       color: "text-purple-600"

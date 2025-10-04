@@ -14,46 +14,46 @@ import {
   Radio,
   Calendar
 } from "lucide-react";
-import type { Script, Project, Episode } from "@shared/schema";
+import type { Submission, Hackathon, Team } from "@shared/schema";
 import { useAuth } from "@/hooks/useAuth";
 
 export function ContributorDashboard() {
   const { user } = useAuth();
   
-  const { data: scripts = [] } = useQuery<Script[]>({
+  const { data: scripts = [] } = useQuery<Submission[]>({
     queryKey: ["/api/scripts"],
   });
 
-  const { data: projects = [] } = useQuery<Project[]>({
+  const { data: projects = [] } = useQuery<Hackathon[]>({
     queryKey: ["/api/projects"],
   });
 
-  const { data: episodes = [] } = useQuery<Episode[]>({
+  const { data: episodes = [] } = useQuery<Team[]>({
     queryKey: ["/api/episodes"],
   });
 
   // Filter user's content
-  const myScripts = scripts.filter(script => script.authorId === user?.id);
+  const mySubmissions = scripts.filter(script => script.authorId === user?.id);
   
   // My active scripts & drafts
-  const myActiveScripts = myScripts.filter(script => 
+  const myActiveSubmissions = mySubmissions.filter(script => 
     script.status === 'Draft' || script.status === 'In Progress'
   );
 
-  // Scripts awaiting my revision
-  const scriptsAwaitingRevision = myScripts.filter(script => 
+  // Submissions awaiting my revision
+  const scriptsAwaitingRevision = mySubmissions.filter(script => 
     script.status === 'Needs Revision'
   );
 
   // My submitted scripts status
-  const mySubmittedScripts = myScripts.filter(script => 
+  const mySubmittedSubmissions = mySubmissions.filter(script => 
     script.status === 'Submitted' || script.status === 'Under Review' || script.status === 'Approved'
   );
 
   // My projects overview
-  const myProjects = projects.filter(project => {
+  const myHackathons = projects.filter(project => {
     // Check if user has contributed scripts to this project
-    return myScripts.some(script => script.projectId === project.id);
+    return mySubmissions.some(script => script.projectId === project.id);
   });
 
   // Recent platform highlights
@@ -61,16 +61,16 @@ export function ContributorDashboard() {
     ...episodes.slice(0, 3).map(episode => ({
       type: 'episode',
       title: episode.title,
-      action: 'Episode Published',
+      action: 'Team Published',
       time: episode.createdAt,
-      project: projects.find(p => p.id === episode.projectId)?.title || 'Unknown Project'
+      project: projects.find(p => p.id === episode.projectId)?.title || 'Unknown Hackathon'
     })),
     ...scripts.filter(script => script.status === 'Approved').slice(0, 2).map(script => ({
       type: 'script',
       title: script.title,
-      action: 'Script Approved',
+      action: 'Submission Approved',
       time: script.updatedAt || script.createdAt,
-      project: projects.find(p => p.id === script.projectId)?.title || 'Unknown Project'
+      project: projects.find(p => p.id === script.projectId)?.title || 'Unknown Hackathon'
     }))
   ].sort((a, b) => new Date(b.time || '').getTime() - new Date(a.time || '').getTime()).slice(0, 5);
 
@@ -93,15 +93,15 @@ export function ContributorDashboard() {
 
   // Contributor productivity metrics
   const contributorStats = {
-    weeklyOutput: myScripts.filter(script => {
+    weeklyOutput: mySubmissions.filter(script => {
       if (!script.createdAt) return false;
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
       return new Date(script.createdAt) >= weekAgo;
     }).length,
-    approvalRate: myScripts.length > 0 ? Math.round((myScripts.filter(s => s.status === 'Approved').length / myScripts.length) * 100) : 0,
-    totalWordCount: myScripts.reduce((total, script) => total + (script.content?.length || 0), 0),
-    avgWordsPerScript: myScripts.length > 0 ? Math.round(myScripts.reduce((total, script) => total + (script.content?.length || 0), 0) / myScripts.length) : 0
+    approvalRate: mySubmissions.length > 0 ? Math.round((mySubmissions.filter(s => s.status === 'Approved').length / mySubmissions.length) * 100) : 0,
+    totalWordCount: mySubmissions.reduce((total, script) => total + (script.content?.length || 0), 0),
+    avgWordsPerSubmission: mySubmissions.length > 0 ? Math.round(mySubmissions.reduce((total, script) => total + (script.content?.length || 0), 0) / mySubmissions.length) : 0
   };
 
   return (
@@ -115,7 +115,7 @@ export function ContributorDashboard() {
             <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-2">
                 <FileText className="h-4 w-4" />
-                <span className="text-sm">{myScripts.length} total scripts</span>
+                <span className="text-sm">{mySubmissions.length} total scripts</span>
               </div>
               <div className="flex items-center space-x-2">
                 <CheckCircle className="h-4 w-4" />
@@ -144,7 +144,7 @@ export function ContributorDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-blue-600">Active Drafts</p>
-                <p className="text-3xl font-bold text-blue-900">{myActiveScripts.length}</p>
+                <p className="text-3xl font-bold text-blue-900">{myActiveSubmissions.length}</p>
               </div>
               <Edit className="h-8 w-8 text-blue-600" />
             </div>
@@ -168,7 +168,7 @@ export function ContributorDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-green-600">Approved</p>
-                <p className="text-3xl font-bold text-green-900">{myScripts.filter(s => s.status === 'Approved').length}</p>
+                <p className="text-3xl font-bold text-green-900">{mySubmissions.filter(s => s.status === 'Approved').length}</p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
@@ -179,8 +179,8 @@ export function ContributorDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-purple-600">Projects</p>
-                <p className="text-3xl font-bold text-purple-900">{myProjects.length}</p>
+                <p className="text-sm font-medium text-purple-600">Hackathons</p>
+                <p className="text-3xl font-bold text-purple-900">{myHackathons.length}</p>
               </div>
               <Briefcase className="h-8 w-8 text-purple-600" />
             </div>
@@ -188,26 +188,26 @@ export function ContributorDashboard() {
         </Card>
       </div>
 
-      {/* My Active Scripts & Drafts - Priority Widget */}
+      {/* My Active Submissions & Drafts - Priority Widget */}
       <Card className="border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
         <CardHeader>
           <CardTitle className="flex items-center text-blue-800">
             <Edit className="h-6 w-6 mr-2" />
-            My Active Scripts & Drafts
-            <Badge className="ml-2 bg-blue-200 text-blue-800">{myActiveScripts.length}</Badge>
+            My Active Submissions & Drafts
+            <Badge className="ml-2 bg-blue-200 text-blue-800">{myActiveSubmissions.length}</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {myActiveScripts.length > 0 ? (
+          {myActiveSubmissions.length > 0 ? (
             <div className="space-y-3">
-              {myActiveScripts.slice(0, 5).map((script) => (
+              {myActiveSubmissions.slice(0, 5).map((script) => (
                 <div key={script.id} className="flex items-center justify-between p-4 bg-white rounded-lg shadow-sm">
                   <div className="flex items-center">
                     <FileText className="h-5 w-5 text-blue-600 mr-3" />
                     <div>
                       <h4 className="font-medium text-gray-900">{script.title}</h4>
                       <p className="text-sm text-gray-500">
-                        Project: {projects.find(p => p.id === script.projectId)?.title || 'Unknown'}
+                        Hackathon: {projects.find(p => p.id === script.projectId)?.title || 'Unknown'}
                       </p>
                     </div>
                   </div>
@@ -232,7 +232,7 @@ export function ContributorDashboard() {
               <Link href="/scripts">
                 <Button className="mt-3 bg-blue-600 hover:bg-blue-700">
                   <FileText className="h-4 w-4 mr-2" />
-                  Create New Script
+                  Create New Submission
                 </Button>
               </Link>
             </div>
@@ -240,13 +240,13 @@ export function ContributorDashboard() {
         </CardContent>
       </Card>
 
-      {/* Scripts Awaiting Revision & Submitted Scripts Status */}
+      {/* Submissions Awaiting Revision & Submitted Submissions Status */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
               <AlertCircle className="h-5 w-5 mr-2 text-red-500" />
-              Scripts Awaiting My Revision
+              Submissions Awaiting My Revision
               {scriptsAwaitingRevision.length > 0 && (
                 <Badge className="ml-2 bg-red-200 text-red-800">{scriptsAwaitingRevision.length}</Badge>
               )}
@@ -285,20 +285,20 @@ export function ContributorDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <CheckCircle className="h-5 w-5 mr-2 text-green-500" />
-              My Submitted Scripts Status
+              My Submitted Submissions Status
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {mySubmittedScripts.length > 0 ? (
+            {mySubmittedSubmissions.length > 0 ? (
               <div className="space-y-3">
-                {mySubmittedScripts.slice(0, 5).map((script) => (
+                {mySubmittedSubmissions.slice(0, 5).map((script) => (
                   <div key={script.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center">
                       <FileText className="h-4 w-4 text-gray-600 mr-3" />
                       <div>
                         <h4 className="font-medium text-gray-900">{script.title}</h4>
                         <p className="text-sm text-gray-500">
-                          {projects.find(p => p.id === script.projectId)?.title || 'Unknown Project'}
+                          {projects.find(p => p.id === script.projectId)?.title || 'Unknown Hackathon'}
                         </p>
                       </div>
                     </div>
@@ -307,11 +307,11 @@ export function ContributorDashboard() {
                     </Badge>
                   </div>
                 ))}
-                {mySubmittedScripts.length > 5 && (
+                {mySubmittedSubmissions.length > 5 && (
                   <div className="text-center pt-2">
                     <Link href="/scripts">
                       <Button variant="outline" size="sm">
-                        View All Submitted Scripts
+                        View All Submitted Submissions
                       </Button>
                     </Link>
                   </div>
@@ -327,28 +327,28 @@ export function ContributorDashboard() {
         </Card>
       </div>
 
-      {/* My Projects Overview & Recent Platform Highlights */}
+      {/* My Hackathons Overview & Recent Platform Highlights */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
               <Briefcase className="h-5 w-5 mr-2 text-purple-500" />
-              My Projects Overview
+              My Hackathons Overview
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {myProjects.length > 0 ? (
+            {myHackathons.length > 0 ? (
               <div className="space-y-3">
-                {myProjects.map((project) => {
-                  const projectScripts = myScripts.filter(script => script.projectId === project.id);
-                  const approvedCount = projectScripts.filter(script => script.status === 'Approved').length;
+                {myHackathons.map((project) => {
+                  const projectSubmissions = mySubmissions.filter(script => script.projectId === project.id);
+                  const approvedCount = projectSubmissions.filter(script => script.status === 'Approved').length;
                   
                   return (
                     <div key={project.id} className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
                       <div>
                         <h4 className="font-medium text-gray-900">{project.title}</h4>
                         <p className="text-sm text-gray-500">
-                          {projectScripts.length} scripts • {approvedCount} approved
+                          {projectSubmissions.length} scripts • {approvedCount} approved
                         </p>
                       </div>
                       <Link href={`/projects`}>

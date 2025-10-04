@@ -33,10 +33,10 @@ export function Navbar() {
 
   const navItems = [
     { href: "/", label: "Dashboard", icon: Home },
-    { href: "/projects", label: "Projects", icon: FolderOpen },
-    ...(canAccessAdvancedFeatures ? [{ href: "/episodes", label: "Episodes", icon: Play }] : []),
-    ...(canAccessAdvancedFeatures ? [{ href: "/scripts", label: "Scripts", icon: FileText }] : []),
-    { href: "/radio-stations", label: "Stations", icon: RadioTower },
+    { href: "/projects", label: "Hackathons", icon: FolderOpen },
+    ...(canAccessAdvancedFeatures ? [{ href: "/episodes", label: "Teams", icon: Play }] : []),
+    ...(canAccessAdvancedFeatures ? [{ href: "/scripts", label: "Submissions", icon: FileText }] : []),
+    { href: "/radio-stations", label: "Colleges", icon: RadioTower },
     ...(isAdmin ? [{ href: "/users", label: "Users", icon: Users }] : []),
     ...(isAdmin ? [{ href: "/analytics", label: "Analytics", icon: TrendingUp }] : []),
     ...(isAdmin ? [{ href: "/onboarding", label: "Onboarding", icon: FormInput }] : []),
@@ -55,9 +55,9 @@ export function Navbar() {
                 </div>
                 <div className="group-hover:scale-105 transition-transform duration-200 min-w-0">
                   <h1 className="text-sm font-bold bg-gradient-to-r from-sky-600 to-rose-500 bg-clip-text text-transparent whitespace-nowrap">
-                    SMART Radio
+                    HackHub
                   </h1>
-                  <p className="text-xs text-sky-700 dark:text-gray-300 font-medium tracking-wide whitespace-nowrap">NGO Content Hub</p>
+                  <p className="text-xs text-sky-700 dark:text-gray-300 font-medium tracking-wide whitespace-nowrap">Hackathon Platform</p>
                 </div>
               </div>
             </Link>

@@ -38,36 +38,36 @@ import {
   FileText,
   User
 } from "lucide-react";
-import type { Script, Project, Episode } from "@shared/schema";
+import type { Submission, Hackathon, Team } from "@shared/schema";
 import { useAuth } from "@/hooks/useAuth";
 
-export function MemberDashboard() {
+export function participantDashboard() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
 
-  const { data: scripts = [] } = useQuery<Script[]>({
+  const { data: scripts = [] } = useQuery<Submission[]>({
     queryKey: ["/api/scripts"],
   });
 
-  const { data: projects = [] } = useQuery<Project[]>({
+  const { data: projects = [] } = useQuery<Hackathon[]>({
     queryKey: ["/api/projects"],
   });
 
-  const { data: episodes = [] } = useQuery<Episode[]>({
+  const { data: episodes = [] } = useQuery<Team[]>({
     queryKey: ["/api/episodes"],
   });
 
-  // Enhanced member engagement stats
-  const memberStats = {
+  // Enhanced participant engagement stats
+  const participantStats = {
     totalContent: scripts.filter(s => s.status === 'Approved').length + episodes.length,
-    totalProjects: projects.length,
+    totalHackathons: projects.length,
     thisWeekContent: scripts.filter(script => {
       if (!script.updatedAt || script.status !== 'Approved') return false;
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
       return new Date(script.updatedAt) >= weekAgo;
     }).length,
-    memberLevel: Math.min(Math.floor((scripts.filter(s => s.status === 'Approved').length + episodes.length) / 5) + 1, 10),
+    participantLevel: Math.min(Math.floor((scripts.filter(s => s.status === 'Approved').length + episodes.length) / 5) + 1, 10),
     completionRate: Math.min(((scripts.filter(s => s.status === 'Approved').length + episodes.length) / Math.max(projects.length * 3, 1)) * 100, 100),
     streakDays: 7, // Mock streak for engagement
     points: (scripts.filter(s => s.status === 'Approved').length * 10) + (episodes.length * 15)
@@ -83,7 +83,7 @@ export function MemberDashboard() {
   // Enhanced navigation actions
   const quickActions = [
     {
-      title: "Discover Projects",
+      title: "Discover Hackathons",
       description: "Explore meaningful radio content that makes a difference",
       icon: Search,
       gradient: "from-blue-500 via-purple-500 to-pink-500",
@@ -91,7 +91,7 @@ export function MemberDashboard() {
       badge: "Popular"
     },
     {
-      title: "Browse Episodes",
+      title: "Browse Teams",
       description: "Listen to inspiring stories and engaging content",
       icon: Play,
       gradient: "from-green-500 via-teal-500 to-blue-500",
@@ -99,7 +99,7 @@ export function MemberDashboard() {
       badge: "New"
     },
     {
-      title: "View Scripts",
+      title: "View Submissions",
       description: "Read compelling scripts from talented creators",
       icon: Mic,
       gradient: "from-orange-500 via-red-500 to-pink-500",
@@ -120,7 +120,7 @@ export function MemberDashboard() {
     },
     {
       type: "achievement",
-      title: "Member Milestone Reached",
+      title: "participant Milestone Reached",
       description: "Congratulations on exploring 10+ projects!",
       time: "1 day ago",
       icon: Trophy,
@@ -129,7 +129,7 @@ export function MemberDashboard() {
     {
       type: "community",
       title: "Weekly Community Update",
-      description: "See what fellow members are creating",
+      description: "See what fellow participants are creating",
       time: "3 days ago",
       icon: Users,
       color: "text-blue-600"
@@ -213,7 +213,7 @@ export function MemberDashboard() {
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                   32
                 </h3>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Projects</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Hackathons</p>
               </div>
             </div>
           </Card>

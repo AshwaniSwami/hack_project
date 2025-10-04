@@ -3,7 +3,7 @@ import { FolderOpen, Mic, FileText, Radio, TrendingUp, Clock } from "lucide-reac
 
 interface StatsCardsProps {
   stats: {
-    activeProjects: number;
+    activeHackathons: number;
     episodesThisMonth: number;
     scriptsPending: number;
     radioStations: number;
@@ -13,8 +13,8 @@ interface StatsCardsProps {
 export function StatsCards({ stats }: StatsCardsProps) {
   const cards = [
     {
-      title: "Active Projects",
-      value: stats.activeProjects,
+      title: "Active Hackathons",
+      value: stats.activeHackathons,
       icon: FolderOpen,
       bgColor: "bg-gradient-to-br from-blue-50 to-blue-100",
       iconColor: "text-blue-600",
@@ -23,7 +23,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
       trend: "up"
     },
     {
-      title: "Episodes This Month",
+      title: "Teams This Month",
       value: stats.episodesThisMonth,
       icon: Mic,
       bgColor: "bg-gradient-to-br from-green-50 to-green-100",
@@ -33,7 +33,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
       trend: "up"
     },
     {
-      title: "Scripts Pending",
+      title: "Submissions Pending",
       value: stats.scriptsPending,
       icon: FileText,
       bgColor: "bg-gradient-to-br from-orange-50 to-orange-100",

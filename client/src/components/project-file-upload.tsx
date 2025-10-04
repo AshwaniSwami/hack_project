@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-interface ProjectFileUploadProps {
+interface HackathonFileUploadProps {
   projectId?: string;
   episodeId?: string;
   scriptId?: string;
@@ -21,14 +21,14 @@ interface ProjectFileUploadProps {
   title: string;
 }
 
-export function ProjectFileUpload({ 
+export function HackathonFileUpload({ 
   projectId, 
   episodeId, 
   scriptId, 
   onUploadSuccess, 
   acceptedTypes = "*", 
   title 
-}: ProjectFileUploadProps) {
+}: HackathonFileUploadProps) {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
