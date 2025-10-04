@@ -23,6 +23,7 @@ export function getFilePermissions(user: User | undefined): FilePermissions {
 
   switch (role) {
     case 'admin':
+    case 'organizer':
       return {
         canView: true,
         canDownload: true,
@@ -31,6 +32,7 @@ export function getFilePermissions(user: User | undefined): FilePermissions {
         canDelete: true,
       };
     case 'editor':
+    case 'analyzer':
       return {
         canView: true,
         canDownload: true,
@@ -39,6 +41,22 @@ export function getFilePermissions(user: User | undefined): FilePermissions {
         canDelete: true,
       };
     case 'member':
+    case 'participant':
+      return {
+        canView: true,
+        canDownload: true,
+        canUpload: true,
+        canEdit: false,
+        canDelete: false,
+      };
+    case 'contributor':
+      return {
+        canView: true,
+        canDownload: true,
+        canUpload: true,
+        canEdit: false,
+        canDelete: false,
+      };
     default:
       return {
         canView: true,
