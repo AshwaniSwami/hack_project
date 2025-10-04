@@ -41,7 +41,7 @@ import {
 import type { Submission, Hackathon, Team } from "@shared/schema";
 import { useAuth } from "@/hooks/useAuth";
 
-export function participantDashboard() {
+export function MemberDashboard() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
 

@@ -27,7 +27,7 @@ import {
 import type { Submission, Hackathon, Team } from "@shared/schema";
 import { useAuth } from "@/hooks/useAuth";
 
-export function analyzerDashboard() {
+export function EditorDashboard() {
   const { user } = useAuth();
   const [showStats, setShowStats] = useState(true);
   
@@ -55,7 +55,7 @@ export function analyzerDashboard() {
 
   // Hackathons with pending items
   const projectsWithPending = projects.filter(project => {
-    const projectSubmissions = scripts.filter(script => script.projectId === project.id);
+    const projectSubmissions = scripts.filter(script => script.hackathonId === project.id);
     return projectSubmissions.some(script => 
       script.status === 'Draft' || script.status === 'Under Review' || script.status === 'Needs Revision'
     );
@@ -78,7 +78,7 @@ export function analyzerDashboard() {
       author: script.authorId,
       status: script.status,
       time: script.createdAt,
-      project: projects.find(p => p.id === script.projectId)?.title || 'Unknown Hackathon'
+      project: projects.find(p => p.id === script.hackathonId)?.name || 'Unknown Hackathon'
     }))
     .slice(0, 5);
 
@@ -250,7 +250,7 @@ export function analyzerDashboard() {
                     <div>
                       <h4 className="font-medium text-gray-900">{script.title}</h4>
                       <p className="text-sm text-gray-500">
-                        Hackathon: {projects.find(p => p.id === script.projectId)?.title || 'Unknown'}
+                        Hackathon: {projects.find(p => p.id === script.hackathonId)?.name || 'Unknown'}
                       </p>
                     </div>
                   </div>
@@ -300,7 +300,7 @@ export function analyzerDashboard() {
             {projectsWithPending.length > 0 ? (
               <div className="space-y-3">
                 {projectsWithPending.slice(0, 5).map((project) => {
-                  const projectSubmissions = scripts.filter(script => script.projectId === project.id);
+                  const projectSubmissions = scripts.filter(script => script.hackathonId === project.id);
                   const pendingCount = projectSubmissions.filter(script => 
                     script.status === 'Draft' || script.status === 'Under Review' || script.status === 'Needs Revision'
                   ).length;
@@ -308,7 +308,7 @@ export function analyzerDashboard() {
                   return (
                     <div key={project.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <div>
-                        <h4 className="font-medium text-gray-900">{project.title}</h4>
+                        <h4 className="font-medium text-gray-900">{project.name}</h4>
                         <p className="text-sm text-gray-500">{pendingCount} pending items</p>
                       </div>
                       <Link href={`/projects`}>
@@ -418,7 +418,7 @@ export function analyzerDashboard() {
                     <div>
                       <h4 className="font-medium text-amber-900">{script.title}</h4>
                       <p className="text-sm text-amber-700">
-                        Hackathon: {projects.find(p => p.id === script.projectId)?.title || 'Unknown'}
+                        Hackathon: {projects.find(p => p.id === script.hackathonId)?.name || 'Unknown'}
                       </p>
                     </div>
                     <div className="flex items-center">

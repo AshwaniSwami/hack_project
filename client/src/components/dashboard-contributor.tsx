@@ -53,7 +53,7 @@ export function ContributorDashboard() {
   // My projects overview
   const myHackathons = projects.filter(project => {
     // Check if user has contributed scripts to this project
-    return mySubmissions.some(script => script.projectId === project.id);
+    return mySubmissions.some(script => script.hackathonId === project.id);
   });
 
   // Recent platform highlights
@@ -63,14 +63,14 @@ export function ContributorDashboard() {
       title: episode.title,
       action: 'Team Published',
       time: episode.createdAt,
-      project: projects.find(p => p.id === episode.projectId)?.title || 'Unknown Hackathon'
+      project: projects.find(p => p.id === episode.hackathonId)?.name || 'Unknown Hackathon'
     })),
     ...scripts.filter(script => script.status === 'Approved').slice(0, 2).map(script => ({
       type: 'script',
       title: script.title,
       action: 'Submission Approved',
       time: script.updatedAt || script.createdAt,
-      project: projects.find(p => p.id === script.projectId)?.title || 'Unknown Hackathon'
+      project: projects.find(p => p.id === script.hackathonId)?.name || 'Unknown Hackathon'
     }))
   ].sort((a, b) => new Date(b.time || '').getTime() - new Date(a.time || '').getTime()).slice(0, 5);
 
@@ -100,8 +100,8 @@ export function ContributorDashboard() {
       return new Date(script.createdAt) >= weekAgo;
     }).length,
     approvalRate: mySubmissions.length > 0 ? Math.round((mySubmissions.filter(s => s.status === 'Approved').length / mySubmissions.length) * 100) : 0,
-    totalWordCount: mySubmissions.reduce((total, script) => total + (script.content?.length || 0), 0),
-    avgWordsPerSubmission: mySubmissions.length > 0 ? Math.round(mySubmissions.reduce((total, script) => total + (script.content?.length || 0), 0) / mySubmissions.length) : 0
+    totalWordCount: mySubmissions.reduce((total, script) => total + (script.description?.length || 0), 0),
+    avgWordsPerSubmission: mySubmissions.length > 0 ? Math.round(mySubmissions.reduce((total, script) => total + (script.description?.length || 0), 0) / mySubmissions.length) : 0
   };
 
   return (
@@ -207,7 +207,7 @@ export function ContributorDashboard() {
                     <div>
                       <h4 className="font-medium text-gray-900">{script.title}</h4>
                       <p className="text-sm text-gray-500">
-                        Hackathon: {projects.find(p => p.id === script.projectId)?.title || 'Unknown'}
+                        Hackathon: {projects.find(p => p.id === script.hackathonId)?.name || 'Unknown'}
                       </p>
                     </div>
                   </div>
@@ -298,7 +298,7 @@ export function ContributorDashboard() {
                       <div>
                         <h4 className="font-medium text-gray-900">{script.title}</h4>
                         <p className="text-sm text-gray-500">
-                          {projects.find(p => p.id === script.projectId)?.title || 'Unknown Hackathon'}
+                          {projects.find(p => p.id === script.hackathonId)?.name || 'Unknown Hackathon'}
                         </p>
                       </div>
                     </div>
@@ -340,13 +340,13 @@ export function ContributorDashboard() {
             {myHackathons.length > 0 ? (
               <div className="space-y-3">
                 {myHackathons.map((project) => {
-                  const projectSubmissions = mySubmissions.filter(script => script.projectId === project.id);
+                  const projectSubmissions = mySubmissions.filter(script => script.hackathonId === project.id);
                   const approvedCount = projectSubmissions.filter(script => script.status === 'Approved').length;
                   
                   return (
                     <div key={project.id} className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
                       <div>
-                        <h4 className="font-medium text-gray-900">{project.title}</h4>
+                        <h4 className="font-medium text-gray-900">{project.name}</h4>
                         <p className="text-sm text-gray-500">
                           {projectSubmissions.length} scripts • {approvedCount} approved
                         </p>

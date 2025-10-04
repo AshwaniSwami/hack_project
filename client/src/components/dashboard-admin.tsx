@@ -24,7 +24,7 @@ import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
 import type { Submission, Hackathon, Team, User } from "@shared/schema";
 import { useAuth } from "@/hooks/useAuth";
 
-export function OrganizerDashboard() {
+export function AdminDashboard() {
   const { user } = useAuth();
   const { data: projects = [] } = useQuery<Hackathon[]>({
     queryKey: ["/api/projects"],
@@ -48,7 +48,7 @@ export function OrganizerDashboard() {
     totalTeams: episodes.length,
     totalSubmissions: scripts.length,
     totalUsers: users.length,
-    activeUsers: users.filter(user => user.status === 'verified').length
+    activeUsers: users.filter(user => user.isActive).length
   };
 
   // Optimized participant role distribution - prevents separate blocks
