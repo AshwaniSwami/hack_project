@@ -27,7 +27,7 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, isLoading, isAuthenticated, isAdmin } = useAuth();
 
-  const canAccessAdvancedFeatures = user?.role === 'admin' || user?.role === 'editor' || user?.role === 'contributor';
+  const canAccessAdvancedFeatures = user?.role === 'organizer' || user?.role === 'analyzer';
 
 
 

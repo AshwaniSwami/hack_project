@@ -299,7 +299,7 @@ export default function Scripts() {
                 </div>
               </div>
 
-              {(user?.role === 'admin' || user?.role === 'editor') && (
+              {(user?.role === 'organizer' || user?.role === 'analyzer') && (
                 <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                   <DialogTrigger asChild>
                     <Button size="lg" className={colors.button.primary}>
@@ -546,7 +546,7 @@ export default function Scripts() {
 
                   {/* Action Controls */}
                   <div className="flex items-center gap-2">
-                    {selectedScripts.length > 0 && (user?.role === 'admin' || user?.role === 'editor') && (
+                    {selectedScripts.length > 0 && (user?.role === 'organizer' || user?.role === 'analyzer') && (
                       <div className="flex items-center gap-2 mr-4">
                         <span className="text-sm text-gray-600 dark:text-gray-400">{selectedScripts.length} selected</span>
                         <Button
@@ -644,7 +644,7 @@ export default function Scripts() {
                       ? "Try adjusting your search filters" 
                       : "Start creating your first radio script"}
                   </p>
-                  {(!searchTerm && statusFilter === "all" && projectFilter === 'all') && (user?.role === 'admin' || user?.role === 'editor') && (
+                  {(!searchTerm && statusFilter === "all" && projectFilter === 'all') && (user?.role === 'organizer' || user?.role === 'analyzer') && (
                     <Button 
                       onClick={() => setIsCreateDialogOpen(true)}
                       size="lg"
@@ -666,7 +666,7 @@ export default function Scripts() {
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex items-center gap-2">
-                            {(user?.role === 'admin' || user?.role === 'editor') && (
+                            {(user?.role === 'organizer' || user?.role === 'analyzer') && (
                               <input
                                 type="checkbox"
                                 checked={selectedScripts.includes(script.id)}
@@ -688,7 +688,7 @@ export default function Scripts() {
                             >
                               <Eye className="h-3 w-3 text-green-600" />
                             </Button>
-                            {(user?.role === 'admin' || user?.role === 'editor') && (
+                            {(user?.role === 'organizer' || user?.role === 'analyzer') && (
                               <>
                                 <Button
                                   variant="ghost"
@@ -759,7 +759,7 @@ export default function Scripts() {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-4 flex-1">
                             <div className="flex items-center gap-2">
-                              {(user?.role === 'admin' || user?.role === 'editor') && (
+                              {(user?.role === 'organizer' || user?.role === 'analyzer') && (
                                 <input
                                   type="checkbox"
                                   checked={selectedScripts.includes(script.id)}
@@ -804,7 +804,7 @@ export default function Scripts() {
                             >
                               <Eye className="h-4 w-4 text-green-600" />
                             </Button>
-                            {(user?.role === 'admin' || user?.role === 'editor') && (
+                            {(user?.role === 'organizer' || user?.role === 'analyzer') && (
                               <>
                                 <Button
                                   variant="ghost"

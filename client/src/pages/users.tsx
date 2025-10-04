@@ -553,17 +553,17 @@ export default function Users() {
                             </TableCell>
                             <TableCell>
                               <Badge 
-                                variant={user.role === 'admin' ? 'default' : user.role === 'editor' ? 'secondary' : 'outline'}
+                                variant={user.role === 'organizer' ? 'default' : user.role === 'analyzer' ? 'secondary' : 'outline'}
                                 className={`
-                                  ${user.role === 'admin' ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white' : 
-                                    user.role === 'editor' ? 'bg-gradient-to-r from-blue-500 to-emerald-500 text-white' :
+                                  ${user.role === 'organizer' ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white' : 
+                                    user.role === 'analyzer' ? 'bg-gradient-to-r from-blue-500 to-emerald-500 text-white' :
                                     'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                                   } text-xs font-medium px-3 py-1
                                 `}
                               >
-                                {user.role === 'admin' && <Crown className="h-3 w-3 mr-1" />}
-                                {user.role === 'editor' && <Edit className="h-3 w-3 mr-1" />}
-                                {user.role === 'member' && <User className="h-3 w-3 mr-1" />}
+                                {user.role === 'organizer' && <Crown className="h-3 w-3 mr-1" />}
+                                {user.role === 'analyzer' && <Edit className="h-3 w-3 mr-1" />}
+                                {user.role === 'participant' && <User className="h-3 w-3 mr-1" />}
                                 {user.role || 'member'}
                               </Badge>
                             </TableCell>

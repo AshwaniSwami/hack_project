@@ -59,9 +59,9 @@ export function AdminDashboard() {
   }, {} as Record<string, number>);
 
   const memberRoleData = [
-    { name: 'Admin', value: roleCount.admin || 0, color: '#ef4444' },
-    { name: 'Editor', value: roleCount.editor || 0, color: '#3b82f6' },
-    { name: 'Member', value: roleCount.member || 0, color: '#10b981' },
+    { name: 'Organizer', value: roleCount.organizer || 0, color: '#ef4444' },
+    { name: 'Analyzer', value: roleCount.analyzer || 0, color: '#3b82f6' },
+    { name: 'Participant', value: roleCount.participant || 0, color: '#10b981' },
   ].filter(item => item.value > 0); // Only show roles that exist
 
   return (

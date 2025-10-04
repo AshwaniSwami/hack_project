@@ -22,14 +22,14 @@ import NotFound from "@/pages/not-found";
 
 function Router() {
   const { isAuthenticated, isLoading, isAdmin, user } = useAuth();
-  const canAccessAdvancedFeatures = user?.role === 'admin' || user?.role === 'editor' || user?.role === 'contributor';
+  const canAccessAdvancedFeatures = user?.role === 'organizer' || user?.role === 'analyzer';
   const { notifications, dismissNotification } = useWebSocket();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       {isAuthenticated && <Navbar />}
       {isAuthenticated && <FloatingActionButton />}
-      {isAuthenticated && user?.role === 'admin' && (
+      {isAuthenticated && user?.role === 'organizer' && (
         <NotificationPopup 
           notifications={notifications} 
           onDismiss={dismissNotification} 

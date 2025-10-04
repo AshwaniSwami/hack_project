@@ -60,7 +60,10 @@ export function useAuth() {
     user,
     isLoading,
     isAuthenticated: !!user,
-    isAdmin: user?.role === "admin",
+    isAdmin: user?.role === "organizer", // Renamed from admin to organizer
+    isOrganizer: user?.role === "organizer",
+    isAnalyzer: user?.role === "analyzer",
+    isParticipant: user?.role === "participant",
     refreshAuth,
     logout,
   };

@@ -278,7 +278,7 @@ export default function Episodes() {
                 </div>
               </div>
               
-              {(user?.role === 'admin' || user?.role === 'editor') && (
+              {(user?.role === 'organizer' || user?.role === 'analyzer') && (
                 <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                   <DialogTrigger asChild>
                     <Button size="lg" className={colors.button.primary}>
@@ -487,7 +487,7 @@ export default function Episodes() {
                   
                   {/* Action Controls */}
                   <div className="flex items-center gap-2">
-                    {selectedEpisodes.length > 0 && (user?.role === 'admin' || user?.role === 'editor') && (
+                    {selectedEpisodes.length > 0 && (user?.role === 'organizer' || user?.role === 'analyzer') && (
                       <div className="flex items-center gap-2 mr-4">
                         <span className="text-sm text-gray-600 dark:text-gray-400">{selectedEpisodes.length} selected</span>
                         <Button
@@ -581,7 +581,7 @@ export default function Episodes() {
                   <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-sm mx-auto">
                     {searchQuery || projectFilter !== 'all' ? 'Try adjusting your search filters' : 'Start creating engaging radio content for your audience'}
                   </p>
-                  {(!searchQuery && projectFilter === 'all') && (user?.role === 'admin' || user?.role === 'editor') && (
+                  {(!searchQuery && projectFilter === 'all') && (user?.role === 'organizer' || user?.role === 'analyzer') && (
                     <Button 
                       onClick={() => setIsCreateDialogOpen(true)}
                       size="lg"
@@ -602,7 +602,7 @@ export default function Episodes() {
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex items-center gap-2">
-                            {(user?.role === 'admin' || user?.role === 'editor') && (
+                            {(user?.role === 'organizer' || user?.role === 'analyzer') && (
                               <input
                                 type="checkbox"
                                 checked={selectedEpisodes.includes(episode.id)}
@@ -615,7 +615,7 @@ export default function Episodes() {
                             </Badge>
                           </div>
                           <div className="flex space-x-1">
-                            {(user?.role === 'admin' || user?.role === 'editor') && (
+                            {(user?.role === 'organizer' || user?.role === 'analyzer') && (
                               <>
                                 <Button
                                   variant="ghost"
@@ -685,7 +685,7 @@ export default function Episodes() {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-4 flex-1">
                             <div className="flex items-center gap-2">
-                              {(user?.role === 'admin' || user?.role === 'editor') && (
+                              {(user?.role === 'organizer' || user?.role === 'analyzer') && (
                                 <input
                                   type="checkbox"
                                   checked={selectedEpisodes.includes(episode.id)}
@@ -721,7 +721,7 @@ export default function Episodes() {
                             </div>
                           </div>
                           <div className="flex space-x-1 shrink-0">
-                            {(user?.role === 'admin' || user?.role === 'editor') && (
+                            {(user?.role === 'organizer' || user?.role === 'analyzer') && (
                               <>
                                 <Button
                                   variant="ghost"

@@ -338,7 +338,7 @@ export default function Projects() {
                 </div>
               </div>
               
-              {((user as any)?.role === 'admin' || (user as any)?.role === 'editor') && (
+              {((user as any)?.role === 'organizer' || (user as any)?.role === 'analyzer') && (
                 <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                   <DialogTrigger asChild>
                     <Button size="lg" className={colors.button.primary}>
@@ -468,7 +468,7 @@ export default function Projects() {
                       </option>
                     ))}
                   </select>
-                  {((user as any)?.role === 'admin' || (user as any)?.role === 'editor') && (
+                  {((user as any)?.role === 'organizer' || (user as any)?.role === 'analyzer') && (
                     <Button
                       variant="outline"
                       onClick={handleCreateTheme}
@@ -559,12 +559,12 @@ export default function Projects() {
               <p className="text-gray-600 dark:text-gray-400 mb-8 text-xl max-w-md mx-auto">
                 {searchTerm 
                   ? "Try adjusting your search terms to find projects" 
-                  : ((user as any)?.role === 'admin' || (user as any)?.role === 'editor') 
+                  : ((user as any)?.role === 'organizer' || (user as any)?.role === 'analyzer') 
                     ? "Start organizing your radio content with your first project"
                     : "No projects available yet. Contact an admin or editor to create projects."
                 }
               </p>
-              {!searchTerm && ((user as any)?.role === 'admin' || (user as any)?.role === 'editor') && (
+              {!searchTerm && ((user as any)?.role === 'organizer' || (user as any)?.role === 'analyzer') && (
                 <Button 
                   onClick={() => setIsCreateDialogOpen(true)}
                   size="lg"

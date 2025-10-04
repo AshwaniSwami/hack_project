@@ -30,7 +30,7 @@ export function useWebSocket() {
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const connect = () => {
-    if (!isAuthenticated || !user || user.role !== 'admin') {
+    if (!isAuthenticated || !user || user.role !== 'organizer') {
       return;
     }
 

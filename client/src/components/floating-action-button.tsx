@@ -12,8 +12,8 @@ export function FloatingActionButton() {
   const [isEpisodeModalOpen, setIsEpisodeModalOpen] = useState(false);
   const [isScriptModalOpen, setIsScriptModalOpen] = useState(false);
 
-  // Only show for admin and editor roles
-  if (!user || (user.role !== 'admin' && user.role !== 'editor')) {
+  // Only show for organizer and analyzer roles
+  if (!user || (user.role !== 'organizer' && user.role !== 'analyzer')) {
     return null;
   }
 

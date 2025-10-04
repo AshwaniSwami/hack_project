@@ -65,7 +65,7 @@ export function ProjectCard({ project, theme, user, onView, onEdit, onDelete }: 
             >
               <Eye className="h-4 w-4 text-emerald-600" />
             </Button>
-            {(user?.role === 'admin' || user?.role === 'editor') && (
+            {(user?.role === 'organizer' || user?.role === 'analyzer') && (
               <>
                 <Button 
                   variant="ghost" 

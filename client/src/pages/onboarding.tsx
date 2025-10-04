@@ -14,10 +14,10 @@ export default function OnboardingPage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("builder");
 
-  // Check if user is admin
-  const isAdmin = user?.role === "admin";
+  // Check if user is organizer
+  const isOrganizer = user?.role === "organizer";
 
-  if (!isAdmin) {
+  if (!isOrganizer) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-sky-50 to-rose-50 dark:from-gray-900 dark:to-gray-800">
         <div className="container mx-auto px-4 py-8">
@@ -28,7 +28,7 @@ export default function OnboardingPage() {
               </div>
               <h3 className="text-lg font-semibold mb-2">Access Restricted</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Only administrators can access the onboarding management system.
+                Only organizers can access the onboarding management system.
               </p>
             </CardContent>
           </Card>
